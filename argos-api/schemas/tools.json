@@ -1,0 +1,44 @@
+{
+  "tools": [
+    {
+      "name": "create_task",
+      "description": "Create a new operational task in the Argos ecosystem.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Clear name of the task" },
+          "owner": { "type": "string", "description": "Agent or Human responsible" },
+          "project": { "type": "string", "description": "Project scope (e.g. Comenio, SCM8)" }
+        },
+        "required": ["title", "owner", "project"]
+      }
+    },
+    {
+      "name": "append_event",
+      "description": "Register an action, thought or change in the task log.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "task_id": { "type": "string" },
+          "agent": { "type": "string" },
+          "event_type": { "type": "string", "enum": ["action", "note", "error", "status_change"] },
+          "summary": { "type": "string" }
+        },
+        "required": ["task_id", "agent", "event_type", "summary"]
+      }
+    },
+    {
+      "name": "promote_observation",
+      "description": "Log a systemic observation (Shadow Log) that could become a Rule (KI).",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "description": "The observation or friction point detected" },
+          "project": { "type": "string", "description": "Context of observation" },
+          "confidence": { "type": "string", "enum": ["low", "medium", "high"] }
+        },
+        "required": ["text", "project", "confidence"]
+      }
+    }
+  ]
+}

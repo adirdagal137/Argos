@@ -1,8 +1,87 @@
-.tmp.driveupload/
-.tmp.drivedownload/
-node_modules/
-dist/
+# ============================================================
+# ARGOS — .gitignore
+# Lo que cambia en cada ciclo operativo NO va a GitHub.
+# Lo que define el navío SÍ va a GitHub.
+# ============================================================
+
+# --- ESTADO OPERATIVO (cambia constantemente) ---
+ARGOS_RUNTIME/state/
+ARGOS_RUNTIME/events/
+ARGOS_RUNTIME/locks/
+ARGOS_RUNTIME/views/
+ARGOS_RUNTIME/handoffs/
+
+# --- WORK PACKETS CERRADOS (historial operativo, no constitutivo) ---
+ARGOS_RUNTIME/work_packets/done/
+ARGOS_RUNTIME/work_packets/archived/
+
+# --- LEGACY (archivado histórico) ---
+ARGOS_RUNTIME/legacy/
+
+# --- LOGS DE SESIÓN (archivos pesados, van a Drive) ---
+ARGOS_RUNTIME/logs/
+logs/
 *.log
-*.tmp
-.gemini/
+ARGOS_GLOBAL_LOG*.md
+ARGOS_CANONICAL_HISTORY.md
+*_archive_*.md
+*shadow_log*
+*_log_2026*.md
+
+# --- EXPORTS Y SNAPSHOTS ---
+*.snapshot.json
+logbook*.json
+*_export/
+
+# --- DATOS OPERATIVOS JSON/JSONL ---
+*.jsonl
+argos.state.json
+argos.state.archive.json
+*.state.json
+*.events.json
+
+# --- MÓDULOS DE PROYECTO (logs locales de Comenio, SCM8, etc.) ---
+ARGOS_RUNTIME/modules/
+
+# --- ENTORNOS Y DEPENDENCIAS ---
+node_modules/
+.env
+.env.*
+*.env
+
+# --- DIARIOS PERSONALES DE IAs (locales, no se comparten) ---
 .claude/
+.codex/
+.gemini/
+
+# --- ARCHIVOS DE SISTEMA ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+
+# --- ARCHIVOS PESADOS DE DRIVE ---
+*.pdf
+*.mp4
+*.zip
+*.gguf
+
+# ============================================================
+# LO QUE SÍ TRACKEA GITHUB (no ignorar):
+#
+# INTER_AI_PROTOCOL.md
+# ARGOS_CREW_VOICES.md
+# ARGOS_VECTOR.md
+# ARGOS_QUICKSTART.md
+# ARGOS_RUNTIME/README.md
+# ARGOS_RUNTIME/schemas/
+# ARGOS_RUNTIME/work_packets/inbox/
+# ARGOS_RUNTIME/work_packets/in_progress/
+# agents/
+# argos-api/ (código fuente)
+# webapp/ (código fuente)
+# README.md
+# CONTEXT_INDEX.md
+# ARCHITECTURE.md
+# ============================================================
