@@ -1,0 +1,8 @@
+.tmp.driveupload/
+.tmp.drivedownload/
+node_modules/
+dist/
+*.log
+*.tmp
+.gemini/
+.claude/

@@ -1,7 +1,7 @@
 {
     "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-17T18:06:20.116Z",
+    "updated_at": "2026-04-17T18:08:51.027Z",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json.",
     "packet_states": {
         "ARG-1776613000001": "open:inbox",
