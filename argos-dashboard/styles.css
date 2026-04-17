@@ -1,19 +1,17 @@
 :root {
     --bg-dark: #060906;
-    --accent-neon: #00ff41; /* More matrix-like green */
-    --accent-blue: #00e5ff; /* Cyan glow */
-    --accent-amber: #ffcc00;
-    --glass-bg: rgba(6, 9, 6, 0.6);
-    --glass-border: rgba(0, 255, 65, 0.15);
-    --panel-bg: rgba(4, 6, 4, 0.85);
-    --text-primary: #f0f7f2;
-    --text-secondary: #8da391;
+    --accent-neon: #18a96b;
+    --accent-blue: #db9d1e;
+    --glass-bg: rgba(14, 25, 18, 0.45);
+    --glass-border: rgba(24, 169, 107, 0.15);
+    --panel-bg: rgba(8, 14, 10, 0.75);
+    --text-primary: #e6eee8;
+    --text-secondary: #7f9984;
     --text-soft: #a5b7aa;
-    --table-line: rgba(0, 255, 65, 0.1);
+    --table-line: rgba(127, 153, 132, 0.18);
     font-family: 'Inter', 'Noto Sans', 'Noto Sans Symbols 2', sans-serif;
     color: var(--text-primary);
     font-size: 13px;
-    --glow: 0 0 15px rgba(0, 255, 65, 0.4);
 }
 
 * {
@@ -28,21 +26,6 @@ body {
     overflow: hidden;
     position: relative;
     line-height: 1.4;
-}
-
-body::after {
-    content: " ";
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    z-index: 9999;
-    background-size: 100% 2px, 3px 100%;
-    pointer-events: none;
-    opacity: 0.15;
 }
 
 .bg-orb {
@@ -108,13 +91,7 @@ body::after {
     -webkit-backdrop-filter: blur(25px);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 255, 65, 0.05);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.glass-panel:hover {
-    border-color: rgba(0, 255, 65, 0.3);
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.7), inset 0 0 25px rgba(0, 255, 65, 0.08);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 .sidebar {
@@ -134,9 +111,8 @@ body::after {
     font-family: 'Outfit', sans-serif;
     font-size: 20px;
     font-weight: 800;
-    letter-spacing: 3px;
-    color: var(--accent-neon);
-    text-shadow: var(--glow);
+    letter-spacing: 2px;
+    color: var(--accent-blue);
 }
 
 .logo-icon {
@@ -578,15 +554,36 @@ body::after {
     font-weight: 600;
 }
 
-/* TASK TOOLBAR */
-.task-toolbar {
+.section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    border-bottom: 1px solid var(--glass-border);
     margin-bottom: 12px;
-    gap: 16px;
+}
+
+.selection-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0 !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* TASK TOOLBAR (OLD) - Removing padding/border if still used by app.js */
+.task-toolbar {
+    display: none;
 }
 
 .toolbar-left {

@@ -437,28 +437,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     function updateTaskSelection() {
-        const toolbar = document.getElementById('task-toolbar');
-        const selectAllCheckbox = document.getElementById('select-all-tasks');
-        const selectionCounter = document.getElementById('selection-counter');
+        const controls = document.getElementById('selection-controls');
         const selectedCountSpan = document.getElementById('selected-count');
         const deleteBtn = document.getElementById('btn-delete-tasks');
 
-        if (!toolbar) return;
+        if (!controls) return;
 
         const count = selectedTasks.size;
         if (count > 0) {
-            selectionCounter.style.display = 'block';
+            controls.style.display = 'flex';
             selectedCountSpan.textContent = String(count);
-            deleteBtn.style.display = 'block';
         } else {
-            selectionCounter.style.display = 'none';
-            deleteBtn.style.display = 'none';
-        }
-
-        const allSelected = pendingTasks.length > 0 && selectedTasks.size === pendingTasks.length;
-        if (selectAllCheckbox) {
-            selectAllCheckbox.checked = allSelected;
-            selectAllCheckbox.indeterminate = selectedTasks.size > 0 && !allSelected;
+            controls.style.display = 'none';
         }
 
         // Update task item visual state
@@ -1834,7 +1824,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnCancelDelete = document.getElementById('btn-cancel-delete');
     const btnConfirmDelete = document.getElementById('btn-confirm-delete');
     const btnDeleteTasks = document.getElementById('btn-delete-tasks');
-    const selectAllCheckbox = document.getElementById('select-all-tasks');
     const deleteTaskList = document.getElementById('delete-task-list');
 
     function openDeleteConfirmation() {
@@ -1905,19 +1894,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnCancelDelete?.addEventListener('click', closeDeleteConfirmation);
     btnConfirmDelete?.addEventListener('click', confirmDelete);
 
-    selectAllCheckbox?.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            pendingTasks.forEach(task => selectedTasks.add(task.id));
-        } else {
-            selectedTasks.clear();
-        }
-        updateTaskSelection();
-
-        // Update all checkboxes
-        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.checked = e.target.checked;
-        });
-    });
 
     function renderVellocino(items) {
         vellocinoContainer.innerHTML = `

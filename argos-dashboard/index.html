@@ -189,30 +189,20 @@
 
                 <div class="project-content">
                     <div id="subview-ordenes" class="subview-section active">
-                <div class="stack-view">
-                    <h3 class="section-title">Ordenes de Trabajo</h3>
-                    <div class="card glass-panel">
-                        <!-- TOOLBAR DE SELECCIÓN -->
-                        <div class="task-toolbar" id="task-toolbar">
-                            <div class="toolbar-left">
-                                <span class="selection-counter" id="selection-counter" style="display:none;">
-                                    <span id="selected-count">0</span> seleccionadas
-                                </span>
-                            </div>
-                            <div class="toolbar-right">
-                                <button class="btn btn-danger" id="btn-delete-tasks" style="display:none;">
-                                    <span class="btn-icon">X</span> Borrar Seleccionadas
-                                </button>
-                                <label class="checkbox-container">
-                                    <span>Seleccionar Todo</span>
-                                    <input type="checkbox" id="select-all-tasks" />
-                                    <span class="custom-checkbox"></span>
-                                </label>
-                            </div>
+                    <div class="section-header">
+                        <h3 class="section-title">Ordenes de Trabajo</h3>
+                        <div class="selection-controls" id="selection-controls" style="display:none;">
+                            <span class="selection-counter" id="selection-counter">
+                                <span id="selected-count">0</span> seleccionadas
+                            </span>
+                            <button class="btn btn-danger btn-small" id="btn-delete-tasks">
+                                <span class="btn-icon">X</span> Borrar
+                            </button>
                         </div>
+                    </div>
+                    <div class="card glass-panel">
                         <div class="task-list" id="expanded-task-list"></div>
                     </div>
-                </div>
                 </div> <!-- End Subview Ordenes -->
 
                 <div id="subview-bugs" class="subview-section">

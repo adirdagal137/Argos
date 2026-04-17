@@ -5,7 +5,6 @@ Esta skill define el protocolo para mantener la salud operativa y visual del Nav
 ## Objetivos
 1.  **Sincronización Total**: Asegurar que todos los repositorios "vivos" (GitHub) estén actualizados.
 2.  **Integridad de Datos**: Refrescar el estado de la API para reflejar cambios en el sistema de archivos local.
-3.  **Estética Premium (LEET)**: Aplicar pulido visual para mantener la sensación de "puente de mando" de alta tecnología.
 
 ## Protocolo de Ejecución
 
@@ -22,10 +21,6 @@ Esta skill define el protocolo para mantener la salud operativa y visual del Nav
 ### 3. Refresco de Vector y Work Packets
 - Asegurar que el `argos.state.json` refleje exactamente el contenido de `work_packets/`.
 - Limpiar la carpeta `trash/` si excede los 50 elementos para mantener la higiene del disco.
-
-### 4. Pulido Visual (LEET Mode)
-- Asegurar que los colores de acento (`--accent-neon`, `--accent-blue`) sean vibrantes.
-- Los widgets de "Estado de IAs" deben mostrar actividad real; si una IA está en standby prolongado, verificar si hay packets en `inbox` que no han sido tomados.
 
 ## Automatización
 Para ejecutar esta skill de forma rápida, el agente puede invocar los endpoints de la API:
