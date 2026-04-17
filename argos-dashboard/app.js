@@ -484,8 +484,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderIaStatus(visibleTasks);
         renderMonitorInbox(openTasks);
 
-        // Reset selection when rendering new tasks
-        selectedTasks.clear();
+        // Persist selection: Only remove tasks that are no longer in the pending list
+        const currentIds = new Set(pendingTasks.map(t => t.id));
+        selectedTasks.forEach(id => {
+            if (!currentIds.has(id)) selectedTasks.delete(id);
+        });
         updateTaskSelection();
 
         if (pendingTasks.length === 0) {
@@ -544,7 +547,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
                 <label class="task-checkbox-wrapper">
-                    <input type="checkbox" class="task-checkbox" data-task-id="${safeHtml(task.id)}" />
+                    <input type="checkbox" class="task-checkbox" data-task-id="${safeHtml(task.id)}" ${selectedTasks.has(task.id) ? 'checked' : ''} />
                     <span class="custom-checkbox"></span>
                 </label>
             `;
@@ -1888,7 +1891,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Event listeners for delete modal
+    async function confirmComplete() {
+        if (selectedTasks.size === 0) return;
+        showToast('Completando ordenes...');
+
+        try {
+            const taskIds = Array.from(selectedTasks);
+            const promises = taskIds.map(id => 
+                fetch(`${API_URL}/tasks/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packetId: id, status: 'done', actor: 'Captain' })
+                })
+            );
+
+            await Promise.all(promises);
+
+            showToast(`âœ“ ${taskIds.length} orden(es) marcadas como completadas.`);
+            selectedTasks.clear();
+            updateTaskSelection();
+            await hydrate();
+        } catch (e) {
+            showToast('Error de conexion al completar ordenes.');
+            console.error('Completion error:', e);
+        }
+    }
+
+    // Event listeners for delete and complete
+    const btnCompleteTasks = document.getElementById('btn-complete-tasks');
+    btnCompleteTasks?.addEventListener('click', confirmComplete);
     btnDeleteTasks?.addEventListener('click', openDeleteConfirmation);
     btnCloseDeleteModal?.addEventListener('click', closeDeleteConfirmation);
     btnCancelDelete?.addEventListener('click', closeDeleteConfirmation);

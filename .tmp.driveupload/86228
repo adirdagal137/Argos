@@ -29,6 +29,9 @@ const ANTIGRAVITY_PROTO_PACKET_NAME = 'ARG-PROTO-AG-001__ANTIGRAVITY_RITUAL_DE_C
 const ANTIGRAVITY_PROTO_PACKET_PATH = path.join(RUNTIME_DIR, 'work_packets', 'inbox', ANTIGRAVITY_PROTO_PACKET_NAME);
 const PENDING_ACTIONS_PATH = path.join(RUNTIME_DIR, 'locks', 'pending_actions.jsonl');
 const TRANSCRIPTS_DIR = path.join(RUNTIME_DIR, 'transcripts');
+const DESKTOP_SOURCES_CONFIG_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_sources.json');
+const DESKTOP_INGEST_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_ingest.state.json');
+const EXTERNAL_TRANSCRIPTS_DIR = path.join(TRANSCRIPTS_DIR, 'external');
 
 app.use(express.static(DASHBOARD_DIR));
 app.use('/api/zoom', zoomRoutes);
@@ -212,6 +215,62 @@ type TokenStats = {
   weekly: number;
   agents: Record<string, { total: number; daily: number; weekly: number }>;
   costEstimate: number;
+};
+
+type DesktopSourceDefinition = {
+  id: string;
+  enabled: boolean;
+  rootPath: string;
+  transcriptGlobs: string[];
+  tokenGlobs: string[];
+  parser: string;
+  agentName: string;
+  owner: string;
+  timezone?: string;
+};
+
+type DesktopSourcesConfig = {
+  version: number;
+  updated_at: string;
+  notes: string;
+  sources: DesktopSourceDefinition[];
+};
+
+type DesktopIngestState = {
+  version: number;
+  updated_at: string;
+  files: Record<string, { mtimeMs: number; size: number; hash: string; importedAt: string }>;
+  importedTokenKeys: string[];
+  importedTranscriptKeys: string[];
+  lastRun: {
+    startedAt?: string;
+    finishedAt?: string;
+    mode?: 'tokens' | 'transcripts' | 'all';
+    actor?: string;
+    summary?: {
+      sources: number;
+      tokenFilesScanned: number;
+      tokensImported: number;
+      transcriptFilesScanned: number;
+      transcriptsMirrored: number;
+      errors: number;
+      warnings: string[];
+    };
+  };
+};
+
+type DesktopImportRunSummary = {
+  startedAt: string;
+  finishedAt: string;
+  mode: 'tokens' | 'transcripts' | 'all';
+  actor: string;
+  sources: number;
+  tokenFilesScanned: number;
+  tokensImported: number;
+  transcriptFilesScanned: number;
+  transcriptsMirrored: number;
+  errors: number;
+  warnings: string[];
 };
 
 type ParsedTimestampLabel = { label: string; precision: 'minute' | 'day'; sortMs: number };
@@ -1399,6 +1458,459 @@ function readJsonFile<T>(filePath: string, fallback: T): T {
   } catch (error) {
     return fallback;
   }
+}
+
+function writeJsonFileSafe(filePath: string, payload: unknown): void {
+  ensureDirSync(path.dirname(filePath));
+  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf-8');
+}
+
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+function simpleHash(raw: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < raw.length; i++) {
+    h ^= raw.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(16);
+}
+
+function defaultDesktopSourcesConfig(): DesktopSourcesConfig {
+  return {
+    version: 1,
+    updated_at: nowIso(),
+    notes: 'Define aqui rutas locales sincronizadas desde Drive para lectura de transcripts/tokens por app desktop.',
+    sources: [
+      {
+        id: 'codex',
+        enabled: true,
+        rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Codex',
+        transcriptGlobs: ['**/*transcript*.md', '**/*transcript*.json', '**/*.chat.jsonl'],
+        tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*ledger*.jsonl'],
+        parser: 'generic',
+        agentName: 'Codex',
+        owner: 'Antigravity',
+        timezone: 'Atlantic/Canary'
+      },
+      {
+        id: 'claude',
+        enabled: true,
+        rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Claude',
+        transcriptGlobs: ['**/*transcript*.md', '**/*conversation*.json', '**/*.jsonl'],
+        tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*ledger*.jsonl'],
+        parser: 'generic',
+        agentName: 'Claude',
+        owner: 'Antigravity',
+        timezone: 'Atlantic/Canary'
+      },
+      {
+        id: 'antigravity',
+        enabled: true,
+        rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Antigravity',
+        transcriptGlobs: ['**/*transcript*.md', '**/*chat*.jsonl', '**/*conversation*.json'],
+        tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*ledger*.jsonl'],
+        parser: 'generic',
+        agentName: 'Antigravity',
+        owner: 'Antigravity',
+        timezone: 'Atlantic/Canary'
+      },
+      {
+        id: 'openclaw',
+        enabled: true,
+        rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/OpenClaw',
+        transcriptGlobs: ['**/*transcript*.md', '**/*session*.json', '**/*.jsonl'],
+        tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*eval*.json', '**/*webhook*.jsonl'],
+        parser: 'generic',
+        agentName: 'DeepSeek',
+        owner: 'OpenClaw',
+        timezone: 'Atlantic/Canary'
+      }
+    ]
+  };
+}
+
+function loadDesktopSourcesConfig(): DesktopSourcesConfig {
+  const fallback = defaultDesktopSourcesConfig();
+  if (!fs.existsSync(DESKTOP_SOURCES_CONFIG_PATH)) {
+    writeJsonFileSafe(DESKTOP_SOURCES_CONFIG_PATH, fallback);
+    return fallback;
+  }
+  const cfg = readJsonFile<DesktopSourcesConfig>(DESKTOP_SOURCES_CONFIG_PATH, fallback);
+  if (!Array.isArray(cfg.sources)) {
+    writeJsonFileSafe(DESKTOP_SOURCES_CONFIG_PATH, fallback);
+    return fallback;
+  }
+  return cfg;
+}
+
+function saveDesktopSourcesConfig(config: DesktopSourcesConfig): void {
+  writeJsonFileSafe(DESKTOP_SOURCES_CONFIG_PATH, {
+    ...config,
+    updated_at: nowIso()
+  });
+}
+
+function emptyDesktopIngestState(): DesktopIngestState {
+  return {
+    version: 1,
+    updated_at: nowIso(),
+    files: {},
+    importedTokenKeys: [],
+    importedTranscriptKeys: [],
+    lastRun: {}
+  };
+}
+
+function loadDesktopIngestState(): DesktopIngestState {
+  const fallback = emptyDesktopIngestState();
+  if (!fs.existsSync(DESKTOP_INGEST_STATE_PATH)) {
+    writeJsonFileSafe(DESKTOP_INGEST_STATE_PATH, fallback);
+    return fallback;
+  }
+  const loaded = readJsonFile<DesktopIngestState>(DESKTOP_INGEST_STATE_PATH, fallback);
+  loaded.files = loaded.files || {};
+  loaded.importedTokenKeys = Array.isArray(loaded.importedTokenKeys) ? loaded.importedTokenKeys : [];
+  loaded.importedTranscriptKeys = Array.isArray(loaded.importedTranscriptKeys) ? loaded.importedTranscriptKeys : [];
+  loaded.lastRun = loaded.lastRun || {};
+  return loaded;
+}
+
+function saveDesktopIngestState(state: DesktopIngestState): void {
+  const MAX_IMPORT_KEYS = 150000;
+  if (state.importedTokenKeys.length > MAX_IMPORT_KEYS) {
+    state.importedTokenKeys = state.importedTokenKeys.slice(state.importedTokenKeys.length - MAX_IMPORT_KEYS);
+  }
+  if (state.importedTranscriptKeys.length > MAX_IMPORT_KEYS) {
+    state.importedTranscriptKeys = state.importedTranscriptKeys.slice(state.importedTranscriptKeys.length - MAX_IMPORT_KEYS);
+  }
+  state.updated_at = nowIso();
+  writeJsonFileSafe(DESKTOP_INGEST_STATE_PATH, state);
+}
+
+function wildcardToRegex(pattern: string): RegExp {
+  const normalized = pattern.replace(/\\/g, '/');
+  const escaped = normalized.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  const regexBody = escaped
+    .replace(/\\\*\\\*/g, '.*')
+    .replace(/\\\*/g, '[^/]*')
+    .replace(/\\\?/g, '.');
+  return new RegExp(`^${regexBody}$`, 'i');
+}
+
+function listFilesRecursive(rootPath: string, limit = 30000): string[] {
+  if (!fs.existsSync(rootPath)) return [];
+  const out: string[] = [];
+  const stack = [rootPath];
+  while (stack.length > 0 && out.length < limit) {
+    const current = stack.pop()!;
+    let items: fs.Dirent[] = [];
+    try {
+      items = fs.readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const item of items) {
+      const full = path.join(current, item.name);
+      if (item.isDirectory()) {
+        stack.push(full);
+        continue;
+      }
+      if (item.isFile()) out.push(full);
+      if (out.length >= limit) break;
+    }
+  }
+  return out;
+}
+
+function filesMatchingGlobs(rootPath: string, globs: string[]): string[] {
+  if (!fs.existsSync(rootPath)) return [];
+  const all = listFilesRecursive(rootPath);
+  if (globs.length === 0) return all;
+  const regexes = globs.map(wildcardToRegex);
+  return all.filter((abs) => {
+    const rel = path.relative(rootPath, abs).replace(/\\/g, '/');
+    return regexes.some((rx) => rx.test(rel));
+  });
+}
+
+function extractTimestampFromUnknown(input: unknown, fallbackIso: string): string {
+  const raw = normaliseText(String(input ?? ''));
+  if (raw === '') return fallbackIso;
+  const parsed = Date.parse(raw);
+  if (!Number.isNaN(parsed)) return new Date(parsed).toISOString();
+  return fallbackIso;
+}
+
+function extractTokenTotalFromObject(obj: Record<string, unknown>): number {
+  const directFields = [
+    'tokens',
+    'total_tokens',
+    'totalTokenCount',
+    'token_count',
+    'tokenCount',
+    'tokens_spent',
+    'TOKENS_SPENT'
+  ];
+  for (const key of directFields) {
+    const val = Number(obj[key] ?? 0);
+    if (Number.isFinite(val) && val > 0) return Math.round(val);
+  }
+
+  const pairCandidates: Array<[string, string]> = [
+    ['input_tokens', 'output_tokens'],
+    ['inputTokens', 'outputTokens'],
+    ['prompt_eval_count', 'eval_count'],
+    ['promptTokens', 'completionTokens']
+  ];
+  for (const [a, b] of pairCandidates) {
+    const x = Number(obj[a] ?? 0);
+    const y = Number(obj[b] ?? 0);
+    if (Number.isFinite(x) && Number.isFinite(y) && (x + y) > 0) return Math.round(x + y);
+  }
+
+  const usage = obj.usage as Record<string, unknown> | undefined;
+  if (usage && typeof usage === 'object') {
+    const nested = extractTokenTotalFromObject(usage);
+    if (nested > 0) return nested;
+  }
+
+  return 0;
+}
+
+function parseTokenRecordsFromFile(filePath: string, source: DesktopSourceDefinition): Array<{ timestamp: string; tokens: number; ref: string; refId: string }> {
+  const content = readTextFileSafe(filePath);
+  if (content.trim() === '') return [];
+
+  const fallbackIso = new Date(fs.statSync(filePath).mtimeMs).toISOString();
+  const lines = content.split(/\r?\n/);
+  const out: Array<{ timestamp: string; tokens: number; ref: string; refId: string }> = [];
+
+  for (const lineRaw of lines) {
+    const line = lineRaw.trim();
+    if (line === '') continue;
+
+    if (line.startsWith('{') && line.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(line) as Record<string, unknown>;
+        const tokens = extractTokenTotalFromObject(parsed);
+        if (tokens > 0) {
+          const timestamp = extractTimestampFromUnknown(parsed.timestamp ?? parsed.time ?? parsed.date ?? parsed.created_at, fallbackIso);
+          const ref = normaliseText(String(parsed.ref ?? parsed.action ?? parsed.type ?? parsed.model ?? path.basename(filePath))).slice(0, 180) || path.basename(filePath);
+          const refId = normaliseText(String(parsed.refId ?? parsed.packetId ?? parsed.packet_id ?? ''));
+          out.push({ timestamp, tokens, ref, refId });
+        }
+        continue;
+      } catch {
+        // sigue con parseo regex
+      }
+    }
+
+    const regexes = [
+      /"total_tokens"\s*:\s*(\d+)/i,
+      /"totalTokenCount"\s*:\s*(\d+)/i,
+      /\bTOKENS_SPENT\s*[:=]\s*(\d+)/i,
+      /\btokens?\s*[:=]\s*(\d+)/i
+    ];
+    for (const rx of regexes) {
+      const match = line.match(rx);
+      if (match) {
+        const tokenVal = Number(match[1] || 0);
+        if (tokenVal > 0) {
+          out.push({
+            timestamp: fallbackIso,
+            tokens: Math.round(tokenVal),
+            ref: `${source.id}:${path.basename(filePath)}`.slice(0, 180),
+            refId: ''
+          });
+        }
+        break;
+      }
+    }
+  }
+
+  // JSON de objeto/array completo cuando no era JSONL
+  if (out.length === 0) {
+    try {
+      const parsed = JSON.parse(content) as unknown;
+      const arr = Array.isArray(parsed) ? parsed : [parsed];
+      arr.forEach((entry) => {
+        if (!entry || typeof entry !== 'object') return;
+        const rec = entry as Record<string, unknown>;
+        const tokens = extractTokenTotalFromObject(rec);
+        if (tokens <= 0) return;
+        out.push({
+          timestamp: extractTimestampFromUnknown(rec.timestamp ?? rec.time ?? rec.date ?? rec.created_at, fallbackIso),
+          tokens,
+          ref: normaliseText(String(rec.ref ?? rec.action ?? rec.type ?? path.basename(filePath))).slice(0, 180) || path.basename(filePath),
+          refId: normaliseText(String(rec.refId ?? rec.packetId ?? rec.packet_id ?? ''))
+        });
+      });
+    } catch {
+      // no-op
+    }
+  }
+
+  return out;
+}
+
+function sanitiseRelativePath(rawPath: string): string {
+  return rawPath
+    .replace(/\\/g, '/')
+    .split('/')
+    .map((chunk) => chunk.replace(/[^a-zA-Z0-9._-]/g, '_'))
+    .join('/');
+}
+
+function markImportedKey(list: string[], key: string): boolean {
+  if (list.includes(key)) return false;
+  list.push(key);
+  return true;
+}
+
+function runDesktopImport(mode: 'tokens' | 'transcripts' | 'all', actor = 'OpenClaw/Antigravity'): DesktopImportRunSummary {
+  const startedAt = nowIso();
+  const config = loadDesktopSourcesConfig();
+  const state = loadDesktopIngestState();
+  const enabledSources = config.sources.filter((s) => s.enabled);
+
+  const summary: DesktopImportRunSummary = {
+    startedAt,
+    finishedAt: startedAt,
+    mode,
+    actor,
+    sources: enabledSources.length,
+    tokenFilesScanned: 0,
+    tokensImported: 0,
+    transcriptFilesScanned: 0,
+    transcriptsMirrored: 0,
+    errors: 0,
+    warnings: []
+  };
+
+  state.lastRun.startedAt = startedAt;
+  state.lastRun.mode = mode;
+  state.lastRun.actor = actor;
+
+  enabledSources.forEach((source) => {
+    if (!fs.existsSync(source.rootPath)) {
+      summary.warnings.push(`[${source.id}] Ruta no existe: ${source.rootPath}`);
+      return;
+    }
+
+    if (mode === 'tokens' || mode === 'all') {
+      const tokenFiles = filesMatchingGlobs(source.rootPath, source.tokenGlobs);
+      summary.tokenFilesScanned += tokenFiles.length;
+
+      tokenFiles.forEach((filePath) => {
+        try {
+          const stat = fs.statSync(filePath);
+          const raw = readTextFileSafe(filePath);
+          const hash = simpleHash(raw);
+          const stateKey = `token:${filePath}`;
+          const prev = state.files[stateKey];
+          if (prev && prev.mtimeMs === stat.mtimeMs && prev.size === stat.size && prev.hash === hash) return;
+
+          const rows = parseTokenRecordsFromFile(filePath, source);
+          rows.forEach((row, idx) => {
+            const key = simpleHash(`${source.id}|${filePath}|${row.timestamp}|${row.tokens}|${row.ref}|${row.refId}|${idx}`);
+            if (!markImportedKey(state.importedTokenKeys, key)) return;
+            appendJsonlRecord(ARGOS_TOKENS_PATH, {
+              timestamp: row.timestamp,
+              agent: normalizeAgentName(source.agentName) || source.agentName,
+              tokens: row.tokens,
+              module: 'desktop_import',
+              refId: row.refId,
+              ref: `Desktop ${source.id}: ${row.ref}`.slice(0, 200),
+              scope: 'work',
+              channel: `desktop:${source.id}`
+            });
+            summary.tokensImported += 1;
+          });
+
+          state.files[stateKey] = {
+            mtimeMs: stat.mtimeMs,
+            size: stat.size,
+            hash,
+            importedAt: nowIso()
+          };
+        } catch (error) {
+          summary.errors += 1;
+          summary.warnings.push(`[${source.id}] Error tokens ${filePath}: ${String(error)}`);
+        }
+      });
+    }
+
+    if (mode === 'transcripts' || mode === 'all') {
+      const transcriptFiles = filesMatchingGlobs(source.rootPath, source.transcriptGlobs);
+      summary.transcriptFilesScanned += transcriptFiles.length;
+
+      transcriptFiles.forEach((filePath) => {
+        try {
+          const stat = fs.statSync(filePath);
+          const raw = readTextFileSafe(filePath);
+          const hash = simpleHash(raw);
+          const rel = sanitiseRelativePath(path.relative(source.rootPath, filePath));
+          const destination = path.join(EXTERNAL_TRANSCRIPTS_DIR, source.id, rel);
+          const stateKey = `transcript:${filePath}`;
+          const prev = state.files[stateKey];
+          if (prev && prev.mtimeMs === stat.mtimeMs && prev.size === stat.size && prev.hash === hash) return;
+
+          ensureDirSync(path.dirname(destination));
+          fs.writeFileSync(destination, raw, 'utf-8');
+
+          const transcriptKey = simpleHash(`${source.id}|${filePath}|${hash}`);
+          if (markImportedKey(state.importedTranscriptKeys, transcriptKey)) {
+            appendJsonlRecord(ARGOS_EVENTS_PATH, {
+              timestamp: nowIso(),
+              actor: normalizeAgentName(source.agentName) || source.agentName,
+              module: 'desktop_import',
+              type: 'external_transcript_mirrored',
+              status: 'done',
+              summary: `Transcript externo espejo (${source.id})`,
+              details: `${filePath} -> ${destination}`,
+              source: 'desktop-import'
+            });
+          }
+
+          summary.transcriptsMirrored += 1;
+          state.files[stateKey] = {
+            mtimeMs: stat.mtimeMs,
+            size: stat.size,
+            hash,
+            importedAt: nowIso()
+          };
+        } catch (error) {
+          summary.errors += 1;
+          summary.warnings.push(`[${source.id}] Error transcript ${filePath}: ${String(error)}`);
+        }
+      });
+    }
+  });
+
+  summary.finishedAt = nowIso();
+  state.lastRun.finishedAt = summary.finishedAt;
+  state.lastRun.summary = {
+    sources: summary.sources,
+    tokenFilesScanned: summary.tokenFilesScanned,
+    tokensImported: summary.tokensImported,
+    transcriptFilesScanned: summary.transcriptFilesScanned,
+    transcriptsMirrored: summary.transcriptsMirrored,
+    errors: summary.errors,
+    warnings: summary.warnings
+  };
+  saveDesktopIngestState(state);
+  publishEvent('desktop-import:updated', {
+    mode: summary.mode,
+    actor: summary.actor,
+    tokensImported: summary.tokensImported,
+    transcriptsMirrored: summary.transcriptsMirrored,
+    errors: summary.errors,
+    timestamp: summary.finishedAt
+  });
+  return summary;
 }
 
 function findArchivedFiles(filename: string, dirPath: string = SESSION_ARCHIVE_ROOT): string[] {
@@ -4955,6 +5467,159 @@ Responde SOLO con JSON válido:
 });
 
 // ============================================================
+// DESKTOP IMPORT - Lectura externa de transcripts/tokens (Drive-synced)
+// ============================================================
+
+app.get('/api/desktop-import/config', (_req: Request, res: Response) => {
+  try {
+    const config = loadDesktopSourcesConfig();
+    return res.json(config);
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo cargando desktop_sources config', detail: String(error) });
+  }
+});
+
+app.post('/api/desktop-import/config', (req: Request, res: Response) => {
+  try {
+    const incoming = req.body as DesktopSourcesConfig;
+    if (!incoming || !Array.isArray(incoming.sources)) {
+      return res.status(400).json({ error: 'Payload invalido: se requiere objeto con sources[]' });
+    }
+
+    const cleaned: DesktopSourcesConfig = {
+      version: Number(incoming.version || 1),
+      updated_at: nowIso(),
+      notes: normaliseText(incoming.notes) || 'desktop sources config',
+      sources: incoming.sources.map((s) => ({
+        id: normaliseText(s.id).toLowerCase(),
+        enabled: Boolean(s.enabled),
+        rootPath: normaliseText(s.rootPath),
+        transcriptGlobs: Array.isArray(s.transcriptGlobs) ? s.transcriptGlobs.map((g) => normaliseText(g)).filter(Boolean) : [],
+        tokenGlobs: Array.isArray(s.tokenGlobs) ? s.tokenGlobs.map((g) => normaliseText(g)).filter(Boolean) : [],
+        parser: normaliseText(s.parser) || 'generic',
+        agentName: normaliseText(s.agentName) || 'DeepSeek',
+        owner: normaliseText(s.owner) || 'OpenClaw/Antigravity',
+        timezone: normaliseText(s.timezone) || 'Atlantic/Canary'
+      }))
+    };
+
+    saveDesktopSourcesConfig(cleaned);
+    publishEvent('desktop-import:config-updated', {
+      sources: cleaned.sources.length,
+      timestamp: cleaned.updated_at
+    });
+    return res.json({ status: 'ok', config: cleaned });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo guardando desktop_sources config', detail: String(error) });
+  }
+});
+
+app.get('/api/desktop-import/status', (_req: Request, res: Response) => {
+  try {
+    const config = loadDesktopSourcesConfig();
+    const state = loadDesktopIngestState();
+    return res.json({
+      status: 'ok',
+      configPath: DESKTOP_SOURCES_CONFIG_PATH,
+      statePath: DESKTOP_INGEST_STATE_PATH,
+      externalTranscriptsDir: EXTERNAL_TRANSCRIPTS_DIR,
+      enabledSources: config.sources.filter((s) => s.enabled).map((s) => ({
+        id: s.id,
+        rootPath: s.rootPath,
+        owner: s.owner,
+        agentName: s.agentName,
+        rootExists: fs.existsSync(s.rootPath)
+      })),
+      lastRun: state.lastRun,
+      indexedFiles: Object.keys(state.files).length
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo consultando estado desktop import', detail: String(error) });
+  }
+});
+
+app.post('/api/desktop-import/run', (req: Request, res: Response) => {
+  try {
+    const modeRaw = normaliseText(req.body?.mode || req.query.mode || 'all').toLowerCase();
+    const mode: 'tokens' | 'transcripts' | 'all' =
+      modeRaw === 'tokens' || modeRaw === 'transcripts' ? modeRaw : 'all';
+    const actor = normaliseText(req.body?.actor) || 'OpenClaw/Antigravity';
+    const summary = runDesktopImport(mode, actor);
+    return res.json({ status: 'ok', summary });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo en desktop import run', detail: String(error) });
+  }
+});
+
+app.get('/api/desktop-import/files', (req: Request, res: Response) => {
+  try {
+    const sourceId = normaliseText(req.query.source as string).toLowerCase();
+    const kindRaw = normaliseText(req.query.kind as string).toLowerCase();
+    const kind: 'tokens' | 'transcripts' = kindRaw === 'tokens' ? 'tokens' : 'transcripts';
+    const limit = Math.max(1, Math.min(5000, Number(req.query.limit || 300)));
+    const config = loadDesktopSourcesConfig();
+    const source = config.sources.find((s) => s.id === sourceId);
+    if (!source) return res.status(404).json({ error: `Source desconocida: ${sourceId}` });
+    if (!fs.existsSync(source.rootPath)) return res.json({ source: source.id, kind, files: [] });
+
+    const files = filesMatchingGlobs(source.rootPath, kind === 'tokens' ? source.tokenGlobs : source.transcriptGlobs)
+      .slice(0, limit)
+      .map((abs) => {
+        const stat = fs.statSync(abs);
+        const rel = path.relative(source.rootPath, abs).replace(/\\/g, '/');
+        return {
+          relativePath: rel,
+          absolutePath: abs,
+          size: stat.size,
+          mtime: new Date(stat.mtimeMs).toISOString()
+        };
+      });
+
+    return res.json({
+      source: source.id,
+      owner: source.owner,
+      kind,
+      rootPath: source.rootPath,
+      files
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo listando archivos desktop source', detail: String(error) });
+  }
+});
+
+app.get('/api/desktop-import/file-content', (req: Request, res: Response) => {
+  try {
+    const sourceId = normaliseText(req.query.source as string).toLowerCase();
+    const relPath = normaliseText(req.query.path as string);
+    if (!sourceId || !relPath) return res.status(400).json({ error: 'source y path son obligatorios' });
+
+    const config = loadDesktopSourcesConfig();
+    const source = config.sources.find((s) => s.id === sourceId);
+    if (!source) return res.status(404).json({ error: `Source desconocida: ${sourceId}` });
+
+    const absPath = path.resolve(source.rootPath, relPath);
+    const rootResolved = path.resolve(source.rootPath);
+    if (!absPath.toLowerCase().startsWith(rootResolved.toLowerCase())) {
+      return res.status(403).json({ error: 'Acceso denegado fuera de rootPath' });
+    }
+    if (!fs.existsSync(absPath)) return res.status(404).json({ error: `Archivo no encontrado: ${relPath}` });
+
+    const stat = fs.statSync(absPath);
+    const content = readTextFileSafe(absPath);
+    return res.json({
+      source: source.id,
+      path: relPath.replace(/\\/g, '/'),
+      absolutePath: absPath,
+      size: stat.size,
+      mtime: new Date(stat.mtimeMs).toISOString(),
+      content
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo leyendo contenido de archivo desktop source', detail: String(error) });
+  }
+});
+
+// ============================================================
 // QWEN / EL AUTOMATISTA — Integración OpenClaw + Ollama local
 // Motor: Qwen3 8B via Ollama (localhost:11434)
 // Gateway: OpenClaw (localhost:18789) — capacidades de automatización
@@ -5347,6 +6012,24 @@ app.listen(PORT, () => {
   console.log(`[ARGOS-API] Navio anclado y escuchando pacificamente en puerto http://localhost:${PORT}`);
   backfillWorkTokensFromFeed(); // Recupera historial de work tokens desde captain_feed
   backfillWorkTokensFromReportLedger(); // Recupera work tokens faltantes desde report tokens (si refId apunta a work packet)
+  loadDesktopSourcesConfig(); // bootstrap config si no existe
+  loadDesktopIngestState();   // bootstrap estado incremental si no existe
+
+  try {
+    const bootstrap = runDesktopImport('all', 'OpenClaw/Antigravity');
+    if (bootstrap.tokensImported > 0 || bootstrap.transcriptsMirrored > 0 || bootstrap.errors > 0) {
+      postToCrewFeed(
+        'Antigravity',
+        '[Desktop Import] Arranque ejecutado',
+        `tokens=${bootstrap.tokensImported}, transcripts=${bootstrap.transcriptsMirrored}, errores=${bootstrap.errors}`,
+        'crew_update',
+        0,
+        'ARG-DESKTOP-IMPORT-BOOTSTRAP'
+      );
+    }
+  } catch (error) {
+    console.error('[DESKTOP-IMPORT] Error en bootstrap:', error);
+  }
 
   // Iniciar Motores Autonomos
   setInterval(runArgosDispatcher, 60000); // Cada 1 minuto
@@ -5372,7 +6055,44 @@ app.listen(PORT, () => {
     } catch (e) {
       console.error('[TOKENS] Error en sync horario:', e);
     }
+
+    // Import horario de tokens externos (responsable: OpenClaw/Antigravity)
+    try {
+      const imported = runDesktopImport('tokens', 'OpenClaw/Antigravity');
+      if (imported.tokensImported > 0 || imported.errors > 0) {
+        postToCrewFeed(
+          'Antigravity',
+          '[Desktop Import] Ciclo horario de tokens',
+          `fuentes=${imported.sources}, archivos=${imported.tokenFilesScanned}, nuevos=${imported.tokensImported}, errores=${imported.errors}`,
+          'crew_update',
+          0,
+          'ARG-DESKTOP-IMPORT-HOURLY-TOKENS'
+        );
+      }
+    } catch (importError) {
+      console.error('[DESKTOP-IMPORT] Error en ciclo horario tokens:', importError);
+    }
   }, 3600000); // Cada hora
+
+  // Import diario de transcripts externos (responsable: OpenClaw/Antigravity)
+  setInterval(() => {
+    try {
+      const imported = runDesktopImport('transcripts', 'OpenClaw/Antigravity');
+      if (imported.transcriptsMirrored > 0 || imported.errors > 0) {
+        postToCrewFeed(
+          'Antigravity',
+          '[Desktop Import] Ciclo diario de transcripts',
+          `fuentes=${imported.sources}, archivos=${imported.transcriptFilesScanned}, espejados=${imported.transcriptsMirrored}, errores=${imported.errors}`,
+          'crew_update',
+          0,
+          'ARG-DESKTOP-IMPORT-DAILY-TRANSCRIPTS'
+        );
+      }
+    } catch (importError) {
+      console.error('[DESKTOP-IMPORT] Error en ciclo diario transcripts:', importError);
+    }
+  }, 24 * 60 * 60 * 1000);
+
   setInterval(runLolaShadowScanner, 120000); // Cada 2 minutos
   // startAntigravityActivityWatcher(); // Silenciado ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â atribuÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­a cambios siempre a Antigravity
   startHeartbeatLoop(); // Mejora 3: Latido del sistema

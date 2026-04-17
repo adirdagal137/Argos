@@ -1,0 +1,84 @@
+{
+    "version":  1,
+    "updated_at":  "2026-04-17T19:25:00.8619004Z",
+    "notes":  "Define aqui rutas locales sincronizadas desde Drive para lectura de transcripts/tokens por app desktop.",
+    "sources":  [
+                    {
+                        "id":  "codex",
+                        "enabled":  true,
+                        "rootPath":  "C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Codex",
+                        "transcriptGlobs":  [
+                                                "**/*transcript*.md",
+                                                "**/*transcript*.json",
+                                                "**/*.chat.jsonl"
+                                            ],
+                        "tokenGlobs":  [
+                                           "**/*token*.jsonl",
+                                           "**/*usage*.json",
+                                           "**/*ledger*.jsonl"
+                                       ],
+                        "parser":  "generic",
+                        "agentName":  "Codex",
+                        "owner":  "Antigravity",
+                        "timezone":  "Atlantic/Canary"
+                    },
+                    {
+                        "id":  "claude",
+                        "enabled":  true,
+                        "rootPath":  "C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Claude",
+                        "transcriptGlobs":  [
+                                                "**/*transcript*.md",
+                                                "**/*conversation*.json",
+                                                "**/*.jsonl"
+                                            ],
+                        "tokenGlobs":  [
+                                           "**/*token*.jsonl",
+                                           "**/*usage*.json",
+                                           "**/*ledger*.jsonl"
+                                       ],
+                        "parser":  "generic",
+                        "agentName":  "Claude",
+                        "owner":  "Antigravity",
+                        "timezone":  "Atlantic/Canary"
+                    },
+                    {
+                        "id":  "antigravity",
+                        "enabled":  true,
+                        "rootPath":  "C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Antigravity",
+                        "transcriptGlobs":  [
+                                                "**/*transcript*.md",
+                                                "**/*chat*.jsonl",
+                                                "**/*conversation*.json"
+                                            ],
+                        "tokenGlobs":  [
+                                           "**/*token*.jsonl",
+                                           "**/*usage*.json",
+                                           "**/*ledger*.jsonl"
+                                       ],
+                        "parser":  "generic",
+                        "agentName":  "Antigravity",
+                        "owner":  "Antigravity",
+                        "timezone":  "Atlantic/Canary"
+                    },
+                    {
+                        "id":  "openclaw",
+                        "enabled":  true,
+                        "rootPath":  "C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/OpenClaw",
+                        "transcriptGlobs":  [
+                                                "**/*transcript*.md",
+                                                "**/*session*.json",
+                                                "**/*.jsonl"
+                                            ],
+                        "tokenGlobs":  [
+                                           "**/*token*.jsonl",
+                                           "**/*usage*.json",
+                                           "**/*eval*.json",
+                                           "**/*webhook*.jsonl"
+                                       ],
+                        "parser":  "generic",
+                        "agentName":  "DeepSeek",
+                        "owner":  "OpenClaw",
+                        "timezone":  "Atlantic/Canary"
+                    }
+                ]
+}

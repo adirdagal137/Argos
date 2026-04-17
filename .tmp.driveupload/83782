@@ -1034,18 +1034,40 @@ body {
     font-weight: 500;
     font-size: 12px;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.btn-icon {
-    background: var(--accent-blue);
-    color: #111;
-    padding: 0 14px;
+.btn-small {
+    padding: 4px 10px;
     font-size: 10px;
 }
 
-.btn-icon:hover {
-    background: #eebb30;
-    box-shadow: 0 0 15px rgba(219, 157, 30, 0.4);
+.btn-success {
+    background: rgba(24, 169, 107, 0.12);
+    color: var(--accent-neon);
+    border: 1px solid rgba(24, 169, 107, 0.4);
+}
+
+.btn-success:hover {
+    background: rgba(24, 169, 107, 0.22);
+    border-color: var(--accent-neon);
+    box-shadow: 0 0 12px rgba(24, 169, 107, 0.3);
+}
+
+.btn-danger {
+    background: rgba(220, 50, 40, 0.12);
+    color: #ffb9b9;
+    border: 1px solid rgba(220, 50, 40, 0.4);
+}
+
+.btn-danger:hover {
+    background: rgba(220, 50, 40, 0.22);
+    border-color: #ffb9b9;
+    box-shadow: 0 0 12px rgba(220, 50, 40, 0.3);
+}
+
+.btn-icon {
+    margin-right: 4px;
 }
 
 .logbook-card {

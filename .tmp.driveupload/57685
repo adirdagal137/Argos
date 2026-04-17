@@ -1,19 +1,19 @@
 {
     "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-17T19:05:37.173Z",
+    "updated_at": "2026-04-17T19:38:34.957Z",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json.",
     "packet_states": {
-        "ARG-1776613000001": "open:inbox",
-        "ARG-1776613001000": "open:inbox",
-        "ARG-1776613002000": "open:inbox",
+        "ARG-1776613000001": "done:done",
+        "ARG-1776613001000": "done:done",
+        "ARG-1776613002000": "done:done",
         "ARG-1776613003000": "open:inbox",
         "ARG-1776613004000": "open:inbox",
         "ARG-1776613005000": "open:inbox",
-        "ARG-1776613006000": "open:inbox",
+        "ARG-1776613006000": "done:done",
         "ARG-1776613007000": "open:inbox",
         "ARG-1776613008000": "open:inbox",
-        "ARG-1776035900474": "open:inbox",
+        "ARG-1776035900474": "done:done",
         "ARG-1775915097259": "open:inbox",
         "ARG-1775948530124": "open:inbox",
         "ARG-1775915331853": "open:inbox",
@@ -39,7 +39,6 @@
     ],
     "owner_hint": "Codex / Antigravity / Capitan",
     "open_packets": [
-        "ARG-DISPATCH-AUTO-001",
         "ARG-1775914491058",
         "ARG-1775915097259",
         "ARG-1775915331853",
@@ -47,31 +46,33 @@
         "ARG-1775943565720",
         "ARG-1775948347775",
         "ARG-1775948530124",
-        "ARG-QWEN-001",
-        "ARG-1776035900474",
         "ARG-1776039352566",
-        "ARG-QWEN-DISPATCHER-001",
         "ARG-1776354624541",
-        "LOLA-RISK-1776424632454",
         "ARG-1776426457123",
-        "ARG-1776613000001",
-        "ARG-1776613001000",
-        "ARG-1776613002000",
         "ARG-1776613003000",
         "ARG-1776613004000",
         "ARG-1776613005000",
-        "ARG-1776613006000",
         "ARG-1776613007000",
-        "ARG-1776613008000"
+        "ARG-1776613008000",
+        "ARG-QWEN-DISPATCHER-001",
+        "LOLA-RISK-1776424632454",
+        "ARG-DISPATCH-AUTO-001",
+        "ARG-QWEN-001"
     ],
     "active_risks": [],
     "status": "active",
     "next_step": "",
     "done_packets_summary": {
-        "total": 0,
-        "tasks": 0,
+        "total": 5,
+        "tasks": 5,
         "bugs": 0,
-        "latest_ids": []
+        "latest_ids": [
+            "ARG-1776035900474",
+            "ARG-1776613000001",
+            "ARG-1776613001000",
+            "ARG-1776613002000",
+            "ARG-1776613006000"
+        ]
     },
     "ia_status": {
         "Claude": {
@@ -90,7 +91,7 @@
             "status": "standby",
             "task": "",
             "task_subject": "",
-            "since": ""
+            "since": "2026-04-17T19:24:34.790Z"
         },
         "DeepSeek": {
             "status": "standby",

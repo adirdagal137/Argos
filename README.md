@@ -1,4 +1,4 @@
-# ARGOS
+# ARGOS — El Navío
 
 Sistema de coordinación multi-IA operado por Rubén ("el Capitán").
 
@@ -8,13 +8,13 @@ Argos es el navío. Las IAs son la tripulación. Este repositorio es la constitu
 
 ## La tripulación
 
-| IA | Rol | Mandato |
-|---|---|---|
-| **Claude** | Navegadora | Estrategia de sesión, arquitectura, decisiones de diseño |
-| **Codex / ChatGPT** | Mecánico | Implementación, código, reparación técnica |
-| **Antigravity / Gemini** | Primer Oficial | Continuidad operativa, UI, integración entre capas |
-| **Lola** | Analista de la Sombra | Memoria relacional, contexto entre sesiones (en desarrollo) |
-| **Qwen / DeepSeek** | Recadero Local | Tareas rutinarias, clasificación, operaciones de archivo |
+| IA | Nombre | Rol | Mandato principal |
+|---|---|---|---|
+| **Claude** | Orfeo | Navegadora | Estrategia de sesión, arquitectura, decisiones de diseño |
+| **Codex / ChatGPT** | Mecánico | Implementación | Código, reparación técnica, refactorización |
+| **Gemini / Antigravity** | Primer Oficial | Integración | Continuidad operativa, UI, cohesión entre capas |
+| **Lola** | Analista de la Sombra | Memoria | Contexto relacional entre sesiones (en desarrollo) |
+| **Qwen / DeepSeek** | Recadero Local | Tareas rutinarias | Clasificación, file ops, búsquedas en logs |
 
 ---
 
@@ -22,69 +22,56 @@ Argos es el navío. Las IAs son la tripulación. Este repositorio es la constitu
 
 ```
 Argos/
-├── README.md                        ← este archivo
-├── CONTEXT_INDEX.md                 ← mapa completo del sistema
-├── ARCHITECTURE.md                  ← diseño técnico del navío
-├── ARGOS_VECTOR.md                  ← timón vivo: foco, prioridades, blockers
-├── ARGOS_QUICKSTART.md              ← cómo unirse al navío en frío
-│
-├── agents/                          ← instrucciones individuales por IA
-│   ├── CLAUDE__SYSTEM_INSTRUCTIONS.md
-│   ├── CODEX__SYSTEM_INSTRUCTIONS.md
-│   ├── ANTIGRAVITY__SYSTEM_INSTRUCTIONS.md
-│   └── QWEN__SYSTEM_INSTRUCTIONS.md
-│
-├── protocols/
-│   ├── INTER_AI_PROTOCOL.md         ← reglas operativas entre IAs
-│   └── ARGOS_CREW_VOICES.md         ← carácter y tono de cada tripulante
+├── README.md                          ← este archivo
+├── CLAUDE.md                          ← instrucciones de inicio para Claude Code (Orfeo)
+├── AGENTS.md                          ← instrucciones para otros agentes
 │
 ├── ARGOS_RUNTIME/
-│   ├── README.md                    ← qué es ARGOS_RUNTIME
-│   ├── schemas/                     ← esquemas canónicos (work_packet, event, state)
+│   ├── README.md                      ← qué es ARGOS_RUNTIME
+│   ├── INTER_AI_PROTOCOL.md           ← reglas operativas entre IAs
+│   ├── ARGOS_CREW_VOICES.md           ← carácter y tono de cada tripulante
+│   ├── ARGOS_VECTOR.md                ← timón vivo: foco, prioridades, blockers
+│   ├── ARGOS_QUICKSTART.md            ← cómo unirse al navío en frío
+│   ├── schemas/                       ← esquemas canónicos (work_packet, event, state)
 │   └── work_packets/
-│       ├── inbox/                   ← packets pendientes de ejecución
-│       └── in_progress/             ← packets en ejecución activa
+│       ├── inbox/                     ← packets pendientes de ejecución
+│       └── in_progress/               ← packets en ejecución activa
 │
-├── argos-api/                       ← servidor Node.js (código fuente)
-└── webapp/                          ← dashboard local (código fuente)
+├── Comenio/                           ← proyecto educación (docs vivos)
+├── LOLA/                              ← proyecto Lola (docs vivos)
+├── SciClass-M8/                       ← proyecto SCM8 (docs vivos)
+└── XuanShu/                           ← proyecto XuanShu (docs vivos)
 ```
 
-Lo que **no** está aquí (vive en Drive o en local):
-- Logs operativos (`ARGOS_GLOBAL_LOG.md`, `argos.events.jsonl`)
+Lo que **no** está aquí (vive en local/Drive):
+- Logs operativos (`ARGOS_GLOBAL_LOG.md`, `*.jsonl`)
 - Estado en tiempo real (`argos.state.json`)
 - Work packets cerrados (`done/`, `archived/`)
-- Archivos pesados, snapshots, legado histórico
+- Archivos pesados, snapshots, legacy histórico
+- Diarios personales de IAs (`.claude/`, `.gemini/`)
 
 ---
 
 ## Cómo leer el navío (para IAs entrando en frío)
 
 1. **Este README** — qué es Argos y quién hace qué
-2. **`ARGOS_VECTOR.md`** — qué está pasando ahora mismo
-3. **`protocols/INTER_AI_PROTOCOL.md`** — las reglas del juego
-4. **`agents/TU_NOMBRE__SYSTEM_INSTRUCTIONS.md`** — tu mandato específico
+2. **`ARGOS_RUNTIME/ARGOS_VECTOR.md`** — qué está pasando ahora mismo
+3. **`ARGOS_RUNTIME/INTER_AI_PROTOCOL.md`** — las reglas del juego
+4. **`CLAUDE.md` o `AGENTS.md`** — tu mandato específico
 5. **`ARGOS_RUNTIME/work_packets/inbox/`** — qué hay pendiente para ti
-6. **`CONTEXT_INDEX.md`** — si necesitas orientarte en Drive o en el filesystem local
+6. Estado en tiempo real → `ARGOS_RUNTIME/state/argos.state.json` (local/Drive)
 
-No leas el historial de logs hasta que lo necesites. El estado actual está en `ARGOS_VECTOR.md` y en `argos.state.json` (Drive/local).
-
----
-
-## Acceso
-
-Repo privado. El acceso de lectura para IAs se gestiona via **GitHub Personal Access Token** (scope: `repo`, solo lectura) que el Capitán distribuye por sesión.
-
-Para leer un archivo desde una IA sin MCP de GitHub:
-```
-https://raw.githubusercontent.com/adirdagal137/Argos/main/RUTA/AL/ARCHIVO.md
-```
-Con el token en el header `Authorization: token <PAT>`, o usando el token en la URL si la IA no soporta headers.
+No leas el historial de logs hasta que lo necesites. El estado actual está en `ARGOS_VECTOR.md`.
 
 ---
 
-## Estado actual
+## Arquitectura de fuentes de verdad
 
-Ver `ARGOS_VECTOR.md` para el foco y prioridades del navío hoy.
+| Capa | Dónde | Qué contiene |
+|---|---|---|
+| **GitHub** (este repo) | Nube | Constitución del navío: protocolos, instrucciones, esquemas, docs vivos |
+| **Local** (`C:\Users\Widox\Desktop\ARGOS\`) | Máquina Widox | Estado operativo, logs, events, work packets activos |
+| **Drive** | Nube | Espejo del local — backup y acceso remoto desde IAs sin filesystem |
 
 ---
 

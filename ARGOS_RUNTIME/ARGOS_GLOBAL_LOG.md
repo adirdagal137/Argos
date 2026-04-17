@@ -27,3 +27,15 @@ Archivo activo de sesion. Ultimo reset: 2026-04-17 12:17 Atlantic/Canary.
 **SIGUIENTE:** Verificación de integridad de bitácora y monitoreo de la salud de la API tras el cambio de directorio.
 
 **RIESGOS:** Ninguno detectado. El sistema opera de forma estable y nativa en el entorno local.
+
+---
+**[2026-04-17 20:24 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Implementacion de lectura externa de transcripts/tokens para apps desktop y scheduler operativo
+**WORK PACKET:** ARG-DESKTOP-IMPORT-20260417
+
+**DETALLES:**
+Codex implemento Desktop Import en argos-api con: config de fuentes por app (Codex, Claude, Antigravity, OpenClaw), estado incremental por archivo/hash, parser generico de tokens, mirror de transcripts externos, endpoints de operacion y lectura de archivos externos, bootstrap al arranque y ciclos automaticos (tokens cada hora, transcripts cada 24h) con trazas en feed/eventos.
+
+**SIGUIENTE:** Capitan compartira rutas reales de Drive en desktop_sources.json y se ejecutara /api/desktop-import/run para primera sincronizacion completa.
+
+**RIESGOS:** Hasta configurar rootPath reales en desktop_sources.json, no habra ingestion efectiva de fuentes externas.

@@ -1,0 +1,41 @@
+﻿[WORK_PACKET]
+ID: ARG-1776613002000
+ROLE_REQUESTED: Claude
+SUBJECT: Refrescar ARGOS_VECTOR.md como timÃ³n vivo â€” solo prioridades actuales, blockers reales y prÃ³ximos movimientos
+STATUS: done
+PRIORITY: P1
+ROOM: ARGOS
+TYPE: strategy
+TOKENS_SPENT: 0
+
+OBJECTIVE:
+ARGOS_VECTOR.md estÃ¡ parcialmente desfasado: refleja decisiones y prioridades de semanas atrÃ¡s
+que ya han mutado o se han resuelto. Un vector desfasado es peor que no tener vector â€” orienta
+mal en el arranque de sesiÃ³n.
+
+Transformarlo en un documento vivo y concreto: solo lo que es cierto hoy.
+
+TAREAS:
+1. Leer ARGOS_VECTOR.md actual.
+2. Leer ARGOS_GLOBAL_LOG.md (tail) y state/argos.state.json para entender el estado real.
+3. Reescribir ARGOS_VECTOR.md con estas secciones Ãºnicamente:
+   a. FOCO ACTUAL â€” una frase. Lo mÃ¡s importante ahora mismo.
+   b. PRIORIDADES VIVAS â€” mÃ¡ximo 5 items, cada uno con su responsable y estado.
+   c. BLOCKERS REALES â€” lo que estÃ¡ bloqueando avance ahora. Si no hay ninguno, decirlo.
+   d. DECISIONES VIGENTES â€” decisiones arquitectÃ³nicas o de protocolo tomadas recientemente
+      que orientan el trabajo actual. No mÃ¡s de 5.
+   e. PRÃ“XIMOS MOVIMIENTOS â€” los siguientes 3 pasos concretos del navÃ­o.
+   f. DEUDA VIVA (separada de histÃ³rica) â€” solo lo que bloquea trabajo actual.
+4. Eliminar del documento todo lo que ya estÃ© resuelto, superado o archivado.
+5. AÃ±adir al pie: fecha de Ãºltima actualizaciÃ³n y sesiÃ³n responsable.
+
+REGLA:
+Si algo no es verdad hoy, no va en el VECTOR. La deuda histÃ³rica tiene su propio archivo.
+
+ENTREGABLE:
+- ARGOS_VECTOR.md reescrito, fechado, con menos de 150 lÃ­neas.
+
+CONTEXTO:
+- Archivo: c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_VECTOR.md
+- Referencia de estado: argos.state.json + tail del global log
+[/WORK_PACKET]

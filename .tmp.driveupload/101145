@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "updated_at": "2026-04-17T19:26:40.280Z",
+  "files": {},
+  "importedTokenKeys": [],
+  "importedTranscriptKeys": [],
+  "lastRun": {
+    "startedAt": "2026-04-17T19:26:40.280Z",
+    "mode": "all",
+    "actor": "OpenClaw/Antigravity",
+    "finishedAt": "2026-04-17T19:26:40.280Z",
+    "summary": {
+      "sources": 4,
+      "tokenFilesScanned": 0,
+      "tokensImported": 0,
+      "transcriptFilesScanned": 0,
+      "transcriptsMirrored": 0,
+      "errors": 0,
+      "warnings": [
+        "[codex] Ruta no existe: C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Codex",
+        "[claude] Ruta no existe: C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Claude",
+        "[antigravity] Ruta no existe: C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Antigravity",
+        "[openclaw] Ruta no existe: C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/OpenClaw"
+      ]
+    }
+  }
+}
