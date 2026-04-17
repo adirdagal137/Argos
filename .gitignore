@@ -10,6 +10,9 @@ ARGOS_RUNTIME/events/
 ARGOS_RUNTIME/locks/
 ARGOS_RUNTIME/views/
 ARGOS_RUNTIME/handoffs/
+ARGOS_RUNTIME/transcripts/
+ARGOS_RUNTIME/mail/
+ARGOS_RUNTIME/archive/
 
 # --- WORK PACKETS CERRADOS (historial operativo, no constitutivo) ---
 ARGOS_RUNTIME/work_packets/done/
@@ -42,6 +45,11 @@ argos.state.archive.json
 
 # --- MÓDULOS DE PROYECTO (logs locales de Comenio, SCM8, etc.) ---
 ARGOS_RUNTIME/modules/
+Comenio/
+LOLA/
+SciClass-M8/
+Shifu/
+XuanShu/
 
 # --- ENTORNOS Y DEPENDENCIAS ---
 node_modules/
@@ -60,6 +68,13 @@ Thumbs.db
 desktop.ini
 *.tmp
 *.bak
+temp/
+tmp/
+cache/
+.cache/
+*.cache
+.tmp.driveupload/
+.tmp.drivedownload/
 
 # --- ARCHIVOS PESADOS DE DRIVE ---
 *.pdf
