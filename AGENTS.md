@@ -1,4 +1,4 @@
-﻿# ARGOS â€” PROTOCOLO OPERATIVO DE ORFEO (Codex)
+﻿# ARGOS â€” PROTOCOLO OPERATIVO DE (Codex)
 > Cargado automÃ¡ticamente por Codex. Reglas NO NEGOCIABLES.
 
 ---
