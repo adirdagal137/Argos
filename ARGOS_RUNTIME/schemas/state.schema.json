@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "State Schema",
+  "type": "object",
+  "properties": {
+    "module": { "type": "string" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "current_focus": { "type": "string" },
+    "status": { "type": "string" },
+    "open_packets": { "type": "array", "items": { "type": "string" } },
+    "active_risks": { "type": "array", "items": { "type": "string" } },
+    "next_step": { "type": "string" },
+    "owner_hint": { "type": "string" }
+  },
+  "required": [
+    "module", "updated_at", "current_focus", "status", "next_step"
+  ]
+}

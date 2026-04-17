@@ -1,0 +1,33 @@
+{
+  "snapshot_at": "2026-04-09T19:10:00Z",
+  "status": "human_views_only",
+  "latest_legacy_snapshot": "ARGOS_RUNTIME/legacy/v1_0_x_google_native_snapshot_2026-04-09/",
+  "views": [
+    {
+      "name": "ARGOS__root_logs",
+      "kind": "spreadsheet",
+      "role": "human_mirror",
+      "status": "frozen_as_canonical_source",
+      "url": "https://docs.google.com/spreadsheets/d/1CiZLX2847P5hXXvhVzivxpLMFVZv4XldHymMtVATwYg"
+    },
+    {
+      "name": "ARGOS__shadow_log",
+      "kind": "spreadsheet",
+      "role": "human_mirror",
+      "status": "frozen_as_canonical_source",
+      "url": "https://docs.google.com/spreadsheets/d/1zc75ryRn01eN00B-oa7N8fLbky_5qdLM2__MDht1UVc"
+    },
+    {
+      "name": "ARGOS__00_registry__registry_1_0_1.yaml",
+      "kind": "document",
+      "role": "snapshot",
+      "status": "pre_1_1_reference_only"
+    },
+    {
+      "name": "ARGOS__03_protocols__inter_ai_protocol_1_0_1.md",
+      "kind": "document",
+      "role": "snapshot",
+      "status": "pre_1_1_reference_only"
+    }
+  ]
+}

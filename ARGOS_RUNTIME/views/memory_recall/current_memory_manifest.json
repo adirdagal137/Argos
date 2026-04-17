@@ -1,0 +1,25 @@
+{
+  "updated_at": "2026-04-10T00:54:36.5807548+01:00",
+  "status": "active_read_only",
+  "purpose": "recalled_legacy_memory",
+  "sources": [
+    "legacy/v1_0_x_google_native_snapshot_2026-04-09/argos_root_logs.snapshot.json",
+    "legacy/v1_0_x_google_native_snapshot_2026-04-09/argos_shadow_log.snapshot.json",
+    "legacy/logs_cache_2026-04-09/AG_log_2026-04-09.md",
+    "legacy/logs_cache_2026-04-09/AG_shadow_log_2026-04-09.md"
+  ],
+  "exports": [
+    "views/memory_recall/ROOT_LOG_GENERAL__RECALLED.md",
+    "views/memory_recall/INTERACTIONS_LOG__RECALLED.md",
+    "views/memory_recall/PENDIENTES_Y_GLITCHES__RECALLED.md",
+    "views/memory_recall/SHADOW_MEMORY__RECALLED.md",
+    "views/memory_recall/ANTIGRAVITY_LOCAL_DRAFTS__RECALLED.md",
+    "views/memory_recall/HISTORIA_Y_ANOTACIONES__RECALLED.md",
+    "views/memory_recall/SHADOW_SYNTHESIS__2026-04-11.md"
+  ],
+  "notes": [
+    "Esta vista devuelve memoria al runtime sin reactivar el backend Google-native.",
+    "Las anotaciones de inconsciencia viven en HISTORIA_Y_ANOTACIONES__RECALLED.md.",
+    "Los snapshots originales siguen congelados en legacy/."
+  ]
+}

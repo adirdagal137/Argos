@@ -1,0 +1,4 @@
+{"timestamp":"2026-04-17T11:47:37.255Z","agent":"Captain (Input)","tokens":5,"module":"argos","refId":"ARG-1776426457123","ref":"New Task: Hola Argos, proband","scope":"input","channel":"captain_input"}
+{"timestamp":"2026-04-17T11:49:18.893Z","agent":"Claude","tokens":3800,"module":"argos","refId":"ARG-1776354464819","ref":"Work Process: Captura real de tokens implementada en argos-api","scope":"work","channel":"process"}
+{"timestamp":"2026-04-17T11:49:18.893Z","agent":"Claude","tokens":273,"module":"argos","refId":"ARG-1776354464819","ref":"TriLog Report: Captura real de tokens implementada en argos-api","scope":"report","channel":"trilog"}
+{"timestamp":"2026-04-17T11:49:18.893Z","agent":"Claude","tokens":57,"module":"argos","refId":"ARG-1776354464819","ref":"TriLog Chat: Captura real de tokens implementada en argos-api","scope":"report","channel":"chat"}

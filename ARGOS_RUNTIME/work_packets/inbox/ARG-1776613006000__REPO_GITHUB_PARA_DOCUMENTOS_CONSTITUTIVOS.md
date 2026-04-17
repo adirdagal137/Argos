@@ -1,0 +1,53 @@
+[WORK_PACKET]
+ID: ARG-1776613006000
+ROLE_REQUESTED: Codex
+SUBJECT: Crear repo GitHub para documentos constitutivos de ARGOS (protocolos, instrucciones de agentes, VECTOR)
+STATUS: open
+PRIORITY: P3
+ROOM: ARGOS
+TYPE: integration
+TOKENS_SPENT: 0
+
+OBJECTIVE:
+Los documentos que definen cómo funciona ARGOS (protocolos, instrucciones de agentes, VECTOR,
+CONTEXT_INDEX) viven mezclados con logs, transcripts y estado operativo en Drive. Esto hace
+que cualquier IA tenga que leer todo para entender nada.
+
+La separación Drive/GitHub resuelve el problema:
+- GitHub: sistema nervioso — lo que le dice a las IAs cómo entender todo lo demás.
+- Drive: archivo vivo — logs, transcripts, estado, history.
+
+TAREAS:
+1. Crear repo privado en GitHub: `argos-core` (o nombre que el Capitán prefiera).
+   El Capitán debe confirmar el nombre y si ya existe una org o usar cuenta personal.
+2. Estructura inicial del repo:
+   /
+   ├── README.md                    (qué es ARGOS, una página)
+   ├── CONTEXT_INDEX.md             (mapa del Drive — viene de ARG-1776613005000)
+   ├── ARCHITECTURE.md              (diseño del sistema — extraído de ARGOS_VECTOR)
+   ├── protocols/
+   │   ├── ARGOS_QUICKSTART.md
+   │   ├── INTER_AI_PROTOCOL.md
+   │   └── ARGOS_CREW_VOICES.md
+   ├── agents/
+   │   ├── CLAUDE__SYSTEM_INSTRUCTIONS.md
+   │   ├── CODEX__SYSTEM_INSTRUCTIONS.md
+   │   ├── ANTIGRAVITY__SYSTEM_INSTRUCTIONS.md
+   │   └── QWEN__SYSTEM_INSTRUCTIONS.md
+   └── ARGOS_VECTOR.md              (timón vivo — viene de ARG-1776613002000)
+
+3. Script de sincronización: un .ps1 o .sh que copie los ficheros relevantes de Drive a la
+   carpeta local del repo y haga commit+push. Ejecutable manualmente o desde argos-api.
+4. Añadir endpoint POST /api/github/sync en argos-api que ejecute el script de sincronización.
+5. Documentar en CONTEXT_INDEX.md la diferencia Drive/GitHub para las IAs.
+
+BLOQUEANTES:
+- Requiere que ARG-1776613005000 (CONTEXT_INDEX) esté completado antes.
+- Requiere credenciales GitHub del Capitán (Personal Access Token o gh CLI autenticado).
+- El Capitán debe confirmar si usar gh CLI (ya instalado?) o API directa.
+
+ENTREGABLE:
+- Repo argos-core en GitHub con estructura inicial.
+- Script de sync Drive → GitHub.
+- Endpoint /api/github/sync operativo.
+[/WORK_PACKET]

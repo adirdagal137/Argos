@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Captain Chat Message Schema",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "kind": { "type": "string" },
+    "speaker": { "type": "string" },
+    "sender_name": { "type": "string" },
+    "sender_role": { "type": "string" },
+    "audience": { "type": "string" },
+    "source": { "type": "string" },
+    "summary": { "type": "string" },
+    "details": { "type": "string" },
+    "status": { "type": "string" }
+  },
+  "required": [
+    "timestamp",
+    "kind",
+    "speaker",
+    "audience",
+    "source",
+    "summary",
+    "status"
+  ]
+}

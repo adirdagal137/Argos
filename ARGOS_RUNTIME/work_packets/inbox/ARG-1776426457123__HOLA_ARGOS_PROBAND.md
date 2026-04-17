@@ -1,0 +1,10 @@
+[WORK_PACKET]
+ID: ARG-1776426457123
+ROLE_REQUESTED: Cualquiera
+SUBJECT: Hola Argos, proband
+STATUS: open
+TOKENS_SPENT: 5
+
+OBJECTIVE:
+Hola Argos, proband
+[/WORK_PACKET]

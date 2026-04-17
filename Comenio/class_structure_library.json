@@ -1,0 +1,1510 @@
+{
+  "version": "2.7.0",
+  "file_role": "class_structure_library",
+  "updated_at": "2025-12-14T00:00:00Z",
+
+  "labels_sync": {
+    "stage_name_canonical": "warmup",
+    "stage_name_aliases": { "warmer": "warmup" },
+    "allowed_stage_keys": ["warmup", "input", "controlled_practice", "freer_practice", "output"]
+  },
+
+  "doc": {
+    "purpose": [
+      "Colección de modalidades de clase + repositorio integrado de actividades/materiales.",
+      "Diseñado para plug & play: grammar_ids canónicos; indexes (si se quieren) se generan fuera del archivo.",
+      "Incluye inbox para capturar actividades/materiales emergentes no categorizados."
+    ],
+    "capture_policy": [
+      "Mantener 'tags' como etiquetas humanas (rápidas).",
+      "Añadir SIEMPRE 'grammar_ids' como IDs canónicos del syllabus (formato: grammar_paths.<...>).",
+      "Seleccionar por 'grammar_ids'; 'tags' solo fallback/legibilidad.",
+      "Si aparece una actividad/material nueva y no está categorizada → assets.inbox.",
+      "Si se usan indexes, regenerarlos externamente (build/utility), no dentro de este archivo."
+    ]
+  },
+
+  "canonicalization": {
+    "note": [
+      "Mapa auxiliar para traducir tags humanos a grammar_ids canónicos.",
+      "No sustituye al resolver del syllabus; acelera el etiquetado del library."
+    ],
+    "tag_to_grammar_id": {
+      "present_simple": "grammar_paths.verb_tenses_and_voice.present_simple",
+      "there_is_are": "grammar_paths.verb_tenses_and_voice.there_is_are",
+      "present_continuous": "grammar_paths.verb_tenses_and_voice.present_continuous",
+      "past_simple": "grammar_paths.verb_tenses_and_voice.past_simple",
+      "past_continuous": "grammar_paths.verb_tenses_and_voice.past_continuous",
+      "be_going_to": "grammar_paths.verb_tenses_and_voice.be_going_to",
+      "future_simple": "grammar_paths.verb_tenses_and_voice.future_simple",
+      "present_perfect_simple": "grammar_paths.verb_tenses_and_voice.present_perfect_simple",
+      "present_perfect_continuous": "grammar_paths.verb_tenses_and_voice.present_perfect_continuous",
+
+      "questions": "grammar_paths.questions",
+      "clauses": "grammar_paths.clauses",
+
+      "adverbs": "grammar_paths.adverbs",
+      "pronouns": "grammar_paths.pronouns",
+      "determiners": "grammar_paths.determiners",
+      "articles": "grammar_paths.determiners.articles",
+      "prepositions": "grammar_paths.prepositions",
+      "quantity": "grammar_paths.determiners.quantity",
+
+      "comparatives": "grammar_paths.adjectives.comparatives",
+      "superlatives": "grammar_paths.adjectives.superlatives",
+
+      "reported_speech": "grammar_paths.reported_speech",
+      "modality": "grammar_paths.modality",
+      "requests": "grammar_paths.modality",
+
+      "to_ing": "grammar_paths.verbs.with_to_and_ing",
+      "phrasal": "grammar_paths.verbs.phrasal",
+      "conditional": "grammar_paths.clauses.conditional"
+    }
+  },
+
+  "validation_rules": {
+    "assets": {
+      "activities_required_fields": ["id", "level", "skills", "interaction", "tags", "grammar_ids"],
+      "materials_required_fields": ["id", "type", "level_hint", "tags", "grammar_ids", "payload"],
+      "grammar_ids_format_prefix": "grammar_paths.",
+      "best_stage_allowed": ["warmup", "input", "controlled_practice", "freer_practice", "output"]
+    }
+  },
+
+  "modalities": [
+    {
+      "id": "mod_starter_circles_55",
+      "name": "Starter Set → Topic Circles (choral → personal → timed output)",
+      "suitable_for": { "level_range": ["A2", "B2"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Evitar silencios automatizando sentence starters; convertirlos en producción personal por temas y cerrar con output cronometrado.",
+      "content_source": "teacher_prompts",
+      "default_skills_focus": ["speaking", "pronunciation", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 12,
+          "aim_es": "Ritmo y automatización: repetición coral sin cortar la fluidez.",
+          "teacher_prompts_en": [
+            "Choral repetition (2 rounds) — no corrections: I usually… / Sometimes I… / These days…",
+            "Focus on stress: CONTENT words louder."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 8,
+          "aim_es": "Personalizar starters con 1 idea corta (evitar discursos largos).",
+          "teacher_prompts_en": [
+            "I read the starter; you finish with ONE short idea (max 8–10 words).",
+            "If you freeze, I give ONE word; you finish the sentence."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 12,
+          "aim_es": "Topic circles: usar 3–4 starters para un tema, con conectores básicos.",
+          "teacher_prompts_en": [
+            "Topic 1: Daily routine — use 4 different starters.",
+            "Add 1 connector: because / but / so (one per answer)."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 18,
+          "aim_es": "Speed Q&A: respuestas rápidas con 2 upgrades (detalle + chunk).",
+          "teacher_prompts_en": [
+            "Quick-fire questions. Answer with a starter + 1 detail.",
+            "Upgrade: add ONE chunk (To be honest… / The thing is…)."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Output: 45–60s mini-monologue usando starters y 2 conectores.",
+          "teacher_prompts_en": [
+            "Record / perform: 45–60 seconds. Use 6 starters + 2 connectors.",
+            "Second attempt: same content, fewer pauses."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_dictation_shadowing_repair_55",
+      "name": "Dictation → Shadowing → Repair Loop (listen to speak)",
+      "suitable_for": { "level_range": ["A2", "C1"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Subir listening + ritmo: dictation corta, comparación con transcript, shadowing y re-producción con chunks.",
+      "content_source": "teacher_provided_clip_or_text",
+      "default_skills_focus": ["listening", "pronunciation", "speaking", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 7,
+          "aim_es": "Preparar oído: 6 palabras clave + 1 patrón de sonido/ritmo.",
+          "teacher_prompts_en": [
+            "Before listening: predict 6 keywords you might hear.",
+            "Pronunciation target: linking OR -ed endings OR weak forms (pick one)."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 12,
+          "aim_es": "Two-pass dictation: gist → exact words.",
+          "teacher_prompts_en": [
+            "Listen 1: write ONLY the main idea (1 sentence).",
+            "Listen 2: dictation (8–12 lines). Leave blanks if unsure."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 15,
+          "aim_es": "Repair: comparar con transcript + mini-drills de ritmo.",
+          "teacher_prompts_en": [
+            "Compare with transcript: circle missing words and word boundaries.",
+            "Shadow line-by-line. 2 rounds: slow → normal."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 16,
+          "aim_es": "Transfer: usar 5 chunks del texto en mini-Q&A.",
+          "teacher_prompts_en": [
+            "Pick 5 useful chunks. Make 1 new sentence with each.",
+            "Mini Q&A: answer 6 questions using at least 3 chunks."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Output grabado: 40–60s retell / opinion con chunks.",
+          "teacher_prompts_en": [
+            "Record: 40–60 seconds retell/opinion (use 3 chunks).",
+            "Repeat once: smoother rhythm, same message."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_exam_listening_loop_55",
+      "name": "Exam Listening Loop (2-pass → transcript mining → speaking output)",
+      "suitable_for": { "level_range": ["B1", "C2"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Practicar listening tipo examen con método estable: predicción, 2 escuchas, análisis de transcript y output oral cronometrado.",
+      "content_source": "exam_prep",
+      "default_skills_focus": ["listening", "speaking", "pronunciation", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 6,
+          "aim_es": "Activar esquemas: tema, distractores y vocabulario clave.",
+          "teacher_prompts_en": [
+            "Look at the questions/options. Predict 5 words you might hear.",
+            "What distractors are likely? (numbers, names, similar words)"
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 12,
+          "aim_es": "Listen 1: gist + estrategia (sin pausar).",
+          "teacher_prompts_en": [
+            "Listen once. Choose answers fast. Don't overthink.",
+            "Mark confidence: sure / maybe / guess."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 16,
+          "aim_es": "Listen 2: detalle + corrección; luego transcript mining.",
+          "teacher_prompts_en": [
+            "Listen again. Fix only the 'maybe/guess' answers.",
+            "Open transcript: underline 6 useful collocations + 2 linking phrases."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 16,
+          "aim_es": "Transfer: speaking con las collocations del audio (Q&A).",
+          "teacher_prompts_en": [
+            "Answer 6 follow-up questions using at least 3 collocations.",
+            "Upgrade: add However / As a result / In my opinion (choose 2)."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Output estilo examen: 40–60s response (record / perform).",
+          "teacher_prompts_en": [
+            "Record: 40–60 seconds. 4–6 short sentences, 2 connectors.",
+            "Second attempt: same content, fewer pauses."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_news_debate_synopsis_55",
+      "name": "News → Debate → Mini-synopsis (headline to output)",
+      "suitable_for": { "level_range": ["B1", "C2"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Convertir un texto real (titular + 1 párrafo) en speaking guiado y un output escrito corto, con chunks reutilizables.",
+      "content_source": "teacher_provided_article",
+      "default_skills_focus": ["reading", "speaking", "writing", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 5,
+          "aim_es": "Activar tema desde el titular y predecir contenido.",
+          "teacher_prompts_en": [
+            "Look at the headline. What do you think happened?",
+            "Give me a 10-second opinion: good / bad / mixed — why?"
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 12,
+          "aim_es": "Leer titular + primer párrafo y extraer collocations.",
+          "teacher_prompts_en": [
+            "Read the headline + first paragraph together.",
+            "Underline 5 useful expressions you could reuse."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 10,
+          "aim_es": "Pasar de reconocimiento a producción con chunks (drill + frases cortas).",
+          "teacher_prompts_en": [
+            "Repeat the 5 expressions with natural stress.",
+            "Make one short SVO sentence with each expression."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 18,
+          "aim_es": "Debate guiado con preguntas de expansión y conectores.",
+          "teacher_prompts_en": [
+            "Answer: Why do you think this is happening?",
+            "Must-use connectors: However / As a result / In my opinion."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Escribir mini-synopsis (2 frases) y leerla en voz alta.",
+          "teacher_prompts_en": [
+            "Write a 2-sentence summary: what happened + why it matters.",
+            "Read it aloud. Let's polish it to sound natural."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_rule_circuit_micro_scenarios_55",
+      "name": "Rule Circuit (apply 3–5 rules across micro-scenarios)",
+      "suitable_for": { "level_range": ["A2", "C2"], "age_bands": ["12-15", "15-18", "adult"] },
+      "intent_es": "Automatizar reglas simples (SVO, preps, artículos, verb patterns, conectores) aplicándolas en 3–4 escenarios cortos.",
+      "content_source": "teacher_prompts",
+      "default_skills_focus": ["speaking", "error_correction", "pronunciation"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 6,
+          "aim_es": "Recordar reglas y activar output rápido.",
+          "teacher_prompts_en": [
+            "Today's rules: {rule_1}, {rule_2}, {rule_3}.",
+            "Translate 5 short Spanish sentences using the rules."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 9,
+          "aim_es": "Modelar 1 mini-diálogo y extraer 4 chunks.",
+          "teacher_prompts_en": [
+            "Listen to a 6-line mini-dialogue for Scenario 1.",
+            "Steal 4 chunks you can reuse (polite requests / preps / articles)."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 12,
+          "aim_es": "Escenario 1 con reformulación inmediata (misma idea, otra frase).",
+          "teacher_prompts_en": [
+            "Roleplay Scenario 1 for 6 turns.",
+            "Rephrase each turn once: Could I have…? → Can I get…?"
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 18,
+          "aim_es": "Rotación por 2 escenarios extra con conectores y corrección mínima.",
+          "teacher_prompts_en": [
+            "Scenario 2: directions. Use Then / Finally.",
+            "Scenario 3: small talk. Use By the way / Anyway.",
+            "Keep sentences under 15 words."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Lock-in: 3 frases propias + micro-reflexión sobre la regla más difícil.",
+          "teacher_prompts_en": [
+            "Create 3 original sentences that follow all rules.",
+            "Say: 'The hardest rule today was… because…'"
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_retell_compression_55",
+      "name": "Retell Compression (3-2-1 ladder + one-sentence takeaway)",
+      "suitable_for": { "level_range": ["B1", "C2"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Mejorar fluidez y claridad comprimiendo una historia (3 min → 2 min → 1 min) y cerrando con resumen de 1 frase.",
+      "content_source": "teacher_provided_story_or_student_experience",
+      "default_skills_focus": ["speaking", "pronunciation", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 6,
+          "aim_es": "Activar contenido y preparar vocabulario base.",
+          "teacher_prompts_en": [
+            "Choose a story: something that happened this week.",
+            "Brainstorm 6 key words + 2 connectors (because / so / but)."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 10,
+          "aim_es": "Modelar estructura breve (inicio → problema → resultado).",
+          "teacher_prompts_en": [
+            "Tell the story once with notes. I only stop for meaning.",
+            "Mark 2 places to add a detail (time / place / feeling)."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 12,
+          "aim_es": "Primera versión guiada: claridad, frases cortas.",
+          "teacher_prompts_en": [
+            "Retell (3 minutes max). Use short sentences.",
+            "Upgrade: add 2 chunks (To be honest… / The thing is…)."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 18,
+          "aim_es": "Ladder 3-2-1: misma historia, menos tiempo, más precisión.",
+          "teacher_prompts_en": [
+            "Round 1: 3 minutes (no stop).",
+            "Round 2: 2 minutes (same events, fewer details).",
+            "Round 3: 1 minute (only essential events)."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Cierre: takeaway en 1 frase + segunda toma mejorada.",
+          "teacher_prompts_en": [
+            "Write ONE sentence takeaway: what you learned / what matters.",
+            "Final retell (45–60s): smoother, same message."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_error_map_rewrite_55",
+      "name": "Error Map → Targeted Rewrite (micro-feedback workshop)",
+      "suitable_for": { "level_range": ["A2", "C2"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Convertir errores recurrentes en un mapa (2–3 categorías) y reescribir output con foco en precisión sin perder fluidez.",
+      "content_source": "student_output_from_class",
+      "default_skills_focus": ["error_correction", "writing", "speaking"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 6,
+          "aim_es": "Calentar con 6 frases cortas para detectar patrones.",
+          "teacher_prompts_en": [
+            "Quick diagnostic: 6 short sentences (you say; I note).",
+            "I only mark: tense / word order / articles / preps (pick 2–3)."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 10,
+          "aim_es": "Mostrar 'error map' (pocas reglas) con ejemplos correctos.",
+          "teacher_prompts_en": [
+            "Here are today's 2–3 patterns. Copy 1 correct example each.",
+            "Say the example aloud with correct rhythm."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 14,
+          "aim_es": "Reescritura guiada por frases: precisión primero.",
+          "teacher_prompts_en": [
+            "Rewrite 6 lines from your earlier output using the map.",
+            "I only correct the 2–3 target patterns."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 18,
+          "aim_es": "Aplicación: mini-output nuevo, misma gramática objetivo.",
+          "teacher_prompts_en": [
+            "New topic, same patterns: answer 6 questions using short sentences.",
+            "Self-check: scan only for the 2–3 patterns."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Producto final: microtexto / mini-talk sin los errores objetivo.",
+          "teacher_prompts_en": [
+            "Produce a final 60-second talk OR 90–120 word text.",
+            "Second attempt after 30 seconds of self-editing."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_narrative_arc_55",
+      "name": "Narrative Arc (hook → questions → branching choices → output)",
+      "suitable_for": { "level_range": ["A1", "C2"], "age_bands": ["12-15", "15-18", "adult"] },
+      "intent_es": "Enmarcar la clase en una mini-historia para provocar preguntas, decisiones y output final (oral o escrito).",
+      "content_source": "teacher_story_world",
+      "default_skills_focus": ["speaking", "listening", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 6,
+          "aim_es": "Hook narrativo: activar curiosidad y vocabulario clave.",
+          "teacher_prompts_en": [
+            "Hook: Something strange happened in town last night…",
+            "Predict 3 details: who / where / what."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 10,
+          "aim_es": "Dar input corto (6–8 líneas) y asegurar comprensión.",
+          "teacher_prompts_en": [
+            "Listen/read the scene (6–8 lines).",
+            "Check meaning with 6 quick questions (yes/no or A/B)."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 12,
+          "aim_es": "Preguntas guiadas: formar y automatizar estructuras objetivo.",
+          "teacher_prompts_en": [
+            "Ask 6 questions about the story using the target form.",
+            "Upgrade: add 1 short reason (because / so / but)."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 20,
+          "aim_es": "Branching: elegir opciones y justificar (roleplay suave).",
+          "teacher_prompts_en": [
+            "Choice A or B? Decide and justify in 2 sentences.",
+            "Roleplay 6 turns: ask, answer, react."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Cierre: mini-output con estructura (oral o escrito).",
+          "teacher_prompts_en": [
+            "Final: 6–8 sentences telling what happened and what you decided.",
+            "Second attempt: same content, fewer pauses / fewer errors."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_fluency_ladder_55",
+      "name": "Fluency Ladder (same task, tighter time, better upgrades)",
+      "suitable_for": { "level_range": ["A2", "B2"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Construir fluidez repitiendo la misma tarea con menos tiempo y 1–2 upgrades (chunks, conectores, pronunciación).",
+      "content_source": "student_topic_or_story",
+      "default_skills_focus": ["speaking", "pronunciation", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 6,
+          "aim_es": "Preparar chunks y conectores; fijar objetivo de tiempo.",
+          "teacher_prompts_en": [
+            "Choose 2 connectors + 2 chunks you will use today.",
+            "Time targets: 60s → 45s → 30s."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 8,
+          "aim_es": "Primera versión completa sin cortar (baseline).",
+          "teacher_prompts_en": [
+            "Tell your story/opinion (60 seconds). I only note errors.",
+            "After: choose 2 words to pronounce better."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 12,
+          "aim_es": "Upgrade controlado: re-frasear y reducir pausas.",
+          "teacher_prompts_en": [
+            "Repeat (45 seconds). Must use 2 connectors + 1 chunk.",
+            "Micro-drill: repeat 2 problem sentences correctly."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 18,
+          "aim_es": "Ladder: tercera versión más rápida y natural.",
+          "teacher_prompts_en": [
+            "Final (30 seconds): keep meaning, fewer details.",
+            "Optional: add 1 stronger adjective/adverb."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Producto final: performance (grabado) o microtexto.",
+          "teacher_prompts_en": [
+            "Record best version OR write 80–100 words.",
+            "Quick self-check: connectors + 2 target fixes."
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "mod_tense_switch_carousel_55",
+      "name": "Tense Switch Carousel (story shifter → roleplay → microtext)",
+      "suitable_for": { "level_range": ["A2", "B2"], "age_bands": ["15-18", "adult"] },
+      "intent_es": "Practicar cambios de tiempo verbal con una misma historia: pasar por 3 tiempos, roleplay por estaciones y cerrar con microtexto con checklist.",
+      "content_source": "teacher_prompts_or_student_story_seed",
+      "default_skills_focus": ["speaking", "error_correction", "writing"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 8,
+          "aim_es": "Activar 'time anchors' y preparar el cambio de tiempo verbal sin bloquear fluidez.",
+          "teacher_prompts_en": [
+            "Time anchors: yesterday / last week / since / already / just / while.",
+            "Say 6 micro-sentences: 2 Past Simple, 2 Past Continuous, 2 Present Perfect."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 10,
+          "aim_es": "Modelar 1 historia corta y marcar verbos/claves temporales.",
+          "teacher_prompts_en": [
+            "Read/listen to a 6–8 sentence story.",
+            "Underline verbs and circle time words."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 16,
+          "aim_es": "Story shifter: misma historia en 3 versiones (tiempos distintos) con corrección de alto impacto.",
+          "teacher_prompts_en": [
+            "Tell version A (Past Simple): focus on sequence.",
+            "Tell version B (Past Continuous): focus on background action.",
+            "Tell version C (Present Perfect): focus on results/experience."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 18,
+          "aim_es": "Roleplay carousel por estaciones: preguntas y respuestas usando el tiempo objetivo.",
+          "teacher_prompts_en": [
+            "Station 1: interviewer (Past Simple questions).",
+            "Station 2: witness (Past Continuous details).",
+            "Station 3: friend (Present Perfect: results / changes)."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 10,
+          "aim_es": "Microtext final con checklist (tenses + articles).",
+          "teacher_prompts_en": [
+            "Write 60–90 words: include PS + PC + PP at least once.",
+            "Self-check: verbs, time words, a/an/the. Then read aloud."
+          ]
+        }
+      ]
+    }
+    ,
+    {
+      "id": "mod_three_scene_vlog_mission_45",
+      "name": "3-Scene Vlog Mission (directions → café → imagination) [45]",
+      "suitable_for": { "level_range": ["A1", "A2"], "age_bands": ["9-12", "12-15"] },
+      "intent_es": "Crear un producto motivador (mini-vlog) con 3 escenas para reciclar preguntas, direcciones, ‘I’d like’ y descripciones con andamiaje claro.",
+      "content_source": "teacher_story_world",
+      "default_skills_focus": ["speaking", "listening", "pronunciation", "error_correction", "writing"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 8,
+          "aim_es": "Activar presente simple/continuo + 3ª persona con micro-eco (sin explicación larga).",
+          "teacher_prompts_en": [
+            "Past (3): What did you do on Saturday? Where did you go? What did you eat?",
+            "Today (PC): How are you today? What are you doing this morning?",
+            "3rd person (quick): What does your brother/friend do after school? Does he/she…?",
+            "Micro-eco repair: I’m study → I’m studying | She play → She plays"
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 7,
+          "aim_es": "Revisión rápida de tarea (pulir, no rehacer) o rescate si no hay tarea.",
+          "teacher_prompts_en": [
+            "Read 3 sentences from homework (or we create 2 rescue sentences):",
+            "✔ form / 💬 meaning (one improvement) / one perfect 'I’d like…' line."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 12,
+          "aim_es": "Escena 1: direcciones con 3 interlocutores (misma estructura, reacciones distintas).",
+          "teacher_prompts_en": [
+            "Scene 1: Asking for directions (3 people).",
+            "Use short questions: Is there a … near here? Where is …? How can I get to …?",
+            "Time signal trick: I say NOW → use Present Continuous; I say YESTERDAY → use Past Simple (1 sentence).",
+            "Goal: 4–5 correct sentences + 2 WH- questions."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 13,
+          "aim_es": "Escena 2: café con ‘specials’ + decisiones propias (roleplay funcional).",
+          "teacher_prompts_en": [
+            "Scene 2: Café with specials. You choose everything.",
+            "Must-use: I’d like … please. Can I see the display case? Here or to go? I’m paying by card.",
+            "Tense switch inside the dialogue (no theory):",
+            "What are you doing today? (PC) / What do you usually drink? (PS) / What did you drink yesterday? (Past Simple, 1 line)."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 5,
+          "aim_es": "Escena 3: descripción sin imagen + grabación del mini-vlog (producto del día).",
+          "teacher_prompts_en": [
+            "Scene 3: 'Broadway in your mind' (no image).",
+            "Frames: I see… (3) / People are… (2) / There is/are… (2 + place) / I’m… (1).",
+            "Record a 45–60s mini-vlog with the 3 scenes (one day in NYC).",
+            "Exit: say ONE new sentence you can say now."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mod_silent_noticing_reset_15",
+      "name": "Silent Noticing Reset (low-pressure reboot) [15]",
+      "suitable_for": { "level_range": ["A1", "A2"], "age_bands": ["12-15", "15-18", "adult"] },
+      "intent_es": "Reiniciar motivación cuando el alumno está muy cansado: observar, nombrar y cerrar con 3 micro-frases (sin drills ni correcciones).",
+      "content_source": "teacher_prompts",
+      "default_skills_focus": ["speaking", "listening", "pronunciation"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 2,
+          "aim_es": "Inicio sin presión: pacto de clase ‘no normal’.",
+          "teacher_prompts_en": [
+            "Today we won’t do a normal class. No exercises, no repeating, no corrections.",
+            "We’ll just notice things in English (or Spanish if needed)."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 5,
+          "aim_es": "Noticing silencioso: mirar alrededor y detectar señales.",
+          "teacher_prompts_en": [
+            "One minute: look around in silence.",
+            "What has colour? What is moving? What is ON?"
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 4,
+          "aim_es": "Decir 3 cosas notadas (EN/ES) y convertir 1–2 a inglés.",
+          "teacher_prompts_en": [
+            "Tell me 3 things you noticed (English, Spanish, or signs).",
+            "Let’s convert 1–2 into English: The light is on. / My cat is sleeping."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 3,
+          "aim_es": "Micro ritual creativo: 3 frases con soporte.",
+          "teacher_prompts_en": [
+            "Finish these (any format: say / type / draw):",
+            "Today I would like to… / Today I’m going to… / Today I will not…"
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 1,
+          "aim_es": "Cierre humano y puente a la próxima clase.",
+          "teacher_prompts_en": [
+            "Thanks for being here. Next class: you teach me something (English/Spanish/drawings)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mod_terminal_escape_polvo42_45",
+      "name": "Terminal Quest: Escape Sleep Mode (commands → feedback → unlock) [45]",
+      "suitable_for": { "level_range": ["A1", "A2"], "age_bands": ["12-15", "15-18", "adult"] },
+      "intent_es": "Gamificar speaking mínimo con una ‘consola’: el alumno usa comandos/frases simples en inglés para desbloquear fases y salir del ‘sleep loop’.",
+      "content_source": "teacher_story_world",
+      "default_skills_focus": ["speaking", "listening", "pronunciation", "error_correction"],
+      "stages": [
+        {
+          "key": "warmup",
+          "duration_min": 6,
+          "aim_es": "Hook: sistema en SLEEP MODE + objetivo claro (3–5 frases valen).",
+          "teacher_prompts_en": [
+            "You are in SLEEP MODE. Your mission: escape the sleep loop.",
+            "You must use commands in English to wake the system up."
+          ]
+        },
+        {
+          "key": "input",
+          "duration_min": 8,
+          "aim_es": "Phase 1: Emotion Scan (1 cosa buena en el mundo).",
+          "teacher_prompts_en": [
+            "Give me one good thing in the world. One only. In English.",
+            "If silence: I offer a model: Cats are nice."
+          ]
+        },
+        {
+          "key": "controlled_practice",
+          "duration_min": 14,
+          "aim_es": "Phase 2: comandos básicos + respuestas del sistema (not found/accepted).",
+          "teacher_prompts_en": [
+            "Try commands (I give hints): wake up / deactivate sleep_mode / boot system / feed_cat / remember / play_soundtrack",
+            "System replies: Command accepted / Command not found / Warning: energy low."
+          ]
+        },
+        {
+          "key": "freer_practice",
+          "duration_min": 12,
+          "aim_es": "Phase 3: ‘Cat Code’ (completar frase y desbloquear).",
+          "teacher_prompts_en": [
+            "Complete: When I wake up, I’m going to…",
+            "Add 1 extra line: Because… / So… (optional)."
+          ]
+        },
+        {
+          "key": "output",
+          "duration_min": 5,
+          "aim_es": "Cierre + tarea: generar una mini-lista de comandos propios.",
+          "teacher_prompts_en": [
+            "Final screen: LIGHT MODE ON. You are awake (a little bit).",
+            "Homework seed: create 6 commands to ‘redirect a sleepy cat’ to another room."
+          ]
+        }
+      ]
+    }
+  ],
+
+  "assets": {
+    "activities": [
+      {
+        "id": "lib_act_pairs_freq_adv_A2_v1",
+        "level": "A2",
+        "skills": ["speaking"],
+        "interaction": ["pairwork", "plenary"],
+        "tags": ["adverbs", "questions", "present_simple"],
+        "grammar_ids": [
+          "grammar_paths.adverbs",
+          "grammar_paths.questions",
+          "grammar_paths.verb_tenses_and_voice.present_simple"
+        ],
+        "use_suggestion": { "best_stage": "freer_practice", "notes": "Preguntas por turnos; si no pairwork, hacerlo en plenaria con 'hot seat'." },
+        "source": { "origin": "legacy_bank", "legacy_kind": "activity", "legacy_id": "act_pairs_freq_adv_A2_v1" }
+      },
+      {
+        "id": "lib_act_read_highlight_comp_A2_v1",
+        "level": "A2",
+        "skills": ["reading", "language_awareness"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["comparatives"],
+        "grammar_ids": ["grammar_paths.adjectives.comparatives"],
+        "use_suggestion": { "best_stage": "input", "notes": "Enfocar solo 6 ejemplos; no saturar." },
+        "source": { "origin": "legacy_bank", "legacy_kind": "activity", "legacy_id": "act_read_highlight_compA_A2_v1" }
+      },
+      {
+        "id": "lib_act_transform_tenses_mix_A2_v1",
+        "level": "A2",
+        "skills": ["error_correction"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["present_simple", "present_continuous", "past_simple"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.present_simple",
+          "grammar_paths.verb_tenses_and_voice.present_continuous",
+          "grammar_paths.verb_tenses_and_voice.past_simple"
+        ],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "Ideal para cierre con corrección rápida." },
+        "source": { "origin": "legacy_bank", "legacy_kind": "activity", "legacy_id": "act_transform_tenses_mix_A2_v1" }
+      },
+      {
+        "id": "lib_act_plans_info_gap_A2_v1",
+        "level": "A2",
+        "skills": ["speaking"],
+        "interaction": ["small_group", "plenary"],
+        "tags": ["be_going_to", "present_continuous", "questions"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.be_going_to",
+          "grammar_paths.verb_tenses_and_voice.present_continuous",
+          "grammar_paths.questions"
+        ],
+        "use_suggestion": { "best_stage": "freer_practice", "notes": "Si no pairwork, hacerlo en grupos o role con teacher." },
+        "source": { "origin": "legacy_bank", "legacy_kind": "activity", "legacy_id": "act_info_gap_plans_be_going_to_A2_v1" }
+      },
+      {
+        "id": "lib_act_summarize_dialogue_A2_v1",
+        "level": "A2",
+        "skills": ["speaking"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["reported_speech"],
+        "grammar_ids": ["grammar_paths.reported_speech"],
+        "use_suggestion": { "best_stage": "output", "notes": "Limitar a 3 frases en A2." },
+        "source": { "origin": "legacy_bank", "legacy_kind": "activity", "legacy_id": "act_output_summarize_dialog_A2_v1" }
+      },
+
+      {
+        "id": "lib_act_sentence_starters_circles_B1_v1",
+        "level": "B1",
+        "skills": ["speaking", "pronunciation"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["present_simple", "adverbs"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.present_simple",
+          "grammar_paths.adverbs"
+        ],
+        "use_suggestion": { "best_stage": "warmup", "notes": "Choral repetition → personalisation; limitar a 8–10 palabras." },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_starters_circles" }
+      },
+      {
+        "id": "lib_act_dictation_two_pass_B1_v1",
+        "level": "B1",
+        "skills": ["listening", "writing", "pronunciation"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["dictation", "listening"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.present_simple"],
+        "use_suggestion": { "best_stage": "input", "notes": "Pass 1 gist; pass 2 exact words; blanks allowed." },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_dictation_two_pass" }
+      },
+      {
+        "id": "lib_act_shadowing_ladder_B1_v1",
+        "level": "B1",
+        "skills": ["pronunciation", "listening"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["shadowing", "pronunciation"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.present_simple"],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "Line-by-line: slow → normal; focus on linking/stress." },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_shadowing" }
+      },
+      {
+        "id": "lib_act_exam_listening_two_pass_B1_v1",
+        "level": "B1",
+        "skills": ["listening", "speaking", "error_correction"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["questions", "exam"],
+        "grammar_ids": ["grammar_paths.questions"],
+        "use_suggestion": { "best_stage": "input", "notes": "Confidence marking (sure/maybe/guess) to drive second listen." },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_exam_listening_loop" }
+      },
+
+      {
+        "id": "lib_act_quickfire_prompts_10s_A2_v1",
+        "level": "A2",
+        "skills": ["speaking"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["quickfire", "fluency", "tenses"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple"
+        ],
+        "use_suggestion": { "best_stage": "warmup", "notes": "5–10s por prompt; exigir 1 frase completa. Si se atasca: simplificar, no parar." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_act_story_shifter_tense_switch_A2_v1",
+        "level": "A2",
+        "skills": ["speaking", "error_correction"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["story_shifter", "tenses", "tense_switching"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.verb_tenses_and_voice.past_continuous",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple"
+        ],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "Misma historia, 3 versiones; corregir solo 2 ‘high impact’ por ronda." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_act_roleplay_carousel_hotseat_A2_v1",
+        "level": "A2",
+        "skills": ["speaking"],
+        "interaction": ["small_group", "plenary"],
+        "tags": ["roleplay", "questions", "tenses"],
+        "grammar_ids": [
+          "grammar_paths.questions",
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple"
+        ],
+        "use_suggestion": { "best_stage": "freer_practice", "notes": "Estaciones: interviewer/witness/friend; rotación rápida. Si no grupos, hacerlo con 'hot seat'." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_act_metacognitive_trio_exit_A2_v1",
+        "level": "A2",
+        "skills": ["language_awareness"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["reflection", "noticing", "errors"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.past_simple"],
+        "use_suggestion": { "best_stage": "output", "notes": "Exit ticket: 1 cosa que mejoré + 1 error típico + 1 meta-regla." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_act_guided_microtext_checklist_A2_v1",
+        "level": "A2",
+        "skills": ["writing", "error_correction", "language_awareness"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["microtext", "checklist", "articles", "tenses"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple",
+          "grammar_paths.determiners.articles"
+        ],
+        "use_suggestion": { "best_stage": "output", "notes": "Microtexto 60–90 palabras + checklist (tiempos/artículos). 2ª versión tras auto-edición." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_act_echo_recast_pingpong_A2_v1",
+        "level": "A2",
+        "skills": ["pronunciation", "speaking", "error_correction"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["echo", "recast", "repair"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.past_simple"],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "Teacher recast → student repeats → student upgrades with 1 detail/chunk." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_act_yesno_wh_rounds_A1_v1",
+        "level": "A1",
+        "skills": ["speaking", "pronunciation", "error_correction"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["questions", "short_answers", "drill_rounds"],
+        "grammar_ids": ["grammar_paths.questions"],
+        "use_suggestion": { "best_stage": "warmup", "notes": "3 rondas: Yes/No → Wh- → eco-respuesta 5–7 palabras. Métrica: 6–8 preguntas bien formadas." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_act_signal_tense_switch_now_yesterday_A1A2_v1",
+        "level": "A2",
+        "skills": ["speaking", "error_correction"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["tense_switching", "now_yesterday", "low_theory"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.present_continuous",
+          "grammar_paths.verb_tenses_and_voice.past_simple"
+        ],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "Teacher cue NOW/YESTERDAY; el alumno cambia el tiempo con 1 frase corta. Reduce fricción: señal → output." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_act_directions_three_people_roleplay_A1_v1",
+        "level": "A1",
+        "skills": ["speaking", "listening"],
+        "interaction": ["plenary", "small_group"],
+        "tags": ["directions", "roleplay", "three_interlocutors"],
+        "grammar_ids": ["grammar_paths.questions", "grammar_paths.prepositions"],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "3 encuentros: hurried local / tourist / helpful local. Mantén 2 preguntas fijas + 1 frase de plan (So I’m going to…)." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_act_cafe_specials_choice_roleplay_A1_v1",
+        "level": "A1",
+        "skills": ["speaking", "listening"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["ordering", "choices", "polite_requests"],
+        "grammar_ids": ["grammar_paths.modality", "grammar_paths.questions"],
+        "use_suggestion": { "best_stage": "freer_practice", "notes": "Roleplay café con specials: 1× I’d like + 2 decisiones (size/hot-iced/here-to-go) + pago. Añadir 1 pregunta del alumno." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_act_broadway_in_your_mind_frames_A1_v1",
+        "level": "A1",
+        "skills": ["speaking", "pronunciation"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["imagination", "description_frames", "there_is_are"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.present_continuous",
+          "grammar_paths.verb_tenses_and_voice.there_is_are"
+        ],
+        "use_suggestion": { "best_stage": "output", "notes": "Frames visibles: I see / People are / There is/are / I’m. Transfer: day → night + 2 frases extra." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_act_record_vlog_then_rewrite_A1A2_v1",
+        "level": "A2",
+        "skills": ["speaking", "writing", "language_awareness"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["product", "vlog", "rewrite"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.present_continuous", "grammar_paths.verb_tenses_and_voice.past_simple"],
+        "use_suggestion": { "best_stage": "output", "notes": "Grabar 45–60s (3 escenas). Luego reescribir 8–10 líneas con checklist simple (auxiliares + 1 frase 3ª persona -s)." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_act_cowrite_news_share_screen_A2_v1",
+        "level": "A2",
+        "skills": ["writing", "speaking", "reading", "error_correction"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["cowriting", "screen_share", "news_event"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple"
+        ],
+        "use_suggestion": { "best_stage": "output", "notes": "Paso 1 ideas libres; paso 2 estructurar; paso 3 grammar check; paso 4 leer + Q&A." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_act_song_dialogue_translation_roleplay_A2_v1",
+        "level": "A2",
+        "skills": ["listening", "speaking", "pronunciation"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["song", "translation", "imaginary_friend_roleplay"],
+        "grammar_ids": [
+          "grammar_paths.questions",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple"
+        ],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "Elegir 6–10 líneas; traducir Qs; roleplay con ‘imaginary friend’; corregir solo word order + auxiliary." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_act_map_directions_listening_locate_A2_v1",
+        "level": "A2",
+        "skills": ["listening", "speaking"],
+        "interaction": ["individual", "plenary"],
+        "tags": ["directions", "map", "listening_task"],
+        "grammar_ids": ["grammar_paths.prepositions", "grammar_paths.questions"],
+        "use_suggestion": { "best_stage": "input", "notes": "Audio-instructions: el alumno localiza lugares en un mapa; luego produce 3 instrucciones propias." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_act_terminal_commands_replies_A1A2_v1",
+        "level": "A2",
+        "skills": ["speaking", "pronunciation"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["gamified", "commands", "system_replies"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.present_simple", "grammar_paths.verb_tenses_and_voice.be_going_to"],
+        "use_suggestion": { "best_stage": "freer_practice", "notes": "El alumno escribe/lee comandos; el profe responde como ‘OS’. Objetivo: 3–5 comandos/frases con sentido." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_act_code_line_by_line_explain_A2_v1",
+        "level": "A2",
+        "skills": ["reading", "speaking"],
+        "interaction": ["plenary", "individual"],
+        "tags": ["clil", "code_reading", "explain_in_english"],
+        "grammar_ids": ["grammar_paths.clauses", "grammar_paths.questions"],
+        "use_suggestion": { "best_stage": "controlled_practice", "notes": "Leer código con comentarios; el alumno explica meaning: It repeats / It stops / It prints." },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      }
+    ],
+
+    "materials": [
+      {
+        "id": "lib_snip_blog_post_comparatives_A2",
+        "type": "text_seed",
+        "level_hint": "A2",
+        "tags": ["comparatives"],
+        "grammar_ids": ["grammar_paths.adjectives.comparatives"],
+        "payload": {
+          "title": "Mini blog post with comparatives",
+          "text": "My new phone is faster than my old one. The screen is bigger and the battery lasts longer. It's more expensive, but it's more useful for work. The camera is better too."
+        },
+        "source": { "origin": "legacy_bank", "legacy_kind": "material", "legacy_id": "snip_blog_comp_A2" }
+      },
+      {
+        "id": "lib_snip_grid_weekend_plans_A2",
+        "type": "grid_seed",
+        "level_hint": "A2",
+        "tags": ["be_going_to", "present_continuous", "questions"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.be_going_to",
+          "grammar_paths.verb_tenses_and_voice.present_continuous",
+          "grammar_paths.questions"
+        ],
+        "payload": {
+          "columns": ["Person", "Saturday", "Sunday"],
+          "rows": [
+            ["Alex", "visit grandparents", "study"],
+            ["Sam", "go hiking", "meet friends"],
+            ["You", "__________", "__________"]
+          ],
+          "task": "Ask and answer about weekend plans using be going to / present continuous."
+        },
+        "source": { "origin": "legacy_bank", "legacy_kind": "material", "legacy_id": "grid_weekend_plans_A2" }
+      },
+      {
+        "id": "lib_snip_prompt_freq_A2",
+        "type": "prompt_set",
+        "level_hint": "A2",
+        "tags": ["adverbs", "present_simple", "questions"],
+        "grammar_ids": [
+          "grammar_paths.adverbs",
+          "grammar_paths.verb_tenses_and_voice.present_simple",
+          "grammar_paths.questions"
+        ],
+        "payload": {
+          "prompts": [
+            "How often do you… (cook / exercise / watch series)?",
+            "Do you usually…? Why / why not?",
+            "What do you never do on weekdays?"
+          ],
+          "rule": "Answer with an adverb of frequency + one reason."
+        },
+        "source": { "origin": "legacy_bank", "legacy_kind": "material", "legacy_id": "prompt_freq_A2" }
+      },
+      {
+        "id": "lib_rc_restaurant_customer_A2",
+        "type": "role_card",
+        "level_hint": "A2",
+        "tags": ["requests", "modality"],
+        "grammar_ids": ["grammar_paths.modality"],
+        "payload": {
+          "role": "Customer",
+          "goal": "Order a meal and deal with one problem",
+          "must_use": ["Could I have…?", "Can I get…?", "I'd like…"],
+          "twist": "Your drink is wrong. Politely complain."
+        },
+        "source": { "origin": "legacy_bank", "legacy_kind": "material", "legacy_id": "rc_restaurant_customer_A2" }
+      },
+      {
+        "id": "lib_snip_sentence_starters_pack_B1",
+        "type": "prompt_set",
+        "level_hint": "B1",
+        "tags": ["speaking", "adverbs", "chunks"],
+        "grammar_ids": ["grammar_paths.adverbs"],
+        "payload": {
+          "starters": [
+            "To be honest, …",
+            "The thing is, …",
+            "In my opinion, …",
+            "From my point of view, …",
+            "These days, …"
+          ],
+          "task": "Use 3 starters in your answers; keep each answer under 15 words."
+        },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_sentence_starters_pack" }
+      },
+      {
+        "id": "lib_mat_email_cancel_booking_B1",
+        "type": "worksheet_seed",
+        "level_hint": "B1",
+        "tags": ["requests", "modality", "polite_language"],
+        "grammar_ids": ["grammar_paths.modality"],
+        "payload": {
+          "title": "Cancel a booking (polite email)",
+          "structure": ["Greeting", "Reason", "Request", "Closing"],
+          "useful_phrases": [
+            "I would like to cancel…",
+            "Could you please confirm…",
+            "I apologise for…"
+          ]
+        },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_cancel_booking_email" }
+      },
+      {
+        "id": "lib_snip_travel_checkin_questions_B1",
+        "type": "prompt_set",
+        "level_hint": "B1",
+        "tags": ["questions", "travel"],
+        "grammar_ids": ["grammar_paths.questions"],
+        "payload": {
+          "prompts": [
+            "Where are you flying to today?",
+            "Do you have any bags to check in?",
+            "Could you show me your passport, please?",
+            "Do you know which terminal we need to go to for our flight?",
+            "Have you made a reservation at the hotel yet?",
+            "Do you need any help with your luggage or packing?",
+            "What sights or landmarks are you planning to visit?"
+          ]
+        },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_travel_questions" }
+      },
+      {
+        "id": "lib_mat_prepositions_core_list_B1",
+        "type": "text_seed",
+        "level_hint": "B1",
+        "tags": ["prepositions"],
+        "grammar_ids": ["grammar_paths.prepositions"],
+        "payload": {
+          "note": "Core prepositions list for rapid drills; teacher may add L1 hints.",
+          "items": ["at", "by", "for", "in", "on", "to", "with", "without", "between", "among", "through", "throughout"]
+        },
+        "source": { "origin": "captured_from_live_class", "ref": "eduardo_prepositions_list" }
+      },
+
+      {
+        "id": "lib_mat_tense_shift_cards_A2",
+        "type": "prompt_set",
+        "level_hint": "A2",
+        "tags": ["past_simple", "past_continuous", "present_perfect_simple", "tense_switching"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.verb_tenses_and_voice.past_continuous",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple"
+        ],
+        "payload": {
+          "cards": [
+            { "anchor": "Yesterday", "target_tense": "past_simple", "example": "Yesterday I missed the bus." },
+            { "anchor": "While", "target_tense": "past_continuous", "example": "While I was walking, it started raining." },
+            { "anchor": "Already / just / yet", "target_tense": "present_perfect_simple", "example": "I've already finished my homework." }
+          ],
+          "task": "Pick 1 anchor card, continue the story with 2 more sentences in the same tense."
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_mat_modals_mini_charts_A2",
+        "type": "worksheet_seed",
+        "level_hint": "A2",
+        "tags": ["modality", "requests"],
+        "grammar_ids": ["grammar_paths.modality"],
+        "payload": {
+          "charts": [
+            { "function": "request", "forms": ["Can I…?", "Could I…?", "I'd like to…"] },
+            { "function": "permission", "forms": ["Can I…?", "Is it OK if I…?"] },
+            { "function": "obligation", "forms": ["I have to…", "I need to…"] }
+          ],
+          "task": "Choose 1 function and create 4 short sentences for a roleplay."
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_mat_connector_ladders_A2",
+        "type": "prompt_set",
+        "level_hint": "A2",
+        "tags": ["clauses", "connectors"],
+        "grammar_ids": ["grammar_paths.clauses"],
+        "payload": {
+          "ladders": [
+            { "level": 1, "items": ["and", "but", "so"] },
+            { "level": 2, "items": ["because", "then", "after that"] },
+            { "level": 3, "items": ["however", "as a result", "in the end"] }
+          ],
+          "task": "Retell your story using at least 3 connectors from levels 1–2 (optional 1 from level 3)."
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_mat_microtext_checklist_tenses_articles_A2",
+        "type": "worksheet_seed",
+        "level_hint": "A2",
+        "tags": ["writing", "checklist", "articles", "past_simple", "present_perfect_simple"],
+        "grammar_ids": [
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.verb_tenses_and_voice.present_perfect_simple",
+          "grammar_paths.determiners.articles"
+        ],
+        "payload": {
+          "max_words": 90,
+          "checklist": [
+            "I used Past Simple at least twice (regular/irregular OK).",
+            "I used Present Perfect at least once (have/has + past participle).",
+            "I used at least 1 Past Continuous sentence (was/were + -ing) when needed.",
+            "I checked my articles (a/an/the/Ø) in 5 noun phrases.",
+            "My sentences are short (max ~15 words)."
+          ],
+          "task": "Write a microtext about a recent event using the checklist, then do a 2nd clean version."
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_inma_a2" }
+      },
+      {
+        "id": "lib_mat_nyc_three_scene_vlog_prompt_A1A2",
+        "type": "prompt_set",
+        "level_hint": "A1",
+        "tags": ["mission", "nyc", "vlog", "three_scenes"],
+        "grammar_ids": [
+          "grammar_paths.questions",
+          "grammar_paths.verb_tenses_and_voice.present_continuous",
+          "grammar_paths.verb_tenses_and_voice.past_simple",
+          "grammar_paths.modality"
+        ],
+        "payload": {
+          "mission_title": "You’re a travel vlogger: One day in NYC — with surprises.",
+          "scenes": [
+            { "scene": 1, "title": "Asking for directions (3 people)", "must_use": ["Excuse me…", "Is there a… near here?", "Go straight / turn left / next to"] },
+            { "scene": 2, "title": "Café with specials", "must_use": ["I’d like… please.", "Here or to go?", "I’m paying by card."] },
+            { "scene": 3, "title": "Broadway in your mind (no image)", "frames": ["I see…", "People are…", "There is/are…", "I’m…"] }
+          ],
+          "recording_task": "Record 45–60 seconds: connect the 3 scenes in one vlog."
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_mat_directions_core_chunks_A1",
+        "type": "prompt_set",
+        "level_hint": "A1",
+        "tags": ["directions", "city_places", "chunks"],
+        "grammar_ids": ["grammar_paths.prepositions", "grammar_paths.questions"],
+        "payload": {
+          "ask": ["How can I get to…?", "Can you tell me the way to…?", "Is there a … near here?"],
+          "give": ["Go straight.", "Turn left/right.", "Go past the …", "It’s next to …", "It’s opposite …", "At the traffic lights, …"],
+          "places": ["police station", "museum", "bank", "library", "bookshop", "underground station", "traffic lights", "roundabout"]
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_rc_cafe_specials_customer_A1",
+        "type": "role_card",
+        "level_hint": "A1",
+        "tags": ["ordering", "polite_requests", "cafe"],
+        "grammar_ids": ["grammar_paths.modality"],
+        "payload": {
+          "role": "Customer",
+          "goal": "Order a drink + choose 2 options + pay",
+          "must_use": ["I’d like …, please.", "Can I …?", "Here or to go?", "I’m paying by card."],
+          "specials": ["pumpkin latte", "apple pie", "hot chocolate", "iced tea"],
+          "options": ["small/medium/large", "hot/iced", "here/to go"]
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_mat_full_sentence_upgrade_bank_A1",
+        "type": "prompt_set",
+        "level_hint": "A1",
+        "tags": ["scaffolding", "full_sentences", "upgrade"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.present_simple", "grammar_paths.questions"],
+        "payload": {
+          "rule": "If your answer is 1–2 words, upgrade to 2 short sentences.",
+          "upgrades": [
+            { "short": "Fine.", "upgrade": "I’m fine, thanks. I had a good day at school." },
+            { "short": "No.", "upgrade": "No, I don’t. But sometimes I do." },
+            { "short": "Yes.", "upgrade": "Yes, I do. I like it a lot." }
+          ]
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_maria_inma_a1_2" }
+      },
+      {
+        "id": "lib_mat_silent_noticing_script_A1A2",
+        "type": "worksheet_seed",
+        "level_hint": "A2",
+        "tags": ["silent_class", "noticing", "reset"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.present_continuous"],
+        "payload": {
+          "title": "Silent Noticing Reset (15 minutes)",
+          "steps": [
+            "No normal class today: no drills, no corrections.",
+            "One minute silence: look around.",
+            "Say 3 things you noticed (any language). Convert 1–2 into English.",
+            "Finish: Today I would like to… / Today I’m going to… / Today I will not…",
+            "Close: Next class you teach me something."
+          ]
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_mat_terminal_quest_polvo42_A1A2",
+        "type": "prompt_set",
+        "level_hint": "A2",
+        "tags": ["terminal", "polvo42", "commands", "gamified"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.be_going_to", "grammar_paths.verb_tenses_and_voice.present_simple"],
+        "payload": {
+          "intro": "You are in SLEEP MODE. Escape the sleep loop using English commands.",
+          "phase_1_prompt": "Give me one good thing in the world. One only. In English.",
+          "valid_commands": ["wake up", "deactivate sleep_mode", "activate eyes", "boot system", "feed_cat", "remember", "move body", "play_soundtrack"],
+          "system_replies": ["Command accepted.", "Command not found.", "Warning: energy levels low."],
+          "unlock_sentence": "When I wake up, I’m going to…"
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_mat_code_game_loop_vocab_A2",
+        "type": "prompt_set",
+        "level_hint": "A2",
+        "tags": ["clil", "coding", "vocabulary"],
+        "grammar_ids": ["grammar_paths.questions"],
+        "payload": {
+          "keywords": ["loop", "variable", "command", "condition", "stop", "input", "output", "print"],
+          "frames": ["It repeats.", "It stops.", "It asks for…", "It prints…", "If…, then…"],
+          "teacher_note": "Use a tiny code snippet with English comments and read line-by-line."
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_mat_news_cowrite_prompt_A2",
+        "type": "worksheet_seed",
+        "level_hint": "A2",
+        "tags": ["cowriting", "news_event", "screen_share"],
+        "grammar_ids": ["grammar_paths.verb_tenses_and_voice.past_simple", "grammar_paths.verb_tenses_and_voice.present_perfect_simple"],
+        "payload": {
+          "title": "Co-write a news paragraph",
+          "steps": [
+            "Write 4–6 raw thoughts (English or Spanish).",
+            "Organize into: What happened? What changed? Why?",
+            "Grammar check: verbs + connectors.",
+            "Read aloud. Teacher asks 6 follow-up questions."
+          ]
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      },
+      {
+        "id": "lib_mat_song_dialogue_translation_template_A2",
+        "type": "worksheet_seed",
+        "level_hint": "A2",
+        "tags": ["song", "dialogue_translation", "roleplay"],
+        "grammar_ids": ["grammar_paths.questions", "grammar_paths.verb_tenses_and_voice.present_perfect_simple"],
+        "payload": {
+          "title": "Song + Dialogue Translation + Roleplay",
+          "structure": [
+            "Pick a song (30–60 seconds).",
+            "Translate 6 key questions (Spanish → English).",
+            "Roleplay with an imaginary friend using the questions.",
+            "Pronunciation: repeat 3 lines with rhythm."
+          ]
+        },
+        "source": { "origin": "captured_from_cp", "ref": "cp_guille_mercedes_a2" }
+      }
+    ],
+
+    "inbox": {
+      "uncategorized_activities": [],
+      "uncategorized_materials": [],
+
+      "capture_template_activity": {
+        "id": "lib_act_<slug>_<level>_v1",
+        "level": "<A1|A2|B1|B2|C1|C2>",
+        "skills": [],
+        "interaction": [],
+        "tags": [],
+        "grammar_ids": [],
+        "draft": true,
+        "notes": "Capturada desde una clase real; pendiente de categorizar.",
+        "source": { "origin": "captured_from_live_class", "ref": "<optional>" },
+        "use_suggestion": { "best_stage": "<warmup|input|controlled_practice|freer_practice|output>", "notes": "" }
+      },
+
+      "capture_template_material": {
+        "id": "lib_mat_<slug>_<level>_v1",
+        "type": "<text_seed|grid_seed|prompt_set|role_card|worksheet_seed>",
+        "level_hint": "<A1|A2|B1|B2|C1|C2>",
+        "tags": [],
+        "grammar_ids": [],
+        "payload": {},
+        "draft": true,
+        "notes": "Material capturado desde una clase real; pendiente de categorizar.",
+        "source": { "origin": "captured_from_live_class", "ref": "<optional>" }
+      }
+    }
+  }
+}

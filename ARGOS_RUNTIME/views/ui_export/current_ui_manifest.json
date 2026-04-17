@@ -1,0 +1,19 @@
+{
+  "updated_at": "2026-04-10T00:42:22.1182489+01:00",
+  "status": "active",
+  "feeds": [
+    {
+      "name": "captain_feed",
+      "path": "ARGOS_RUNTIME/views/ui_export/captain_feed.jsonl",
+      "schema": "ARGOS_RUNTIME/views/ui_export/captain_messages.schema.json",
+      "role": "webapp_chat_mirror",
+      "style": "verbal_non_technical",
+      "identity_field": "sender_name"
+    }
+  ],
+  "notes": [
+    "Este feed refleja ordenes del Capitan y avisos de la tripulacion.",
+    "La fuente de verdad sigue en ARGOS_RUNTIME; la UI solo lee esta vista derivada.",
+    "Las entradas nuevas deben traer sender_name cuando exista una voz identificable."
+  ]
+}

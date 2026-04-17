@@ -1,0 +1,129 @@
+{
+  "snapshot_at": "2026-04-09T19:10:00Z",
+  "source": {
+    "title": "ARGOS__shadow_log",
+    "url": "https://docs.google.com/spreadsheets/d/1zc75ryRn01eN00B-oa7N8fLbky_5qdLM2__MDht1UVc"
+  },
+  "tabs": {
+    "SHADOW_EVENTS": [
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos / SCM8",
+        "visible_trigger": "Propuesta de shadow_log y modulo Lola",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos / SCM8",
+        "visible_trigger": "Crear versiones nuevas si mover a legacy no es posible",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos / SCM8",
+        "visible_trigger": "No crear archivos por cada patch",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-08 19:51 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos / SCM8",
+        "visible_trigger": "Cada prompt+respuesta debe alterar algun log",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-09 10:41 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos / SCM8",
+        "visible_trigger": "Criterio claro entre log visible, interactions y shadow",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos / Comenio",
+        "visible_trigger": "Integrar Comenio en Argos con logs y shadow",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-09 11:54 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos",
+        "visible_trigger": "Revisar la propuesta de Antigravity",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos",
+        "visible_trigger": "El Capitan aporta la explicacion de Antonio",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos",
+        "visible_trigger": "Bajada a tierra: primero infraestructura comun",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos",
+        "visible_trigger": "Pedir pasar ya a la materializacion",
+        "status": "active"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "voice": "Codex",
+        "project": "Argos",
+        "visible_trigger": "Convertir la decision en instruccion concreta para Antigravity",
+        "status": "active"
+      }
+    ],
+    "PATTERNS": [
+      {
+        "pattern_id": "PAT-ARGOS-001",
+        "pattern": "El Capitan piensa la continuidad IA-humano como mayeutica, no como simple output.",
+        "status": "active"
+      }
+    ],
+    "ETHICS_LIMITS": [
+      {
+        "rule_id": "ETH-SHADOW-001",
+        "rule": "No registrar cadena interna literal de la IA.",
+        "status": "active"
+      },
+      {
+        "rule_id": "ETH-SHADOW-002",
+        "rule": "No diagnosticar al usuario.",
+        "status": "active"
+      },
+      {
+        "rule_id": "ETH-SHADOW-003",
+        "rule": "Separar log operativo y sombra.",
+        "status": "active"
+      }
+    ],
+    "SCHEMA_SHADOW": [
+      {
+        "tab": "SHADOW_EVENTS",
+        "column": "shadow_signal",
+        "required": "yes"
+      },
+      {
+        "tab": "GLOBAL",
+        "column": "admission_rule",
+        "required": "yes"
+      },
+      {
+        "tab": "GLOBAL",
+        "column": "promotion_guard",
+        "required": "yes"
+      }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+J:\Mi unidad\Argos\ARGOS_RUNTIME\ARGOS_GLOBAL_LOG.md, C:\Users\Widox\AppData\Local\Google\DriveFS\lost_and_found\109913477231171244432\ARGOS_GLOBAL_LOG.md
+J:\Mi unidad\Argos\ARGOS_RUNTIME\ARGOS_GLOBAL_SHADOW_LOG.md, C:\Users\Widox\AppData\Local\Google\DriveFS\lost_and_found\109913477231171244432\ARGOS_GLOBAL_SHADOW_LOG.md
+J:\Mi unidad\Argos\ARGOS_RUNTIME\ARGOS_GLOBAL_GLITCH_LOG.md, C:\Users\Widox\AppData\Local\Google\DriveFS\lost_and_found\109913477231171244432\ARGOS_GLOBAL_GLITCH_LOG.md
+J:\Mi unidad\Argos\ARGOS_RUNTIME\events\argos.events.jsonl, C:\Users\Widox\AppData\Local\Google\DriveFS\lost_and_found\109913477231171244432\argos.events.jsonl
+J:\Mi unidad\Argos\ARGOS_RUNTIME\views\ui_export\captain_feed.jsonl, C:\Users\Widox\AppData\Local\Google\DriveFS\lost_and_found\109913477231171244432\captain_feed.jsonl

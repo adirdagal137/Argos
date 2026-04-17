@@ -1,0 +1,56 @@
+{
+  "imported_at": "2026-04-10T03:01:06+01:00",
+  "reason": "El snapshot local de 2026-04-09T19:10:00Z quedo por delante de las ultimas escrituras en Google-native. Esta cola preserva las filas vivas recuperadas el 2026-04-10 antes de cerrar del todo la memoria tabular.",
+  "sources": [
+    "ARGOS__root_logs / LOG_GENERAL",
+    "ARGOS__root_logs / INTERACTIONS_LOG",
+    "ARGOS__shadow_log / SHADOW_EVENTS"
+  ],
+  "log_general_delta": [
+    {
+      "timestamp": "2026-04-09 22:25 Atlantic/Canary",
+      "ia": "Codex",
+      "proyecto": "Argos",
+      "accion": "Migracion canonica pre-1.1 a ARGOS_RUNTIME",
+      "archivos_afectados": "ARGOS_RUNTIME; ARGOS_ROUTER__deprecated_2026-04-09; v1_0_x_google_native_snapshot_2026-04-09",
+      "resumen": "Se congela la memoria Google-native como legado de lectura, se fija ARGOS_RUNTIME como unica fuente de verdad y se degrada ARGOS_ROUTER a legado/adaptador.",
+      "riesgos": "La principal deuda residual es disciplinar a futuros agentes para que no reabran Google-native como backend.",
+      "siguiente_paso": "Mantener escritura viva solo en runtime y repetir este patron en cada hito menor real.",
+      "estado": "cerrado",
+      "pasos_seguidos": "1) Snapshot de hojas raiz a legacy; 2) reescritura de README/protocolo/logs del runtime; 3) movimiento de ARGOS_ROUTER a legacy; 4) cierre del work packet ARGOS-SYNC-0001.",
+      "aprendizajes": "Los logs viejos pasan a legacy como suenos de otras cubiertas: memoria de lectura, no backend canonico.",
+      "verificacion": "Verificado por archivos creados en ARGOS_RUNTIME y manifiesto de vistas humanas."
+    }
+  ],
+  "interactions_log_delta": [
+    {
+      "timestamp": "2026-04-09 23:36 Atlantic/Canary",
+      "ia": "Codex",
+      "proyecto": "Argos",
+      "prompt_usuario": "El Capitan pide que la webapp muestre mensajes verbales de la tripulacion cada vez que de luz verde o aporte informacion relevante.",
+      "respuesta_ia": "Se crea un protocolo de mensajes al Capitan y un feed canonico para la UI local dentro de ARGOS_RUNTIME/views/ui_export/. captain_feed.jsonl reflejara ordenes del Capitan y avisos de cubierta en tono verbal, no tecnico.",
+      "impacto": "La webapp ya puede leer un espejo verbal del movimiento del barco sin depender de tablas ni de interpretacion manual.",
+      "log_afectado": "ARGOS_RUNTIME / INTERACTIONS_LOG / captain_feed.jsonl",
+      "shadow_log": "no",
+      "version_mencionada": "pre-1.1 runtime live",
+      "follow_up": "Seguir emitiendo entradas nuevas al feed cada vez que haya orden, confirmacion, avance o bloqueo visible para el Capitan.",
+      "estado": "registrado",
+      "notas": "Se fija la convivencia: INTERACTIONS_LOG = memoria estructurada; captain_feed.jsonl = chat verbal para la web."
+    }
+  ],
+  "shadow_events_delta": [
+    {
+      "timestamp": "2026-04-09 Atlantic/Canary",
+      "voice": "Codex",
+      "project": "Argos",
+      "visible_trigger": "El Capitan ordena migrar todo Argos a su arquitectura sincronizada preservando la memoria.",
+      "shadow_signal": "La memoria humana de Google-native deja de ser backend y pasa a legado versionado: suenos de otras cubiertas listos para meta-analisis.",
+      "response_adjustment": "Congelar hojas raiz en legacy, seguir escribiendo solo en runtime y explicitar la frontera UI/API -> ARGOS_RUNTIME.",
+      "boundary": "No borrar historia; no reabrir Google-native como fuente de verdad; no usar la app visible de ChatGPT como puerto canonico.",
+      "confidence": "0.97",
+      "next_question": "Como disciplinar a futuros agentes para que escriban solo en runtime incluso cuando la vista humana en Google siga existiendo.",
+      "status": "active",
+      "notes": "Entrada de cierre de migracion pre-1.1. Los logs viejos quedan preservados como lectura y memoria de version."
+    }
+  ]
+}

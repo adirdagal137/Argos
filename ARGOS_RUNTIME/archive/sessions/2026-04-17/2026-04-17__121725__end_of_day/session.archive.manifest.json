@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-04-17T11:17:29.862Z",
+  "generated_at_canary": "2026-04-17 12:17 Atlantic/Canary",
+  "mode": "end_of_day",
+  "actor": "Codex",
+  "reason": "normalizacion y limpieza de contexto",
+  "report": {
+    "compactedDoneStates": 99,
+    "archivedDonePackets": 113,
+    "archivedTranscriptFiles": 10,
+    "movedCount": 137
+  }
+}

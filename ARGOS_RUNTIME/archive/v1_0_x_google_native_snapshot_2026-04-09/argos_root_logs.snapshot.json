@@ -1,0 +1,274 @@
+{
+  "snapshot_at": "2026-04-09T19:10:00Z",
+  "source": {
+    "title": "ARGOS__root_logs",
+    "url": "https://docs.google.com/spreadsheets/d/1CiZLX2847P5hXXvhVzivxpLMFVZv4XldHymMtVATwYg"
+  },
+  "tabs": {
+    "LOG_GENERAL": [
+      {
+        "timestamp": "2026-04-07 14:30 Atlantic/Canary",
+        "ia": "ChatGPT",
+        "proyecto": "Argos / SCM8",
+        "accion": "Instanciacion de logs raiz y verificacion de saneamiento",
+        "estado": "abierto"
+      },
+      {
+        "timestamp": "2026-04-07 21:35 Atlantic/Canary",
+        "ia": "ChatGPT",
+        "proyecto": "Argos / SCM8",
+        "accion": "Canonizacion de documentos vivos y migracion de bitacora local a Sheets",
+        "estado": "abierto"
+      },
+      {
+        "timestamp": "2026-04-07 23:14 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Definicion de flujo operativo multi-IA para escritura Markdown",
+        "estado": "abierto"
+      },
+      {
+        "timestamp": "2026-04-07 23:29 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Cierre de canonizacion de plantillas planas externas",
+        "estado": "cerrado"
+      },
+      {
+        "timestamp": "2026-04-08 00:44 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Canonizacion de traza operativa obligatoria",
+        "estado": "cerrado"
+      },
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Creacion de patron de manifiestos de contenidos por disciplina",
+        "estado": "cerrado"
+      },
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Canonizacion de naming corto SCM8 y etiqueta GRAV",
+        "estado": "parcial"
+      },
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8 / Lola",
+        "accion": "Institucion de shadow_log, politica legacy y versionado 1.0.1",
+        "estado": "cerrado_logico / fisico_pendiente"
+      },
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Creacion de documentos versionados 1.0.1",
+        "estado": "cerrado_documental / fisico_pendiente"
+      },
+      {
+        "timestamp": "2026-04-08 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Revision de politica de versionado",
+        "estado": "cerrado"
+      },
+      {
+        "timestamp": "2026-04-09 10:41 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "accion": "Institucion del criterio de reparto entre LOG_GENERAL, INTERACTIONS_LOG y SHADOW_LOG",
+        "estado": "cerrado"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / Comenio",
+        "accion": "Integracion inicial de Comenio bajo Argos",
+        "estado": "abierto"
+      },
+      {
+        "timestamp": "2026-04-09 11:54 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "accion": "Review de propuesta de migracion de Antigravity",
+        "estado": "cerrado"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "accion": "Cierre de especificacion minima de ARGOS_RUNTIME como capa comun de comunicacion inter-IA",
+        "estado": "cerrado conceptual / pendiente materializacion"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "accion": "Intento de materializacion de ARGOS_RUNTIME y movimiento a legacy",
+        "estado": "bloqueado por herramienta"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "accion": "Creacion de work packet para Antigravity sobre materializacion de ARGOS_RUNTIME",
+        "estado": "cerrado documental / ejecucion pendiente"
+      }
+    ],
+    "INTERACTIONS_LOG": [
+      {
+        "timestamp": "2026-04-08 19:51 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "prompt": "Propuesta de shadow_log como ley del navio y luego por modulo, con Lola como lectora futura.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-08 19:51 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "prompt": "Correccion de politica de versionado: patchs en logs, archivos nuevos solo para 1.1, 1.2, etc.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-08 19:51 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "prompt": "Necesidad de que cada prompt+respuesta quede en algun log y propuesta de una pestana INTERACTIONS_LOG.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-08 19:51 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / Comenio (futuro)",
+        "prompt": "Aclaracion conceptual sobre shadow_log en clases particulares.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-09 10:41 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / SCM8",
+        "prompt": "Criterio para repartir entre log visible, interactions y shadow.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos / Comenio",
+        "prompt": "Repasar Comenio bajo instrucciones de ARGOS e integrarlo.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-09 11:54 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "prompt": "Revisar propuesta de migracion de Antigravity y dejar log.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "prompt": "Lectura lenta de los archivos de Antonio.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "prompt": "Cerrar infraestructura antes de producir material; Gemini no puede depender de gdocs ni gsheets.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "prompt": "Crear ya los ficheros definidos para ARGOS_RUNTIME y mover los otros a legacy.",
+        "estado": "registrado"
+      },
+      {
+        "timestamp": "2026-04-09 Atlantic/Canary",
+        "ia": "Codex",
+        "proyecto": "Argos",
+        "prompt": "Crear un fichero para informar a Antigravity de la tarea.",
+        "estado": "registrado"
+      }
+    ],
+    "PENDIENTES_GENERALES": [
+      {
+        "id": "P-001",
+        "pendiente": "Verificar y recolocar docs locales de SCM8 dentro de su carpeta",
+        "estado": "cerrado"
+      },
+      {
+        "id": "P-002",
+        "pendiente": "Definir convencion final para logs locales de futuros proyectos",
+        "estado": "aplazado"
+      },
+      {
+        "id": "P-003",
+        "pendiente": "Canonizar plantillas planas externas",
+        "estado": "cerrado"
+      },
+      {
+        "id": "P-004",
+        "pendiente": "Aplicar fisicamente versionado 1.0.1 y legacy en Argos",
+        "estado": "abierto",
+        "absorbed_by": "ARGOS-SYNC-0001"
+      }
+    ],
+    "GLITCH_LOG_GENERAL": [
+      {
+        "id_glitch": "G-001",
+        "tipo": "mezcla de niveles documentales",
+        "estado": "mitigado"
+      },
+      {
+        "id_glitch": "G-002",
+        "tipo": "confusion de capacidad del conector Drive",
+        "estado": "mitigado"
+      },
+      {
+        "id_glitch": "G-003",
+        "tipo": "lectura incorrecta de placeholders .gdoc/.gsheet",
+        "estado": "mitigado"
+      },
+      {
+        "id_glitch": "G-004",
+        "tipo": "friccion de codificacion en plantillas Markdown",
+        "estado": "mitigado"
+      },
+      {
+        "id_glitch": "G-005",
+        "tipo": "respuesta no alineada con intencion operativa",
+        "estado": "mitigado"
+      }
+    ],
+    "SCHEMA_ARGOS": [
+      {
+        "campo": "Tabs vivas",
+        "descripcion": "LOG_GENERAL / INTERACTIONS_LOG / GLITCH_LOG_GENERAL / PENDIENTES_GENERALES"
+      },
+      {
+        "campo": "traza_operativa",
+        "descripcion": "Pasos seguidos / Errores-aprendizajes / Verificacion"
+      },
+      {
+        "campo": "interactions_log",
+        "descripcion": "Prompt usuario / Respuesta IA / Impacto / Follow-up / Estado"
+      },
+      {
+        "campo": "shadow_criteria",
+        "descripcion": "Impresiones / friccion / clima / sesgos activados / intuiciones no elevadas"
+      },
+      {
+        "campo": "promotion_rule",
+        "descripcion": "No promover sombra por una sola impresion"
+      }
+    ]
+  }
+}

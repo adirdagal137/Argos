@@ -1,0 +1,36 @@
+{
+    "generated_at":  "2026-04-13T01:42:45.2360558+01:00",
+    "sources":  [
+                    "legacy/v1_0_x_google_native_snapshot_2026-04-09/argos_root_logs.snapshot.json",
+                    "legacy/v1_0_x_google_native_snapshot_2026-04-09/argos_shadow_log.snapshot.json",
+                    "legacy/v1_0_x_google_native_snapshot_2026-04-09/google_native_tail_import_2026-04-10.json",
+                    "drive:AG_log_2026-04-09.md",
+                    "drive:AG_shadow_log_2026-04-09.md",
+                    "views/logbook_export/logbook.snapshot.json",
+                    "events/argos.events.jsonl"
+                ],
+    "timestamp_policy":  {
+                             "minute":  "Se conserva cuando existe en la fuente.",
+                             "day":  "Se mantiene como precision day cuando no existe hora fiable.",
+                             "timezone":  "Atlantic/Canary para etiquetas legacy y locales."
+                         },
+    "outputs":  [
+                    "views/history_export/ARGOS_CANONICAL_HISTORY.md",
+                    "views/history_export/argos.timeline.jsonl",
+                    "ARGOS_GLOBAL_GLITCH_LOG.md",
+                    "events/argos.glitches.jsonl",
+                    "events/argos.events.jsonl",
+                    "views/logbook_export/logbook.snapshot.json"
+                ],
+    "counts":  {
+                   "timeline_entries":  800,
+                   "glitch_entries":  611,
+                   "event_entries":  102
+               },
+    "notes":  [
+                  "La capa viva (ARGOS_GLOBAL_LOG.md y ARGOS_GLOBAL_SHADOW_LOG.md) sigue siendo operativa.",
+                  "La memoria consolidada completa vive en ARGOS_CANONICAL_HISTORY.md y argos.timeline.jsonl.",
+                  "Los drafts locales de Antigravity se absorben como fuentes historicas con precision day.",
+                  "La cola final de Google-native posterior al snapshot inicial queda preservada en google_native_tail_import_2026-04-10.json."
+              ]
+}
