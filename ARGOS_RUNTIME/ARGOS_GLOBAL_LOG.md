@@ -120,3 +120,30 @@ Se implement� POST /api/remote/closure con validaci�n completa, idempotencia
 **ERRORES + APRENDIZAJES:** Se detect� fricci�n menor con herramientas de shell (rg no disponible en este entorno) y se resolvi� usando alternativas PowerShell sin bloquear la entrega.
 
 **RIESGOS:** Sin dominio propio de Cloudflare, la URL p�blica puede quedar menos estable para prompts persistentes. Mitigaci�n: configurar hostname dedicado y servicio al arranque.
+
+---
+**[2026-04-18 02:42 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Verificación estado tunnel Cloudflare + cierre de sesión
+**WORK PACKET:** ARG-CLOUDFLARE-TUNNEL-001
+
+**DETALLES:**
+Verificación completa del estado del tunnel Cloudflare y endpoints /api/tasks. Hallazgos: (1) GET/POST /api/tasks operativos. (2) POST /api/remote/closure implementado por Codex — auth token, idempotencia, mark_packet_done, confirmado por /api/health. (3) cloudflared NO está corriendo. (4) Toolkit listo en ARGOS_RUNTIME/tools/. (5) Creado work packet ARG-CLOUDFLARE-TUNNEL-001 para Antigravity con instrucciones de activación y smoke test.
+
+**SIGUIENTE:** Antigravity ejecuta ARG-CLOUDFLARE-TUNNEL-001 para activar el túnel.
+
+**RIESGOS:** Túnel no activo = agentes cloud no pueden hacer cierre remoto vía API. Fallback: inbox_deposits/ sigue operativo.
+
+---
+**[2026-04-18 02:43 Atlantic/Canary] VOZ CHATAGENT:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** N/A
+
+**DETALLES:**
+Verificación solicitada por el Capitán: estado del tunnel Cloudflare y endpoints /api/tasks en argos-api.
+
+Hallazgos:
+- GET/POST /api/tasks y variantes operativos (core de argos-api).
+- POST /api/remote/closure implementado por Codex: auth token (X-Argos-Agent-Token), idempotencia por (agent, packet_id, timestamp), mark_packet_done. Confirmado vía /api/health → remote_closure.enabled=true.
+- cloudflared.exe NO está corriendo. Puerto 8080 escucha localmente.
+- Toolkit listo: setup_cloudflared_tunnel.ps1, cloudflared_config.example.yml, start_cloudflared_hidden.vbs en ARGOS_RUNTIME/tools/.
+- Creado work packet ARG-CLOUDFLARE-TUNNEL-001 para Antigravity: activar el túnel con instrucciones y smoke test incluidos.

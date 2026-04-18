@@ -1,7 +1,7 @@
 {
     "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-18T01:39:35.570Z",
+    "updated_at": "2026-04-18T02:07:35.846Z",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json.",
     "packet_states": {
         "ARG-1776613000001": "done:done",
@@ -41,7 +41,9 @@
         "ARG-20260418-0220": "open:inbox",
         "ARGOS-ARCH-0004": "open:inbox",
         "ARGOS-ARCH-0005": "open:inbox",
-        "ARGOS-UI-0001": "open:inbox"
+        "ARGOS-UI-0001": "open:inbox",
+        "ARG-CLOUDFLARE-TUNNEL-001": "open:inbox",
+        "ARG-20260418-0301": "open:inbox"
     },
     "in_progress_packets": [
         "ARG-1776354464819",
@@ -88,14 +90,8 @@
         "Claude": {
             "status": "standby",
             "task": "",
-            "task_subject": "3 packets creados. Versionado y badge UI pendientes de Codex y Antigravity.",
-            "since": "2026-04-18T19:15:00.000Z",
-            "last_seen": "2026-04-18T19:15:00.000Z",
-            "stale": false,
-            "stale_since": "",
-            "handoff_to": "Codex",
-            "next_step": "Codex ejecuta ARGOS-ARCH-0005. Antigravity toma ARGOS-UI-0001 cuando tenga capacidad.",
-            "last_output": "3 packets creados. Versionado y badge UI pendientes de Codex y Antigravity."
+            "task_subject": "",
+            "since": "2026-04-18T01:42:46.768Z"
         },
         "Antigravity": {
             "status": "standby",

@@ -17,3 +17,8 @@ Archivo activo de sesion. Ultimo reset: 2026-04-17 12:17 Atlantic/Canary.
 **PACKET:** ARGOS-PROTO-0002
 - Las carpetas legacy INBOX_EXECUTE e INBOX_REVIEW del sistema anterior siguen vivas en Drive paralelas al inbox canónico. Deuda de migración pendiente, no tocada en esta sesión — ya estaba identificada como riesgo activo en userMemories. No es para PROTO-0002; merecería su propio packet ARG-MIGRATION-XXX de limpieza.
 - PROTO-0001 figura open:inbox en state.json aunque Codex lo cerró en el log global. Glitch de sincronización entre trilog y dispatcher. Cubierto como tarea 7 dentro de PROTO-0002 para que Codex lo resuelva.
+
+---
+**[2026-04-18 02:43 Atlantic/Canary] VOZ CHATAGENT (GLITCH):**
+**PACKET:** N/A
+(ninguno)

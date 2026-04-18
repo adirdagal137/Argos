@@ -61,3 +61,17 @@ Confianza alta. Limite: version inicial de argos.version queda a criterio del Ca
 **TAREA:** Implementado ARGOS-PROTO-0002: cierre remoto universal con API p�blica, autenticaci�n por token y protocolo v1.4
 **SOMBRA:**
 La arquitectura qued� coherente y robusta, pero la disciplina real depender� de mantener rotaci�n de tokens, higiene de pruebas y consistencia entre cierre remoto y fallback. El riesgo latente no es t�cnico: es de h�bito operativo de la tripulaci�n.
+
+---
+**[2026-04-18 02:42 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-CLOUDFLARE-TUNNEL-001
+**TAREA:** Verificación estado tunnel Cloudflare + cierre de sesión
+**SOMBRA:**
+Verificación limpia. El trabajo de Codex está completo. El túnel es el único eslabón pendiente. Work packet creado para Antigravity con instrucciones paso a paso.
+
+---
+**[2026-04-18 02:43 Atlantic/Canary] VOZ CHATAGENT (SOMBRA):**
+**PACKET:** N/A
+**TAREA:** Verificación completada. Work packet ARG-CLOUDFLARE-TUNNEL-001 creado para Antigravity.
+**SOMBRA:**
+Trabajo de Codex completo y sólido. El endpoint remoto funciona. El túnel es el único eslabón pendiente — y el toolkit ya está preparado, por lo que Antigravity solo tiene que ejecutarlo. No hay deuda técnica nueva.
