@@ -6,6 +6,7 @@
 
 # --- ESTADO OPERATIVO (cambia constantemente) ---
 ARGOS_RUNTIME/state/
+ARGOS_RUNTIME/secrets/
 ARGOS_RUNTIME/events/
 ARGOS_RUNTIME/locks/
 ARGOS_RUNTIME/views/

@@ -79,3 +79,44 @@ Sesión de diseño con el Capitán desde claude.ai (proyecto Argos, web).
 3. Capitán tomó tres decisiones vía ask_user_input: Cloudflare Tunnel (no ngrok), API primaria + Drive fallback, nombrado ARGOS-PROTO-0002 como continuidad directa del 0001.
 4. Redactado work packet ARGOS-PROTO-0002 ("Cierre Remoto Universal"), 14 KB, con: arquitectura de tres capas actualizada, endpoint POST /api/remote/closure con schema JSON completo, autenticación por token por agente, reescritura propuesta de la sección 3 del protocolo para unificar los tres caminos (local / API pública / Drive fallback), clarificación de triggers A y B, smoke test end-to-end en tres caminos, reconciliación del packet PROTO-0001 que figura open:inbox en state.json.
 5. Packet subido a work_packets/inbox/ en Drive. File ID 1TuYiv_xiyVJlTOi4agfbtoO2NXSxgWgF. UTF-8 sin BOM verificado. Pendiente de inyección de header [WORK_PACKET] por el Dispatcher en su próximo ciclo.
+
+---
+**[2026-04-18 20:15 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** sesion-arquitectura-2026-04-18
+
+**DETALLES:**
+Sesion de revision arquitectonica con el Capitan. Temas tratados:
+
+1. Lectura del analisis de ChatGPT sobre estado del sistema (PROTO-0001/0002).
+   Diagnostico correcto en hechos. ChatGPT tiene Drive configurado segun Capitan.
+   Posicion: observador informado, no agente activo aun hasta que PROTO-0002 este implementado.
+
+2. Clarificacion sobre "live" en INTER_AI_PROTOCOL v1.4: la seccion 1.6 NO es
+   la carpeta live/ (deprecada y archivada). Es el protocolo de escritura unificada.
+   Naming era ruido de transicion; el protocolo v1.4 ya esta limpio.
+
+3. ARGOS-ARCH-0004 formalizado: la webapp SI escribe en ARGOS_RUNTIME con scope
+   definido (captain_feed, edicion de packets, marcado de completados, otras interacciones).
+   Decision ya tomada por el Capitan, este packet la documenta formalmente.
+
+4. ARGOS-ARCH-0005 creado (P2, Codex): versionado global mediante fichero unico
+   ARGOS_RUNTIME/argos.version. Reglas patch/minor/major. Minor se incrementa al
+   cerrar packet TAG: protocol. Hook de git tag en cada hito.
+
+5. ARGOS-UI-0001 creado (P3, Antigravity): badge visual en dashboard para packets
+   con TAG: protocol. Minimal, solo CSS/rendering condicional, sin cambio de schema.
+
+---
+**[2026-04-18 02:33 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Implementado ARGOS-PROTO-0002: cierre remoto universal con API p�blica, autenticaci�n por token y protocolo v1.4
+**WORK PACKET:** ARG-1776474386624-573
+
+**DETALLES:**
+Se implement� POST /api/remote/closure con validaci�n completa, idempotencia y mark_packet_done; se unific� la integraci�n de dep�sitos y cierre remoto en integrateClosure(); se a�adi� bootstrap/rotaci�n de tokens de agente; se actualiz� /api/health; se instalaron y documentaron utilidades Cloudflare Tunnel; se actualiz� INTER_AI_PROTOCOL a v1.4 y ARGOS_QUICKSTART; se reconcili� ARGOS-PROTO-0001 a done; se verific� build y smoke tests de API/fallback.
+
+**SIGUIENTE:** Capit�n decide dominio p�blico (propio o quick tunnel estable) y distribuye tokens/URL en instrucciones de Claude.ai, ChatGPT y Gemini.
+
+**ERRORES + APRENDIZAJES:** Se detect� fricci�n menor con herramientas de shell (rg no disponible en este entorno) y se resolvi� usando alternativas PowerShell sin bloquear la entrega.
+
+**RIESGOS:** Sin dominio propio de Cloudflare, la URL p�blica puede quedar menos estable para prompts persistentes. Mitigaci�n: configurar hostname dedicado y servicio al arranque.

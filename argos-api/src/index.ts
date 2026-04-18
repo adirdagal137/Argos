@@ -3,6 +3,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
+import { randomBytes, timingSafeEqual } from 'crypto';
 import zoomRoutes from './routes/zoom.routes';
 import { manualDraftGlobals, manualDraftShadows, legacyGlitches, lateRuntimeGlobals, lateRuntimeShadows } from './legacy_history_data';
 
@@ -38,6 +39,9 @@ const INBOX_DEPOSITS_PROCESSED_DIR = path.join(INBOX_DEPOSITS_DIR, 'processed');
 const DESKTOP_SOURCES_CONFIG_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_sources.json');
 const DESKTOP_INGEST_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_ingest.state.json');
 const EXTERNAL_TRANSCRIPTS_DIR = path.join(TRANSCRIPTS_DIR, 'external');
+const SECRETS_DIR = path.join(RUNTIME_DIR, 'secrets');
+const AGENT_TOKENS_PATH = path.join(SECRETS_DIR, 'agent_tokens.json');
+const ARGOS_REMOTE_CLOSURES_PATH = path.join(RUNTIME_DIR, 'events', 'argos.remote_closures.jsonl');
 
 app.use(express.static(DASHBOARD_DIR));
 app.use('/api/zoom', zoomRoutes);
@@ -259,6 +263,39 @@ type ParsedChatDeposit = {
   packetId: string;
   timestampIso: string;
   statePayload: DepositStatePayload;
+};
+
+type RemoteClosureTrigger = 'task_completed' | 'session_close' | 'handoff';
+
+type RemoteClosurePayload = {
+  agent: string;
+  interface: string;
+  timestamp: string;
+  packet_id: string;
+  trigger: RemoteClosureTrigger;
+  sections: {
+    log: string;
+    shadow: string;
+    glitch: string;
+    state: {
+      status: LiveStatus;
+      summary: string;
+      handoff_to: string | null;
+      next_step: string;
+    };
+    captain: string;
+  };
+  mark_packet_done: boolean;
+};
+
+type RemoteClosureRecord = {
+  key: string;
+  closure_id: string;
+  timestamp: string;
+  agent: string;
+  packet_id: string;
+  trigger: RemoteClosureTrigger;
+  source: string;
 };
 
 type DesktopSourceDefinition = {
@@ -1528,6 +1565,229 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+function resolveRemoteAgentTokenKey(rawAgent: string): string {
+  const normalized = normaliseText(rawAgent).toLowerCase();
+  if (normalized.includes('claude') || normalized.includes('orfeo')) return 'Claude';
+  if (normalized.includes('chatgpt') || normalized.includes('codex')) return 'ChatGPT';
+  if (normalized.includes('gemini') || normalized.includes('antigravity')) return 'Gemini';
+  const fallback = normaliseText(rawAgent);
+  return fallback === '' ? 'Unknown' : fallback;
+}
+
+function buildDefaultAgentTokens(): Record<string, string> {
+  return {
+    Claude: `arg_clau_${randomBytes(24).toString('hex')}`,
+    ChatGPT: `arg_chat_${randomBytes(24).toString('hex')}`,
+    Gemini: `arg_gemi_${randomBytes(24).toString('hex')}`
+  };
+}
+
+function ensureAgentTokensFile(): Record<string, string> {
+  ensureDirSync(SECRETS_DIR);
+  const current = readJsonFile<Record<string, string>>(AGENT_TOKENS_PATH, {});
+  const defaults = buildDefaultAgentTokens();
+  const next: Record<string, string> = { ...current };
+  let changed = false;
+
+  (Object.keys(defaults) as Array<keyof typeof defaults>).forEach((agent) => {
+    const value = normaliseText(next[agent]);
+    if (value !== '') return;
+    next[agent] = defaults[agent];
+    changed = true;
+  });
+
+  if (!fs.existsSync(AGENT_TOKENS_PATH) || changed) {
+    writeJsonFileSafe(AGENT_TOKENS_PATH, next);
+  }
+
+  return next;
+}
+
+function readAgentTokens(): Record<string, string> {
+  return ensureAgentTokensFile();
+}
+
+function secureTokenEquals(expectedToken: string, providedToken: string): boolean {
+  const expected = Buffer.from(expectedToken, 'utf-8');
+  const provided = Buffer.from(providedToken, 'utf-8');
+  if (expected.length === 0 || expected.length !== provided.length) return false;
+  return timingSafeEqual(expected, provided);
+}
+
+function isLocalhostRequest(req: Request): boolean {
+  const forwardedRaw = req.headers['x-forwarded-for'];
+  const forwarded = Array.isArray(forwardedRaw)
+    ? forwardedRaw[0]
+    : String(forwardedRaw || '').split(',')[0].trim();
+  const candidates = [
+    normaliseText(req.ip),
+    normaliseText(req.socket?.remoteAddress),
+    normaliseText(forwarded)
+  ]
+    .map((value) => value.replace(/^::ffff:/, '').toLowerCase())
+    .filter(Boolean);
+
+  return candidates.some((value) => value === '127.0.0.1' || value === '::1' || value === 'localhost');
+}
+
+function parseRemoteClosurePayload(rawBody: unknown): { payload: RemoteClosurePayload | null; error: string } {
+  const body = rawBody && typeof rawBody === 'object' ? (rawBody as Record<string, unknown>) : null;
+  if (!body) return { payload: null, error: 'Body JSON requerido' };
+
+  const agent = normaliseText(body.agent);
+  const agentInterface = normaliseText(body.interface);
+  const packetId = normaliseText(body.packet_id);
+  const timestamp = normaliseText(body.timestamp);
+  const triggerRaw = normaliseText(body.trigger).toLowerCase();
+  const allowedTriggers: RemoteClosureTrigger[] = ['task_completed', 'session_close', 'handoff'];
+  if (!allowedTriggers.includes(triggerRaw as RemoteClosureTrigger)) {
+    return { payload: null, error: 'trigger invalido. Valores permitidos: task_completed, session_close, handoff' };
+  }
+  const trigger = triggerRaw as RemoteClosureTrigger;
+
+  if (agent === '') return { payload: null, error: 'agent es obligatorio' };
+  if (agentInterface === '') return { payload: null, error: 'interface es obligatorio' };
+  if (timestamp === '') return { payload: null, error: 'timestamp es obligatorio' };
+  if (packetId === '') return { payload: null, error: 'packet_id es obligatorio' };
+
+  const sectionsRaw = body.sections && typeof body.sections === 'object'
+    ? (body.sections as Record<string, unknown>)
+    : null;
+  if (!sectionsRaw) {
+    return { payload: null, error: 'sections es obligatorio y debe ser un objeto' };
+  }
+
+  const requiredKeys = ['log', 'shadow', 'glitch', 'state', 'captain'];
+  for (const key of requiredKeys) {
+    if (!Object.prototype.hasOwnProperty.call(sectionsRaw, key)) {
+      return { payload: null, error: `sections.${key} es obligatorio` };
+    }
+  }
+
+  const log = normaliseText(sectionsRaw.log);
+  const shadow = normaliseText(sectionsRaw.shadow);
+  const glitch = normaliseText(sectionsRaw.glitch);
+  const captain = normaliseText(sectionsRaw.captain);
+
+  if (log === '') return { payload: null, error: 'sections.log no puede ser vacio' };
+  if (shadow === '') return { payload: null, error: 'sections.shadow no puede ser vacio' };
+  if (captain === '') return { payload: null, error: 'sections.captain no puede ser vacio' };
+
+  const stateRaw = sectionsRaw.state && typeof sectionsRaw.state === 'object'
+    ? (sectionsRaw.state as Record<string, unknown>)
+    : null;
+  if (!stateRaw) {
+    return { payload: null, error: 'sections.state es obligatorio y debe ser un objeto' };
+  }
+
+  const statusRaw = normaliseText(stateRaw.status).toLowerCase();
+  const validStatuses: LiveStatus[] = ['idle', 'working', 'blocked', 'waiting_captain'];
+  if (!validStatuses.includes(statusRaw as LiveStatus)) {
+    return { payload: null, error: 'sections.state.status invalido. Valores permitidos: idle, working, blocked, waiting_captain' };
+  }
+  const status = statusRaw as LiveStatus;
+  const summary = normaliseText(stateRaw.summary);
+  const nextStep = normaliseText(stateRaw.next_step);
+  const handoffToRaw = stateRaw.handoff_to;
+  const handoffTo = handoffToRaw === null ? null : (normaliseText(handoffToRaw) || null);
+  if (summary === '') return { payload: null, error: 'sections.state.summary no puede ser vacio' };
+
+  return {
+    payload: {
+      agent,
+      interface: agentInterface,
+      timestamp,
+      packet_id: packetId,
+      trigger,
+      sections: {
+        log,
+        shadow,
+        glitch,
+        state: {
+          status,
+          summary,
+          handoff_to: handoffTo,
+          next_step: nextStep
+        },
+        captain
+      },
+      mark_packet_done: Boolean(body.mark_packet_done)
+    },
+    error: ''
+  };
+}
+
+function buildRemoteClosureStateSection(payload: DepositStatePayload): string {
+  return [
+    `status: ${payload.status}`,
+    `summary: ${payload.summary}`,
+    `handoff_to: ${payload.handoff_to || 'null'}`,
+    `next_step: ${payload.next_step}`,
+    `packet_id: ${payload.packet_id}`
+  ].join('\n');
+}
+
+function parseRemoteClosureToDeposit(payload: RemoteClosurePayload): ParsedChatDeposit {
+  const packetId = normaliseText(payload.packet_id);
+  const timestampIso = parseDepositTimestampIso(payload.timestamp);
+  const actorCanonical = normalizeAgentName(payload.agent) || payload.agent;
+  const statePayload: DepositStatePayload = {
+    status: payload.sections.state.status,
+    summary: payload.sections.state.summary,
+    handoff_to: payload.sections.state.handoff_to,
+    next_step: payload.sections.state.next_step,
+    packet_id: packetId
+  };
+  return {
+    filePath: '',
+    fileName: `remote_${resolveRemoteAgentTokenKey(payload.agent).toLowerCase()}_${timestampIso.replace(/[:.]/g, '-')}.md`,
+    metadata: {
+      agent: payload.agent,
+      interface: payload.interface,
+      timestamp: timestampIso,
+      packet_id: packetId,
+      trigger: payload.trigger
+    },
+    sections: {
+      LOG: payload.sections.log,
+      SHADOW: payload.sections.shadow,
+      GLITCH: payload.sections.glitch,
+      STATE: buildRemoteClosureStateSection(statePayload),
+      CAPTAIN: payload.sections.captain
+    },
+    actorRaw: payload.agent,
+    actorCanonical,
+    packetId,
+    timestampIso,
+    statePayload
+  };
+}
+
+function buildRemoteClosureKey(agent: string, packetId: string, timestampIso: string): string {
+  return `${normaliseText(agent).toLowerCase()}|${normaliseText(packetId)}|${normaliseText(timestampIso)}`;
+}
+
+function hasRemoteClosureRecord(key: string): boolean {
+  const rows = readTextFileSafe(ARGOS_REMOTE_CLOSURES_PATH)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (const line of rows) {
+    try {
+      const parsed = JSON.parse(line) as RemoteClosureRecord;
+      if (normaliseText(parsed.key) === key) return true;
+    } catch {
+      // Ignorar lineas corruptas
+    }
+  }
+  return false;
+}
+
+function appendRemoteClosureRecord(record: RemoteClosureRecord): void {
+  appendJsonlRecord(ARGOS_REMOTE_CLOSURES_PATH, record);
+}
+
 function canonicalLiveAgentName(agentId: LiveAgentId): LiveStateRecord['agent'] {
   if (agentId === 'claude') return 'Claude';
   if (agentId === 'codex') return 'Codex';
@@ -1879,11 +2139,25 @@ function updateIaStatusFromDeposit(deposit: ParsedChatDeposit): void {
   writeArgosState(state);
 }
 
-function integrateChatDeposit(deposit: ParsedChatDeposit, trigger: string): void {
+type ClosureIntegrationOptions = {
+  source: string;
+  trigger: string;
+  captainSummaryPrefix?: string;
+};
+
+type ClosureIntegrationResult = {
+  captainFeedId: string | null;
+  packetRef: string;
+  actor: string;
+};
+
+function integrateClosure(deposit: ParsedChatDeposit, options: ClosureIntegrationOptions): ClosureIntegrationResult {
   const packetRef = normaliseText(deposit.packetId);
   const actor = normalizeAgentName(deposit.actorCanonical) || deposit.actorCanonical;
   const timestampIso = deposit.timestampIso;
   const canaryLabelText = canaryTimestampLabelFromIso(timestampIso);
+  const sourceLabel = normaliseText(options.source) || 'closure_integration';
+  const triggerLabel = normaliseText(options.trigger) || 'manual';
 
   const logText = normaliseText(deposit.sections.LOG);
   if (logText !== '') {
@@ -1910,7 +2184,7 @@ function integrateChatDeposit(deposit: ParsedChatDeposit, trigger: string): void
       status: deposit.statePayload.status,
       summary: firstLine(logText) || 'Integracion de deposito chat',
       details: logText,
-      source: `deposit:${trigger}`
+      source: `${sourceLabel}:${triggerLabel}`
     });
   }
 
@@ -1941,28 +2215,30 @@ function integrateChatDeposit(deposit: ParsedChatDeposit, trigger: string): void
       '# ARGOS GLOBAL GLITCH LOG\nRegistro estructural de fallas sistemicas y fricciones tecnicas.\n',
       glitchEntry
     );
-    appendJsonlRecord(ARGOS_GLITCHES_PATH, {
-      timestamp: timestampIso,
-      actor,
-      packet_id: packetRef,
-      summary: firstLine(glitchText) || 'Glitch reportado via deposito',
-      details: glitchText,
-      source: `deposit:${trigger}`
-    });
+      appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+        timestamp: timestampIso,
+        actor,
+        packet_id: packetRef,
+        summary: firstLine(glitchText) || 'Glitch reportado via deposito',
+        details: glitchText,
+        source: `${sourceLabel}:${triggerLabel}`
+      });
   }
 
   const captainText = normaliseText(deposit.sections.CAPTAIN);
+  let captainFeedId: string | null = null;
   if (captainText !== '') {
+    captainFeedId = nextFeedMessageId();
     appendJsonlRecord(CAPTAIN_FEED_PATH, {
-      id: nextFeedMessageId(),
+      id: captainFeedId,
       timestamp: timestampIso,
       kind: 'crew_update',
       speaker: 'crew',
       sender_name: actor,
       sender_role: 'agent',
       audience: 'captain',
-      source: 'deposit_heartbeat',
-      summary: `[DEPOSITO] ${deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
+      source: sourceLabel,
+      summary: `${normaliseText(options.captainSummaryPrefix) || '[DEPOSITO]'} ${deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
       details: captainText,
       status: deposit.statePayload.status,
       tokens: 0,
@@ -1978,18 +2254,25 @@ function integrateChatDeposit(deposit: ParsedChatDeposit, trigger: string): void
     module: 'argos',
     type: 'chat_deposit_integrated',
     summary: `Deposito integrado: ${deposit.fileName}`,
-    details: `Trigger=${trigger}; packet=${packetRef || 'N/A'}; status=${deposit.statePayload.status}`,
+    details: `Trigger=${triggerLabel}; packet=${packetRef || 'N/A'}; status=${deposit.statePayload.status}`,
     packet_id: packetRef,
     refId: packetRef,
-    source: 'deposit_heartbeat'
+    source: sourceLabel
   });
   publishEvent('deposit:processed', {
     actor,
     packet_id: packetRef,
     file: deposit.fileName,
     status: deposit.statePayload.status,
-    trigger
+    trigger: triggerLabel,
+    source: sourceLabel
   });
+
+  return {
+    captainFeedId,
+    packetRef,
+    actor
+  };
 }
 
 function processSingleInboxDeposit(filePath: string, trigger: string): boolean {
@@ -2009,7 +2292,11 @@ function processSingleInboxDeposit(filePath: string, trigger: string): boolean {
     return false;
   }
 
-  integrateChatDeposit(parsed, trigger);
+  integrateClosure(parsed, {
+    source: 'deposit_heartbeat',
+    trigger,
+    captainSummaryPrefix: '[DEPOSITO]'
+  });
   const destination = path.join(INBOX_DEPOSITS_PROCESSED_DIR, path.basename(filePath));
   moveFileWithFallback(filePath, destination);
   return true;
@@ -3675,6 +3962,84 @@ function findWorkPacketById(packetId: string, zones: WorkPacketZone[] = ['inbox'
   return null;
 }
 
+function packetExistsInZone(packetId: string, zone: string): boolean {
+  const targetId = normaliseText(packetId);
+  if (targetId === '') return false;
+  const zonePath = path.join(RUNTIME_DIR, 'work_packets', zone);
+  if (!fs.existsSync(zonePath)) return false;
+  const files = fs.readdirSync(zonePath).filter((file) => file.endsWith('.md'));
+  return files.some((fileName) => {
+    const filePath = path.join(zonePath, fileName);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    if (!content.includes('[WORK_PACKET]')) return false;
+    const parsedId = getPacketField(content, 'ID') || fileName.replace(/\.md$/i, '');
+    return normaliseText(parsedId) === targetId;
+  });
+}
+
+function markWorkPacketDone(packetId: string, actor: string, timestampIso: string): { moved: boolean; reason?: string } {
+  const targetId = normaliseText(packetId);
+  if (targetId === '') return { moved: false, reason: 'packet_id vacio' };
+
+  if (packetExistsInZone(targetId, 'archived')) {
+    return { moved: false, reason: `Packet ${targetId} esta en archived/ y no se puede reabrir ni cerrar` };
+  }
+
+  const resolved = findWorkPacketById(targetId, ['inbox', 'in_progress']);
+  if (!resolved) {
+    return { moved: false, reason: `Packet ${targetId} no existe en inbox/ ni in_progress/` };
+  }
+
+  const doneDir = path.join(RUNTIME_DIR, 'work_packets', 'done');
+  ensureDirSync(doneDir);
+  const nextContent = upsertPacketField(resolved.content, 'STATUS', 'done');
+  const targetPath = path.join(doneDir, resolved.fileName);
+  fs.writeFileSync(targetPath, nextContent, 'utf-8');
+  if (resolved.filePath !== targetPath && fs.existsSync(resolved.filePath)) {
+    fs.unlinkSync(resolved.filePath);
+  }
+
+  const state = readArgosState();
+  if (!state.packet_states) state.packet_states = {};
+  state.packet_states[targetId] = 'done:done';
+  if (Array.isArray(state.open_packets)) {
+    state.open_packets = state.open_packets.filter((id: string) => id !== targetId);
+  }
+  if (Array.isArray(state.in_progress_packets)) {
+    state.in_progress_packets = state.in_progress_packets.filter((id: string) => id !== targetId);
+  }
+  writeArgosState(state);
+
+  const syncResult = runSyncState();
+  if (!syncResult.ok) {
+    console.warn('[ARGOS-API] sync_state fallo tras mark_packet_done remoto:', syncResult.stderr || syncResult.stdout);
+  }
+
+  appendJsonlRecord(ARGOS_EVENTS_PATH, {
+    timestamp: timestampIso,
+    actor: normalizeAgentName(actor) || actor,
+    module: 'argos',
+    type: 'packet_remote_done',
+    packet_id: targetId,
+    refId: targetId,
+    summary: `Packet movido a done via remote closure: ${targetId}`,
+    details: `Origen=${resolved.zone} destino=done`,
+    source: 'api:remote/closure'
+  });
+
+  publishEvent('packet:changed', {
+    packetId: targetId,
+    oldZone: resolved.zone,
+    newZone: 'done',
+    oldStatus: normalizeTaskStatus(getPacketField(resolved.content, 'STATUS'), resolved.zone === 'in_progress' ? 'in_progress' : 'open'),
+    newStatus: 'done',
+    timestamp: timestampIso,
+    source: 'api:remote/closure'
+  });
+
+  return { moved: true };
+}
+
 function parseLooseTimestampMs(rawValue: string): number {
   const trimmed = normaliseText(rawValue);
   if (trimmed === '') return 0;
@@ -4085,6 +4450,19 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'ARGOS API (Tifis) is running', runtime: RUNTIME_DIR });
 });
 
+app.get('/api/health', (_req: Request, res: Response) => {
+  const tokens = readAgentTokens();
+  res.json({
+    status: 'ok',
+    message: 'ARGOS API (Tifis) is running',
+    runtime: RUNTIME_DIR,
+    remote_closure: {
+      enabled: true,
+      configured_agents: Object.keys(tokens)
+    }
+  });
+});
+
 // ============ ENDPOINT: SSE Subscription para Pub/Sub ============
 app.get('/api/subscribe/:module', (req: Request, res: Response) => {
   const module = req.params.module || 'argos';
@@ -4100,6 +4478,144 @@ app.get('/api/state', (req: Request, res: Response) => {
   const statePath = path.join(RUNTIME_DIR, 'state', 'argos.state.json');
   const fallback = { status: 'ok', message: 'ARGOS API (Tifis) is running', runtime: RUNTIME_DIR };
   res.json(readJsonFile<Record<string, unknown>>(statePath, fallback));
+});
+
+app.post('/api/remote/closure', (req: Request, res: Response) => {
+  try {
+    const parsed = parseRemoteClosurePayload(req.body);
+    if (!parsed.payload) {
+      return res.status(400).json({ error: parsed.error });
+    }
+    const payload = parsed.payload;
+    const providedToken = normaliseText(req.header('X-Argos-Agent-Token'));
+    if (providedToken === '') {
+      return res.status(401).json({ error: 'Falta header X-Argos-Agent-Token' });
+    }
+
+    const tokens = readAgentTokens();
+    const tokenKey = resolveRemoteAgentTokenKey(payload.agent);
+    const expectedToken = normaliseText(tokens[tokenKey]);
+    if (expectedToken === '' || !secureTokenEquals(expectedToken, providedToken)) {
+      return res.status(401).json({ error: `Token invalido para agente ${tokenKey}` });
+    }
+
+    const timestampIso = parseDepositTimestampIso(payload.timestamp);
+    const closureKey = buildRemoteClosureKey(payload.agent, payload.packet_id, timestampIso);
+    if (hasRemoteClosureRecord(closureKey)) {
+      return res.status(409).json({ error: 'Cierre duplicado para (agent, packet_id, timestamp)' });
+    }
+
+    if (payload.mark_packet_done) {
+      if (packetExistsInZone(payload.packet_id, 'archived')) {
+        return res.status(422).json({ error: `Packet ${payload.packet_id} esta en archived/` });
+      }
+      const activePacket = findWorkPacketById(payload.packet_id, ['inbox', 'in_progress']);
+      if (!activePacket) {
+        return res.status(422).json({ error: `Packet ${payload.packet_id} debe existir en inbox/ o in_progress/ para mark_packet_done` });
+      }
+    }
+
+    const depositPayload = parseRemoteClosureToDeposit({ ...payload, timestamp: timestampIso });
+    const integrated = integrateClosure(depositPayload, {
+      source: 'api:remote/closure',
+      trigger: payload.trigger,
+      captainSummaryPrefix: '[CIERRE-REMOTO]'
+    });
+
+    let packetMovedTo: 'done' | 'unchanged' = 'unchanged';
+    if (payload.mark_packet_done) {
+      const moveResult = markWorkPacketDone(payload.packet_id, payload.agent, timestampIso);
+      if (!moveResult.moved) {
+        return res.status(422).json({ error: moveResult.reason || 'No se pudo mover packet a done' });
+      }
+      packetMovedTo = 'done';
+    }
+
+    const closureId = `closure_${timestampIso.replace(/[:.]/g, '-')}_${tokenKey.toLowerCase()}`;
+    appendRemoteClosureRecord({
+      key: closureKey,
+      closure_id: closureId,
+      timestamp: timestampIso,
+      agent: payload.agent,
+      packet_id: payload.packet_id,
+      trigger: payload.trigger,
+      source: 'api:remote/closure'
+    });
+
+    appendJsonlRecord(ARGOS_EVENTS_PATH, {
+      timestamp: timestampIso,
+      actor: normalizeAgentName(payload.agent) || payload.agent,
+      module: 'argos',
+      type: 'remote_closure',
+      packet_id: payload.packet_id,
+      refId: payload.packet_id,
+      status: depositPayload.statePayload.status,
+      summary: depositPayload.statePayload.summary || firstLine(payload.sections.log) || 'Remote closure integrado',
+      details: `trigger=${payload.trigger}; interface=${payload.interface}; mark_packet_done=${payload.mark_packet_done}`,
+      source: 'api:remote/closure'
+    });
+
+    publishEvent('remote:closure', {
+      closure_id: closureId,
+      agent: payload.agent,
+      packet_id: payload.packet_id,
+      trigger: payload.trigger,
+      packet_moved_to: packetMovedTo
+    });
+
+    return res.json({
+      closure_id: closureId,
+      transcriptRef: `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
+      packet_moved_to: packetMovedTo
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo integrando remote closure', detail: String(error) });
+  }
+});
+
+app.post('/api/admin/rotate-token', (req: Request, res: Response) => {
+  try {
+    if (!isLocalhostRequest(req)) {
+      return res.status(403).json({ error: 'Endpoint disponible solo en localhost' });
+    }
+
+    const rawAgent = normaliseText(req.query.agent as string) || normaliseText(req.body?.agent);
+    if (rawAgent === '') {
+      return res.status(400).json({ error: 'agent requerido (query o body)' });
+    }
+
+    const tokenKey = resolveRemoteAgentTokenKey(rawAgent);
+    const tokens = readAgentTokens();
+    if (!Object.prototype.hasOwnProperty.call(tokens, tokenKey)) {
+      return res.status(404).json({ error: `No hay token configurado para ${tokenKey}` });
+    }
+
+    let prefix = 'arg_ext_';
+    if (tokenKey === 'Claude') prefix = 'arg_clau_';
+    if (tokenKey === 'ChatGPT') prefix = 'arg_chat_';
+    if (tokenKey === 'Gemini') prefix = 'arg_gemi_';
+
+    tokens[tokenKey] = `${prefix}${randomBytes(24).toString('hex')}`;
+    writeJsonFileSafe(AGENT_TOKENS_PATH, tokens);
+
+    appendJsonlRecord(ARGOS_EVENTS_PATH, {
+      timestamp: nowIso(),
+      actor: 'Captain',
+      module: 'argos',
+      type: 'agent_token_rotated',
+      summary: `Token rotado para ${tokenKey}`,
+      details: 'Rotacion ejecutada via /api/admin/rotate-token',
+      source: 'api:admin/rotate-token'
+    });
+
+    return res.json({
+      status: 'ok',
+      agent: tokenKey,
+      token: tokens[tokenKey]
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo rotando token de agente', detail: String(error) });
+  }
 });
 
 app.post('/api/sync-state', (req: Request, res: Response) => {
@@ -6757,6 +7273,7 @@ app.listen(PORT, () => {
   backfillWorkTokensFromReportLedger(); // Recupera work tokens faltantes desde report tokens (si refId apunta a work packet)
   ensureLiveLayerBootstrap();   // bootstrap de capa live por agente
   startInboxDepositsWatcher();  // watcher + barrido inicial de inbox_deposits
+  ensureAgentTokensFile();      // bootstrap de tokens por agente para remote closure
   loadDesktopSourcesConfig(); // bootstrap config si no existe
   loadDesktopIngestState();   // bootstrap estado incremental si no existe
 

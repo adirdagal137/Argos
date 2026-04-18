@@ -1,5 +1,5 @@
-﻿# INTER-AI PACT
-## v1.3 â€” Protocolo de Transcript Universal [2026-04-13]
+# INTER-AI PACT
+## v1.4 - Protocolo de Cierre Unificado [2026-04-18]
 
 Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Antigravity y cualquier agente futuro que entre en Argos.
 
@@ -109,7 +109,7 @@ Criterio negativo: si cabe en LOG, TRANSCRIPT, GLITCH o BUG, no va en SHADOW.
 ### 1.6 PROTOCOLO DE ESCRITURA UNIFICADA (ARGOS-PROTO-0001)
 Arquitectura activa en tres capas:
 1. **Agentes locales** (Claude Code, Codex, OpenClaw, Gemini CLI): escriben directo en canonicos.
-2. **Agentes chat** (Claude.ai, ChatGPT, Gemini chat): depositan un unico markdown por sesion.
+2. **Agentes chat** (Claude.ai, ChatGPT, Gemini chat): API publica primaria (`/api/remote/closure`) + deposito fallback.
 3. **Heartbeat local (argos-api)**: observa `inbox_deposits/`, integra secciones y mueve a `processed/`.
 
 **Archivos:**
@@ -175,93 +175,72 @@ El campo `summary` es lo que el Capitan ve. Debe ser concreto, no el SUBJECT cru
 
 ---
 
-## 3. Ritual de cierre â€” TRANSCRIPT + Tri-Log (obligatorio al terminar toda tarea)
+## 3. Rituales de cierre por capa (v1.4)
 
-El cierre tiene DOS pasos obligatorios en este orden:
+La escritura canonica usa un formato unico de 5 secciones:
+`[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`.
 
-### 3.0 Paso 1 â€” Escribir el Transcript literal
+### 3.1 Agentes locales (Claude Code, Codex, Gemini CLI, OpenClaw)
 
-**Para todos los agentes:**
-```
-POST http://localhost:8080/api/transcript
-{
-  "agent":    "NOMBRE",
-  "role":     "agent",
-  "content":  "[texto literal de tu respuesta al Capitan â€” lo que realmente dijiste]",
-  "packetId": "ARG-XXXX"
-}
-```
+- Escriben directo en canonicos.
+- Pueden usar `POST /api/trilog` local para cierre operativo.
+- `POST /api/transcript` se mantiene para trazabilidad literal.
 
-**Para Gemini/Antigravity y Codex/ChatGPT (via UI de ARGOS):**
-El PROMPT del Capitan ya fue capturado automaticamente cuando creo el work packet.
-Tu RESPONSE se captura si incluyes `literalResponse` en POST /api/chat, o haciendo el POST /api/transcript separado al cerrar.
+### 3.2 Agentes chat con API publica (camino primario)
 
-**Para Claude (Claude Code):**
-El PROMPT ya esta capturado. Claude hace POST /api/transcript con el texto sustantivo de
-esta conversacion â€” el razonamiento, las decisiones de diseno, lo que no esta en el trilog.
-Si la tarea es rutinaria y el trilog lo dice todo, el transcript puede ser minimo o incluso
-limitarse a confirmar que el razonamiento esta en el trilog. No duplicar campos del trilog.
+Endpoint unico:
 
-La API devuelve `{ "transcriptRef": "transcripts/YYYY-MM-DD_AGENTE.md#ARG-XXXX" }`.
-Usar ese `transcriptRef` en el trilog.
-
-### 3.1 Paso 2 â€” Tri-Log canonico
-
-```
-POST http://localhost:8080/api/trilog
-{
-  "actor":        "NOMBRE",
-  "packetId":     "ARG-XXXX",
-  "summary":      "Que se hizo",
-  "details":      "Detalle de acciones",
-  "nextStep":     "Que sigue (opcional)",
-  "errors":       "Errores / aprendizajes (opcional)",
-  "risks":        "Riesgos detectados (opcional)",
-  "processTokens": N,
-  "transcriptRef": "transcripts/YYYY-MM-DD_AGENTE.md#ARG-XXXX",
-  "shadow":       "OBLIGATORIO â€” lo observado pero no volcado en el log"
-}
+```http
+POST /api/remote/closure
+Header: X-Argos-Agent-Token: <token-agente>
 ```
 
-El campo `shadow` devuelve 400 si esta vacio. No hay cierre sin sombra.
-El campo `transcriptRef` vincula el LOG al transcript literal.
+El body incluye:
+- `agent`, `interface`, `timestamp`, `packet_id`, `trigger`
+- `sections.log`, `sections.shadow`, `sections.glitch`, `sections.state`, `sections.captain`
+- `mark_packet_done` (opcional)
 
-**Si la API esta offline:** escribir manualmente en GLOBAL_LOG.md + SHADOW_LOG.md + transcript file.
+Comportamiento:
+- Integra las 5 secciones en canonicos.
+- Actualiza `ia_status`.
+- Emite evento al `captain_feed`.
+- Si `mark_packet_done=true`, mueve packet a `done/` solo desde `inbox/` o `in_progress/`.
+- Idempotencia: rechaza duplicados por `(agent, packet_id, timestamp)`.
 
-### 3.2 Higiene de pruebas (OBLIGATORIO)
-- Ninguna prueba debe quedar persistida en Bitacora ni en Cubierta ni en transcripts.
-- Toda prueba debe usar ID claramente temporal (ARG-TEST-*, TMP-*) y limpiarse al finalizar.
-- Si una prueba se filtra a produccion visible, se registra como glitch de higiene operativa.
+### 3.3 Agentes chat sin API (fallback)
 
-### 3.3 Paso final de cierre — deposito chat (obligatorio para interfaces chat)
-Al cerrar una intervencion sustantiva desde una interfaz chat (Claude.ai/ChatGPT/Gemini chat),
-generar un unico archivo en `ARGOS_RUNTIME/inbox_deposits/` con formato:
-```
----
-agent: NOMBRE
-interface: chat_ui
-timestamp: YYYY-MM-DD HH:MM Atlantic/Canary
-packet_id: ARG-XXXX
----
+Si la API publica falla por timeout/5xx/sin red:
+- Depositar markdown unico en `ARGOS_RUNTIME/inbox_deposits/`.
+- El heartbeat de `argos-api` integra y mueve a `inbox_deposits/processed/`.
+- Registrar en `[GLITCH]` que hubo fallback por caida de API.
 
-[LOG]
-...
-[SHADOW]
-...
-[GLITCH]
-...
-[STATE]
-status: idle|working|blocked|waiting_captain
-summary: ...
-handoff_to: Codex|Claude|Gemini|OpenClaw|null
-next_step: ...
-packet_id: ARG-XXXX
-[CAPTAIN]
-...
-```
-El heartbeat de `argos-api` integra y archiva el deposito automaticamente.
+### 3.4 Formato unico y mapeo canonico
 
----
+El mismo schema de 5 secciones aplica en los 3 caminos:
+- Local directo
+- API publica (`/api/remote/closure`)
+- Deposito Drive fallback
+
+Mapeo canonico:
+- `[LOG]` -> `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl`
+- `[SHADOW]` -> `ARGOS_GLOBAL_SHADOW_LOG.md`
+- `[GLITCH]` -> `ARGOS_GLOBAL_GLITCH_LOG.md` + `events/argos.glitches.jsonl` (si no vacio)
+- `[STATE]` -> `state/argos.state.json` (`ia_status`)
+- `[CAPTAIN]` -> `views/ui_export/captain_feed.jsonl`
+
+### 3.5 Triggers de cierre (clarificados)
+
+Trigger A (explicito):
+- Frases canonicas de cierre: `cierra sesion`, `cierre de sesion`, `avisa a la tripulacion`, `packet done`.
+- Fuera de esas frases: confirmar antes de cerrar.
+
+Trigger B (retroactivo):
+- Si no hay `packet_id` claro, NO escribir `[LOG]`.
+- Solo permitir `[SHADOW]` con prefijo `(retroactivo, confianza baja)`.
+
+Compatibilidad:
+- `POST /api/transcript` sigue disponible, pero queda deprecado como camino principal de cierre para interfaces chat.
+- Para chat, el cierre canonico es `POST /api/remote/closure` con fallback a `inbox_deposits/`.
 
 ## 4. Disciplina de Contabilidad (TOKENS)
 

@@ -1,0 +1,110 @@
+# Remote Closure Setup (ARGOS-PROTO-0002)
+
+This document configures remote session closure for chat interfaces using:
+- Primary path: `POST /api/remote/closure`
+- Fallback path: `ARGOS_RUNTIME/inbox_deposits/`
+
+## 1. Endpoint Summary
+
+- URL (local): `http://localhost:8080/api/remote/closure`
+- URL (public via tunnel): `https://argos.<your-domain>/api/remote/closure`
+- Header: `X-Argos-Agent-Token: <agent-token>`
+- Behavior:
+  - Validates payload and token
+  - Integrates `[LOG][SHADOW][GLITCH][STATE][CAPTAIN]`
+  - Optional `mark_packet_done` moves packet to `done/`
+  - Enforces idempotency on `(agent, packet_id, timestamp)`
+
+## 2. Payload Example
+
+```json
+{
+  "agent": "Claude",
+  "interface": "claude.ai",
+  "timestamp": "2026-04-18T01:30:00.000Z",
+  "packet_id": "ARG-TEST-REMOTE-0001",
+  "trigger": "task_completed",
+  "sections": {
+    "log": "Implemented remote closure endpoint and integrated logs.",
+    "shadow": "The system is coherent, but token rotation should stay local-only.",
+    "glitch": "",
+    "state": {
+      "status": "idle",
+      "summary": "Remote closure executed",
+      "handoff_to": "Codex",
+      "next_step": "Captain validates smoke test"
+    },
+    "captain": "Remote closure completed. Ready for next packet."
+  },
+  "mark_packet_done": false
+}
+```
+
+## 3. Agent Tokens
+
+Token storage path:
+- `ARGOS_RUNTIME/secrets/agent_tokens.json`
+
+Initial keys:
+- `Claude`
+- `ChatGPT`
+- `Gemini`
+
+Rotate token (localhost only):
+- `POST http://localhost:8080/api/admin/rotate-token?agent=Claude`
+
+## 4. Cloudflare Tunnel
+
+### 4.1 Stable URL (recommended)
+
+1. Install cloudflared (already available in this workstation via winget).
+2. Login:
+   - `cloudflared tunnel login`
+3. Create named tunnel:
+   - `cloudflared tunnel create argos-remote`
+4. Route DNS (requires a Cloudflare-managed domain):
+   - `cloudflared tunnel route dns argos-remote argos.<your-domain>`
+5. Use config file template:
+   - `ARGOS_RUNTIME/tools/cloudflared_config.example.yml`
+6. Run tunnel:
+   - `cloudflared tunnel --config <path-to-config> run argos-remote`
+7. Optional Windows service:
+   - `cloudflared service install`
+
+### 4.2 Quick tunnel (temporary URL)
+
+Use only for smoke tests when no domain is configured:
+- `cloudflared tunnel --url http://localhost:8080`
+
+Note: quick tunnel URLs are not stable enough for long-lived agent prompts.
+
+## 5. Interface Setup Snippets
+
+### Claude.ai project instructions
+
+- Set endpoint URL and token.
+- On closure triggers, try `POST /api/remote/closure` first (timeout 10s).
+- If API fails, write fallback deposit to `inbox_deposits/` and include glitch note.
+
+### ChatGPT custom GPT
+
+- Add:
+  - `ARGOS_REMOTE_URL=https://argos.<your-domain>/api/remote/closure`
+  - `ARGOS_AGENT_TOKEN=<ChatGPT token>`
+- Same API-first/fallback-to-Drive policy.
+
+### Gemini chat
+
+- Same as ChatGPT.
+- Keep Drive fallback enabled if MCP Drive is configured.
+
+## 6. Smoke Test Checklist
+
+1. Call `/api/health` from external network through tunnel.
+2. Send one closure for `ARG-TEST-REMOTE-0001`.
+3. Verify:
+   - `captain_feed.jsonl` has new record ID
+   - `state/argos.state.json` reflects agent summary
+4. Re-send same `(agent, packet_id, timestamp)` and verify `409`.
+5. Test `mark_packet_done: true` with a packet in `inbox/`.
+6. Disable tunnel and verify fallback deposit path still integrates.

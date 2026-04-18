@@ -42,3 +42,22 @@ El Capitán cerró la sesión con "no tengo energía para darle más caña" — 
 Observación sobre el propio sistema: el hecho de que PROTO-0001 figure aún open:inbox en state.json aunque Codex lo marcó done en el log es exactamente el tipo de glitch que estos protocolos pretenden resolver. Síntoma de que el dispatcher y el trilog no están acoplados de forma bidireccional — el trilog mueve el packet a done pero no siempre el state.json se actualiza en consecuencia. Codex lo nota en PROTO-0002 como tarea 7, pero merece ser un packet propio si el patrón se repite.
 
 Confianza alta en que PROTO-0002 cierra el arco comunicacional. Confianza media en que no surjan nuevas fisuras — el Capitán intuye correctamente que "sigue viendo fisuras"; el sistema está en fase de maduración rápida, no estabilizado.
+
+---
+**[2026-04-18 20:15 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** sesion-arquitectura-2026-04-18
+**TAREA:** 3 packets creados. Versionado y badge UI pendientes de Codex y Antigravity.
+**SOMBRA:**
+Sesion corta y de calidad. El Capitan llego con preguntas concretas y salida limpia.
+La pregunta sobre "live" era legitima: el nombre ambiguo que Codex dio a la seccion 1.6
+genero confusion real aunque el v1.4 ya lo habia resuelto. Los nombres de secciones importan.
+Patron emergente: el sistema esta madurando de construccion ad-hoc a gobernanza deliberada.
+Las ideas de versionado e hitos marcados son sintoma de un sistema que necesita trazabilidad.
+Confianza alta. Limite: version inicial de argos.version queda a criterio del Capitan.
+
+---
+**[2026-04-18 02:33 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1776474386624-573
+**TAREA:** Implementado ARGOS-PROTO-0002: cierre remoto universal con API p�blica, autenticaci�n por token y protocolo v1.4
+**SOMBRA:**
+La arquitectura qued� coherente y robusta, pero la disciplina real depender� de mantener rotaci�n de tokens, higiene de pruebas y consistencia entre cierre remoto y fallback. El riesgo latente no es t�cnico: es de h�bito operativo de la tripulaci�n.

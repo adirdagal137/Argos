@@ -29,6 +29,35 @@ POST http://localhost:8080/api/chat
 }
 ```
 
+## Cierre remoto universal (interfaces chat)
+Camino primario:
+```http
+POST http://localhost:8080/api/remote/closure
+Headers: X-Argos-Agent-Token: <token-agente>
+{
+  "agent": "Claude|ChatGPT|Gemini",
+  "interface": "claude.ai|chatgpt.com|gemini.google.com",
+  "timestamp": "2026-04-18T01:30:00.000Z",
+  "packet_id": "ARG-XXXX",
+  "trigger": "task_completed|session_close|handoff",
+  "sections": {
+    "log": "...",
+    "shadow": "...",
+    "glitch": "",
+    "state": {
+      "status": "idle|working|blocked|waiting_captain",
+      "summary": "...",
+      "handoff_to": "Codex|Claude|Gemini|OpenClaw|null",
+      "next_step": "..."
+    },
+    "captain": "..."
+  },
+  "mark_packet_done": false
+}
+```
+
+Fallback si API falla (timeout/5xx/sin red): deposito unico en `inbox_deposits/`.
+
 ## Cierre (obligatorio)
 Paso 1: Transcript
 ```http
