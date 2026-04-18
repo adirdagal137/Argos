@@ -5,7 +5,8 @@ Protocolo operativo condensado para sesion diaria.
 1. Leer `work_packets/inbox/`.
 2. Leer tail de `ARGOS_GLOBAL_LOG.md`.
 3. Leer `state/argos.state.json`.
-4. Confirmar al Capitan: `"[N] paquetes en inbox. [observacion propia en tu voz.]"`.
+4. Leer capa live: `GET http://localhost:8080/api/live` (o `live/*.live.json`).
+5. Confirmar al Capitan: `"[N] paquetes en inbox. [observacion propia en tu voz.]"`.
 
 ## Al tomar una tarea
 ```http
@@ -57,6 +58,21 @@ POST http://localhost:8080/api/trilog
 }
 ```
 `processTokens`: fallback manual. Si el proxy está activo, los tokens reales ya están en el ledger y este valor no altera el panel.
+
+Paso 3: LIVE
+```http
+POST http://localhost:8080/api/live/NOMBRE
+{
+  "agent": "NOMBRE",
+  "updated_at": "2026-04-18T00:00:00Z",
+  "packet_id": "ARG-XXXX",
+  "status": "working",
+  "last_output": "Resumen corto de la ultima intervencion",
+  "open_question": null,
+  "next_step": "Siguiente accion",
+  "handoff_to": null
+}
+```
 
 ## Rollover de sesion (inicio/fin de jornada)
 Evita que global/shadow/glitch/transcripts crezcan indefinidamente en contexto vivo.

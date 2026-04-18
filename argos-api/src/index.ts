@@ -29,6 +29,8 @@ const ANTIGRAVITY_PROTO_PACKET_NAME = 'ARG-PROTO-AG-001__ANTIGRAVITY_RITUAL_DE_C
 const ANTIGRAVITY_PROTO_PACKET_PATH = path.join(RUNTIME_DIR, 'work_packets', 'inbox', ANTIGRAVITY_PROTO_PACKET_NAME);
 const PENDING_ACTIONS_PATH = path.join(RUNTIME_DIR, 'locks', 'pending_actions.jsonl');
 const TRANSCRIPTS_DIR = path.join(RUNTIME_DIR, 'transcripts');
+const LIVE_DIR = path.join(RUNTIME_DIR, 'live');
+const LIVE_SCHEMA_PATH = path.join(LIVE_DIR, '_schema.json');
 const DESKTOP_SOURCES_CONFIG_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_sources.json');
 const DESKTOP_INGEST_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_ingest.state.json');
 const EXTERNAL_TRANSCRIPTS_DIR = path.join(TRANSCRIPTS_DIR, 'external');
@@ -215,6 +217,21 @@ type TokenStats = {
   weekly: number;
   agents: Record<string, { total: number; daily: number; weekly: number }>;
   costEstimate: number;
+};
+
+type LiveStatus = 'idle' | 'working' | 'blocked' | 'waiting_captain';
+
+type LiveAgentId = 'claude' | 'codex' | 'gemini' | 'openclaw';
+
+type LiveStateRecord = {
+  agent: 'Claude' | 'Codex' | 'Gemini' | 'OpenClaw';
+  updated_at: string;
+  packet_id: string | null;
+  status: LiveStatus;
+  last_output: string;
+  open_question: string | null;
+  next_step: string | null;
+  handoff_to: 'Claude' | 'Codex' | 'Gemini' | 'OpenClaw' | null;
 };
 
 type DesktopSourceDefinition = {
@@ -1467,6 +1484,120 @@ function writeJsonFileSafe(filePath: string, payload: unknown): void {
 
 function nowIso(): string {
   return new Date().toISOString();
+}
+
+function canonicalLiveAgentName(agentId: LiveAgentId): LiveStateRecord['agent'] {
+  if (agentId === 'claude') return 'Claude';
+  if (agentId === 'codex') return 'Codex';
+  if (agentId === 'gemini') return 'Gemini';
+  return 'OpenClaw';
+}
+
+function normalizeLiveAgentId(raw: unknown): LiveAgentId | null {
+  const value = normaliseText(raw).toLowerCase();
+  if (value === 'claude' || value === 'orfeo') return 'claude';
+  if (value === 'codex' || value === 'chatgpt') return 'codex';
+  if (value === 'gemini' || value === 'antigravity' || value === 'ag') return 'gemini';
+  if (value === 'openclaw' || value === 'qwen') return 'openclaw';
+  return null;
+}
+
+function liveAgentFilePath(agentId: LiveAgentId): string {
+  return path.join(LIVE_DIR, `${agentId}.live.json`);
+}
+
+function normalizeLiveStatus(raw: unknown): LiveStatus {
+  const value = normaliseText(raw).toLowerCase();
+  if (value === 'working') return 'working';
+  if (value === 'blocked') return 'blocked';
+  if (value === 'waiting_captain') return 'waiting_captain';
+  return 'idle';
+}
+
+function defaultLiveState(agentId: LiveAgentId): LiveStateRecord {
+  return {
+    agent: canonicalLiveAgentName(agentId),
+    updated_at: nowIso(),
+    packet_id: null,
+    status: 'idle',
+    last_output: 'Sin actualizacion aun.',
+    open_question: null,
+    next_step: null,
+    handoff_to: null
+  };
+}
+
+function sanitizeLiveState(agentId: LiveAgentId, input: unknown): LiveStateRecord {
+  const fallback = defaultLiveState(agentId);
+  if (!input || typeof input !== 'object') return fallback;
+  const obj = input as Record<string, unknown>;
+  const canonicalAgent = canonicalLiveAgentName(agentId);
+  const parsedDate = Date.parse(normaliseText(obj.updated_at));
+
+  const handoffRaw = normaliseText(obj.handoff_to);
+  const handoffId = normalizeLiveAgentId(handoffRaw);
+
+  return {
+    agent: canonicalAgent,
+    updated_at: Number.isNaN(parsedDate) ? nowIso() : new Date(parsedDate).toISOString(),
+    packet_id: normaliseText(obj.packet_id) || null,
+    status: normalizeLiveStatus(obj.status),
+    last_output: normaliseText(obj.last_output) || 'Sin actualizacion aun.',
+    open_question: normaliseText(obj.open_question) || null,
+    next_step: normaliseText(obj.next_step) || null,
+    handoff_to: handoffId ? canonicalLiveAgentName(handoffId) : null
+  };
+}
+
+function isLiveStateStale(updatedAt: string, staleHours = 24): boolean {
+  const ts = Date.parse(updatedAt);
+  if (Number.isNaN(ts)) return true;
+  return (Date.now() - ts) > (staleHours * 60 * 60 * 1000);
+}
+
+function liveSchemaTemplate(): Record<string, unknown> {
+  return {
+    $schema: 'argos-live-v1',
+    fields: {
+      agent: 'string - nombre canonico del agente (Claude, Codex, Gemini, OpenClaw)',
+      updated_at: 'ISO 8601 timestamp',
+      packet_id: 'string | null - work packet activo en este momento',
+      status: 'idle | working | blocked | waiting_captain',
+      last_output: 'string - resumen de 1-3 lineas de lo ultimo que hizo/dijo',
+      open_question: 'string | null - pregunta abierta para Capitan u otra IA',
+      next_step: 'string | null - que planea hacer a continuacion',
+      handoff_to: 'string | null - agente al que deja relevo'
+    }
+  };
+}
+
+function ensureLiveLayerBootstrap(): void {
+  ensureDirSync(LIVE_DIR);
+  if (!fs.existsSync(LIVE_SCHEMA_PATH)) {
+    writeJsonFileSafe(LIVE_SCHEMA_PATH, liveSchemaTemplate());
+  }
+
+  const liveAgents: LiveAgentId[] = ['claude', 'codex', 'gemini', 'openclaw'];
+  liveAgents.forEach((agentId) => {
+    const filePath = liveAgentFilePath(agentId);
+    if (!fs.existsSync(filePath)) {
+      writeJsonFileSafe(filePath, defaultLiveState(agentId));
+    }
+  });
+}
+
+function readLiveState(agentId: LiveAgentId): LiveStateRecord {
+  const filePath = liveAgentFilePath(agentId);
+  if (!fs.existsSync(filePath)) return defaultLiveState(agentId);
+  const parsed = readJsonFile<Record<string, unknown>>(filePath, defaultLiveState(agentId));
+  return sanitizeLiveState(agentId, parsed);
+}
+
+function writeLiveState(agentId: LiveAgentId, payload: unknown): LiveStateRecord {
+  ensureLiveLayerBootstrap();
+  const sanitized = sanitizeLiveState(agentId, payload);
+  writeJsonFileSafe(liveAgentFilePath(agentId), sanitized);
+  return sanitized;
 }
 
 function simpleHash(raw: string): string {
@@ -5625,6 +5756,90 @@ app.get('/api/desktop-import/file-content', (req: Request, res: Response) => {
 // Gateway: OpenClaw (localhost:18789) — capacidades de automatización
 // ============================================================
 
+// ============================================================
+// LIVE LAYER - Estado operativo en vivo por agente
+// ============================================================
+
+app.get('/api/live', (_req: Request, res: Response) => {
+  try {
+    ensureLiveLayerBootstrap();
+    const agents: LiveAgentId[] = ['claude', 'codex', 'gemini', 'openclaw'];
+    const records = agents.map((agentId) => {
+      const state = readLiveState(agentId);
+      const updatedMs = Date.parse(state.updated_at);
+      const ageMinutes = Number.isNaN(updatedMs) ? null : Math.max(0, Math.floor((Date.now() - updatedMs) / 60000));
+      return {
+        id: agentId,
+        file: `${agentId}.live.json`,
+        stale: isLiveStateStale(state.updated_at, 24),
+        age_minutes: ageMinutes,
+        ...state
+      };
+    });
+    return res.json({
+      status: 'ok',
+      schema: '_schema.json',
+      records
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo leyendo capa live', detail: String(error) });
+  }
+});
+
+app.get('/api/live/:agent', (req: Request, res: Response) => {
+  try {
+    ensureLiveLayerBootstrap();
+    const agentId = normalizeLiveAgentId(req.params.agent);
+    if (!agentId) {
+      return res.status(404).json({ error: `Agente live no soportado: ${req.params.agent}` });
+    }
+    const state = readLiveState(agentId);
+    const updatedMs = Date.parse(state.updated_at);
+    const ageMinutes = Number.isNaN(updatedMs) ? null : Math.max(0, Math.floor((Date.now() - updatedMs) / 60000));
+    return res.json({
+      status: 'ok',
+      id: agentId,
+      file: `${agentId}.live.json`,
+      stale: isLiveStateStale(state.updated_at, 24),
+      age_minutes: ageMinutes,
+      record: state
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo leyendo agente live', detail: String(error) });
+  }
+});
+
+app.post('/api/live/:agent', (req: Request, res: Response) => {
+  try {
+    ensureLiveLayerBootstrap();
+    const agentId = normalizeLiveAgentId(req.params.agent);
+    if (!agentId) {
+      return res.status(404).json({ error: `Agente live no soportado: ${req.params.agent}` });
+    }
+
+    const body = req.body as Record<string, unknown>;
+    const bodyAgent = normalizeLiveAgentId(body?.agent);
+    const bodyUpdatedAt = normaliseText(body?.updated_at);
+    if (!bodyAgent || bodyUpdatedAt === '') {
+      return res.status(400).json({ error: 'Campos obligatorios: agent y updated_at' });
+    }
+    if (bodyAgent !== agentId) {
+      return res.status(400).json({ error: 'El agent del body debe coincidir con el agente de la ruta' });
+    }
+
+    const saved = writeLiveState(agentId, body);
+    publishEvent('live:updated', {
+      agent: saved.agent,
+      status: saved.status,
+      packet_id: saved.packet_id,
+      updated_at: saved.updated_at
+    });
+    return res.json({ status: 'ok', id: agentId, record: saved });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo escribiendo estado live', detail: String(error) });
+  }
+});
+
 const OPENCLAW_BASE = 'http://localhost:18789';
 const OPENCLAW_TOKEN = 'e533092640655ba1aa91e7b282be108fd08f2ac24467862e';
 const QWEN_MODEL = 'qwen3:8b'; // Mismo modelo que DeepSeek — Ollama directo
@@ -6012,6 +6227,7 @@ app.listen(PORT, () => {
   console.log(`[ARGOS-API] Navio anclado y escuchando pacificamente en puerto http://localhost:${PORT}`);
   backfillWorkTokensFromFeed(); // Recupera historial de work tokens desde captain_feed
   backfillWorkTokensFromReportLedger(); // Recupera work tokens faltantes desde report tokens (si refId apunta a work packet)
+  ensureLiveLayerBootstrap();   // bootstrap de capa live por agente
   loadDesktopSourcesConfig(); // bootstrap config si no existe
   loadDesktopIngestState();   // bootstrap estado incremental si no existe
 

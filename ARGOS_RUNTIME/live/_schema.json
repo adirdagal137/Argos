@@ -1,0 +1,13 @@
+{
+  "$schema": "argos-live-v1",
+  "fields": {
+    "agent": "string - canonical agent name (Claude, Codex, Gemini, OpenClaw)",
+    "updated_at": "ISO 8601 timestamp",
+    "packet_id": "string | null - active work packet",
+    "status": "idle | working | blocked | waiting_captain",
+    "last_output": "string - concise 1-3 line status",
+    "open_question": "string | null - open question for Captain or another agent",
+    "next_step": "string | null - immediate next action",
+    "handoff_to": "string | null - agent receiving handoff"
+  }
+}

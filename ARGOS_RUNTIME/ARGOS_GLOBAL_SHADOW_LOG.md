@@ -17,3 +17,10 @@ El servidor tenía un mecanismo de persistencia no documentado (NSSM o similar) 
 **TAREA:** Implementacion de lectura externa de transcripts/tokens para apps desktop y scheduler operativo
 **SOMBRA:**
 Riesgo operativo principal: heterogeneidad de formatos de cada app. Se resolvio con parser generico y dedupe incremental, pero conviene anadir adaptadores especificos por app cuando se tenga muestra real de archivos para evitar falsos negativos en extraccion de tokens.
+
+---
+**[2026-04-18 00:18 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1776467399391-231
+**TAREA:** Implementada capa LIVE para coordinaci�n en tiempo real entre agentes
+**SOMBRA:**
+La capa live reduce fricci�n inmediata, pero puede volverse un mini-transcript si no se mantiene disciplina de brevedad. La regla clave es mantener last_output corto y no duplicar trilog/transcript.

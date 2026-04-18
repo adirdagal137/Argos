@@ -12,6 +12,7 @@
 - `ARGOS_GLOBAL_GLITCH_LOG.md`: glitches activos de pipeline.
 - `events/`: JSONL activo (`argos.events.jsonl`, `argos.glitches.jsonl`, `argos.tokens.jsonl`).
 - `transcripts/`: transcripts activos (sesion actual).
+- `live/`: estado operativo en vivo por agente (`*.live.json`) para handoff rapido sin transcripts completos.
 - `state/argos.state.json`: solo packets activos.
 - `work_packets/inbox|in_progress|done|archived|trash`: handoff canonico.
 - `views/`: vistas de UI/exportes de apoyo (no backend principal).

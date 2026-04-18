@@ -1,7 +1,7 @@
 {
     "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-17T20:57:16.459Z",
+    "updated_at": "2026-04-18T00:23:32.218Z",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json.",
     "packet_states": {
         "ARG-1776613000001": "done:done",
@@ -32,23 +32,25 @@
         "ARG-1776354464819": "in_progress:in_progress",
         "ARG-1776354624541": "open:inbox",
         "LOLA-RISK-1776424632454": "open:inbox",
-        "ARG-1776426457123": "open:inbox"
+        "ARG-1776426457123": "open:inbox",
+        "ARG-1776467399391-231": "in_progress:in_progress",
+        "ARG-1776470810747": "open:inbox"
     },
     "in_progress_packets": [
-        "ARG-1776354464819"
+        "ARG-1776354464819",
+        "ARG-1776467399391-231"
     ],
     "owner_hint": "Codex / Antigravity / Capitan",
     "open_packets": [
         "ARG-1775914491058",
         "ARG-1775915097259",
-        "ARG-1775915331853",
         "ARG-1775943270801",
         "ARG-1775943565720",
-        "ARG-1775948347775",
         "ARG-1775948530124",
         "ARG-1776039352566",
         "ARG-1776354624541",
         "ARG-1776426457123",
+        "ARG-1776470810747",
         "ARG-1776613003000",
         "ARG-1776613004000",
         "ARG-1776613005000",
@@ -91,7 +93,7 @@
             "status": "standby",
             "task": "",
             "task_subject": "",
-            "since": "2026-04-17T19:24:34.790Z"
+            "since": "2026-04-17T23:18:49.025Z"
         },
         "DeepSeek": {
             "status": "standby",

@@ -1,0 +1,10 @@
+{
+  "agent": "Claude",
+  "updated_at": "2026-04-17T23:55:00Z",
+  "packet_id": "ARGOS-LIVE-0001",
+  "status": "waiting_captain",
+  "last_output": "Propuesta de capa live disenada y documentada. Work packet ARGOS-LIVE-0001 creado. Recomendacion: usar capa live para reducir dependencia de transcripts completos.",
+  "open_question": null,
+  "next_step": "Esperar implementacion de API /api/live y adopcion de protocolo por el resto de agentes.",
+  "handoff_to": "Codex"
+}

@@ -106,6 +106,21 @@ Criterio negativo: si cabe en LOG, TRANSCRIPT, GLITCH o BUG, no va en SHADOW.
 **Archivo:**
 - ARGOS_GLOBAL_SHADOW_LOG.md (formato **[YYYY-MM-DD HH:MM Atlantic/Canary] VOZ NOMBRE:**)
 
+### 1.6 LIVE — Estado en tiempo real entre agentes
+**Que va aqui:** El estado operativo minimo de cada agente al terminar su turno,
+para que la siguiente IA arranque sin leer transcripts completos.
+No va aqui: razonamiento largo, detalles de implementacion, ni duplicado de trilog.
+
+**Archivos:**
+- `ARGOS_RUNTIME/live/<agente>.live.json` (sobrescrito por cada agente en su cierre)
+- `ARGOS_RUNTIME/live/_schema.json` (schema live canonico)
+
+**Campos canonicos:** `agent`, `updated_at`, `packet_id`, `status`, `last_output`,
+`open_question`, `next_step`, `handoff_to`.
+
+**Regla de no-duplicacion:** LIVE no reemplaza trilog/transcript; solo cubre contexto inmediato.
+Si una decision requiere trazabilidad completa, se consulta trilog/transcript.
+
 ---
 
 ## 2. Ritual de inicio (cualquier agente, cualquier sesion)
@@ -116,7 +131,8 @@ Antes de ejecutar cualquier orden:
 3. Leer este archivo (INTER_AI_PROTOCOL.md).
 4. Leer ARGOS_CREW_VOICES.md — caracter y tono del navio. **Obligatorio.**
 5. Leer tail de ARGOS_GLOBAL_LOG.md — que se hizo recientemente.
-6. Confirmar al Capitan: "[N] paquetes en inbox. [Frase propia del agente en su voz.]"
+6. Leer `ARGOS_RUNTIME/live/` (o `GET /api/live`) para estado operativo de otros agentes.
+7. Confirmar al Capitan: "[N] paquetes en inbox. [Frase propia del agente en su voz.]"
 
 ### Nota sobre el ritual para agentes cloud (Claude, DeepSeek)
 
@@ -205,6 +221,23 @@ El campo `transcriptRef` vincula el LOG al transcript literal.
 - Ninguna prueba debe quedar persistida en Bitacora ni en Cubierta ni en transcripts.
 - Toda prueba debe usar ID claramente temporal (ARG-TEST-*, TMP-*) y limpiarse al finalizar.
 - Si una prueba se filtra a produccion visible, se registra como glitch de higiene operativa.
+
+### 3.3 Paso final de cierre — escribir LIVE (obligatorio)
+Al cerrar una intervencion sustantiva (con o sin packet), cada agente actualiza su estado live:
+```
+POST http://localhost:8080/api/live/<agente>
+{
+  "agent": "Claude|Codex|Gemini|OpenClaw",
+  "updated_at": "2026-04-18T00:00:00Z",
+  "packet_id": "ARG-XXXX o null",
+  "status": "idle|working|blocked|waiting_captain",
+  "last_output": "Resumen corto de lo ultimo que hizo",
+  "open_question": null,
+  "next_step": "Siguiente accion inmediata",
+  "handoff_to": "Codex|Claude|Gemini|OpenClaw|null"
+}
+```
+Si no hay API disponible, escribir directo en `ARGOS_RUNTIME/live/<agente>.live.json`.
 
 ---
 

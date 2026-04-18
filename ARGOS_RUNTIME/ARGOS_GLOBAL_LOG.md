@@ -39,3 +39,15 @@ Codex implemento Desktop Import en argos-api con: config de fuentes por app (Cod
 **SIGUIENTE:** Capitan compartira rutas reales de Drive en desktop_sources.json y se ejecutara /api/desktop-import/run para primera sincronizacion completa.
 
 **RIESGOS:** Hasta configurar rootPath reales en desktop_sources.json, no habra ingestion efectiva de fuentes externas.
+
+---
+**[2026-04-18 00:18 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Implementada capa LIVE para coordinaci�n en tiempo real entre agentes
+**WORK PACKET:** ARG-1776467399391-231
+
+**DETALLES:**
+Codex implement� la capa live end-to-end: funciones de bootstrap y saneamiento de estados live, endpoints /api/live (GET all, GET one, POST one), marca stale >24h, creaci�n de ARGOS_RUNTIME/live/_schema.json y archivos iniciales claude/codex/gemini/openclaw. Adem�s actualiz� INTER_AI_PROTOCOL con secci�n 1.6 LIVE y ritual de arranque/cierre, ARGOS_RUNTIME/README y ARGOS_QUICKSTART.
+
+**SIGUIENTE:** Validar en uso real multi-ventana (Claude->Codex->Gemini) y decidir si se a�ade widget live en dashboard.
+
+**RIESGOS:** Si los relojes de las m�quinas difieren, age_minutes/stale puede verse desplazado. Recomendado mantener NTP activo o normalizar timezone de escritura.
