@@ -51,3 +51,31 @@ Codex implement� la capa live end-to-end: funciones de bootstrap y saneamiento
 **SIGUIENTE:** Validar en uso real multi-ventana (Claude->Codex->Gemini) y decidir si se a�ade widget live en dashboard.
 
 **RIESGOS:** Si los relojes de las m�quinas difieren, age_minutes/stale puede verse desplazado. Recomendado mantener NTP activo o normalizar timezone de escritura.
+
+---
+**[2026-04-18 01:15 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARGOS-PROTO-0001
+
+**DETALLES:**
+Sesión extensa (2026-04-17/18) con el Capitán desde claude.ai móvil. Temas ejecutados:
+1. Investigación de rutas locales de transcripts y tokens por agente (Claude Code, Codex, Antigravity, Gemini CLI, OpenClaw). Documento AGENT_DATA_PATHS.md generado y subido a Drive.
+2. Recomendación Gemini CLI sobre Antigravity para trabajo Argos — confirmada por el Capitán.
+3. Diseño inicial de capa live/ (ARGOS-LIVE-0001) — posteriormente absorbida y cancelada.
+4. Clarificación arquitectónica completa: distinción entre agentes locales (Claude Code, Codex, OpenClaw, Gemini CLI) y agentes chat (Claude.ai, ChatGPT, Gemini chat). El MCP de Drive solo tiene create_file, no update — esto define el patrón de depósito.
+5. Diseño y formalización del protocolo de escritura unificada (ARGOS-PROTO-0001): archivo de depósito único por sesión con secciones [LOG][SHADOW][GLITCH][STATE][CAPTAIN], heartbeat local que lo integra en canónicos, triggers A/B/C/D.
+6. Work packet ARGOS-PROTO-0001 subido a inbox/ en Drive.
+7. Carpeta inbox_deposits/ creada en ARGOS_RUNTIME. Este archivo es el primer depósito real del protocolo.
+
+---
+**[2026-04-18 02:10 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARGOS-PROTO-0002
+
+**DETALLES:**
+Sesión de diseño con el Capitán desde claude.ai (proyecto Argos, web).
+1. Invocado skill new-session. Leído INTER_AI_PROTOCOL v1.3, state.json, ARGOS_GLOBAL_LOG tail, packet ARGOS-PROTO-0001 (done por Codex esta madrugada) y el primer depósito de Claude de las 01:15 que ya integró el heartbeat.
+2. Analizadas fisuras remanentes tras el cierre de PROTO-0001: ChatGPT web sin MCP de Drive, ambigüedad entre sección 3 y sección 1.6/3.3 del protocolo v1.3, trigger A sin frase canónica, trigger B con riesgo de alucinación, latencia de Drive for Desktop.
+3. Capitán tomó tres decisiones vía ask_user_input: Cloudflare Tunnel (no ngrok), API primaria + Drive fallback, nombrado ARGOS-PROTO-0002 como continuidad directa del 0001.
+4. Redactado work packet ARGOS-PROTO-0002 ("Cierre Remoto Universal"), 14 KB, con: arquitectura de tres capas actualizada, endpoint POST /api/remote/closure con schema JSON completo, autenticación por token por agente, reescritura propuesta de la sección 3 del protocolo para unificar los tres caminos (local / API pública / Drive fallback), clarificación de triggers A y B, smoke test end-to-end en tres caminos, reconciliación del packet PROTO-0001 que figura open:inbox en state.json.
+5. Packet subido a work_packets/inbox/ en Drive. File ID 1TuYiv_xiyVJlTOi4agfbtoO2NXSxgWgF. UTF-8 sin BOM verificado. Pendiente de inyección de header [WORK_PACKET] por el Dispatcher en su próximo ciclo.

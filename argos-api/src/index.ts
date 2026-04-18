@@ -31,6 +31,10 @@ const PENDING_ACTIONS_PATH = path.join(RUNTIME_DIR, 'locks', 'pending_actions.js
 const TRANSCRIPTS_DIR = path.join(RUNTIME_DIR, 'transcripts');
 const LIVE_DIR = path.join(RUNTIME_DIR, 'live');
 const LIVE_SCHEMA_PATH = path.join(LIVE_DIR, '_schema.json');
+const LEGACY_RUNTIME_DIR = path.join(RUNTIME_DIR, 'legacy');
+const LIVE_DEPRECATED_DIR = path.join(LEGACY_RUNTIME_DIR, 'live_deprecated_2026-04-18');
+const INBOX_DEPOSITS_DIR = path.join(RUNTIME_DIR, 'inbox_deposits');
+const INBOX_DEPOSITS_PROCESSED_DIR = path.join(INBOX_DEPOSITS_DIR, 'processed');
 const DESKTOP_SOURCES_CONFIG_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_sources.json');
 const DESKTOP_INGEST_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'desktop_ingest.state.json');
 const EXTERNAL_TRANSCRIPTS_DIR = path.join(TRANSCRIPTS_DIR, 'external');
@@ -197,6 +201,7 @@ type TaskRecord = {
   tokens_spent: number;
   mtimeMs: number;
   created_at: string;
+  created_at_ms: number;
   estimated_time: string;
 };
 
@@ -232,6 +237,28 @@ type LiveStateRecord = {
   open_question: string | null;
   next_step: string | null;
   handoff_to: 'Claude' | 'Codex' | 'Gemini' | 'OpenClaw' | null;
+};
+
+type DepositSectionKey = 'LOG' | 'SHADOW' | 'GLITCH' | 'STATE' | 'CAPTAIN';
+
+type DepositStatePayload = {
+  status: LiveStatus;
+  summary: string;
+  handoff_to: string | null;
+  next_step: string;
+  packet_id: string;
+};
+
+type ParsedChatDeposit = {
+  filePath: string;
+  fileName: string;
+  metadata: Record<string, string>;
+  sections: Partial<Record<DepositSectionKey, string>>;
+  actorRaw: string;
+  actorCanonical: string;
+  packetId: string;
+  timestampIso: string;
+  statePayload: DepositStatePayload;
 };
 
 type DesktopSourceDefinition = {
@@ -289,6 +316,10 @@ type DesktopImportRunSummary = {
   errors: number;
   warnings: string[];
 };
+
+let liveLayerDeprecationLogged = false;
+let inboxDepositsWatcher: fs.FSWatcher | null = null;
+let inboxDepositsDebounceTimer: NodeJS.Timeout | null = null;
 
 type ParsedTimestampLabel = { label: string; precision: 'minute' | 'day'; sortMs: number };
 
@@ -515,8 +546,8 @@ function normalizeAgentName(rawName: string): 'Claude' | 'Antigravity' | 'Codex'
 
   if (v.includes('claude')) return 'Claude';
   if (v.includes('antigravity') || v.includes('gemini')) return 'Antigravity';
-  if (v.includes('codex')) return 'Codex';
-  if (v.includes('orfeo') || v.includes('deepseek') || v.includes('contramaestre')) return 'DeepSeek';
+  if (v.includes('codex') || v.includes('chatgpt')) return 'Codex';
+  if (v.includes('orfeo') || v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw') || v.includes('qwen')) return 'DeepSeek';
 
   return null;
 }
@@ -1355,7 +1386,18 @@ function backfillWorkTokensFromFeed(): void {
 // â”€â”€ Estado de IAs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Eliminado normaliseAgentName por redundancia. Usar normalizeAgentName.
 
-type IaAgentStatus = { status: 'active' | 'standby' | 'restricted'; task: string; task_subject: string; since: string };
+type IaAgentStatus = {
+  status: 'active' | 'standby' | 'restricted';
+  task: string;
+  task_subject: string;
+  since: string;
+  last_seen?: string;
+  stale?: boolean;
+  stale_since?: string;
+  handoff_to?: string;
+  next_step?: string;
+  last_output?: string;
+};
 type IaStatusMap = { Claude: IaAgentStatus; Antigravity: IaAgentStatus; Codex: IaAgentStatus; DeepSeek: IaAgentStatus };
 
 function defaultIaStatus(): IaStatusMap {
@@ -1502,8 +1544,11 @@ function normalizeLiveAgentId(raw: unknown): LiveAgentId | null {
   return null;
 }
 
-function liveAgentFilePath(agentId: LiveAgentId): string {
-  return path.join(LIVE_DIR, `${agentId}.live.json`);
+function liveAgentToIaStatusKey(agentId: LiveAgentId): keyof IaStatusMap {
+  if (agentId === 'claude') return 'Claude';
+  if (agentId === 'codex') return 'Codex';
+  if (agentId === 'gemini') return 'Antigravity';
+  return 'DeepSeek';
 }
 
 function normalizeLiveStatus(raw: unknown): LiveStatus {
@@ -1549,6 +1594,17 @@ function sanitizeLiveState(agentId: LiveAgentId, input: unknown): LiveStateRecor
   };
 }
 
+function mapIaStatusToLiveStatus(status: IaAgentStatus['status']): LiveStatus {
+  if (status === 'active') return 'working';
+  if (status === 'restricted') return 'blocked';
+  return 'idle';
+}
+
+function mapLiveStatusToIaStatus(status: LiveStatus): IaAgentStatus['status'] {
+  if (status === 'idle') return 'standby';
+  return 'active';
+}
+
 function isLiveStateStale(updatedAt: string, staleHours = 24): boolean {
   const ts = Date.parse(updatedAt);
   if (Number.isNaN(ts)) return true;
@@ -1571,33 +1627,495 @@ function liveSchemaTemplate(): Record<string, unknown> {
   };
 }
 
-function ensureLiveLayerBootstrap(): void {
-  ensureDirSync(LIVE_DIR);
-  if (!fs.existsSync(LIVE_SCHEMA_PATH)) {
-    writeJsonFileSafe(LIVE_SCHEMA_PATH, liveSchemaTemplate());
+function archiveLiveLayerToLegacyIfNeeded(): void {
+  const markerPath = path.join(LIVE_DEPRECATED_DIR, '_deprecation.json');
+  if (!fs.existsSync(LIVE_DIR)) {
+    if (!fs.existsSync(markerPath)) {
+      ensureDirSync(LIVE_DEPRECATED_DIR);
+      writeJsonFileSafe(markerPath, {
+        deprecated_at: nowIso(),
+        reason: 'ARGOS-PROTO-0001 migrates live layer to unified chat deposits + heartbeat integration'
+      });
+    }
+    return;
   }
 
-  const liveAgents: LiveAgentId[] = ['claude', 'codex', 'gemini', 'openclaw'];
-  liveAgents.forEach((agentId) => {
-    const filePath = liveAgentFilePath(agentId);
-    if (!fs.existsSync(filePath)) {
-      writeJsonFileSafe(filePath, defaultLiveState(agentId));
+  ensureDirSync(LIVE_DEPRECATED_DIR);
+  const entries = fs.readdirSync(LIVE_DIR, { withFileTypes: true });
+  entries.forEach((entry) => {
+    const sourcePath = path.join(LIVE_DIR, entry.name);
+    const destinationPath = path.join(LIVE_DEPRECATED_DIR, entry.name);
+    if (entry.isDirectory()) {
+      ensureDirSync(destinationPath);
+      return;
     }
+    moveFileWithFallback(sourcePath, destinationPath);
+  });
+
+  try {
+    fs.rmSync(LIVE_DIR, { recursive: true, force: true });
+  } catch {
+    // Best effort: if delete fails, legacy files are still migrated.
+  }
+
+  writeJsonFileSafe(markerPath, {
+    deprecated_at: nowIso(),
+    source_dir: LIVE_DIR,
+    archived_to: LIVE_DEPRECATED_DIR,
+    reason: 'ARGOS-PROTO-0001'
   });
 }
 
+function ensureLiveLayerBootstrap(): void {
+  archiveLiveLayerToLegacyIfNeeded();
+  if (!liveLayerDeprecationLogged) {
+    console.log(`[LIVE] Capa live deprecada por ARGOS-PROTO-0001. Archivada en ${LIVE_DEPRECATED_DIR}`);
+    liveLayerDeprecationLogged = true;
+  }
+}
+
 function readLiveState(agentId: LiveAgentId): LiveStateRecord {
-  const filePath = liveAgentFilePath(agentId);
-  if (!fs.existsSync(filePath)) return defaultLiveState(agentId);
-  const parsed = readJsonFile<Record<string, unknown>>(filePath, defaultLiveState(agentId));
-  return sanitizeLiveState(agentId, parsed);
+  const state = readArgosState();
+  const ia = readIaStatus(state);
+  const iaKey = liveAgentToIaStatusKey(agentId);
+  const row = ia[iaKey];
+  const updatedAt = normaliseText((row as unknown as Record<string, unknown>).last_seen) || row.since || nowIso();
+  const handoffId = normalizeLiveAgentId((row as unknown as Record<string, unknown>).handoff_to);
+  const packetId = normaliseText(row.task) || null;
+  const output = normaliseText((row as unknown as Record<string, unknown>).last_output) || row.task_subject || 'Estado sincronizado desde ia_status.';
+
+  return {
+    agent: canonicalLiveAgentName(agentId),
+    updated_at: Number.isNaN(Date.parse(updatedAt)) ? nowIso() : new Date(updatedAt).toISOString(),
+    packet_id: packetId,
+    status: mapIaStatusToLiveStatus(row.status),
+    last_output: output,
+    open_question: null,
+    next_step: normaliseText((row as unknown as Record<string, unknown>).next_step) || null,
+    handoff_to: handoffId ? canonicalLiveAgentName(handoffId) : null
+  };
 }
 
 function writeLiveState(agentId: LiveAgentId, payload: unknown): LiveStateRecord {
   ensureLiveLayerBootstrap();
   const sanitized = sanitizeLiveState(agentId, payload);
-  writeJsonFileSafe(liveAgentFilePath(agentId), sanitized);
+  const state = readArgosState();
+  const ia = readIaStatus(state);
+  const iaKey = liveAgentToIaStatusKey(agentId);
+  const prev = ia[iaKey];
+  const nextStatus = prev.status === 'restricted' ? 'restricted' : mapLiveStatusToIaStatus(sanitized.status);
+
+  ia[iaKey] = {
+    ...prev,
+    status: nextStatus,
+    task: sanitized.packet_id || '',
+    task_subject: sanitized.last_output || prev.task_subject || '',
+    since: sanitized.updated_at,
+    last_seen: sanitized.updated_at,
+    stale: false,
+    stale_since: '',
+    handoff_to: sanitized.handoff_to || '',
+    next_step: sanitized.next_step || '',
+    last_output: sanitized.last_output || ''
+  };
+  (state as Record<string, unknown>).ia_status = ia;
+  writeArgosState(state);
   return sanitized;
+}
+
+function ensureInboxDepositDirectories(): void {
+  ensureDirSync(INBOX_DEPOSITS_DIR);
+  ensureDirSync(INBOX_DEPOSITS_PROCESSED_DIR);
+}
+
+function parseDepositTimestampIso(raw: string): string {
+  const cleaned = normaliseText(raw);
+  if (cleaned === '') return nowIso();
+  const parsedNative = Date.parse(cleaned);
+  if (!Number.isNaN(parsedNative)) return new Date(parsedNative).toISOString();
+
+  const match = cleaned.match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+  if (match) {
+    const parsed = Date.parse(`${match[1]}T${match[2]}:00`);
+    if (!Number.isNaN(parsed)) return new Date(parsed).toISOString();
+  }
+  return nowIso();
+}
+
+function parseFrontmatterAndBody(raw: string): { metadata: Record<string, string>; body: string } {
+  const trimmed = raw.replace(/^\uFEFF/, '');
+  if (!trimmed.startsWith('---')) return { metadata: {}, body: trimmed };
+
+  const lines = trimmed.split(/\r?\n/);
+  if (lines.length < 3) return { metadata: {}, body: trimmed };
+  let closingIndex = -1;
+  for (let i = 1; i < lines.length; i += 1) {
+    if (lines[i].trim() === '---') {
+      closingIndex = i;
+      break;
+    }
+  }
+  if (closingIndex === -1) return { metadata: {}, body: trimmed };
+
+  const metadata: Record<string, string> = {};
+  lines.slice(1, closingIndex).forEach((line) => {
+    const match = line.match(/^\s*([a-zA-Z0-9_]+)\s*:\s*(.*)\s*$/);
+    if (!match) return;
+    metadata[match[1].toLowerCase()] = match[2].trim();
+  });
+  return { metadata, body: lines.slice(closingIndex + 1).join('\n') };
+}
+
+function parseDepositSections(body: string): Partial<Record<DepositSectionKey, string>> {
+  const sections: Partial<Record<DepositSectionKey, string>> = {};
+  const markerRegex = /^\[(LOG|SHADOW|GLITCH|STATE|CAPTAIN)\]\s*$/gm;
+  const matches = Array.from(body.matchAll(markerRegex));
+  matches.forEach((match, index) => {
+    const key = match[1] as DepositSectionKey;
+    const start = (match.index ?? 0) + match[0].length;
+    const end = index + 1 < matches.length ? (matches[index + 1].index ?? body.length) : body.length;
+    sections[key] = body.slice(start, end).trim();
+  });
+  return sections;
+}
+
+function parseDepositStatePayload(rawState: string): DepositStatePayload {
+  const parsed: Record<string, string> = {};
+  rawState.split(/\r?\n/).forEach((line) => {
+    const match = line.match(/^\s*([a-zA-Z_]+)\s*:\s*(.*)\s*$/);
+    if (!match) return;
+    parsed[match[1].toLowerCase()] = match[2].trim();
+  });
+
+  return {
+    status: normalizeLiveStatus(parsed.status),
+    summary: normaliseText(parsed.summary),
+    handoff_to: normaliseText(parsed.handoff_to) || null,
+    next_step: normaliseText(parsed.next_step),
+    packet_id: normaliseText(parsed.packet_id)
+  };
+}
+
+function canaryTimestampLabelFromIso(iso: string): string {
+  const parsed = Date.parse(iso);
+  const base = Number.isNaN(parsed) ? new Date() : new Date(parsed);
+  const canaryTs = base.toLocaleString('sv-SE', {
+    timeZone: 'Atlantic/Canary',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).slice(0, 16);
+  return `${canaryTs} Atlantic/Canary`;
+}
+
+function appendMarkdownEntry(filePath: string, fallbackHeader: string, entry: string): void {
+  const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : fallbackHeader;
+  const base = existing.endsWith('\n') ? existing : `${existing}\n`;
+  fs.writeFileSync(filePath, `${base}${entry}`, 'utf-8');
+}
+
+function firstLine(value: string): string {
+  const clean = value.split(/\r?\n/).map((line) => line.trim()).find((line) => line !== '');
+  return clean || '';
+}
+
+function isEmptyGlitchSection(value: string): boolean {
+  const normalized = normaliseText(value).toLowerCase().replace(/[().\s]/g, '');
+  return normalized === '' || normalized === 'vacio' || normalized === 'vacío' || normalized === 'none' || normalized === 'no';
+}
+
+function parseChatDepositFile(filePath: string): ParsedChatDeposit | null {
+  const raw = readTextFileSafe(filePath);
+  if (normaliseText(raw) === '') return null;
+
+  const { metadata, body } = parseFrontmatterAndBody(raw);
+  const sections = parseDepositSections(body);
+  const actorRaw = metadata.agent || 'ChatAgent';
+  const actorCanonical = normalizeAgentName(actorRaw) || actorRaw;
+  const statePayload = parseDepositStatePayload(sections.STATE || '');
+  const packetId = normaliseText(statePayload.packet_id) || normaliseText(metadata.packet_id);
+  const timestampIso = parseDepositTimestampIso(metadata.timestamp || nowIso());
+
+  return {
+    filePath,
+    fileName: path.basename(filePath),
+    metadata,
+    sections,
+    actorRaw,
+    actorCanonical,
+    packetId,
+    timestampIso,
+    statePayload
+  };
+}
+
+function updateIaStatusFromDeposit(deposit: ParsedChatDeposit): void {
+  const canonical = normalizeAgentName(deposit.actorCanonical) || normalizeAgentName(deposit.actorRaw);
+  if (!canonical) return;
+
+  const state = readArgosState();
+  const ia = readIaStatus(state);
+  const current = ia[canonical];
+  const iaStatus = current.status === 'restricted' ? 'restricted' : mapLiveStatusToIaStatus(deposit.statePayload.status);
+  const handoffCanonical = normalizeAgentName(deposit.statePayload.handoff_to || '');
+
+  ia[canonical] = {
+    ...current,
+    status: iaStatus,
+    task: iaStatus === 'active' ? deposit.packetId : '',
+    task_subject: deposit.statePayload.summary || current.task_subject || '',
+    since: deposit.timestampIso,
+    last_seen: deposit.timestampIso,
+    stale: false,
+    stale_since: '',
+    handoff_to: handoffCanonical || '',
+    next_step: deposit.statePayload.next_step,
+    last_output: deposit.statePayload.summary || firstLine(deposit.sections.LOG || '') || ''
+  };
+  (state as Record<string, unknown>).ia_status = ia;
+  if (deposit.statePayload.next_step) state.next_step = deposit.statePayload.next_step;
+  writeArgosState(state);
+}
+
+function integrateChatDeposit(deposit: ParsedChatDeposit, trigger: string): void {
+  const packetRef = normaliseText(deposit.packetId);
+  const actor = normalizeAgentName(deposit.actorCanonical) || deposit.actorCanonical;
+  const timestampIso = deposit.timestampIso;
+  const canaryLabelText = canaryTimestampLabelFromIso(timestampIso);
+
+  const logText = normaliseText(deposit.sections.LOG);
+  if (logText !== '') {
+    const logEntry =
+      `\n---\n` +
+      `**[${canaryLabelText}] VOZ ${actor.toUpperCase()}:**\n` +
+      `**MISION:** Integracion automatica de deposito chat\n` +
+      `**WORK PACKET:** ${packetRef || 'N/A'}\n\n` +
+      `**DETALLES:**\n${logText}\n`;
+    appendMarkdownEntry(
+      ARGOS_GLOBAL_LOG_PATH,
+      '# ARGOS GLOBAL LOG\nRegistro operativo compartido por la tripulacion.\n',
+      logEntry
+    );
+
+    appendJsonlRecord(ARGOS_EVENTS_PATH, {
+      timestamp: timestampIso,
+      timestamp_label: canaryLabelText.replace(' Atlantic/Canary', ''),
+      actor,
+      module: 'argos',
+      type: 'chat_deposit_log',
+      packet_id: packetRef,
+      refId: packetRef,
+      status: deposit.statePayload.status,
+      summary: firstLine(logText) || 'Integracion de deposito chat',
+      details: logText,
+      source: `deposit:${trigger}`
+    });
+  }
+
+  const shadowText = normaliseText(deposit.sections.SHADOW);
+  if (shadowText !== '') {
+    const shadowEntry =
+      `\n---\n` +
+      `**[${canaryLabelText}] VOZ ${actor.toUpperCase()} (SOMBRA):**\n` +
+      `**PACKET:** ${packetRef || 'N/A'}\n` +
+      `**TAREA:** ${deposit.statePayload.summary || 'Integracion de deposito chat'}\n` +
+      `**SOMBRA:**\n${shadowText}\n`;
+    appendMarkdownEntry(
+      ARGOS_GLOBAL_SHADOW_PATH,
+      '# ARGOS GLOBAL SHADOW LOG\nMaterial observado sin destino operativo inmediato.\n',
+      shadowEntry
+    );
+  }
+
+  const glitchText = normaliseText(deposit.sections.GLITCH);
+  if (!isEmptyGlitchSection(glitchText)) {
+    const glitchEntry =
+      `\n---\n` +
+      `**[${canaryLabelText}] VOZ ${actor.toUpperCase()} (GLITCH):**\n` +
+      `**PACKET:** ${packetRef || 'N/A'}\n` +
+      `${glitchText}\n`;
+    appendMarkdownEntry(
+      ARGOS_GLOBAL_GLITCH_PATH,
+      '# ARGOS GLOBAL GLITCH LOG\nRegistro estructural de fallas sistemicas y fricciones tecnicas.\n',
+      glitchEntry
+    );
+    appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+      timestamp: timestampIso,
+      actor,
+      packet_id: packetRef,
+      summary: firstLine(glitchText) || 'Glitch reportado via deposito',
+      details: glitchText,
+      source: `deposit:${trigger}`
+    });
+  }
+
+  const captainText = normaliseText(deposit.sections.CAPTAIN);
+  if (captainText !== '') {
+    appendJsonlRecord(CAPTAIN_FEED_PATH, {
+      id: nextFeedMessageId(),
+      timestamp: timestampIso,
+      kind: 'crew_update',
+      speaker: 'crew',
+      sender_name: actor,
+      sender_role: 'agent',
+      audience: 'captain',
+      source: 'deposit_heartbeat',
+      summary: `[DEPOSITO] ${deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
+      details: captainText,
+      status: deposit.statePayload.status,
+      tokens: 0,
+      refId: packetRef
+    });
+  }
+
+  updateIaStatusFromDeposit(deposit);
+
+  appendJsonlRecord(ARGOS_EVENTS_PATH, {
+    timestamp: timestampIso,
+    actor,
+    module: 'argos',
+    type: 'chat_deposit_integrated',
+    summary: `Deposito integrado: ${deposit.fileName}`,
+    details: `Trigger=${trigger}; packet=${packetRef || 'N/A'}; status=${deposit.statePayload.status}`,
+    packet_id: packetRef,
+    refId: packetRef,
+    source: 'deposit_heartbeat'
+  });
+  publishEvent('deposit:processed', {
+    actor,
+    packet_id: packetRef,
+    file: deposit.fileName,
+    status: deposit.statePayload.status,
+    trigger
+  });
+}
+
+function processSingleInboxDeposit(filePath: string, trigger: string): boolean {
+  const parsed = parseChatDepositFile(filePath);
+  if (!parsed) {
+    const invalidDestination = path.join(INBOX_DEPOSITS_PROCESSED_DIR, `${path.basename(filePath, '.md')}__invalid.md`);
+    moveFileWithFallback(filePath, invalidDestination);
+    appendJsonlRecord(ARGOS_EVENTS_PATH, {
+      timestamp: nowIso(),
+      actor: 'Codex',
+      module: 'argos',
+      type: 'chat_deposit_invalid',
+      summary: `Deposito invalido movido: ${path.basename(filePath)}`,
+      details: `Trigger=${trigger}`,
+      source: 'deposit_heartbeat'
+    });
+    return false;
+  }
+
+  integrateChatDeposit(parsed, trigger);
+  const destination = path.join(INBOX_DEPOSITS_PROCESSED_DIR, path.basename(filePath));
+  moveFileWithFallback(filePath, destination);
+  return true;
+}
+
+function processPendingInboxDeposits(trigger = 'manual'): { scanned: number; processed: number } {
+  ensureInboxDepositDirectories();
+  const files = fs.readdirSync(INBOX_DEPOSITS_DIR)
+    .filter((name) => name.toLowerCase().endsWith('.md'))
+    .map((name) => path.join(INBOX_DEPOSITS_DIR, name));
+
+  let processed = 0;
+  files.forEach((filePath) => {
+    try {
+      if (processSingleInboxDeposit(filePath, trigger)) processed += 1;
+    } catch (error) {
+      appendJsonlRecord(ARGOS_EVENTS_PATH, {
+        timestamp: nowIso(),
+        actor: 'Codex',
+        module: 'argos',
+        type: 'chat_deposit_error',
+        summary: `Error procesando deposito ${path.basename(filePath)}`,
+        details: String(error),
+        source: 'deposit_heartbeat'
+      });
+    }
+  });
+
+  return { scanned: files.length, processed };
+}
+
+function scheduleInboxDepositScan(trigger: string): void {
+  if (inboxDepositsDebounceTimer) clearTimeout(inboxDepositsDebounceTimer);
+  inboxDepositsDebounceTimer = setTimeout(() => {
+    const result = processPendingInboxDeposits(trigger);
+    if (result.processed > 0) {
+      console.log(`[DEPOSITS] Procesados ${result.processed}/${result.scanned} depositos (${trigger})`);
+    }
+  }, 1200);
+}
+
+function startInboxDepositsWatcher(): void {
+  ensureInboxDepositDirectories();
+  processPendingInboxDeposits('startup_scan');
+  if (inboxDepositsWatcher) return;
+
+  inboxDepositsWatcher = fs.watch(INBOX_DEPOSITS_DIR, (eventType, fileName) => {
+    if (!fileName) {
+      scheduleInboxDepositScan(`watch:${eventType}`);
+      return;
+    }
+    if (!fileName.toLowerCase().endsWith('.md')) return;
+    scheduleInboxDepositScan(`watch:${eventType}:${fileName}`);
+  });
+  console.log(`[DEPOSITS] Watcher activo sobre ${INBOX_DEPOSITS_DIR}`);
+}
+
+function markStaleAgentsFromDeposits(staleMinutes = 60): number {
+  const state = readArgosState();
+  const ia = readIaStatus(state);
+  let changes = 0;
+
+  (Object.keys(ia) as Array<keyof IaStatusMap>).forEach((agentKey) => {
+    const row = ia[agentKey];
+    const seenRaw = normaliseText((row as unknown as Record<string, unknown>).last_seen) || row.since;
+    const seenTs = Date.parse(seenRaw);
+    if (Number.isNaN(seenTs)) return;
+
+    const isStaleNow = (Date.now() - seenTs) > staleMinutes * 60 * 1000;
+    const wasStale = Boolean((row as unknown as Record<string, unknown>).stale);
+
+    if (isStaleNow && !wasStale) {
+      (row as unknown as Record<string, unknown>).stale = true;
+      (row as unknown as Record<string, unknown>).stale_since = nowIso();
+      changes += 1;
+      appendJsonlRecord(CAPTAIN_FEED_PATH, {
+        id: nextFeedMessageId(),
+        timestamp: nowIso(),
+        kind: 'crew_update',
+        speaker: 'crew',
+        sender_name: 'Codex',
+        sender_role: 'agent',
+        audience: 'captain',
+        source: 'deposit_heartbeat',
+        summary: `[HEARTBEAT] ${agentKey} marcado stale`,
+        details: `Sin actividad registrada en > ${staleMinutes} minutos.`,
+        status: 'recorded',
+        tokens: 0,
+        refId: ''
+      });
+      publishEvent('ia:stale', { agent: agentKey, stale: true, stale_minutes: staleMinutes });
+    }
+
+    if (!isStaleNow && wasStale) {
+      (row as unknown as Record<string, unknown>).stale = false;
+      (row as unknown as Record<string, unknown>).stale_since = '';
+      changes += 1;
+      publishEvent('ia:stale', { agent: agentKey, stale: false, stale_minutes: staleMinutes });
+    }
+  });
+
+  if (changes > 0) {
+    (state as Record<string, unknown>).ia_status = ia;
+    writeArgosState(state);
+  }
+  return changes;
 }
 
 function simpleHash(raw: string): string {
@@ -3294,6 +3812,14 @@ function loadTasksFromZone(zone: 'inbox' | 'in_progress' | 'done'): TaskRecord[]
     const packetType = typeMatch ? typeMatch[1].trim().toLowerCase() : 'task';
     const tokensMatch = content.match(/TOKENS_SPENT:\s*(\d+)/);
     const createdAtMatch = content.match(/CREATED_AT:\s*(.*)/);
+    const createdAtStr = createdAtMatch ? createdAtMatch[1].trim() : '';
+    let createdAtMs = stat.birthtimeMs;
+    if (createdAtStr !== '') {
+      const parsed = Date.parse(createdAtStr);
+      if (!Number.isNaN(parsed)) {
+        createdAtMs = parsed;
+      }
+    }
     const estimatedTimeMatch = content.match(/ESTIMATED_TIME:\s*(.*)/);
 
     return {
@@ -3307,7 +3833,8 @@ function loadTasksFromZone(zone: 'inbox' | 'in_progress' | 'done'): TaskRecord[]
       priority,
       tokens_spent: tokensMatch ? Number(tokensMatch[1]) : 0,
       mtimeMs: stat.mtimeMs,
-      created_at: createdAtMatch ? createdAtMatch[1].trim() : new Date(stat.birthtimeMs).toISOString(),
+      created_at: createdAtStr || new Date(stat.birthtimeMs).toISOString(),
+      created_at_ms: createdAtMs,
       estimated_time: estimatedTimeMatch ? estimatedTimeMatch[1].trim() : ''
     };
   });
@@ -4403,18 +4930,18 @@ app.get('/api/tasks', (req: Request, res: Response) => {
       const pa = PRIORITY_RANK[a.priority] ?? 1;
       const pb = PRIORITY_RANK[b.priority] ?? 1;
       if (pb !== pa) return pb - pa; // mayor prioridad primero
-      return b.mtimeMs - a.mtimeMs;  // misma prioridad → más reciente primero
+      return b.created_at_ms - a.created_at_ms;  // misma prioridad → mas reciente primero
     };
     const pendingTasks = tasks
       .filter((task) => task.status !== 'done')
       .sort(byPriorityThenRecency);
     const doneTasks = tasks
       .filter((task) => task.status === 'done')
-      .sort((a, b) => b.mtimeMs - a.mtimeMs);
+      .sort((a, b) => b.created_at_ms - a.created_at_ms);
     const orderedTasks = [...pendingTasks, ...doneTasks];
 
     res.json({
-      tasks: orderedTasks.map(({ mtimeMs, ...task }) => task)
+      tasks: orderedTasks
     });
   } catch (error) {
     res.status(500).json({ error: 'Fallo desenterrando los work packets fisicos del inbox' });
@@ -5778,7 +6305,8 @@ app.get('/api/live', (_req: Request, res: Response) => {
     });
     return res.json({
       status: 'ok',
-      schema: '_schema.json',
+      mode: 'deprecated_bridge',
+      archived_live_dir: LIVE_DEPRECATED_DIR,
       records
     });
   } catch (error) {
@@ -5799,7 +6327,7 @@ app.get('/api/live/:agent', (req: Request, res: Response) => {
     return res.json({
       status: 'ok',
       id: agentId,
-      file: `${agentId}.live.json`,
+      mode: 'deprecated_bridge',
       stale: isLiveStateStale(state.updated_at, 24),
       age_minutes: ageMinutes,
       record: state
@@ -6228,6 +6756,7 @@ app.listen(PORT, () => {
   backfillWorkTokensFromFeed(); // Recupera historial de work tokens desde captain_feed
   backfillWorkTokensFromReportLedger(); // Recupera work tokens faltantes desde report tokens (si refId apunta a work packet)
   ensureLiveLayerBootstrap();   // bootstrap de capa live por agente
+  startInboxDepositsWatcher();  // watcher + barrido inicial de inbox_deposits
   loadDesktopSourcesConfig(); // bootstrap config si no existe
   loadDesktopIngestState();   // bootstrap estado incremental si no existe
 
@@ -6270,6 +6799,17 @@ app.listen(PORT, () => {
       console.log(`[TOKENS] Sync horario — total acumulado: ${grand}`);
     } catch (e) {
       console.error('[TOKENS] Error en sync horario:', e);
+    }
+
+    // Red de seguridad: procesar pendientes y marcar stale > 60 min
+    try {
+      const deposits = processPendingInboxDeposits('hourly_safety');
+      const staleUpdates = markStaleAgentsFromDeposits(60);
+      if (deposits.processed > 0 || staleUpdates > 0) {
+        console.log(`[DEPOSITS] Ciclo horario -> procesados=${deposits.processed}, stale_updates=${staleUpdates}`);
+      }
+    } catch (depositError) {
+      console.error('[DEPOSITS] Error en ciclo horario:', depositError);
     }
 
     // Import horario de tokens externos (responsable: OpenClaw/Antigravity)

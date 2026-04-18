@@ -476,6 +476,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderTasks(tasks) {
         if (expandedTaskList) expandedTaskList.innerHTML = '';
         const visibleTasks = tasks.filter((task) => !isLolaPacket(task) && belongsToProject(task.id, currentProject));
+        
+        // Stable sort: Priority (High > Mid > Low) then Entry Time (Newest first)
+        const priorityMap = { 'high': 0, 'mid': 1, 'low': 2 };
+        visibleTasks.sort((a, b) => {
+            // 1. Sort by done status (open tasks first)
+            const aDone = a.status === 'done' ? 1 : 0;
+            const bDone = b.status === 'done' ? 1 : 0;
+            if (aDone !== bDone) return aDone - bDone;
+
+            // 2. Sort by priority
+            const pa = priorityMap[a.priority] ?? 2;
+            const pb = priorityMap[b.priority] ?? 2;
+            if (pa !== pb) return pa - pb;
+
+            // 3. Sort by creation time (descending)
+            return (b.created_at_ms || 0) - (a.created_at_ms || 0);
+        });
+
         latestVisibleTasks = visibleTasks;
         pendingTasks = visibleTasks;
         const openTasks = visibleTasks.filter((task) => task.status !== 'done');

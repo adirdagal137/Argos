@@ -1,3 +1,15 @@
+[WORK_PACKET]
+ID: ARG-1776471872288-689
+TYPE: task
+TAG: autonomous_normalization
+SUBJECT: # WORK PACKET — ARGOS-PROTO-0001 **ID:** ARGOS-PROTO-0001 **Título:** Protocolo de...
+ROLE_REQUESTED: Cualquiera
+OWNER: Cualquiera
+STATUS: open
+REPORTED_BY: Argos Dispatcher
+REPORTED_AT: 2026-04-18 00:24
+
+[CONTENIDO ORIGINAL]
 # WORK PACKET — ARGOS-PROTO-0001
 
 **ID:** ARGOS-PROTO-0001
@@ -224,3 +236,5 @@ implementación. Su opinión es bienvenida antes de que Codex ejecute.
 
 *Generado por Claude — claude.ai — 2026-04-18 01:05 Atlantic/Canary*
 *Packet anterior relacionado: ARGOS-LIVE-0001 (absorbido, archivar)*
+
+[/WORK_PACKET]

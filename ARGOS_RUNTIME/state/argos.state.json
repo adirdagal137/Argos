@@ -1,7 +1,7 @@
 {
     "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-18T00:23:32.218Z",
+    "updated_at": "2026-04-18T01:13:26.770Z",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json.",
     "packet_states": {
         "ARG-1776613000001": "done:done",
@@ -34,7 +34,9 @@
         "LOLA-RISK-1776424632454": "open:inbox",
         "ARG-1776426457123": "open:inbox",
         "ARG-1776467399391-231": "in_progress:in_progress",
-        "ARG-1776470810747": "open:inbox"
+        "ARG-1776470810747": "open:inbox",
+        "ARG-1776471872288-689": "open:inbox",
+        "ARG-1776474386624-573": "open:inbox"
     },
     "in_progress_packets": [
         "ARG-1776354464819",
@@ -63,7 +65,7 @@
     ],
     "active_risks": [],
     "status": "active",
-    "next_step": "",
+    "next_step": "Codex implementa Cloudflare Tunnel + endpoint /api/remote/closure + autenticación por token + unificación del protocolo a v1.4. Opcional: ChatGPT revisa el packet antes de ejecución.",
     "done_packets_summary": {
         "total": 5,
         "tasks": 5,
@@ -80,8 +82,14 @@
         "Claude": {
             "status": "standby",
             "task": "",
-            "task_subject": "",
-            "since": "2026-04-17T11:49:19.186Z"
+            "task_subject": "ARGOS-PROTO-0002 redactado y depositado en inbox para Codex.",
+            "since": "2026-04-18T01:10:00.000Z",
+            "last_seen": "2026-04-18T01:10:00.000Z",
+            "stale": false,
+            "stale_since": "",
+            "handoff_to": "Codex",
+            "next_step": "Codex implementa Cloudflare Tunnel + endpoint /api/remote/closure + autenticación por token + unificación del protocolo a v1.4. Opcional: ChatGPT revisa el packet antes de ejecución.",
+            "last_output": "ARGOS-PROTO-0002 redactado y depositado en inbox para Codex."
         },
         "Antigravity": {
             "status": "standby",

@@ -12,7 +12,8 @@
 - `ARGOS_GLOBAL_GLITCH_LOG.md`: glitches activos de pipeline.
 - `events/`: JSONL activo (`argos.events.jsonl`, `argos.glitches.jsonl`, `argos.tokens.jsonl`).
 - `transcripts/`: transcripts activos (sesion actual).
-- `live/`: estado operativo en vivo por agente (`*.live.json`) para handoff rapido sin transcripts completos.
+- `inbox_deposits/`: deposito canonico para agentes chat (`<agente>_YYYY-MM-DD_HH-MM.md`) y cola `processed/`.
+- `legacy/live_deprecated_2026-04-18/`: capa `live/` archivada por ARGOS-PROTO-0001.
 - `state/argos.state.json`: solo packets activos.
 - `work_packets/inbox|in_progress|done|archived|trash`: handoff canonico.
 - `views/`: vistas de UI/exportes de apoyo (no backend principal).
@@ -38,3 +39,9 @@ Script rapido:
 ## Nota de compatibilidad
 - `events/` queda reservado a datos activos.
 - Historial previo ubicado fuera de `archive/sessions` se considera legado y se migra gradualmente a `archive/legacy`.
+
+## Depositos chat (ARGOS-PROTO-0001)
+- Agentes locales escriben directo en canonicos (`ARGOS_GLOBAL_*`, `events/*.jsonl`, `state/argos.state.json`, `views/ui_export/captain_feed.jsonl`).
+- Agentes chat depositan un unico markdown en `inbox_deposits/`.
+- El heartbeat de `argos-api` procesa el deposito al detectarlo, integra secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]` y mueve el archivo a `inbox_deposits/processed/`.
+- Red de seguridad: cada hora se reprocesan pendientes y se marca `stale` en `ia_status` cuando un agente supera 60 minutos sin actividad.
