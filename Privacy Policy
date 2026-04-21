@@ -1,0 +1,31 @@
+# Argos Privacy Policy
+
+Last updated: 13:10 21-04-2026
+
+Argos is a personal experimental system for orchestrating AI agents and workflows.
+
+## Data Usage
+Argos may process:
+- Messages sent by the user
+- Work packet data
+- Operational logs (captain feed, closures, updates)
+
+This data is used solely for:
+- Executing requested operations
+- Maintaining system state
+- Coordinating between AI agents
+
+## Storage
+Data may be stored temporarily or persistently in local or remote infrastructure controlled by the system operator.
+
+## Sharing
+No data is sold or shared with third parties, except where required for system operation (e.g., API providers like OpenAI).
+
+## Security
+Basic measures are taken to protect data, but this system is experimental and not intended for sensitive information.
+
+## User Responsibility
+Users should not input confidential or sensitive personal data into Argos.
+
+## Contact
+For questions, contact: [your email or leave placeholder]
