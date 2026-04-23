@@ -413,21 +413,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function renderIaStatus(tasks) {
-        const activeTasks = tasks.filter((task) => task.status !== 'done');
+        const activeTasks = tasks.filter((task) => task.status === 'in_progress' || task.zone === 'in_progress');
         // Usar el cache actualizado por hydrate y SSE — no hacer fetch redundante
         const apiStatusMap = cachedIaStatus;
-        const genericQueue = activeTasks.filter((task) => isGenericOwner(task.owner));
-        let genericIndex = 0;
 
         const assignTask = (agentName) => {
             const direct = activeTasks.find((task) => isTaskAssignedTo(task, agentName));
             if (direct) return direct;
-
-            if (genericIndex < genericQueue.length) {
-                const sharedTask = genericQueue[genericIndex];
-                genericIndex += 1;
-                return sharedTask;
-            }
             return null;
         };
 
@@ -514,8 +506,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const pb = priorityMap[b.priority] ?? 2;
             if (pa !== pb) return pa - pb;
 
-            // 3. Sort by creation time (descending)
-            return (b.created_at_ms || 0) - (a.created_at_ms || 0);
+            // 3. Sort by recency (created_at, fallback mtime) descending
+            const aRecency = Math.max(a.created_at_ms || 0, a.mtimeMs || 0);
+            const bRecency = Math.max(b.created_at_ms || 0, b.mtimeMs || 0);
+            return bRecency - aRecency;
         });
 
         latestVisibleTasks = visibleTasks;

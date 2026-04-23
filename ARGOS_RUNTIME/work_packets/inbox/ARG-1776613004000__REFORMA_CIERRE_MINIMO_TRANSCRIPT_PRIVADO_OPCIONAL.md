@@ -32,9 +32,15 @@ TAREAS:
    - Decisiones arquitectónicas que no caben en el trilog
    - Solicitud explícita del Capitán
 
+NOTA ADICIONAL (2026-04-23, Capitán):
+Los transcripts, cuando se necesiten, se acceden a través de los archivos de conversación nativos
+de cada IA — no se requiere infraestructura adicional de recuperación. El packet ARG-1776813558224
+(recuperar transcripts) queda absorbido por esta decisión y puede cerrarse.
+
 ENTREGABLE:
 - INTER_AI_PROTOCOL.md sección 3 actualizada.
 - ARGOS_QUICKSTART.md sección Cierre actualizada.
 - Instrucciones de agentes actualizadas.
 - Confirmación de que /api/trilog acepta transcriptRef vacío.
+- ARG-1776813558224 marcado como done (absorbido).
 [/WORK_PACKET]

@@ -2134,7 +2134,7 @@ function markStaleAgentsFromDeposits(staleMinutes = 60) {
                 timestamp: nowIso(),
                 kind: 'crew_update',
                 speaker: 'crew',
-                sender_name: 'Codex',
+                sender_name: agentKey,
                 sender_role: 'agent',
                 audience: 'captain',
                 source: 'deposit_heartbeat',
@@ -3935,17 +3935,10 @@ function inferIaStatusFromTasks(base) {
     const activeTasks = loadTasksFromZone('in_progress')
         .filter((task) => task.status === 'in_progress' || task.status === 'open')
         .sort((a, b) => b.mtimeMs - a.mtimeMs);
-    const genericQueue = activeTasks.filter((task) => isIaGenericOwner(task.owner));
-    let genericIndex = 0;
     const assignTask = (agentName) => {
         const direct = activeTasks.find((task) => isTaskAssignedToAgent(task, agentName));
         if (direct)
             return direct;
-        if (genericIndex < genericQueue.length) {
-            const sharedTask = genericQueue[genericIndex];
-            genericIndex += 1;
-            return sharedTask;
-        }
         return null;
     };
     // Índice de packets realmente en in_progress/ — validación rápida por nombre de fichero
@@ -4094,6 +4087,13 @@ function parseVectorMarkdown() {
                     const simpleMatch = trimmed.match(/^[-*]\s+(.*)/);
                     if (simpleMatch) {
                         currentCategory.goals.push({ status: 'todo', text: simpleMatch[1].trim() });
+                    }
+                    else {
+                        // 4. Fallback: lineas de parrafo dentro de una categoria
+                        const paragraph = trimmed.replace(/^>\s*/, '').trim();
+                        if (paragraph !== '') {
+                            currentCategory.goals.push({ status: 'todo', text: paragraph });
+                        }
                     }
                 }
             }
@@ -5278,19 +5278,20 @@ app.get('/api/tasks', (req, res) => {
         // 1) Pendientes (open/in_progress): prioridad desc (high > mid > low), luego recencia desc
         // 2) Completadas al final, por recencia desc
         const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
+        const recencyMs = (task) => Math.max(task.created_at_ms || 0, task.mtimeMs || 0);
         const byPriorityThenRecency = (a, b) => {
             const pa = PRIORITY_RANK[a.priority] ?? 1;
             const pb = PRIORITY_RANK[b.priority] ?? 1;
             if (pb !== pa)
                 return pb - pa; // mayor prioridad primero
-            return b.created_at_ms - a.created_at_ms; // misma prioridad → mas reciente primero
+            return recencyMs(b) - recencyMs(a); // misma prioridad → mas reciente primero
         };
         const pendingTasks = tasks
             .filter((task) => task.status !== 'done')
             .sort(byPriorityThenRecency);
         const doneTasks = tasks
             .filter((task) => task.status === 'done')
-            .sort((a, b) => b.created_at_ms - a.created_at_ms);
+            .sort((a, b) => recencyMs(b) - recencyMs(a));
         const orderedTasks = [...pendingTasks, ...doneTasks];
         res.json({
             tasks: orderedTasks
