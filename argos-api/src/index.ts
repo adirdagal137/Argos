@@ -6459,6 +6459,46 @@ app.post('/api/ia/status', (req: Request, res: Response) => {
   return res.json({ status: 'ok', agent, ia_status: status });
 });
 
+// ============ ENDPOINT: GET /api/ia/bootstrap ============
+app.get('/api/ia/bootstrap', (req: Request, res: Response) => {
+  const auth = authenticateAgentRequest(req);
+  if (!auth.ok) {
+    return res.status(auth.status).json({ error: auth.error });
+  }
+
+  const agentName = normalizeAgentName(auth.tokenAgent) || auth.tokenAgent;
+  const state = readArgosState();
+  const iaStatus = inferIaStatusFromTasks(readIaStatus(state));
+  const tunnel = resolvePublicTunnelInfo();
+
+  const inboxPackets = loadTasksFromZone('inbox').map((task) => ({
+    id: task.id,
+    title: task.title,
+    assigned_to: task.owner,
+    priority: task.priority,
+    status: task.status,
+    created: task.created_at_ms ? new Date(task.created_at_ms).toISOString().split('T')[0] : ''
+  }));
+
+  const vector = readTextFileSafe(ARGOS_VECTOR_PATH);
+
+  const iaStatusMap = iaStatus as Record<string, unknown>;
+  const myStatus = iaStatusMap[agentName]
+    ?? Object.entries(iaStatusMap).find(([k]) => k.toLowerCase() === agentName.toLowerCase())?.[1]
+    ?? { status: 'standby', task: '', stale: false };
+
+  return res.json({
+    agent: agentName,
+    timestamp: nowIso(),
+    tunnel_url: tunnel.url || null,
+    runtime: RUNTIME_DIR,
+    ia_status: iaStatus,
+    inbox_packets: inboxPackets,
+    vector,
+    my_status: myStatus
+  });
+});
+
 app.post('/api/tasks', (req: Request, res: Response) => {
   try {
     if (!ensureCaptainUiWrite(req, res)) return;
