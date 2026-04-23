@@ -45,8 +45,31 @@ const EXTERNAL_TRANSCRIPTS_DIR = path_1.default.join(TRANSCRIPTS_DIR, 'external'
 const SECRETS_DIR = path_1.default.join(RUNTIME_DIR, 'secrets');
 const AGENT_TOKENS_PATH = path_1.default.join(SECRETS_DIR, 'agent_tokens.json');
 const ARGOS_REMOTE_CLOSURES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.remote_closures.jsonl');
+const INTER_AI_PROTOCOL_PATH = path_1.default.join(RUNTIME_DIR, 'INTER_AI_PROTOCOL.md');
+const ARGOS_VECTOR_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_VECTOR.md');
+const ARGOS_QUICKSTART_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_QUICKSTART.md');
+const NGROK_QUICK_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'ngrok.quick.json');
+const CLOUDFLARED_QUICK_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'cloudflared.quick.json');
+const EXTERNAL_WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const LOCAL_ONLY_API_PATHS = new Set(['/admin/rotate-token']);
 app.use(express_1.default.static(DASHBOARD_DIR));
 app.use('/api/zoom', zoom_routes_1.default);
+app.use('/api', (req, res, next) => {
+    const method = String(req.method || '').toUpperCase();
+    if (!EXTERNAL_WRITE_METHODS.has(method))
+        return next();
+    if (isTrustedLocalRequest(req))
+        return next();
+    if (LOCAL_ONLY_API_PATHS.has(req.path)) {
+        return res.status(403).json({ error: 'Endpoint disponible solo en localhost' });
+    }
+    const auth = authenticateAgentRequest(req);
+    if (!auth.ok) {
+        return res.status(auth.status).json({ error: auth.error });
+    }
+    res.locals.authenticatedAgent = auth.tokenAgent;
+    return next();
+});
 const sseClients = new Map();
 let clientIdCounter = 0;
 function publishEvent(topic, payload, excludeModule) {
@@ -248,7 +271,7 @@ function resolveFeedRecordId(record) {
 function buildChatMessage(record) {
     const timestamp = normaliseText(record.timestamp) || new Date().toISOString();
     const id = resolveFeedRecordId(record);
-    const sender = inferSenderName(record) || 'Tripulacion';
+    const sender = inferSenderName(record) || 'DeepSeek';
     const speaker = normaliseText(record.speaker).toLowerCase();
     const senderRole = normaliseText(record.sender_role).toLowerCase();
     const type = speaker === 'crew' || senderRole === 'agent' ? 'received' : 'sent';
@@ -790,7 +813,71 @@ function isAntigravityRole(role) {
     return value.includes('antigravity') || value.includes('gemini');
 }
 function normaliseText(value) {
-    return typeof value === 'string' ? value.trim() : '';
+    return typeof value === 'string' ? value.replace(/\uFEFF/g, '').trim() : '';
+}
+function mojibakeScore(value) {
+    return (value.match(/[ÃÂâð\uFFFD]/g) || []).length;
+}
+function repairMojibake(value) {
+    let out = value;
+    for (let i = 0; i < 2; i += 1) {
+        const currentScore = mojibakeScore(out);
+        if (currentScore === 0)
+            break;
+        try {
+            const decoded = Buffer.from(out, 'latin1').toString('utf8');
+            if (!decoded || decoded === out)
+                break;
+            const decodedScore = mojibakeScore(decoded);
+            if (decodedScore >= currentScore)
+                break;
+            out = decoded;
+        }
+        catch {
+            break;
+        }
+    }
+    return out;
+}
+function cleanupReplacementArtifacts(value) {
+    let out = value;
+    out = out
+        .replace(/â€”/g, '-')
+        .replace(/â€“/g, '-')
+        .replace(/Â·/g, '·')
+        .replace(/Â¿/g, '¿')
+        .replace(/Â¡/g, '¡');
+    const replacements = [
+        [/\uFFFDnico/gi, 'unico'],
+        [/misi\uFFFDn/gi, 'mision'],
+        [/Tripulaci\uFFFDn/gi, 'Tripulacion'],
+        [/coordinaci\uFFFDn/gi, 'coordinacion'],
+        [/integraci\uFFFDn/gi, 'integracion'],
+        [/implementaci\uFFFDn/gi, 'implementacion'],
+        [/actualizaci\uFFFDn/gi, 'actualizacion'],
+        [/autenticaci\uFFFDn/gi, 'autenticacion'],
+        [/validaci\uFFFDn/gi, 'validacion'],
+        [/comunicaci\uFFFDn/gi, 'comunicacion'],
+        [/operaci\uFFFDn/gi, 'operacion'],
+        [/gesti\uFFFDn/gi, 'gestion'],
+        [/conexi\uFFFDn/gi, 'conexion'],
+        [/sesi\uFFFDn/gi, 'sesion'],
+        [/acci\uFFFDn/gi, 'accion'],
+        [/tensi\uFFFDn/gi, 'tension'],
+        [/fricci\uFFFDn/gi, 'friccion'],
+        [/p\uFFFDblica/gi, 'publica'],
+        [/t\uFFFDnel/gi, 'tunel']
+    ];
+    replacements.forEach(([pattern, replacement]) => {
+        out = out.replace(pattern, replacement);
+    });
+    return out.replace(/\uFFFD/g, '');
+}
+function normaliseHumanText(value) {
+    const normalized = normaliseText(value);
+    if (normalized === '')
+        return '';
+    return cleanupReplacementArtifacts(repairMojibake(normalized));
 }
 function cleanMarkdownText(value) {
     return (value || '').replace(/\*\*/g, '').replace(/__/g, '').replace(/\[/g, '').replace(/\]/g, '').trim();
@@ -798,21 +885,39 @@ function cleanMarkdownText(value) {
 /**
  * Normalizador de Identidad: Unifica nombres de agentes para consistencia visual (CSS/Icons)
  */
+function resolveCanonicalCrewVoice(rawName, fallback = 'DeepSeek') {
+    const cleaned = cleanMarkdownText(rawName || '').trim();
+    const agent = normalizeAgentName(cleaned);
+    if (agent)
+        return agent;
+    const lower = cleaned.toLowerCase();
+    const genericVoice = lower === '' ||
+        lower.includes('sistema') ||
+        lower.includes('tripulacion') ||
+        lower.includes('crew') ||
+        lower.includes('cualquiera') ||
+        lower.includes('dispatcher') ||
+        lower.includes('despachador') ||
+        lower.includes('iat') ||
+        lower.includes('chatagent') ||
+        lower.includes('externalagent') ||
+        lower.includes('captain') ||
+        lower.includes('capitan') ||
+        lower.includes('ruben thor') ||
+        lower.includes('thor');
+    if (genericVoice)
+        return fallback;
+    return fallback;
+}
 function normalizeActorName(rawName) {
-    const actorLower = cleanMarkdownText(rawName || '').toLowerCase();
-    if (actorLower.includes('antigravity'))
-        return 'Antigravity';
-    if (actorLower.includes('claude'))
-        return 'Claude';
-    if (actorLower.includes('codex'))
-        return 'Codex';
-    if (actorLower.includes('capitan'))
-        return 'Capitan';
-    if (actorLower === 'dispatcher' || actorLower === 'despachador')
-        return 'Dispatcher';
-    if (actorLower === 'lola')
-        return 'Lola';
-    return rawName || 'Tripulacion';
+    // Primero intenta resolver al nombre canónico de agente activo
+    const agent = normalizeAgentName(rawName || '');
+    if (agent)
+        return agent;
+    // Si no es un agente activo reconocido, preservar el nombre original limpio
+    // en lugar de colapsar a 'DeepSeek' — evita contaminación del trilog/logbook
+    const cleaned = cleanMarkdownText(rawName || '').trim();
+    return cleaned || 'Sistema';
 }
 /**
  * Utility: Robust token estimation (standard ratio: 1 token approx 4 characters)
@@ -1192,6 +1297,96 @@ function ensureAgentTokensFile() {
 function readAgentTokens() {
     return ensureAgentTokensFile();
 }
+function extractAgentTokenFromRequest(req) {
+    const authHeader = normaliseText(req.header('Authorization'));
+    if (authHeader.toLowerCase().startsWith('bearer ')) {
+        return normaliseText(authHeader.slice(7));
+    }
+    const directToken = normaliseText(req.header('X-Argos-Agent-Token'));
+    if (directToken !== '')
+        return directToken;
+    const bootstrapToken = normaliseText(req.header('X-Bootstrap-Token'));
+    if (bootstrapToken !== '')
+        return bootstrapToken;
+    if (typeof req.query.token === 'string') {
+        const queryToken = normaliseText(req.query.token);
+        if (queryToken !== '')
+            return queryToken;
+    }
+    return '';
+}
+function resolveAgentByTokenValue(providedToken, tokens) {
+    const entries = Object.entries(tokens);
+    for (const [agentKey, tokenValue] of entries) {
+        const expectedToken = normaliseText(tokenValue);
+        if (expectedToken === '')
+            continue;
+        if (secureTokenEquals(expectedToken, providedToken)) {
+            return agentKey;
+        }
+    }
+    return null;
+}
+function authenticateAgentRequest(req, requiredAgentRaw = '') {
+    const providedToken = extractAgentTokenFromRequest(req);
+    if (providedToken === '') {
+        return {
+            ok: false,
+            status: 401,
+            error: 'Falta autenticacion. Formatos aceptados: Authorization: Bearer <token> | X-Argos-Agent-Token: <token> | X-Bootstrap-Token: <token> | ?token=<token>'
+        };
+    }
+    const tokens = readAgentTokens();
+    const requiredAgent = normaliseText(requiredAgentRaw);
+    if (requiredAgent !== '') {
+        const tokenKey = resolveRemoteAgentTokenKey(requiredAgent);
+        const expectedToken = normaliseText(tokens[tokenKey]);
+        if (expectedToken === '' || !secureTokenEquals(expectedToken, providedToken)) {
+            return { ok: false, status: 401, error: `Token invalido para agente ${tokenKey}` };
+        }
+        return { ok: true, tokenAgent: tokenKey, token: providedToken };
+    }
+    const matchedAgent = resolveAgentByTokenValue(providedToken, tokens);
+    if (!matchedAgent) {
+        return { ok: false, status: 401, error: 'Token de agente invalido' };
+    }
+    return { ok: true, tokenAgent: matchedAgent, token: providedToken };
+}
+function ensureExternalActorMatchesToken(req, res, actorRaw) {
+    if (isTrustedLocalRequest(req))
+        return true;
+    const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
+    if (tokenAgent === '') {
+        res.status(401).json({ error: 'Token de agente requerido para escritura externa' });
+        return false;
+    }
+    const actor = normaliseText(actorRaw);
+    if (actor === '')
+        return true;
+    const actorKey = resolveRemoteAgentTokenKey(actor);
+    if (actorKey !== tokenAgent) {
+        res.status(403).json({ error: `Token de ${tokenAgent} no autorizado para actuar como ${actorKey}` });
+        return false;
+    }
+    return true;
+}
+function ensureCaptainUiWrite(req, res) {
+    const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
+    if (tokenAgent !== '') {
+        res.status(403).json({ error: `Endpoint reservado al Capitan/UI local. El agente ${tokenAgent} debe usar /api/remote/*.` });
+        return false;
+    }
+    if (!isTrustedLocalRequest(req)) {
+        res.status(403).json({ error: 'Endpoint reservado al Capitan/UI local (loopback).' });
+        return false;
+    }
+    const captainUiHeader = normaliseText(req.header('X-Argos-Captain-UI'));
+    if (captainUiHeader !== '1') {
+        res.status(403).json({ error: 'Falta cabecera X-Argos-Captain-UI en accion de Capitan.' });
+        return false;
+    }
+    return true;
+}
 function secureTokenEquals(expectedToken, providedToken) {
     const expected = Buffer.from(expectedToken, 'utf-8');
     const provided = Buffer.from(providedToken, 'utf-8');
@@ -1204,6 +1399,13 @@ function isLocalhostRequest(req) {
     const forwarded = Array.isArray(forwardedRaw)
         ? forwardedRaw[0]
         : String(forwardedRaw || '').split(',')[0].trim();
+    const hasForwardedHeader = Array.isArray(forwardedRaw)
+        ? forwardedRaw.some((value) => normaliseText(value) !== '')
+        : normaliseText(forwardedRaw) !== '';
+    // Si la peticion viene por un proxy/tunnel (x-forwarded-for), NO se considera localhost.
+    // Esto evita que trafico externo via ngrok/cloudflare herede privilegios locales.
+    if (hasForwardedHeader)
+        return false;
     const candidates = [
         normaliseText(req.ip),
         normaliseText(req.socket?.remoteAddress),
@@ -1211,7 +1413,24 @@ function isLocalhostRequest(req) {
     ]
         .map((value) => value.replace(/^::ffff:/, '').toLowerCase())
         .filter(Boolean);
-    return candidates.some((value) => value === '127.0.0.1' || value === '::1' || value === 'localhost');
+    if (candidates.length === 0)
+        return false;
+    const isLocalValue = (value) => value === '127.0.0.1' || value === '::1' || value === 'localhost';
+    return candidates.every(isLocalValue);
+}
+function isLoopbackHostHeader(req) {
+    const forwardedHostRaw = req.headers['x-forwarded-host'];
+    const forwardedHost = Array.isArray(forwardedHostRaw)
+        ? normaliseText(forwardedHostRaw[0])
+        : normaliseText(forwardedHostRaw).split(',')[0].trim();
+    const hostHeader = (forwardedHost || normaliseText(req.headers.host)).toLowerCase();
+    if (hostHeader === '')
+        return false;
+    const hostOnly = hostHeader.split(':')[0].trim();
+    return hostOnly === 'localhost' || hostOnly === '127.0.0.1' || hostOnly === '::1' || hostOnly === '[::1]';
+}
+function isTrustedLocalRequest(req) {
+    return isLocalhostRequest(req) && isLoopbackHostHeader(req);
 }
 function parseRemoteClosurePayload(rawBody) {
     const body = rawBody && typeof rawBody === 'object' ? rawBody : null;
@@ -1567,14 +1786,25 @@ function parseDepositTimestampIso(raw) {
     const cleaned = normaliseText(raw);
     if (cleaned === '')
         return nowIso();
+    const tryParse = (ms) => {
+        if (Number.isNaN(ms))
+            return null;
+        // Rechazar timestamps más de 30 minutos en el futuro — probablemente sintéticos/hardcodeados
+        const nowMs = Date.now();
+        if (ms > nowMs + 30 * 60 * 1000)
+            return null;
+        return new Date(ms).toISOString();
+    };
     const parsedNative = Date.parse(cleaned);
-    if (!Number.isNaN(parsedNative))
-        return new Date(parsedNative).toISOString();
+    const nativeResult = tryParse(parsedNative);
+    if (nativeResult !== null)
+        return nativeResult;
     const match = cleaned.match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
     if (match) {
         const parsed = Date.parse(`${match[1]}T${match[2]}:00`);
-        if (!Number.isNaN(parsed))
-            return new Date(parsed).toISOString();
+        const matchResult = tryParse(parsed);
+        if (matchResult !== null)
+            return matchResult;
     }
     return nowIso();
 }
@@ -2653,7 +2883,7 @@ function recordTriLogViolation(packetId, subject, owner, missingLanes) {
     })
         .slice(0, 16);
     const glitchId = getNextGlitchId();
-    const canonicalOwner = normalizeAgentName(owner) || owner || 'Sistema';
+    const canonicalOwner = normalizeAgentName(owner) || normalizeActorName(owner || '');
     const details = `Lane(s) ausentes: ${missing}. Owner detectado: ${canonicalOwner}. Subject: ${subject}`;
     const nextStep = 'Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.';
     appendJsonlRecord(ARGOS_GLITCHES_PATH, {
@@ -2790,15 +3020,36 @@ function runMergeHistory() {
             fs_1.default.mkdirSync(historyDir, { recursive: true });
         const timeline = [];
         const timelineIndex = new Set();
+        const packetActorIndex = new Map();
+        const captainInputPacketIds = buildCaptainInputPacketIdSet();
+        if (fs_1.default.existsSync(ARGOS_EVENTS_PATH)) {
+            const rawEvents = fs_1.default.readFileSync(ARGOS_EVENTS_PATH, 'utf-8').split('\n').map((line) => line.trim()).filter(Boolean);
+            rawEvents.forEach((line) => {
+                try {
+                    const rec = JSON.parse(line);
+                    const packetId = normaliseText(rec.packet_id) || normaliseText(rec.refId) || normaliseText(rec.packetId);
+                    if (packetId === '')
+                        return;
+                    const actorRaw = normaliseText(rec.actor) || normaliseText(rec.sender_name);
+                    const actor = normalizeActorName(actorRaw);
+                    if (actor === 'DeepSeek')
+                        return;
+                    packetActorIndex.set(packetId, actor);
+                }
+                catch {
+                    // ignore invalid event lines
+                }
+            });
+        }
         const addEntry = (entry, stream) => {
             const ts = entry.timestamp_label || entry.timestamp || '';
-            const actor = entry.actor || '';
+            const actor = normalizeActorName(entry.actor || '');
             const summary = (entry.summary || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
             const key = `${stream}|${ts}|${actor}|${summary}`;
             if (timelineIndex.has(key))
                 return;
             timelineIndex.add(key);
-            timeline.push({ ...entry, stream });
+            timeline.push({ ...entry, actor, stream });
         };
         // 1. Absorber Legacy Data (de legacy_history_data.ts)
         legacy_history_data_1.manualDraftGlobals.forEach(e => addEntry(e, 'global'));
@@ -2826,9 +3077,9 @@ function runMergeHistory() {
                 const tsMatch = block.match(/\[(\d{4}[-/\.]\d{1,2}[-/\.]\d{1,2}(?:\s+\d{2}:\d{2})?.*?)\]/);
                 if (tsMatch) {
                     const tsLabel = tsMatch[1];
-                    const actorMatch = block.match(/VOZ\s+([^:\n\*]+)/) || block.match(/ACTOR\s*:\s*([^:\n\*]+)/);
-                    const actor = actorMatch ? actorMatch[1].trim() : 'Sistema';
-                    const summaryMatch = block.match(/(?:ACCION|ACCIÓN|MISION|MISIÓN|MISSION|SUBJECT)\s*[:\*]+\s*([^:\n\*]+)/);
+                    const actorMatch = block.match(/(?:\*\*\s*)?VOZ\s+([^:\n\*]+)/i) || block.match(/(?:\*\*\s*)?ACTOR\s*:\s*([^\n\*]+)/i);
+                    const actor = normalizeActorName(actorMatch ? actorMatch[1].trim() : '');
+                    const summaryMatch = block.match(/(?:ACCION|ACCIÓN|MISION|MISIÓN|MISSION|SUBJECT)\s*[:\*]+\s*([^\n\*]+)/i);
                     const summary = summaryMatch ? summaryMatch[1].trim() : 'Registro';
                     addEntry({ timestamp_label: tsLabel, actor, summary, status: 'done', source: 'ARGOS_GLOBAL_LOG.md' }, 'global');
                 }
@@ -2842,11 +3093,22 @@ function runMergeHistory() {
                 const content = fs_1.default.readFileSync(path_1.default.join(doneDir, f), 'utf-8');
                 const tsMatch = content.match(/COMPLETED_AT:\s*(\d{4}-\d{2}-\d{2}(?:T|\s+)\d{2}:\d{2})/);
                 const ts = tsMatch ? tsMatch[1] : fs_1.default.statSync(path_1.default.join(doneDir, f)).mtime.toISOString().slice(0, 16).replace('T', ' ');
-                const actorMatch = content.match(/EXECUTED_BY:\s*([^:\n\*]+)/);
-                const actor = actorMatch ? actorMatch[1].trim() : 'Tripulacion';
+                const packetIdFromFile = (content.match(/ID:\s*([^\n]+)/i)?.[1] || '').trim();
+                if (packetIdFromFile !== '' && captainInputPacketIds.has(packetIdFromFile)) {
+                    return;
+                }
+                const actorMatch = content.match(/EXECUTED_BY:\s*([^\n]+)/i) ||
+                    content.match(/ROLE_REQUESTED:\s*([^\n]+)/i) ||
+                    content.match(/OWNER:\s*([^\n]+)/i);
+                let actor = normalizeActorName(actorMatch ? actorMatch[1].trim() : '');
+                if (actor === 'DeepSeek' && packetIdFromFile !== '') {
+                    const actorFromEvents = packetActorIndex.get(packetIdFromFile);
+                    if (actorFromEvents)
+                        actor = actorFromEvents;
+                }
                 const summaryMatch = content.match(/SUMMARY:([^\n]+)/) || content.match(/SUBJECT:\s*([^\n]+)/);
                 const summary = summaryMatch ? summaryMatch[1].trim() : `Tarea completada: ${f}`;
-                addEntry({ timestamp_label: ts, actor, summary, status: 'done', source: `work_packets/done/${f}` }, 'global');
+                addEntry({ id: packetIdFromFile, timestamp_label: ts, actor, summary, status: 'done', source: `work_packets/done/${f}` }, 'global');
             });
         }
         // 5. Ordenar y Guardar
@@ -2924,10 +3186,51 @@ function inferSenderName(record) {
         return actorName;
     const source = normaliseText(record.source).toLowerCase();
     if (source.includes('captain'))
-        return 'Capitan';
+        return 'Ruben Thor';
     if (source.includes('agent'))
-        return 'Tripulacion';
-    return '';
+        return 'DeepSeek';
+    return 'DeepSeek';
+}
+function buildCaptainInputPacketIdSet() {
+    const ids = new Set();
+    try {
+        if (!fs_1.default.existsSync(ARGOS_TOKENS_PATH))
+            return ids;
+        const lines = fs_1.default.readFileSync(ARGOS_TOKENS_PATH, 'utf-8')
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line !== '');
+        lines.forEach((line) => {
+            try {
+                const rec = JSON.parse(line);
+                const channel = normaliseText(rec.channel).toLowerCase();
+                const agent = normaliseText(rec.agent).toLowerCase();
+                const scope = normaliseText(rec.scope).toLowerCase();
+                const refId = normaliseText(rec.refId);
+                if (refId === '')
+                    return;
+                const isCaptainInput = channel === 'captain_input' ||
+                    agent.includes('captain (input)') ||
+                    (scope === 'input' && agent.includes('captain'));
+                if (isCaptainInput)
+                    ids.add(refId);
+            }
+            catch {
+                // ignore invalid token rows
+            }
+        });
+    }
+    catch {
+        // ignore filesystem errors
+    }
+    return ids;
+}
+function extractPacketIdFromWorkPacketSource(source) {
+    const src = normaliseText(source);
+    if (src === '')
+        return '';
+    const match = src.match(/work_packets[\/\\]done[\/\\]([A-Z0-9-]+?)__/i);
+    return match ? normaliseText(match[1]) : '';
 }
 // Extrae el primer ID de work packet mencionado en un bloque de texto
 // Patrón: ARG-XXXX o ARGOS-XXXX (con guiones, sin guiones bajos para no capturar nombres de archivo)
@@ -2969,15 +3272,16 @@ function parseArgosMarkdownStream(filePath, idPrefix) {
             '';
         const ts = parseTimestampLabel(timestampRaw);
         // 3. Extracción de Voz (Actor)
-        const rawActor = block.match(/^\s*VOZ\s+([^:\n*]+)/im)?.[1]?.trim() ||
+        const rawActor = block.match(/\bVOZ\s+([^:\n*]+)/i)?.[1]?.trim() ||
+            block.match(/^\s*(?:\*\*\s*)?ACTOR\s*:\s*([^\n*]+)/im)?.[1]?.trim() ||
             headerActor ||
-            (block.includes('CAPITAN') ? 'Capitan' : 'Sistema');
+            '';
         const actor = normalizeActorName(rawActor);
         // 4. Extracción de Estado
         const status = block.match(/^\s*\*\*ESTADO(?:\s+\d+)?\s*:\*\*\s*([^\n]+)/im)?.[1]?.trim() ||
             'done';
         // 5. Extracción de Resumen (Misión/Subject)
-        const summary = block.match(/\*\*(?:ACCION|ACCIÓN|MISION|MISIÓN|MISSION|SUBJECT|ASUNTO)\s*:\*\*\s*([^\n]+)/i)?.[1]?.trim() ||
+        const summary = block.match(/\*\*(?:ACCION|ACCIÓN|MISION|MISIÓN|MISSION|SUBJECT|ASUNTO)\s*:\*\*\s*([^\n\*]+)/i)?.[1]?.trim() ||
             block.match(/\*\*(?:CATEGORIA|TAREA|OBJETIVO)\s*:\*\*\s*([^\n]+)/i)?.[1]?.trim() ||
             block.split('\n')[0].replace(/[\*\[\]]/g, '').trim() ||
             'Registro actualizado';
@@ -3034,15 +3338,29 @@ function parseArgosEventsStream(filePath, idPrefix) {
                     normaliseText(record.next_step),
                     normaliseText(record.nextStep)
                 ].join(' '));
+            const detailsText = normaliseText(record.verification) || normaliseText(record.details);
+            const summaryText = normaliseText(record.summary) || normaliseText(record.type) || 'Evento';
+            const rawActor = normaliseText(record.actor) || normaliseText(record.sender_name);
+            let actor = normalizeActorName(rawActor);
+            // Si el actor no es un agente canónico activo, intentar extraer owner de los detalles
+            const canonicalAgents = new Set(['Claude', 'Antigravity', 'Codex', 'DeepSeek']);
+            if (!canonicalAgents.has(actor)) {
+                const ownerFromDetails = detailsText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
+                    summaryText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
+                    '';
+                if (ownerFromDetails !== '') {
+                    actor = normalizeActorName(ownerFromDetails);
+                }
+            }
             parsed.push({
                 id: packetId,
                 timestamp_label: ts.label,
                 timestamp_precision: ts.precision,
                 timestamp: normaliseText(record.timestamp),
-                actor: normalizeActorName(normaliseText(record.actor) || normaliseText(record.sender_name)),
+                actor,
                 status: normaliseText(record.status) || 'done',
-                summary: normaliseText(record.summary) || normaliseText(record.type) || 'Evento',
-                details: normaliseText(record.verification) || normaliseText(record.details),
+                summary: summaryText,
+                details: detailsText,
                 next_step: normaliseText(record.next_step) || normaliseText(record.nextStep) || normaliseText(record.follow_up) || normaliseText(record.next_action),
                 errors: normaliseText(record.errors) || normaliseText(record.learnings) || normaliseText(record.bug_details) || normaliseText(record.error_base),
                 risks: normaliseText(record.risks) || normaliseText(record.dangers),
@@ -3135,25 +3453,31 @@ function enrichArgosStreams(snapshot) {
     if (!argos)
         return clone;
     const wpCache = buildWorkPacketCache();
+    const captainInputPacketIds = buildCaptainInputPacketIdSet();
+    const isCaptainOriginEntry = (entry) => {
+        const entryId = normaliseText(entry.id || '');
+        const sourcePacketId = extractPacketIdFromWorkPacketSource(normaliseText(entry.source || ''));
+        const packetId = entryId || sourcePacketId;
+        if (packetId === '')
+            return false;
+        return captainInputPacketIds.has(packetId);
+    };
     const streamMap = new Map((argos.streams || []).map((stream) => [stream.id, stream]));
     const loadStreamEntries = (filename, streamType, parser) => {
         const livePath = streamType === 'glitch'
             ? path_1.default.join(RUNTIME_DIR, 'events', filename)
             : path_1.default.join(RUNTIME_DIR, filename);
-        const allPaths = [livePath, ...findArchivedFiles(filename)];
         const combined = [];
-        allPaths.forEach(fp => {
-            if (fs_1.default.existsSync(fp)) {
-                combined.push(...parser(fp, `argos-${streamType}-live`));
-            }
-        });
+        if (fs_1.default.existsSync(livePath)) {
+            combined.push(...parser(livePath, `argos-${streamType}-live`));
+        }
         return combined;
     };
     const liveLogEntries = loadStreamEntries('ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
     const liveShadowEntries = loadStreamEntries('ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
     const liveGlitchEntries = loadStreamEntries('argos.glitches.jsonl', 'glitch', parseArgosEventsStream);
     const processEntries = (entries, streamId) => {
-        return entries.map((entry) => {
+        const next = entries.map((entry) => {
             const id = normaliseText(entry.id || '');
             const wp = id ? wpCache.get(id) : null;
             const currentSummary = entry.summary || '';
@@ -3163,7 +3487,7 @@ function enrichArgosStreams(snapshot) {
                 entry.summary = wp.subject;
             }
             // 2. Enriquecimiento de Voz (Actor)
-            if (wp && wp.owner && (currentActor === 'Sistema' || currentActor === 'Dispatcher' || currentActor === 'Tripulacion' || currentActor === 'IAT')) {
+            if (wp && wp.owner && (currentActor === 'Sistema' || currentActor === 'Dispatcher' || currentActor === 'Tripulacion' || currentActor === 'IAT' || currentActor === 'Cualquiera' || currentActor === 'Capitan')) {
                 entry.actor = normalizeActorName(wp.owner);
             }
             // 3. Dispatcher Log Guard (Solo en Log stream)
@@ -3178,8 +3502,10 @@ function enrichArgosStreams(snapshot) {
                     entry.summary = `[Voz No Autorizada] ${finalSummary}`;
                 }
             }
+            entry.actor = normalizeActorName(entry.actor || '');
             return entry;
         });
+        return next.filter((entry) => !isCaptainOriginEntry(entry));
     };
     const applyEntries = (streamId, entries) => {
         const processed = processEntries(entries, streamId);
@@ -3188,7 +3514,11 @@ function enrichArgosStreams(snapshot) {
         const stream = streamMap.get(streamId);
         if (!stream)
             return;
-        const combined = [...processed, ...(stream.entries || [])];
+        const existingSanitized = (stream.entries || []).map((entry) => ({
+            ...entry,
+            actor: normalizeActorName(entry.actor || '')
+        }));
+        const combined = [...processed, ...existingSanitized];
         const seen = new Set();
         const deduplicated = combined.filter(e => {
             const key = `${e.timestamp_label || ''}|${e.actor || ''}|${e.summary || ''}|${e.id || ''}`;
@@ -3202,7 +3532,7 @@ function enrichArgosStreams(snapshot) {
             const msB = b.sortMs || Date.parse(b.timestamp || b.timestamp_label || '1970-01-01') || 0;
             return msB - msA;
         });
-        stream.entries = deduplicated;
+        stream.entries = deduplicated.filter((entry) => !isCaptainOriginEntry(entry));
     };
     applyEntries('log', liveLogEntries);
     applyEntries('shadow', liveShadowEntries);
@@ -3212,6 +3542,21 @@ function enrichArgosStreams(snapshot) {
         ...m,
         streams: (m.streams || []).filter((s) => s.id !== 'interactions')
     }));
+    clone.modules = (clone.modules || []).map((module) => {
+        if (module.id !== 'argos')
+            return module;
+        return {
+            ...module,
+            streams: (module.streams || []).map((stream) => {
+                if (stream.id !== 'log' && stream.id !== 'shadow' && stream.id !== 'glitch')
+                    return stream;
+                return {
+                    ...stream,
+                    entries: (stream.entries || []).filter((entry) => !isCaptainOriginEntry(entry))
+                };
+            })
+        };
+    });
     clone.updated_at = new Date().toISOString();
     return clone;
 }
@@ -3710,30 +4055,173 @@ function loadBugsFromAllZones() {
     return bugs;
 }
 function parseVectorMarkdown() {
-    const vectorPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_VECTOR.md');
+    const vectorPath = ARGOS_VECTOR_PATH;
     if (!fs_1.default.existsSync(vectorPath))
         return { categories: [] };
-    const content = fs_1.default.readFileSync(vectorPath, 'utf-8');
-    const sections = content
-        .split(/^##\s+/m)
-        .map((section) => section.trim())
-        .filter((section) => section !== '');
-    const categories = sections
-        .map((section) => {
-        const lines = section.split('\n').map((line) => line.trim()).filter((line) => line !== '');
-        const title = lines[0] || '';
-        const goals = lines
-            .slice(1)
-            .filter((line) => /^-\s*\[[ xX]\]/.test(line))
-            .map((line) => {
-            const isDone = /\[[xX]\]/.test(line);
-            const text = line.replace(/-\s*\[[ xX]\]\s*/, '').trim();
-            return { text, status: isDone ? 'done' : 'pending' };
-        });
-        return { title, goals };
-    })
-        .filter((category) => category.title !== '' && !category.title.startsWith('#') && category.goals.length > 0);
-    return { categories };
+    const rawContent = fs_1.default.readFileSync(vectorPath, 'utf-8');
+    const content = normaliseHumanText(rawContent);
+    const lines = content.split(/\n/);
+    const categories = [];
+    let currentCategory = null;
+    lines.forEach((line) => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed === '---')
+            return;
+        // Detectar categorías (##)
+        if (trimmed.startsWith('## ')) {
+            currentCategory = { title: trimmed.replace('## ', '').trim(), goals: [] };
+            categories.push(currentCategory);
+            return;
+        }
+        if (currentCategory) {
+            // 1. Checklist items: - [ ] o - [x] o - [~]
+            const goalMatch = trimmed.match(/^[-*]\s*\[([ x~X])\]\s*(.*)/);
+            if (goalMatch) {
+                const char = goalMatch[1].toLowerCase();
+                currentCategory.goals.push({
+                    status: char === 'x' ? 'done' : (char === '~' ? 'in_progress' : 'todo'),
+                    text: goalMatch[2].trim()
+                });
+            }
+            else {
+                // 2. Numbered items: 1. Texto
+                const numberedMatch = trimmed.match(/^\d+\.\s+(.*)/);
+                if (numberedMatch) {
+                    currentCategory.goals.push({ status: 'todo', text: numberedMatch[1].trim() });
+                }
+                else {
+                    // 3. Simple list items: - Texto
+                    const simpleMatch = trimmed.match(/^[-*]\s+(.*)/);
+                    if (simpleMatch) {
+                        currentCategory.goals.push({ status: 'todo', text: simpleMatch[1].trim() });
+                    }
+                }
+            }
+        }
+    });
+    return { categories: categories.filter((c) => c.goals.length > 0) };
+}
+function readProtocolVersion() {
+    const protocolRaw = readTextFileSafe(INTER_AI_PROTOCOL_PATH);
+    if (protocolRaw === '')
+        return 'unknown';
+    const versionMatch = protocolRaw.match(/^##\s*v?([0-9]+(?:\.[0-9]+){1,2})\b/im);
+    if (!versionMatch)
+        return 'unknown';
+    return versionMatch[1];
+}
+function readVectorCurrentFocus() {
+    const vectorRaw = readTextFileSafe(ARGOS_VECTOR_PATH);
+    if (vectorRaw === '')
+        return '';
+    const sectionMatch = vectorRaw.match(/##\s*FOCO ACTUAL\s*\r?\n([\s\S]*?)(?=\r?\n##\s+|$)/i);
+    if (!sectionMatch)
+        return '';
+    const text = sectionMatch[1]
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line !== '' && line !== '---')
+        .join(' ');
+    return normaliseHumanText(text);
+}
+function resolvePublicTunnelInfo() {
+    const candidates = [
+        { provider: 'ngrok', path: NGROK_QUICK_STATE_PATH },
+        { provider: 'cloudflare', path: CLOUDFLARED_QUICK_STATE_PATH }
+    ];
+    let fallback = null;
+    for (const candidate of candidates) {
+        const row = readJsonFile(candidate.path, null);
+        if (!row || typeof row !== 'object')
+            continue;
+        const url = normaliseText(row.url);
+        if (url === '')
+            continue;
+        const provider = normaliseText(row.provider) || candidate.provider;
+        const status = normaliseText(row.status) || 'unknown';
+        if (!fallback) {
+            fallback = { url, provider, status };
+        }
+        if (status.toLowerCase() === 'running') {
+            return { url, provider, status };
+        }
+    }
+    return fallback || { url: '', provider: 'unknown', status: 'unknown' };
+}
+function readQuickstartSnippet(maxChars = 2000) {
+    const raw = readTextFileSafe(ARGOS_QUICKSTART_PATH);
+    if (raw === '')
+        return '';
+    if (raw.length <= maxChars)
+        return raw;
+    return `${raw.slice(0, maxChars)}\n...[truncated]`;
+}
+function readMarkdownTail(filePath, maxLines) {
+    const raw = readTextFileSafe(filePath);
+    if (raw === '')
+        return '';
+    const lines = raw.split(/\r?\n/);
+    return lines.slice(-Math.max(1, maxLines)).join('\n').trim();
+}
+function readCaptainFeedTail(limit = 5) {
+    const lines = readCaptainFeedLines(CAPTAIN_FEED_PATH);
+    const records = lines
+        .map((line) => line.parsed ? ensureCaptainFeedRecordId(line.parsed) : null)
+        .filter((row) => row !== null);
+    return records.slice(-Math.max(1, limit)).map((record) => ({
+        timestamp: normaliseText(record.timestamp),
+        sender_name: inferSenderName(record),
+        summary: normaliseText(record.summary),
+        refId: normaliseText(record.refId)
+    }));
+}
+function buildBootstrapPayload() {
+    const state = readArgosState();
+    const iaStatus = inferIaStatusFromTasks(readIaStatus(state));
+    const packetStates = state.packet_states && typeof state.packet_states === 'object'
+        ? state.packet_states
+        : {};
+    const activePackets = [
+        ...loadTasksFromZone('inbox'),
+        ...loadTasksFromZone('in_progress')
+    ]
+        .sort((a, b) => b.created_at_ms - a.created_at_ms)
+        .map((task) => ({
+        id: task.id,
+        subject: task.title,
+        owner: task.owner,
+        status: normaliseText(packetStates[task.id]) || `${task.status}:${task.zone}`,
+        priority: task.priority
+    }));
+    const tunnel = resolvePublicTunnelInfo();
+    const stateFocus = normaliseText(state.current_focus);
+    const currentFocus = readVectorCurrentFocus() || stateFocus;
+    const inProgressPackets = Array.isArray(state.in_progress_packets)
+        ? state.in_progress_packets
+            .map((row) => normaliseText(String(row)))
+            .filter(Boolean)
+        : [];
+    const openPacketsCount = Array.isArray(state.open_packets)
+        ? state.open_packets.length
+        : activePackets.filter((packet) => packet.status.toLowerCase().includes('inbox')).length;
+    const nextStep = normaliseText(state.next_step);
+    return {
+        generated_at: nowIso(),
+        ia_status: iaStatus,
+        active_packets: activePackets,
+        current_focus: currentFocus,
+        protocol_version: readProtocolVersion(),
+        tunnel_url: tunnel.url,
+        tunnel_provider: tunnel.provider,
+        tunnel_status: tunnel.status,
+        state_summary: {
+            status: normaliseText(state.status),
+            current_focus: currentFocus,
+            in_progress_packets: inProgressPackets,
+            open_packets_count: openPacketsCount,
+            next_step: nextStep
+        }
+    };
 }
 // ============ MEJORA 3: Heartbeat SSE ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â mantiene conexiones abiertas, sin ruido en chat/log ============
 function startHeartbeatLoop() {
@@ -3825,6 +4313,96 @@ app.get('/api/state', (req, res) => {
     const fallback = { status: 'ok', message: 'ARGOS API (Tifis) is running', runtime: RUNTIME_DIR };
     res.json(readJsonFile(statePath, fallback));
 });
+app.get('/api/bootstrap', (req, res) => {
+    const auth = authenticateAgentRequest(req);
+    if (!auth.ok) {
+        return res.status(auth.status).json({ error: auth.error });
+    }
+    const payload = buildBootstrapPayload();
+    return res.json(payload);
+});
+app.get('/api/remote/aperture', (req, res) => {
+    const auth = authenticateAgentRequest(req);
+    if (!auth.ok) {
+        return res.status(auth.status).json({ ok: false, error: auth.error });
+    }
+    const bootstrap = buildBootstrapPayload();
+    const aperturePayload = {
+        ok: true,
+        generated_at: bootstrap.generated_at,
+        quickstart: readQuickstartSnippet(),
+        suggested_reads: ['INTER_AI_PROTOCOL.md', 'ARGOS_VECTOR.md'],
+        state_summary: bootstrap.state_summary,
+        inbox_summary: bootstrap.active_packets.map((packet) => ({
+            id: packet.id,
+            title: packet.subject,
+            status: packet.status
+        })),
+        log_tail: readMarkdownTail(ARGOS_GLOBAL_LOG_PATH, 10),
+        captain_feed_tail: readCaptainFeedTail(5),
+        protocol_version: bootstrap.protocol_version,
+        tunnel_url: bootstrap.tunnel_url
+    };
+    return res.json(aperturePayload);
+});
+app.post('/api/remote/update', (req, res) => {
+    try {
+        const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
+        const claimedActor = normaliseText(req.body?.agent) || normaliseText(req.body?.actor) || tokenAgent;
+        if (!ensureExternalActorMatchesToken(req, res, claimedActor))
+            return;
+        const summary = normaliseText(req.body?.summary);
+        if (summary === '') {
+            return res.status(400).json({ ok: false, error: 'summary es obligatorio' });
+        }
+        const details = normaliseText(req.body?.details);
+        const packetRef = normaliseText(req.body?.packet_id) || normaliseText(req.body?.packetId) || normaliseText(req.body?.refId);
+        const canonicalSender = normalizeAgentName(claimedActor) || claimedActor || tokenAgent || 'ExternalAgent';
+        const timestamp = nowIso();
+        const entryId = nextFeedMessageId();
+        appendJsonlRecord(CAPTAIN_FEED_PATH, {
+            id: entryId,
+            timestamp,
+            kind: 'crew_update',
+            speaker: 'crew',
+            sender_name: canonicalSender,
+            sender_role: 'agent',
+            audience: 'captain',
+            source: 'api:remote/update',
+            summary,
+            details,
+            status: 'recorded',
+            tokens: 0,
+            refId: packetRef
+        });
+        appendJsonlRecord(ARGOS_EVENTS_PATH, {
+            timestamp,
+            actor: canonicalSender,
+            module: 'argos',
+            type: 'remote_update',
+            packet_id: packetRef,
+            refId: packetRef,
+            summary,
+            details,
+            source: 'api:remote/update'
+        });
+        publishEvent('chat:message', {
+            id: entryId,
+            actor: canonicalSender,
+            summary: summary.substring(0, 100),
+            timestamp,
+            tokens: 0
+        });
+        return res.json({
+            ok: true,
+            entry_id: entryId,
+            timestamp
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ ok: false, error: 'Fallo en remote update', detail: String(error) });
+    }
+});
 app.post('/api/remote/closure', (req, res) => {
     try {
         const parsed = parseRemoteClosurePayload(req.body);
@@ -3832,16 +4410,11 @@ app.post('/api/remote/closure', (req, res) => {
             return res.status(400).json({ error: parsed.error });
         }
         const payload = parsed.payload;
-        const providedToken = normaliseText(req.header('X-Argos-Agent-Token'));
-        if (providedToken === '') {
-            return res.status(401).json({ error: 'Falta header X-Argos-Agent-Token' });
+        const auth = authenticateAgentRequest(req, payload.agent);
+        if (!auth.ok) {
+            return res.status(auth.status).json({ error: auth.error });
         }
-        const tokens = readAgentTokens();
-        const tokenKey = resolveRemoteAgentTokenKey(payload.agent);
-        const expectedToken = normaliseText(tokens[tokenKey]);
-        if (expectedToken === '' || !secureTokenEquals(expectedToken, providedToken)) {
-            return res.status(401).json({ error: `Token invalido para agente ${tokenKey}` });
-        }
+        const tokenKey = auth.tokenAgent;
         const timestampIso = parseDepositTimestampIso(payload.timestamp);
         const closureKey = buildRemoteClosureKey(payload.agent, payload.packet_id, timestampIso);
         if (hasRemoteClosureRecord(closureKey)) {
@@ -4062,7 +4635,14 @@ app.get('/api/chat', (req, res) => {
 });
 app.post('/api/chat', (req, res) => {
     try {
+        const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
         let { sender, summary, details, kind, tokens } = req.body;
+        sender = normaliseText(sender);
+        if (!ensureExternalActorMatchesToken(req, res, sender || tokenAgent))
+            return;
+        if (sender === '' && tokenAgent !== '') {
+            sender = tokenAgent;
+        }
         if (!summary)
             return res.status(400).json({ error: 'Missing summary' });
         const resolvedTokens = resolveEstimatedTokens(tokens, summary, details, req.body.refId, sender);
@@ -4354,6 +4934,8 @@ app.get('/api/tokens', (req, res) => {
 app.post('/api/tokens/record', (req, res) => {
     try {
         const { agent, tokens, ref, module, refId, scope, channel } = req.body;
+        if (!ensureExternalActorMatchesToken(req, res, normaliseText(agent)))
+            return;
         if (!agent)
             return res.status(400).json({ error: 'Missing agent' });
         const resolvedTokens = resolveEstimatedTokens(tokens, ref, refId, module, agent);
@@ -4397,6 +4979,8 @@ app.post('/api/trilog', (req, res) => {
         suppressed = '', // opcional: detalles suprimidos/no volcados en LOG
         status = 'done', module = 'argos', transcriptRef = '' // referencia al bloque de transcript literal (YYYY-MM-DD_Agente.md#ARG-XXXX)
          } = req.body;
+        if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor)))
+            return;
         const packetRef = normaliseText(packetId);
         if (!actor || !summary || packetRef === '') {
             return res.status(400).json({ error: 'Campos obligatorios: actor, packetId, summary' });
@@ -4600,6 +5184,8 @@ app.get('/api/transcript/list', (req, res) => {
 app.post('/api/transcript', (req, res) => {
     try {
         const { agent, role, content, packetId } = req.body;
+        if (!ensureExternalActorMatchesToken(req, res, normaliseText(agent)))
+            return;
         if (!agent || !content)
             return res.status(400).json({ error: 'agent y content son obligatorios' });
         const validRole = role === 'captain' ? 'captain' : 'agent';
@@ -4788,6 +5374,8 @@ app.get('/api/ia/pending-actions', (_req, res) => {
     return res.json(actions);
 });
 app.post('/api/ia/approve-action', (req, res) => {
+    if (!ensureCaptainUiWrite(req, res))
+        return;
     const actionId = req.body.actionId;
     if (!actionId)
         return res.status(400).json({ error: 'actionId requerido' });
@@ -4801,9 +5389,8 @@ app.post('/api/ia/approve-action', (req, res) => {
     const action = actions[actionIdx];
     // Ejecutar la accion original SIN pasar por el interceptor (bypass)
     // Nota: Esto requiere que los endpoints originales acepten un flag de bypass o que llamemos a la logica directamente.
-    // Por ahora, simularemos la ejecucion llamando a la logica interna o marcando el actor como 'Captain' temporalmente.
+    // Por ahora, simularemos la ejecucion llamando a la logica interna.
     const originalBody = action.payload;
-    originalBody.actor = 'Captain'; // Forzar autorizacion
     // Simulacion de re-peticion interna (loopback)
     // En una API real usariamos un dispatcher interno. Aqui llamaremos al endpoint correspondiente.
     // Para simplificar esta version, borramos de pendientes y pedimos al usuario que 're-ejecute' o implementamos el switch:
@@ -4821,6 +5408,8 @@ app.post('/api/ia/approve-action', (req, res) => {
     return res.json({ status: 'approved', originalAction: action.action, message: 'La accion ha sido validada y debe ser re-enviada por el sistema con firma de Capitan o procesada internamente.' });
 });
 app.post('/api/tasks/update', (req, res) => {
+    if (!ensureCaptainUiWrite(req, res))
+        return;
     interceptAction(req, res, 'tasks/update', () => {
         try {
             const packetId = normaliseText(req.body.packetId);
@@ -4881,7 +5470,7 @@ app.post('/api/tasks/update', (req, res) => {
                 hour: '2-digit',
                 minute: '2-digit'
             }).slice(0, 16);
-            const actor = normaliseText(req.body.actor) || 'Captain';
+            const actor = normaliseText(req.body.actor) || 'Ruben Thor';
             appendJsonlRecord(ARGOS_EVENTS_PATH, {
                 timestamp: nowIso,
                 timestamp_label: canaryTs,
@@ -4942,6 +5531,8 @@ app.get('/api/bugs', (req, res) => {
 app.post('/api/ia/start-task', (req, res) => {
     try {
         const { packetId, actor, summary = '' } = req.body;
+        if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor)))
+            return;
         if (!packetId)
             return res.status(400).json({ error: 'packetId requerido' });
         if (!actor)
@@ -5038,6 +5629,8 @@ app.get('/api/ia/status', (_req, res) => {
 });
 app.post('/api/ia/status', (req, res) => {
     const { actor, status, task = '', task_subject = '' } = req.body;
+    if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor)))
+        return;
     if (!actor || !status)
         return res.status(400).json({ error: 'actor y status requeridos' });
     if (status !== 'active' && status !== 'standby' && status !== 'restricted') {
@@ -5055,6 +5648,8 @@ app.post('/api/ia/status', (req, res) => {
 });
 app.post('/api/tasks', (req, res) => {
     try {
+        if (!ensureCaptainUiWrite(req, res))
+            return;
         const body = req.body;
         if (!body.rawText)
             return res.status(400).json({ error: 'Empty transmission' });
@@ -5138,6 +5733,8 @@ ${rawText}
 });
 app.post('/api/tasks/delete', (req, res) => {
     try {
+        if (!ensureCaptainUiWrite(req, res))
+            return;
         const { taskIds } = req.body;
         if (!Array.isArray(taskIds) || taskIds.length === 0) {
             return res.status(400).json({ error: 'taskIds must be a non-empty array' });
@@ -6641,9 +7238,9 @@ function runLolaShadowScanner() {
             const riskPath = path_1.default.join(RUNTIME_DIR, 'work_packets', 'inbox', `${riskId}.md`);
             if (!fs_1.default.existsSync(riskPath)) {
                 fs_1.default.writeFileSync(riskPath, riskContent, 'utf-8');
-                // Lola no habla en pÃºblico (Oracle protocol). 
+                // Lola no habla en público (Oracle protocol).
                 // Se comenta el anuncio al feed para mantener el silencio de la sombra.
-                // postToCrewFeed('Lola', summary, `Nivel de estrÃ©s crÃ­tico: ${stressLevel}. Se ha generado burbuja de riesgo ${riskId}.`, 'risk_alert');
+                // postToCrewFeed('Lola', summary, `Nivel de estrés crítico: ${stressLevel}. Se ha generado burbuja de riesgo ${riskId}.`, 'risk_alert');
                 console.log(`[LOLA] Riesgo ${riskId} inyectado silenciosamente.`);
             }
         }

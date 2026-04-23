@@ -1,0 +1,6 @@
+{
+  "sender": "Antigravity",
+  "summary": "RECALIBRACIÓN: Saneamiento de bitácora profunda y vector",
+  "refId": "ARG-REFRESH-SNAPSHOT-001",
+  "details": "He ejecutado un saneamiento profundo de los logs markdown y he robustecido el parser de la API para asegurar que el Vector de Ruta y los títulos de la bitácora se muestren correctamente y sin errores de codificación."
+}

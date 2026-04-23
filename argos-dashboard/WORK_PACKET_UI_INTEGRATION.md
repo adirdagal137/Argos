@@ -9,8 +9,8 @@ OBJECTIVE:
 Acoplar la UI estática actual (Vanilla JS) con el servidor local Node.js (`argos-api`) para dotar de capacidad interactiva con el disco duro, permitiendo que la interfaz envíe órdenes orquestadas a Antigravity y redacte expedientes para Claude/ChatGPT.
 
 DEPENDENCIES:
-- `file:///C:/Users/Widox/.gemini/antigravity/scratch/argos-dashboard/app.js`
-- `file:///C:/Users/Widox/.gemini/antigravity/scratch/argos-api/src/index.ts`
+- `file:///C:/Users/Widox/Desktop/ARGOS/argos-dashboard/app.js`
+- `file:///C:/Users/Widox/Desktop/ARGOS/argos-api/src/index.ts`
 
 INPUT_SUMMARY:
 Actualmente la UI vive bajo el sandbox del navegador (imposibilidad de interactuar con disco / terminal). Se debe usar el servidor Express (`argos-api`) construido como puente (Backend-For-Frontend) para salvar el formato Markdown directo al Drive cuando el Capitán ordene algo, facilitando la operativa asíncrona ("Alt+Tab") para los modelos de caja cerrada (Claude/GPT Desktop).

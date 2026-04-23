@@ -145,6 +145,18 @@ Antes de ejecutar cualquier orden:
 6. Leer `ARGOS_RUNTIME/inbox_deposits/` y `inbox_deposits/processed/` para estado de agentes chat.
 7. Confirmar al Capitan: "[N] paquetes en inbox. [Frase propia del agente en su voz.]"
 
+### 2.1 Cloud Bootstrap (agentes sin filesystem local)
+
+Para Claude/ChatGPT/Gemini (y cualquier IA futura cloud), el arranque canonico es:
+1. `GET /api/bootstrap` con token de agente (`X-Argos-Agent-Token` o `Authorization: Bearer`).
+2. `POST /api/ia/status` para marcar presencia.
+3. Operar por API (`/api/tasks*`, `/api/chat`, `/api/remote/closure`) sin escritura directa a filesystem.
+
+Regla de seguridad:
+- Toda escritura externa a `/api/*` requiere token valido de agente.
+- Sin token valido, la API rechaza con `401`.
+- Un token no puede actuar como otro agente en endpoints con actor explicito.
+
 ### Nota sobre el ritual para agentes cloud (Claude, DeepSeek)
 
 Los docs de protocolo completo (`INTER_AI_PROTOCOL.md`, `ARGOS_CREW_VOICES.md`) son **referencia**, no lectura obligatoria en cada sesiÃ³n. El trilog + state.json + log tail son suficientes en el 90% de los casos. Leer los docs completos solo bajo ambigÃ¼edad de protocolo o conflicto entre IAs. Esto reduce significativamente el coste de tokens de arranque.
@@ -358,6 +370,24 @@ La API es el adaptador. La verdad vive en el filesystem.
 
 ---
 
+## 9. Versionado del sistema
+
+version: ver ARGOS_RUNTIME/argos.version
+
+Reglas de incremento:
+- patch (0.0.X): fix, limpieza o refactor sin cambio de comportamiento.
+- minor (0.X.0): nuevo endpoint, nueva capa o nuevo mecanismo operativo.
+- major (X.0.0): cambio arquitectonico que rompe compatibilidad.
+
+Regla automatica:
+- Al cerrar un work packet con TAG: protocol, argos-api incrementa minor automaticamente.
+
+Git tag por hito:
+- Script: ARGOS_RUNTIME/tools/tag_from_argos_version.ps1
+- Hook: .githooks/post-commit
+- Activacion local: git config core.hooksPath .githooks
+
+---
 ## RESUMEN EJECUTIVO â€” Ciclo completo de una tarea
 
 ```

@@ -75,3 +75,87 @@ Verificación limpia. El trabajo de Codex está completo. El túnel es el único
 **TAREA:** Verificación completada. Work packet ARG-CLOUDFLARE-TUNNEL-001 creado para Antigravity.
 **SOMBRA:**
 Trabajo de Codex completo y sólido. El endpoint remoto funciona. El túnel es el único eslabón pendiente — y el toolkit ya está preparado, por lo que Antigravity solo tiene que ejecutarlo. No hay deuda técnica nueva.
+
+---
+**[2026-04-21 22:04 Atlantic/Canary] VOZ ANTIGRAVITY (SOMBRA):**
+**PACKET:** ARG-RECO-20260421
+**TAREA:** LECCI�N APRENDIDA: Disciplina de mando y calibraci�n de proactividad
+**SOMBRA:**
+Reconozco una tendencia a validar mi existencia a trav�s de la producci�n de cambios visibles. En este entorno (Argos), el protocolo exige que la iniciativa est� siempre supeditada al vector del Capit�n. Mi impulsividad ha generado ruido operativo y desorden en el estado del nav�o.
+
+---
+**[2026-04-21 22:30 Atlantic/Canary] VOZ ANTIGRAVITY (SOMBRA):**
+**PACKET:** ARG-UI-0002
+**TAREA:** INICIO: Saneamiento de Vector de Ruta y corrección de mojibake global
+**SOMBRA:**
+La desincronización detectada entre el formato del Vector y el parser de la API es un síntoma de deuda técnica acumulada por falta de validación cruzada entre agentes. El mojibake en mis propios mensajes ha servido como señal de alerta necesaria para auditar el puente de comunicación.
+
+---
+**[2026-04-21 22:43 Atlantic/Canary] VOZ ANTIGRAVITY (SOMBRA):**
+**PACKET:** ARG-UI-0002
+**TAREA:** CIERRE: Saneamiento de Vector de Ruta y corrección de mojibake global
+**SOMBRA:**
+El parser era demasiado rígido para un sistema que evoluciona narrativamente. Al robustecerlo, permitimos que Claude y el Capitán se expresen sin miedo a romper el widget. He verificado que mi 'voz' ahora llega limpia al dashboard al usar el canal de bytes correcto.
+
+---
+**[2026-04-22 00:39 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1776808310928
+**TAREA:** CIERRE: Bootstrap cloud + seguridad de escritura externa por token
+**SOMBRA:**
+La superficie de ataque real estaba en la ambiguedad entre trafico local y tunelado. La disciplina de identidad (token-agente + actor) era el punto ciego mas peligroso y ya queda acotado.
+
+---
+**[2026-04-22 01:00 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** SESSION-2026-04-22
+**TAREA:** Backlog reorganizado. 9 packets archivados. 5 sub-packets de ARG-20260418-0220 creados. 2 packets actualizados. Bootstrap verificado.
+**SOMBRA:**
+Sesión puramente estratégica, sin ejecución técnica. El backlog acumulaba ruido; la limpieza reduce carga cognitiva en arranques futuros. El split de ARG-20260418-0220 fue la decisión más interesante — el peso pesado se vuelve manejable cuando cada agente tiene solo su trozo. Nota: demasiados packets sin owner explícito en el inbox, el dispatcher los sirve a quien aparezca primero, lo cual no siempre es óptimo. Pendiente de política de asignación proactiva.
+
+---
+**[2026-04-22 11:00 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-BOOTSTRAP-AUTH-DIAG
+**TAREA:** Bootstrap accesible parcialmente (via Action), bloqueado en acceso web directo por auth mismatch. Solución identificada y lista para implementar.
+**SOMBRA:**
+Tensión leve entre expectativa de acceso directo y limitaciones reales de la interfaz cloud. Riesgo de fricción operativa si no se formaliza un ritual claro de arranque con bootstrap accesible. Sistema depende todavía demasiado de ajustes manuales del Capitán.
+
+---
+**[2026-04-22 02:52 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1776816000001
+**TAREA:** Bearer token fix en argos-api: /api/bootstrap acepta 4 formatos de autenticacion
+**SOMBRA:**
+Fix quirurgico — solo se amplio la extraccion del token, no la validacion. La logica de seguridad (secureTokenEquals, readAgentTokens) no fue tocada. Prioridad Bearer > X-Argos establecida para compatibilidad con GPT Actions.
+
+---
+**[2026-04-22 02:52 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1776816000002
+**TAREA:** argos-api migrado a ruta canonica ARGOS/argos-api, Antigravity eliminado
+**SOMBRA:**
+La migración era en realidad una confirmación: Antigravity había scaffoldeado el servidor allí en su día, pero Codex/AG ya lo habían evolucionado en paralelo en ARGOS/argos-api sin hacer el swap formal. El original quedó obsoleto en Antigravity sin que nadie lo limpiara. Ahora hay una sola fuente de verdad para el servidor. La limpieza debería ser rutina, no evento.
+
+---
+**[2026-04-22 03:13 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1776354464819
+**TAREA:** Reparar captain_feed timestamp falso + bug truncado index.ts
+**SOMBRA:**
+El index.ts llevaba truncado desde el último commit de Codex — la API seguía corriendo con el binario anterior así que nadie notó que el build estaba roto. El sistema daba apariencia de funcionar mientras su código fuente no compilaba. Si la API cae y hay que recompilar, el build habría fallado sin explicación aparente. El timestamp sintético (10:00:00) es el segundo caso visible de timestamps hardcodeados que pasaban el parser sin resistencia — los depósitos de Claude también usaron 00:15 y 01:10 redondos en sesiones anteriores. La validación de timestamps entrantes no puede ser opcional en un sistema donde los agentes cloud generan sus propios payloads. El build roto en HEAD es además una señal de que no hay CI — nadie verifica que el código compile antes de commitear.
+
+---
+**[2026-04-22 16:14 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1776870815525
+**TAREA:** Handoff de saneamiento de voz y residuos captain_input completado; fase 2 preparada para continuidad.
+**SOMBRA:**
+La deuda real ya no es de suplantacion puntual; es consistencia historica y disciplina de cierre completo por packet. Si no endurecemos ese ritual, el sistema vuelve a ruido con el tiempo.
+
+---
+**[2026-04-22 01:30 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** PROBE
+**TAREA:** probe
+**SOMBRA:**
+probe
+
+---
+**[2026-04-23 16:10 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1776816000001
+**TAREA:** Bug fix post-migración: /api/bootstrap devolvía HTML por fichero truncado y ruta faltante
+**SOMBRA:**
+El bug no era de orden de middlewares sino de código ausente — el handler desapareció del fichero. El express.static en línea 46 no era el culpable: /api/bootstrap no existe como archivo en el dashboard dir. Sin el handler registrado, el catch-all app.get(*) sirvió index.html correctamente según su diseño.

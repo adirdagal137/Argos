@@ -1,4 +1,28 @@
-const API_URL = 'http://localhost:8080/api';
+const API_URL = (() => {
+    const runtimeOverride = (window.ARGOS_API_BASE || '').toString().trim();
+    const htmlOverride = (document.documentElement?.dataset?.apiBase || '').toString().trim();
+    const configuredBase = runtimeOverride || htmlOverride;
+
+    const normalize = (value) => {
+        const cleaned = value.replace(/\/+$/, '');
+        return cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`;
+    };
+
+    if (configuredBase) {
+        return normalize(configuredBase);
+    }
+
+    if (window.location && /^https?:/i.test(window.location.protocol)) {
+        return `${window.location.origin}/api`;
+    }
+
+    return 'http://localhost:8080/api';
+})();
+
+const CAPTAIN_UI_HEADERS = {
+    'Content-Type': 'application/json',
+    'X-Argos-Captain-UI': '1'
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     const statusSpan = document.getElementById('backend-status');
@@ -665,15 +689,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             const catDiv = document.createElement('div');
             catDiv.className = 'vector-cat';
             
+            const goalsHtml = cat.goals.map(goal => {
+                const rawText = goal.text;
+                // Regex para capturar **ID** — Descripcion (soporta guiones cortos, largos y normales)
+                const wpMatch = rawText.match(/^\*\*([A-Z0-9-]+)\*\*\s*[—–-]\s*(.*)/i);
+                
+                let displayHtml = '';
+                if (wpMatch) {
+                    const id = wpMatch[1];
+                    const description = wpMatch[2];
+                    displayHtml = `<span class="goal-text event-link" title="Click para ver info de ${id}" onclick="window.openEventInPanel('${id}')">${safeHtml(description)}</span>`;
+                } else {
+                    displayHtml = `<span class="goal-text">${safeHtml(rawText)}</span>`;
+                }
+
+                return `
+                    <div class="vector-goal ${goal.status === 'done' ? 'done' : ''}">
+                        <div class="goal-bullet"></div>
+                        ${displayHtml}
+                    </div>
+                `;
+            }).join('');
+
             catDiv.innerHTML = `
                 <div class="vector-cat-title">${safeHtml(cat.title)}</div>
                 <div class="vector-goals">
-                    ${cat.goals.map(goal => `
-                        <div class="vector-goal ${goal.status === 'done' ? 'done' : ''}">
-                            <div class="goal-bullet"></div>
-                            <span class="goal-text">${safeHtml(goal.text)}</span>
-                        </div>
-                    `).join('')}
+                    ${goalsHtml}
                 </div>
             `;
             vectorContainer.appendChild(catDiv);
@@ -770,14 +811,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const updateResponse = await fetch(`${API_URL}/tasks/update`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: CAPTAIN_UI_HEADERS,
                 body: JSON.stringify({
                     packetId,
                     subject: nextSubject,
                     owner: nextOwner,
                     status: nextStatus,
                     objective: nextObjective,
-                    actor: 'Thor'
+                    actor: 'Ruben Thor'
                 })
             });
 
@@ -1414,7 +1455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch(`${API_URL}/tasks`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: CAPTAIN_UI_HEADERS,
                 body: JSON.stringify({ rawText })
             });
 
@@ -1888,7 +1929,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const taskIds = Array.from(selectedTasks);
             const response = await fetch(`${API_URL}/tasks/delete`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: CAPTAIN_UI_HEADERS,
                 body: JSON.stringify({ taskIds })
             });
 
@@ -1918,8 +1959,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const promises = taskIds.map(id => 
                 fetch(`${API_URL}/tasks/update`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ packetId: id, status: 'done', actor: 'Captain' })
+                    headers: CAPTAIN_UI_HEADERS,
+                    body: JSON.stringify({ packetId: id, status: 'done', actor: 'Ruben Thor' })
                 })
             );
 

@@ -4,6 +4,8 @@ Sistema de coordinación multi-IA operado por Rubén ("el Capitán").
 
 Argos es el navío. Las IAs son la tripulación. Este repositorio es la constitución del navío — las reglas, los roles, los protocolos y la arquitectura que definen cómo funciona todo. No es un archivo de logs ni un estado operativo: es lo que hace que el navío sea el navío.
 
+version: ver ARGOS_RUNTIME/argos.version
+
 ---
 
 ## La tripulación
@@ -74,5 +76,12 @@ No leas el historial de logs hasta que lo necesites. El estado actual está en `
 | **Drive** | Nube | Espejo del local — backup y acceso remoto desde IAs sin filesystem |
 
 ---
+
+
+## Versionado global
+
+- version: ver ARGOS_RUNTIME/argos.version
+- Hook de tag por commit: .githooks/post-commit
+- Activacion local del hook: git config core.hooksPath .githooks
 
 *Argos opera bajo el principio de que el contexto vive en el navío, no en los tripulantes.*

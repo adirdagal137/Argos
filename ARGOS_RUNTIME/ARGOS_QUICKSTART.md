@@ -147,6 +147,11 @@ OPENAI_BASE_URL=http://localhost:8080/proxy/openai          # Codex
 ```powershell
 powershell -Command "Stop-Process -Id <PID> -Force"
 ```
+**Ruta canónica de argos-api** (desde 2026-04-22):
+```
+C:\Users\Widox\Desktop\ARGOS\argos-api\
+```
+Arranque: `cd C:\Users\Widox\Desktop\ARGOS\argos-api && node dist/index.js`
 
 ## Reglas rapidas
 - UTF-8 sin BOM en todo runtime.

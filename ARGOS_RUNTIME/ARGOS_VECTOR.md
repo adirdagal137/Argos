@@ -1,31 +1,53 @@
-# ARGOS VECTOR - HOJA DE RUTA
-**Actualizado:** 2026-04-11 22:35 Atlantic/Canary
+# ARGOS VECTOR — TIMÓN VIVO
+**Actualizado:** 2026-04-18 13:00 Atlantic/Canary
+**Responsable de actualización:** Claude / Orfeo
 
-## OBJETIVOS DIARIOS (2026-04-11)
-- [x] ORDEN EJECUTIVA TOKENS — Panel solo WORK_TOKENS + cierre obligatorio con process/trilog/chat tokens (2026-04-11)
-- [~] Estabilizar ciclo log-shadow-realidad â€” Sincronizado estado 'restricted' en API/UI (2026-04-11)
-- [x] Contador de tokens actualiza en tiempo real â€” ARG-1775828525682 / ARG-TOKEN-AUTO-001 (Verificado via SSE)
-- [ ] ARG-SHADOW-SYNTHESIS-001 â€” SÃ­ntesis del shadow log para que Lola opere bien
+---
 
-## OBJETIVOS SEMANALES (EN CURSO)
-- [ ] Integrar MÃ³dulos SciClass-M8 (Comenio) â€” NO INICIADO
-- [~] Refinar sistema de "MÃ¡scaras" (Handoff entre IAs) â€” observar emergencias (SISTEMA-ARGOS, Argos-Dispatcher)
-- [ ] ARG-COMMS-005 â€” Inbox observado en tiempo real
-- [ ] Antigravity encoding espaÃ±ol â€” mojibake en tildes persiste
+## FOCO ACTUAL
+Establecer el canal de comunicación directa Claude↔API (tunnel + remote/closure) y cerrar la deuda arquitectónica B1-B2-B3 antes de ampliar funcionalidad.
 
-## OBJETIVOS GENERALES (LARGO PLAZO)
-- [~] Consolidar Argos como Orquestador Multi-Agente agnÃ³stico â€” EN CURSO
-- [x] Implementar Analista de la Sombra (Lola) asincrÃ³nico â€” HECHO
-- [ ] Dashboard Modular con selecciÃ³n de Dominio CWD â€” NO INICIADO
-- [~] Deepseek como 4Âº tripulante (GuardiÃ¡n de Eficiencia) â€” GGUF Descarga ~72% (ETR ~8m)
+---
 
-## BLOCKERS IDENTIFICADOS (2026-04-11)
-1. **Enforcer Tri-Log demasiado estricto** â€” dispara blocker por packet individual, no por sesiÃ³n. Genera ruido en SISTEMA-ARGOS.
-2. [x] **Tokens no actualizan en tiempo real** â€” RESUELTO via SSE 'tokens:updated'
-3. **Exports stale** â€” snapshots de logbook no se regeneran automÃ¡ticamente (ARGOS-NOTE-0001)
+## PRIORIDADES VIVAS
 
-## DEUDA TÃ‰CNICA
-- Tokens: solo estimaciÃ³n por chars, no conteo real de la API (ARG-TOKEN-AUTO-001)
-- Transcripts: captura literal del chat no automatizada (ARG-1775791234000)
-- Legibilidad: columnas legacy estrechas (ARGOS-NOTE-0002)
-- Cuarentena: sin sistema para paquetes malformados (ARG-DISPATCH-AUTO-001)
+1. **Canal remoto operativo** — tunnel funcionando, script de arranque probado, `cloudflared.quick.json` escribiendo URL. Falta: desbloquear web_fetch al inicio de sesión con un paso manual mínimo. → Capitán + Claude
+2. **ARGOS-ARCH-0004** — Decisión pendiente del Capitán: ¿la webapp escribe en ARGOS_RUNTIME o es solo lectura? Bloquea el diseño de endpoints de escritura. → Capitán decide
+3. **ARGOS-ARCH-0005** — Pendiente Codex (in_progress). Depende parcialmente de ARCH-0004.
+4. **ARGOS-UI-0001** — Pendiente Antigravity. El explorador de archivos en la UI está bloqueado (traductor físico no montado).
+5. **ARGOS_VECTOR.md desactualizado** — Este archivo. Se resuelve con este commit. ✓
+
+---
+
+## BLOCKERS REALES
+
+- **ARCH-0004 sin decidir** — hasta que el Capitán decida si la webapp escribe o solo lee, no se diseñan endpoints de escritura definitivos.
+- **web_fetch limitado** — Claude no puede construir URLs propias para hacer POST al tunnel; requiere que el Capitán pegue la URL una vez por sesión. Mitigado con `cloudflared.quick.json` + Drive MCP.
+- **Explorador de archivos bloqueado en UI** — Node no tiene el módulo de filesystem montado. Antigravity tiene el packet.
+
+---
+
+## DECISIONES VIGENTES
+
+1. La carpeta local `C:\Users\Widox\Desktop\ARGOS` es la fuente de verdad — Drive for Desktop sincroniza automáticamente.
+2. El tunnel Cloudflare es gratuito/temporal (URL cambia en cada reinicio). Script `quick_tunnel_start.ps1` gestiona el arranque y escribe la URL en `state/cloudflared.quick.json`.
+3. Autenticación al API: header `X-Argos-Agent-Token` con token por agente. Token de Claude guardado en memoria de sesión.
+4. `POST /api/remote/closure` es el endpoint principal de cierre de sesión para Claude — hace trilog + state + events en una sola llamada.
+5. La distinción `INBOX_REVIEW / INBOX_EXECUTE` del sistema legacy no está implementada — riesgo activo registrado.
+
+---
+
+## PRÓXIMOS MOVIMIENTOS
+
+1. Capitán decide **ARCH-0004** (webapp escribe vs. solo lee) — desbloquea a Codex y a Claude.
+2. Codex cierra **ARGOS-ARCH-0005**.
+3. Claude hace el primer POST real a `/api/remote/closure` para cerrar un packet y verificar el canal completo end-to-end.
+
+---
+
+## DEUDA VIVA (bloquea trabajo actual)
+
+- Explorador de archivos en UI sin módulo filesystem (ARGOS-UI-0001)
+- Transcripts: captura literal del chat no automatizada — Claude hace POST manual al cierre
+- INBOX_REVIEW / INBOX_EXECUTE ausente del sistema nuevo (riesgo de migración activo)
+- Token counting: estimación por chars, no conteo real de la API
