@@ -153,6 +153,54 @@ C:\Users\Widox\Desktop\ARGOS\argos-api\
 ```
 Arranque: `cd C:\Users\Widox\Desktop\ARGOS\argos-api && node dist/index.js`
 
+## Protocolo de commits y ramas (OBLIGATORIO para cambios de codigo)
+
+**Por que:** varios agentes pueden tocar `argos-api/src/index.ts` en paralelo.
+Sin commits frecuentes, una escritura posterior borra el trabajo anterior silenciosamente.
+
+### Regla general
+Cada agente ejecuta `argos_commit.ps1` al **cerrar sesion** si modifico archivos constitutivos.
+Claude Code lo hace **automaticamente** via hook Stop. Codex y Antigravity deben llamarlo en su ritual de cierre.
+
+```powershell
+# Cierre de sesion — commit basico
+.\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Codex -PacketId ARG-XXXX
+
+# Inicio de tarea de mejora del sistema — crear rama
+.\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Codex -PacketId ARG-XXXX -Branch
+```
+
+### Cuando crear rama vs commitear en main
+
+| Situacion | Accion |
+|-----------|--------|
+| Fix rapido, < 50 lineas, bajo riesgo | Commit directo en `main` |
+| Packet TYPE: build o maintenance que toca `index.ts` | **Rama obligatoria** |
+| Refactor grande o cambio de arquitectura | **Rama obligatoria** |
+| Docs, scripts PS1, work packets | Commit directo en `main` |
+
+### Nombre de rama
+Formato automatico: `<agente>/<packet-id>` (ej. `codex/arg-1776816000001`).
+Se puede forzar con `-BranchName <nombre>`.
+
+### Merge a main
+Una vez verificado el trabajo en la rama:
+```powershell
+git checkout main
+git merge <rama> --no-ff -m "[<Agente>] merge <packet-id>: <descripcion>"
+```
+
+### Archivos constitutivos (los que se commitean)
+- `argos-api/src/` — codigo fuente del servidor
+- `argos-api/dist/index.js` — build compilado
+- `argos-dashboard/` — frontend
+- `ARGOS_RUNTIME/ARGOS_QUICKSTART.md`, `INTER_AI_PROTOCOL.md`, `ARGOS_VECTOR.md`
+- `ARGOS_RUNTIME/agents/` — instrucciones de agentes
+- `ARGOS_RUNTIME/tools/` — scripts del navio
+- `ARGOS_RUNTIME/work_packets/inbox/` — packets activos
+
+**NO se commitean:** `state/`, `events/`, `secrets/`, `views/`, `transcripts/` (en .gitignore).
+
 ## Reglas rapidas
 - UTF-8 sin BOM en todo runtime.
 - No usar `Set-Content -Encoding UTF8` en PowerShell 5.
