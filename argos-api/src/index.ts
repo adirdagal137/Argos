@@ -183,11 +183,17 @@ type LogbookEntry = {
   timestamp?: string;
   actor?: string;
   status?: string;
+  mission?: string;
   summary?: string;
   details?: string;
   next_step?: string;
   errors?: string;
   risks?: string;
+  risk_level?: string;
+  closure_type?: string;
+  handoff_active?: boolean;
+  lifecycle_event?: boolean;
+  transcriptRef?: string;
   source?: string;
 };
 
@@ -290,10 +296,19 @@ type DepositSectionKey = 'LOG' | 'SHADOW' | 'GLITCH' | 'STATE' | 'CAPTAIN';
 
 type DepositStatePayload = {
   status: LiveStatus;
+  mission: string;
   summary: string;
   handoff_to: string | null;
   next_step: string;
   packet_id: string;
+  closure_type?: string;
+  result?: string;
+  risk_level?: string;
+  handoff?: string;
+  schema_version?: number;
+  handoff_active?: boolean;
+  transcript_ref?: string;
+  lifecycle_event?: boolean;
 };
 
 type ParsedChatDeposit = {
@@ -308,7 +323,10 @@ type ParsedChatDeposit = {
   statePayload: DepositStatePayload;
 };
 
-type RemoteClosureTrigger = 'task_completed' | 'session_close' | 'handoff';
+type RemoteClosureTrigger = 'task_completed' | 'blocked' | 'meta' | 'session_close' | 'handoff';
+type ClosureType = 'task_completed' | 'blocked' | 'meta' | 'session_close';
+type ClosureStatus = 'completed' | 'blocked' | 'in_progress' | 'cancelled';
+type ClosureRiskLevel = 'none' | 'low' | 'medium' | 'high' | 'blocked';
 
 type HandoffPayload = {
   // Obligatorios
@@ -327,6 +345,18 @@ type RemoteClosurePayload = {
   interface: string;
   timestamp: string;
   packet_id: string;
+  schema_version: number;
+  mission: string;
+  closure_type: ClosureType;
+  status: ClosureStatus;
+  result: string;
+  risk_level: ClosureRiskLevel;
+  next_step: string;
+  handoff: string;
+  handoff_active: boolean;
+  transcript_ref: string;
+  lifecycle_event: boolean;
+  legacy_summary_used: boolean;
   trigger: RemoteClosureTrigger;
   sections: {
     log: string;
