@@ -196,6 +196,7 @@ function buildEmptyLogbook() {
             { id: 'details', label: 'Detalles' },
             { id: 'next_step', label: 'Siguiente' },
             { id: 'errors', label: 'Errores+Aprendizajes' },
+            { id: 'risk_level', label: 'Riesgo' },
             { id: 'risks', label: 'Riesgos' },
             { id: 'id', label: 'ID' },
             { id: 'transcriptRef', label: 'ðŸ“„' }
@@ -1540,20 +1541,20 @@ function isLoopbackHostHeader(req) {
 function isTrustedLocalRequest(req) {
     return isLocalhostRequest(req) && isLoopbackHostHeader(req);
 }
+function parseBooleanLike(value) {
+    if (typeof value === 'boolean')
+        return value;
+    const normalized = normaliseText(value).toLowerCase();
+    return normalized === 'true' || normalized === '1' || normalized === 'yes';
+}
 function parseRemoteClosurePayload(rawBody) {
     const body = rawBody && typeof rawBody === 'object' ? rawBody : null;
     if (!body)
         return { payload: null, error: 'Body JSON requerido' };
     const agent = normaliseText(body.agent);
     const agentInterface = normaliseText(body.interface);
-    const packetId = normaliseText(body.packet_id);
     const timestamp = normaliseText(body.timestamp);
-    const triggerRaw = normaliseText(body.trigger).toLowerCase();
-    const allowedTriggers = ['task_completed', 'session_close', 'handoff'];
-    if (!allowedTriggers.includes(triggerRaw)) {
-        return { payload: null, error: 'trigger invalido. Valores permitidos: task_completed, session_close, handoff' };
-    }
-    const trigger = triggerRaw;
+    const packetId = normaliseText(body.packet_id) || normaliseText(body.id);
     if (agent === '')
         return { payload: null, error: 'agent es obligatorio' };
     const normalizedAgent = parseCanonicalProtocolActor(agent);
@@ -1569,49 +1570,81 @@ function parseRemoteClosurePayload(rawBody) {
         return { payload: null, error: 'timestamp es obligatorio' };
     if (packetId === '')
         return { payload: null, error: 'packet_id es obligatorio' };
+    const missionRaw = normaliseText(body.mission);
+    const summaryRaw = normaliseText(body.summary);
+    const stateMissionRaw = body.sections && typeof body.sections === 'object' && body.sections !== null
+        ? normaliseText(body.sections.state?.summary)
+        : '';
+    const mission = missionRaw || summaryRaw || stateMissionRaw;
+    const legacySummaryUsed = missionRaw === '' && summaryRaw !== '';
+    if (mission === '')
+        return { payload: null, error: 'mission es obligatorio (summary solo fallback legacy)' };
+    if (mission.length > 80)
+        return { payload: null, error: 'mission excede 80 caracteres' };
+    const closureTypeRaw = normaliseText(body.closure_type).toLowerCase();
+    const triggerRaw = normaliseText(body.trigger).toLowerCase();
+    const allowedClosureTypes = ['task_completed', 'blocked', 'meta', 'session_close'];
+    let closureType = 'task_completed';
+    if (allowedClosureTypes.includes(closureTypeRaw)) {
+        closureType = closureTypeRaw;
+    }
+    else if (triggerRaw === 'blocked' || triggerRaw === 'meta' || triggerRaw === 'session_close' || triggerRaw === 'task_completed') {
+        closureType = triggerRaw;
+    }
+    const statusRaw = normaliseText(body.status).toLowerCase();
+    const allowedStatuses = ['completed', 'blocked', 'in_progress', 'cancelled'];
+    let status;
+    if (allowedStatuses.includes(statusRaw)) {
+        status = statusRaw;
+    }
+    else if (closureType === 'blocked') {
+        status = 'blocked';
+    }
+    else if (closureType === 'meta') {
+        status = 'in_progress';
+    }
+    else {
+        status = 'completed';
+    }
+    const resultRaw = normaliseText(body.result);
+    const nextStepRaw = normaliseText(body.next_step);
+    const handoffRawField = normaliseText(body.handoff);
+    const riskLevelRaw = normaliseText(body.risk_level).toLowerCase();
+    const allowedRiskLevels = ['none', 'low', 'medium', 'high', 'blocked'];
+    const riskLevel = allowedRiskLevels.includes(riskLevelRaw)
+        ? riskLevelRaw
+        : (status === 'blocked' ? 'blocked' : 'none');
+    const schemaVersionRaw = Number(body.schema_version);
+    const schemaVersion = Number.isFinite(schemaVersionRaw) && schemaVersionRaw > 0
+        ? Math.trunc(schemaVersionRaw)
+        : 1;
+    const handoffActive = parseBooleanLike(body.handoff_active);
+    const lifecycleEvent = parseBooleanLike(body.lifecycle_event);
+    const transcriptRef = normaliseText(body.transcript_ref);
     const sectionsRaw = body.sections && typeof body.sections === 'object'
         ? body.sections
         : null;
-    if (!sectionsRaw) {
-        return { payload: null, error: 'sections es obligatorio y debe ser un objeto' };
-    }
-    const requiredKeys = ['log', 'shadow', 'glitch', 'state', 'captain'];
-    for (const key of requiredKeys) {
-        if (!Object.prototype.hasOwnProperty.call(sectionsRaw, key)) {
-            return { payload: null, error: `sections.${key} es obligatorio` };
-        }
-    }
-    const log = normaliseText(sectionsRaw.log);
-    const shadow = normaliseText(sectionsRaw.shadow);
-    const glitch = normaliseText(sectionsRaw.glitch);
-    const captain = normaliseText(sectionsRaw.captain);
-    if (log === '')
-        return { payload: null, error: 'sections.log no puede ser vacio' };
-    if (shadow === '')
-        return { payload: null, error: 'sections.shadow no puede ser vacio' };
-    if (captain === '')
-        return { payload: null, error: 'sections.captain no puede ser vacio' };
-    const stateRaw = sectionsRaw.state && typeof sectionsRaw.state === 'object'
+    const stateRaw = sectionsRaw && sectionsRaw.state && typeof sectionsRaw.state === 'object'
         ? sectionsRaw.state
         : null;
-    if (!stateRaw) {
-        return { payload: null, error: 'sections.state es obligatorio y debe ser un objeto' };
-    }
-    const statusRaw = normaliseText(stateRaw.status).toLowerCase();
+    const mapClosureStatusToLive = (value) => {
+        if (value === 'blocked')
+            return 'blocked';
+        if (value === 'in_progress')
+            return 'working';
+        return 'idle';
+    };
+    const stateStatusRaw = stateRaw ? normaliseText(stateRaw.status).toLowerCase() : '';
     const validStatuses = ['idle', 'working', 'blocked', 'waiting_captain'];
-    if (!validStatuses.includes(statusRaw)) {
-        return { payload: null, error: 'sections.state.status invalido. Valores permitidos: idle, working, blocked, waiting_captain' };
-    }
-    const status = statusRaw;
-    const summary = normaliseText(stateRaw.summary);
-    const nextStep = normaliseText(stateRaw.next_step);
-    const handoffToRaw = stateRaw.handoff_to;
+    const stateStatus = validStatuses.includes(stateStatusRaw)
+        ? stateStatusRaw
+        : mapClosureStatusToLive(status);
+    const nextStep = nextStepRaw || (stateRaw ? normaliseText(stateRaw.next_step) : '') || normaliseText(body.nextStep);
+    const handoffToRaw = stateRaw ? stateRaw.handoff_to : body.handoff_to;
     const handoffTo = handoffToRaw === null ? null : (normaliseText(handoffToRaw) || null);
-    if (summary === '')
-        return { payload: null, error: 'sections.state.summary no puede ser vacio' };
     // Campo handoff opcional
     let handoff;
-    const handoffRaw = sectionsRaw.handoff && typeof sectionsRaw.handoff === 'object'
+    const handoffRaw = sectionsRaw && sectionsRaw.handoff && typeof sectionsRaw.handoff === 'object'
         ? sectionsRaw.handoff
         : null;
     if (handoffRaw) {
@@ -1629,20 +1662,50 @@ function parseRemoteClosurePayload(rawBody) {
             ...(handoffRaw.riesgo ? { riesgo: normaliseText(handoffRaw.riesgo) } : {})
         };
     }
+    const result = resultRaw || (sectionsRaw ? normaliseText(sectionsRaw.log) : '');
+    const handoffCore = handoffRawField || (handoff ? handoff.continuidad : '');
+    const handoffText = handoffCore || nextStep;
+    if (closureType === 'task_completed' && result === '') {
+        return { payload: null, error: 'result no puede ser vacio cuando closure_type=task_completed' };
+    }
+    if (closureType === 'blocked' && handoffCore === '') {
+        return { payload: null, error: 'Un bloqueo sin handoff no ayuda a nadie. ¿Qué necesita saber el siguiente para desbloquearlo?' };
+    }
+    const log = normaliseText(sectionsRaw?.log) || result || mission;
+    const shadow = normaliseText(sectionsRaw?.shadow) || `risk_level=${riskLevel}; closure_type=${closureType}; status=${status}.`;
+    const glitch = normaliseText(sectionsRaw?.glitch) || (legacySummaryUsed ? 'DEPRECATION: usar mission en lugar de summary.' : '');
+    const captain = normaliseText(sectionsRaw?.captain) || `${mission}. ${result || 'Cierre registrado.'}`;
+    const allowedTriggers = ['task_completed', 'blocked', 'meta', 'session_close', 'handoff'];
+    const inferredTriggerRaw = triggerRaw || closureType;
+    const trigger = allowedTriggers.includes(inferredTriggerRaw)
+        ? inferredTriggerRaw
+        : closureType;
     return {
         payload: {
             agent: normalizedAgent,
             interface: agentInterface,
             timestamp,
             packet_id: packetId,
+            schema_version: schemaVersion,
+            mission,
+            closure_type: closureType,
+            status,
+            result,
+            risk_level: riskLevel,
+            next_step: nextStep,
+            handoff: handoffText,
+            handoff_active: handoffActive,
+            transcript_ref: transcriptRef,
+            lifecycle_event: lifecycleEvent,
+            legacy_summary_used: legacySummaryUsed,
             trigger,
             sections: {
                 log,
                 shadow,
                 glitch,
                 state: {
-                    status,
-                    summary,
+                    status: stateStatus,
+                    summary: mission,
                     handoff_to: handoffTo,
                     next_step: nextStep
                 },
@@ -1657,10 +1720,19 @@ function parseRemoteClosurePayload(rawBody) {
 function buildRemoteClosureStateSection(payload) {
     return [
         `status: ${payload.status}`,
+        `mission: ${payload.mission}`,
         `summary: ${payload.summary}`,
         `handoff_to: ${payload.handoff_to || 'null'}`,
         `next_step: ${payload.next_step}`,
-        `packet_id: ${payload.packet_id}`
+        `packet_id: ${payload.packet_id}`,
+        `closure_type: ${payload.closure_type || ''}`,
+        `result: ${payload.result || ''}`,
+        `risk_level: ${payload.risk_level || ''}`,
+        `handoff: ${payload.handoff || ''}`,
+        `schema_version: ${payload.schema_version || 1}`,
+        `handoff_active: ${payload.handoff_active ? 'true' : 'false'}`,
+        `transcript_ref: ${payload.transcript_ref || ''}`,
+        `lifecycle_event: ${payload.lifecycle_event ? 'true' : 'false'}`
     ].join('\n');
 }
 function parseRemoteClosureToDeposit(payload) {
@@ -1669,10 +1741,19 @@ function parseRemoteClosureToDeposit(payload) {
     const actorCanonical = normalizeAgentName(payload.agent) || payload.agent;
     const statePayload = {
         status: payload.sections.state.status,
-        summary: payload.sections.state.summary,
+        mission: payload.mission,
+        summary: payload.mission,
         handoff_to: payload.sections.state.handoff_to,
         next_step: payload.sections.state.next_step,
-        packet_id: packetId
+        packet_id: packetId,
+        closure_type: payload.closure_type,
+        result: payload.result,
+        risk_level: payload.risk_level,
+        handoff: payload.handoff,
+        schema_version: payload.schema_version,
+        handoff_active: payload.handoff_active,
+        transcript_ref: payload.transcript_ref,
+        lifecycle_event: payload.lifecycle_event
     };
     return {
         filePath: '',
@@ -1682,7 +1763,14 @@ function parseRemoteClosureToDeposit(payload) {
             interface: payload.interface,
             timestamp: timestampIso,
             packet_id: packetId,
-            trigger: payload.trigger
+            trigger: payload.trigger,
+            schema_version: String(payload.schema_version),
+            closure_type: payload.closure_type,
+            status: payload.status,
+            risk_level: payload.risk_level,
+            handoff_active: payload.handoff_active ? 'true' : 'false',
+            lifecycle_event: payload.lifecycle_event ? 'true' : 'false',
+            transcript_ref: payload.transcript_ref || ''
         },
         sections: {
             LOG: payload.sections.log,
@@ -1989,12 +2077,28 @@ function parseDepositStatePayload(rawState) {
             return;
         parsed[match[1].toLowerCase()] = match[2].trim();
     });
+    const mission = normaliseText(parsed.mission) || normaliseText(parsed.summary);
+    const schemaVersionRaw = Number(parsed.schema_version);
+    const schemaVersion = Number.isFinite(schemaVersionRaw) && schemaVersionRaw > 0
+        ? Math.trunc(schemaVersionRaw)
+        : 1;
+    const handoffActive = parseBooleanLike(parsed.handoff_active);
+    const lifecycleEvent = parseBooleanLike(parsed.lifecycle_event);
     return {
         status: normalizeLiveStatus(parsed.status),
-        summary: normaliseText(parsed.summary),
+        mission,
+        summary: mission,
         handoff_to: normaliseText(parsed.handoff_to) || null,
         next_step: normaliseText(parsed.next_step),
-        packet_id: normaliseText(parsed.packet_id)
+        packet_id: normaliseText(parsed.packet_id),
+        closure_type: normaliseText(parsed.closure_type),
+        result: normaliseText(parsed.result),
+        risk_level: normaliseText(parsed.risk_level),
+        handoff: normaliseText(parsed.handoff),
+        schema_version: schemaVersion,
+        handoff_active: handoffActive,
+        transcript_ref: normaliseText(parsed.transcript_ref),
+        lifecycle_event: lifecycleEvent
     };
 }
 function canaryTimestampLabelFromIso(iso) {
@@ -2059,14 +2163,14 @@ function updateIaStatusFromDeposit(deposit) {
         ...current,
         status: iaStatus,
         task: iaStatus === 'active' ? deposit.packetId : '',
-        task_subject: deposit.statePayload.summary || current.task_subject || '',
+        task_subject: deposit.statePayload.mission || deposit.statePayload.summary || current.task_subject || '',
         since: deposit.timestampIso,
         last_seen: deposit.timestampIso,
         stale: false,
         stale_since: '',
         handoff_to: handoffCanonical || '',
         next_step: deposit.statePayload.next_step,
-        last_output: deposit.statePayload.summary || firstLine(deposit.sections.LOG || '') || ''
+        last_output: deposit.statePayload.mission || deposit.statePayload.summary || firstLine(deposit.sections.LOG || '') || ''
     };
     state.ia_status = ia;
     if (deposit.statePayload.next_step)
@@ -2107,7 +2211,7 @@ function integrateClosure(deposit, options) {
         const shadowEntry = `\n---\n` +
             `**[${canaryLabelText}] VOZ ${actor.toUpperCase()} (SOMBRA):**\n` +
             `**PACKET:** ${packetRef || 'N/A'}\n` +
-            `**TAREA:** ${deposit.statePayload.summary || 'Integracion de deposito chat'}\n` +
+            `**TAREA:** ${deposit.statePayload.mission || deposit.statePayload.summary || 'Integracion de deposito chat'}\n` +
             `**SOMBRA:**\n${shadowText}\n`;
         appendMarkdownEntry(ARGOS_GLOBAL_SHADOW_PATH, '# ARGOS GLOBAL SHADOW LOG\nMaterial observado sin destino operativo inmediato.\n', shadowEntry);
     }
@@ -2140,11 +2244,12 @@ function integrateClosure(deposit, options) {
             sender_role: 'agent',
             audience: 'captain',
             source: sourceLabel,
-            summary: `${normaliseText(options.captainSummaryPrefix) || '[DEPOSITO]'} ${deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
+            summary: `${normaliseText(options.captainSummaryPrefix) || '[DEPOSITO]'} ${deposit.statePayload.mission || deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
             details: captainText,
             status: deposit.statePayload.status,
             tokens: 0,
-            refId: packetRef
+            refId: packetRef,
+            transcriptRef: deposit.statePayload.transcript_ref || ''
         });
     }
     updateIaStatusFromDeposit(deposit);
@@ -3506,7 +3611,15 @@ function parseArgosEventsStream(filePath, idPrefix) {
                     normaliseText(record.nextStep)
                 ].join(' '));
             const detailsText = normaliseText(record.verification) || normaliseText(record.details);
-            const summaryText = normaliseText(record.summary) || normaliseText(record.type) || 'Evento';
+            const missionText = normaliseText(record.mission);
+            const summaryText = missionText || normaliseText(record.summary) || normaliseText(record.type) || 'Evento';
+            const riskLevelText = normaliseText(record.risk_level) || normaliseText(record.riskLevel);
+            const transcriptRef = normaliseText(record.transcriptRef) || normaliseText(record.transcript_ref);
+            const closureType = normaliseText(record.closure_type);
+            const lifecycleRaw = normaliseText(record.lifecycle_event).toLowerCase();
+            const lifecycleEvent = lifecycleRaw === 'true' || lifecycleRaw === '1' || lifecycleRaw === 'yes';
+            const handoffActiveRaw = normaliseText(record.handoff_active).toLowerCase();
+            const handoffActive = handoffActiveRaw === 'true' || handoffActiveRaw === '1' || handoffActiveRaw === 'yes';
             const rawActor = normaliseText(record.actor) || normaliseText(record.sender_name);
             let actor = normalizeActorName(rawActor);
             // Si el actor no es un agente canÃ³nico activo, intentar extraer owner de los detalles
@@ -3526,11 +3639,17 @@ function parseArgosEventsStream(filePath, idPrefix) {
                 timestamp: normaliseText(record.timestamp),
                 actor,
                 status: normaliseText(record.status) || 'done',
+                mission: missionText || summaryText,
                 summary: summaryText,
                 details: detailsText,
                 next_step: normaliseText(record.next_step) || normaliseText(record.nextStep) || normaliseText(record.follow_up) || normaliseText(record.next_action),
                 errors: normaliseText(record.errors) || normaliseText(record.learnings) || normaliseText(record.bug_details) || normaliseText(record.error_base),
                 risks: normaliseText(record.risks) || normaliseText(record.dangers),
+                risk_level: riskLevelText,
+                closure_type: closureType,
+                handoff_active: handoffActive,
+                lifecycle_event: lifecycleEvent,
+                transcriptRef,
                 source: idPrefix,
                 sortMs: ts.sortMs + index
             });
@@ -3557,6 +3676,7 @@ function parseCaptainFeedStream(filePath, idPrefix) {
             const summary = normaliseText(record.summary);
             const details = normaliseText(record.details);
             const packetId = normaliseText(record.refId) || extractPacketId(`${summary} ${details}`);
+            const transcriptRef = normaliseText(record.transcriptRef);
             parsed.push({
                 id: packetId,
                 timestamp_label: ts.label,
@@ -3569,6 +3689,7 @@ function parseCaptainFeedStream(filePath, idPrefix) {
                 next_step: '',
                 errors: '',
                 risks: '',
+                transcriptRef,
                 source: idPrefix,
                 sortMs: ts.sortMs + index
             });
@@ -4636,10 +4757,34 @@ app.post('/api/remote/closure', (req, res) => {
             packet_id: payload.packet_id,
             refId: payload.packet_id,
             status: depositPayload.statePayload.status,
-            summary: depositPayload.statePayload.summary || firstLine(payload.sections.log) || 'Remote closure integrado',
-            details: `trigger=${payload.trigger}; interface=${payload.interface}; mark_packet_done=${payload.mark_packet_done}`,
+            summary: payload.mission || firstLine(payload.sections.log) || 'Remote closure integrado',
+            mission: payload.mission,
+            closure_type: payload.closure_type,
+            result: payload.result,
+            handoff: payload.handoff,
+            handoff_active: payload.handoff_active,
+            schema_version: payload.schema_version,
+            risk_level: payload.risk_level,
+            risks: payload.handoff,
+            lifecycle_event: payload.lifecycle_event,
+            transcriptRef: payload.transcript_ref || `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
+            details: `trigger=${payload.trigger}; interface=${payload.interface}; mark_packet_done=${payload.mark_packet_done}; status=${payload.status}`,
             source: 'api:remote/closure'
         });
+        if (payload.legacy_summary_used) {
+            appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+                id: getNextGlitchId(),
+                timestamp: timestampIso,
+                actor: normalizeAgentName(payload.agent) || payload.agent,
+                module: 'argos_remote_closure',
+                type: 'deprecation',
+                status: 'open',
+                summary: `Deprecation en remote closure (${payload.packet_id}): se uso summary`,
+                details: 'El payload recibio summary sin mission. Se normalizo a mission para compatibilidad Fase 1.',
+                next_step: 'Actualizar cliente remoto para enviar mission (<=80).',
+                source: 'api:remote/closure'
+            });
+        }
         publishEvent('remote:closure', {
             closure_id: closureId,
             agent: payload.agent,
@@ -4649,7 +4794,7 @@ app.post('/api/remote/closure', (req, res) => {
         });
         return res.json({
             closure_id: closureId,
-            transcriptRef: `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
+            transcriptRef: payload.transcript_ref || `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
             packet_moved_to: packetMovedTo
         });
     }
@@ -5220,7 +5365,7 @@ app.post('/api/trilog', (req, res) => {
         discarded = '', // opcional: detalles descartados durante el proceso
         ignored = '', // opcional: detalles ignorados por baja prioridad
         suppressed = '', // opcional: detalles suprimidos/no volcados en LOG
-        status = 'done', module = 'argos', transcriptRef = '' // referencia al bloque de transcript literal (YYYY-MM-DD_Agente.md#ARG-XXXX)
+        status = 'done', module = 'argos', lifecycle_event = false, transcriptRef = '' // referencia al bloque de transcript literal (YYYY-MM-DD_Agente.md#ARG-XXXX)
          } = req.body;
         if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor)))
             return;
@@ -5273,11 +5418,13 @@ app.post('/api/trilog', (req, res) => {
             packet_id: packetRef,
             refId: packetRef,
             status,
+            mission: summary,
             summary,
             details,
             next_step: nextStep,
             errors,
             risks,
+            lifecycle_event: Boolean(lifecycle_event),
             tokens: processTokenCount,
             transcriptRef: normaliseText(transcriptRef),
             source: 'api:trilog'

@@ -359,6 +359,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return div;
     }
 
+    function formatRiskLevel(value) {
+        const risk = String(value || '').trim().toLowerCase();
+        if (!risk) return { label: '--', className: '' };
+        if (risk === 'none') return { label: '🟢 none', className: 'bubble-risk-none' };
+        if (risk === 'low') return { label: '🟡 low', className: 'bubble-risk-low' };
+        if (risk === 'medium') return { label: '🟠 medium', className: 'bubble-risk-medium' };
+        if (risk === 'high') return { label: '🔴 high', className: 'bubble-risk-high' };
+        if (risk === 'blocked') return { label: '⛔ blocked', className: 'bubble-risk-blocked' };
+        return { label: risk, className: '' };
+    }
+
     function compactTaskTitle(title) {
         const text = String(title || '').trim();
         if (!text) return 'Sin orden activa';
@@ -1220,6 +1231,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         entries.forEach((entry) => {
             const row = document.createElement('tr');
             row.className = 'logbook-row';
+            if (entry.lifecycle_event) {
+                row.classList.add('logbook-row-lifecycle');
+            }
             row.addEventListener('click', (event) => {
                 event.stopPropagation();
                 const shouldExpand = expandedLogbookRow !== row;
@@ -1236,6 +1250,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let value = entry[column.id] || '--';
                 if (column.id === 'timestamp_label') {
                     value = formatMaritimeDate(value, entry.timestamp_precision);
+                }
+                if (column.id === 'summary' && entry.mission) {
+                    value = entry.mission;
+                }
+                if (column.id === 'risk_level') {
+                    const risk = formatRiskLevel(value);
+                    value = risk.label;
+                    if (risk.className) {
+                        td.dataset.extraBubbleClass = risk.className;
+                    }
                 }
 
                 // transcriptRef — render as 📄 button instead of raw text
@@ -1266,6 +1290,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     extraClass = 'is-imprecise';
                 } else if (column.id === 'actor' && value !== '--') {
                     extraClass = `bubble-agent-${value.toLowerCase().replace(/\s+/g, '-')}`;
+                } else if (column.id === 'status' && String(value).toLowerCase() === 'blocked' && entry.handoff_active) {
+                    extraClass = 'bubble-status-blocked-handoff';
+                } else if (column.id === 'summary' && entry.lifecycle_event) {
+                    extraClass = 'bubble-lifecycle-event';
+                } else if (column.id === 'risk_level' && td.dataset.extraBubbleClass) {
+                    extraClass = td.dataset.extraBubbleClass;
                 }
 
                 const bubble = buildBubbleCell(value, extraClass);
