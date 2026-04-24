@@ -7922,6 +7922,11 @@ function runGitCommand(dir: string, args: string[]): { ok: boolean, output: stri
   }
 }
 
+// ============ ENDPOINT: GET /api/ping — health check mínimo sin autenticación ============
+app.get('/api/ping', (_req: Request, res: Response) => {
+  res.json({ ok: true, ts: nowIso(), service: 'argos-api' });
+});
+
 // Fallback para SPA: cualquier ruta no manejada por la API devuelve index.html
 app.get('*', (req: Request, res: Response) => {
   const indexPath = path.join(DASHBOARD_DIR, 'index.html');
