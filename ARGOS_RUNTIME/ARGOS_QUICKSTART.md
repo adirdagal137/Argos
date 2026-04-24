@@ -63,18 +63,36 @@ ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md
 con secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`.
 El `packet_id` y el actor canónico son OBLIGATORIOS en el deposit o irá a ORPHAN.
 
-**Transcript (opcional):**
+**Transcript (opcional — recomendado para Claude Code y Codex):**
 Solo si hay razonamiento que no cabe en sections.log:
 ```http
 POST http://localhost:8080/api/transcript
+Headers: X-Argos-Agent-Token: <token-agente>
 {
-  "agent": "NOMBRE",
+  "agent": "Claude|Codex|Pi|ChatGPT|DeepSeek",
   "role": "agent",
   "content": "Razonamiento que NO está en sections.log",
   "packetId": "ARG-XXXX"
 }
 ```
 No duplicar lo que ya está en sections.log ni en el feed.
+
+**Agentes sin acceso HTTP directo (ChatGPT, Pi):**
+Dictar este JSON al Capitán o a OpenClaw para que haga el POST:
+```json
+{
+  "agent": "ChatGPT",
+  "role": "agent",
+  "content": "<razonamiento interno o decisiones no obvias>",
+  "packetId": "ARG-XXXX"
+}
+```
+
+**Lectura de transcripts (cualquier agente, sin token):**
+```http
+GET http://localhost:8080/api/transcript/ARG-XXXX
+```
+Devuelve todas las entradas de todos los agentes para ese packet, ordenadas cronológicamente.
 
 **Agentes locales (Claude Code, Codex CLI):** también pueden usar `POST /api/trilog` como alternativa equivalente a `/api/remote/closure`.
 

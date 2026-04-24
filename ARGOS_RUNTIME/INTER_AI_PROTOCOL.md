@@ -94,10 +94,18 @@ Claude hace POST /api/transcript al cierre con el texto sustantivo de esta conve
 El PROMPT ya esta capturado. El RESPONSE es el razonamiento clave de este exchange â€”
 lo que no esta en el trilog ni en los chats del feed.
 
-**Lectura por otras IAs:**
+**Lectura por otras IAs (sin token — acceso público de solo lectura):**
 ```
-GET http://localhost:8080/api/transcript?agent=Claude&date=2026-04-13
+# Todos los agentes para un packet — forma canónica:
+GET http://localhost:8080/api/transcript/ARG-XXXX
+
+# Alternativa query-param (equivalente):
+GET http://localhost:8080/api/transcript/packet?packetId=ARG-XXXX
+
+# Un agente específico para una fecha:
 GET http://localhost:8080/api/transcript?agent=Claude&date=2026-04-13&packetId=ARG-XXXX
+
+# Listar archivos disponibles para una fecha:
 GET http://localhost:8080/api/transcript/list?date=2026-04-13
 ```
 
@@ -564,7 +572,7 @@ Git tag por hito:
 ```
 MOMENTO 1 — INICIO DE SESIÓN (no genera log ni feed)
   1. Leer ARGOS_QUICKSTART.md + inbox/ + state.json + tail LOG reciente
-  2. Solo si hay ambigüedad o conflicto: GET /api/transcript?packetId=ARG-XXXX
+  2. Solo si hay ambigüedad o conflicto: GET /api/transcript/ARG-XXXX
 
 MOMENTO 2 — START (1 mensaje al feed)
   3. POST /api/ia/start-task → “Claude tomando misión: [summary]” llega al feed

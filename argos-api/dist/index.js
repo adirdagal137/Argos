@@ -258,6 +258,7 @@ function buildEmptyLogbook() {
         ]
     };
 }
+const CANONICAL_PROTOCOL_ACTORS = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'DeepSeek', 'Qwen'];
 function generateStableHash(seed) {
     let hash = 2166136261;
     for (let i = 0; i < seed.length; i += 1) {
@@ -337,7 +338,7 @@ function normalizeAgentName(rawName) {
         .replace(/\*\*/g, '').replace(/__/g, '').replace(/\[/g, '').replace(/\]/g, '');
     if (v.includes('claude'))
         return 'Claude';
-    if (v.includes('antigravity') || v.includes('gemini'))
+    if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v))
         return 'Antigravity';
     if (v.includes('codex') || v.includes('chatgpt'))
         return 'Codex';
@@ -345,11 +346,40 @@ function normalizeAgentName(rawName) {
         return 'DeepSeek';
     return null;
 }
+function parseCanonicalProtocolActor(rawName) {
+    const cleaned = cleanMarkdownText(rawName || '').trim();
+    if (cleaned === '')
+        return null;
+    const exact = CANONICAL_PROTOCOL_ACTORS.find((name) => name.toLowerCase() === cleaned.toLowerCase());
+    return exact || null;
+}
+function resolveCrewDisplayName(rawName, fallback = 'DeepSeek') {
+    const cleaned = cleanMarkdownText(rawName || '').trim();
+    if (cleaned === '')
+        return fallback;
+    const canonical = parseCanonicalProtocolActor(cleaned);
+    if (canonical)
+        return canonical;
+    const lower = cleaned.toLowerCase();
+    if (lower.includes('claude') || lower.includes('orfeo'))
+        return 'Claude';
+    if (lower.includes('antigravity') || lower.includes('gemini') || /\bpi\b/.test(lower))
+        return 'Pi';
+    if (lower.includes('chatgpt'))
+        return 'ChatGPT';
+    if (lower.includes('codex'))
+        return 'Codex';
+    if (lower.includes('qwen'))
+        return 'Qwen';
+    if (lower.includes('deepseek') || lower.includes('openclaw') || lower.includes('contramaestre'))
+        return 'DeepSeek';
+    return cleaned || fallback;
+}
 // --- SOPORTE PARA SISTEMA VOCAL (V2) ---
 function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tokens = 0, refId = '') {
     const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
     const numericTokens = Number(tokens) || 0;
-    const canonicalSender = normalizeAgentName(sender) || sender;
+    const canonicalSender = resolveCrewDisplayName(sender, normalizeAgentName(sender) || sender || 'DeepSeek');
     const record = {
         id: nextFeedMessageId(),
         timestamp: new Date().toISOString(),
@@ -811,8 +841,8 @@ function getVoiceForRole(role) {
     // Si el rol es compuesto ("Antigravity / Codex"), usar solo el agente primario (primero)
     const primary = (role || '').split('/')[0].trim();
     const r = primary.toLowerCase();
-    if (r.includes('antigravity') || r.includes('gemini'))
-        return 'Antigravity';
+    if (r.includes('antigravity') || r.includes('gemini') || /\bpi\b/.test(r))
+        return 'Pi';
     if (r.includes('codex'))
         return 'Codex';
     if (r.includes('claude') || r.includes('orfeo'))
@@ -820,11 +850,11 @@ function getVoiceForRole(role) {
     if (r.includes('lola'))
         return 'Lola';
     // Sin voz de sistema — si el rol no es de un agente conocido, no tiene voz en los logs
-    return primary || 'Antigravity';
+    return primary || 'Pi';
 }
 function isAntigravityRole(role) {
     const value = normaliseText(role).toLowerCase();
-    return value.includes('antigravity') || value.includes('gemini');
+    return value.includes('antigravity') || value.includes('gemini') || /\bpi\b/.test(value);
 }
 function normaliseText(value) {
     return typeof value === 'string' ? value.replace(/\uFEFF/g, '').trim() : '';
@@ -924,10 +954,13 @@ function resolveCanonicalCrewVoice(rawName, fallback = 'DeepSeek') {
     return fallback;
 }
 function normalizeActorName(rawName) {
+    const display = resolveCrewDisplayName(rawName || '', '');
+    if (display !== '')
+        return display;
     // Primero intenta resolver al nombre canónico de agente activo
     const agent = normalizeAgentName(rawName || '');
     if (agent)
-        return agent;
+        return agent === 'Antigravity' ? 'Pi' : agent;
     // Si no es un agente activo reconocido, preservar el nombre original limpio
     // en lugar de colapsar a 'DeepSeek' — evita contaminación del trilog/logbook
     const cleaned = cleanMarkdownText(rawName || '').trim();
@@ -1278,7 +1311,7 @@ function resolveRemoteAgentTokenKey(rawAgent) {
         return 'Claude';
     if (normalized.includes('chatgpt') || normalized.includes('codex'))
         return 'ChatGPT';
-    if (normalized.includes('gemini') || normalized.includes('antigravity'))
+    if (normalized.includes('gemini') || normalized.includes('antigravity') || /\bpi\b/.test(normalized))
         return 'Gemini';
     const fallback = normaliseText(rawAgent);
     return fallback === '' ? 'Unknown' : fallback;
@@ -1462,6 +1495,13 @@ function parseRemoteClosurePayload(rawBody) {
     const trigger = triggerRaw;
     if (agent === '')
         return { payload: null, error: 'agent es obligatorio' };
+    const normalizedAgent = parseCanonicalProtocolActor(agent);
+    if (!normalizedAgent) {
+        return {
+            payload: null,
+            error: `agent debe ser un nombre canonico. Validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}`
+        };
+    }
     if (agentInterface === '')
         return { payload: null, error: 'interface es obligatorio' };
     if (timestamp === '')
@@ -1510,7 +1550,7 @@ function parseRemoteClosurePayload(rawBody) {
         return { payload: null, error: 'sections.state.summary no puede ser vacio' };
     return {
         payload: {
-            agent,
+            agent: normalizedAgent,
             interface: agentInterface,
             timestamp,
             packet_id: packetId,
@@ -1953,7 +1993,7 @@ function updateIaStatusFromDeposit(deposit) {
 }
 function integrateClosure(deposit, options) {
     const packetRef = normaliseText(deposit.packetId);
-    const actor = normalizeAgentName(deposit.actorCanonical) || deposit.actorCanonical;
+    const actor = resolveCrewDisplayName(deposit.actorRaw || deposit.actorCanonical, normalizeAgentName(deposit.actorCanonical) || deposit.actorCanonical || 'DeepSeek');
     const timestampIso = deposit.timestampIso;
     const canaryLabelText = canaryTimestampLabelFromIso(timestampIso);
     const sourceLabel = normaliseText(options.source) || 'closure_integration';
@@ -2067,6 +2107,52 @@ function processSingleInboxDeposit(filePath, trigger) {
         });
         return false;
     }
+    const moveToOrphanWithGlitch = (summary, details, nextStep) => {
+        const orphanDest = path_1.default.join(INBOX_DEPOSITS_PROCESSED_DIR, `__orphan_${path_1.default.basename(filePath)}`);
+        moveFileWithFallback(filePath, orphanDest);
+        const ts = nowIso();
+        appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+            id: getNextGlitchId(),
+            timestamp: ts,
+            timestamp_label: canaryTimestampLabelFromIso(ts),
+            actor: 'Dispatcher',
+            module: 'argos_deposit_guard',
+            type: 'orphan_deposit',
+            status: 'open',
+            summary,
+            details,
+            next_step: nextStep,
+            source: 'deposit_heartbeat'
+        });
+        return false;
+    };
+    if (!parsed.packetId || parsed.packetId.trim() === '') {
+        return moveToOrphanWithGlitch(`Deposito ORPHAN: packet_id vacio - ${path_1.default.basename(filePath)}`, 'El deposit no tiene packet_id. Movido a __orphan. Revisar deposito.', 'Agente que genero el deposito debe hacer closure correcta con packet_id.');
+    }
+    const actorCanonical = normaliseText(parsed.actorCanonical);
+    const canonicalActor = parseCanonicalProtocolActor(actorCanonical);
+    if (!canonicalActor) {
+        return moveToOrphanWithGlitch(`Deposito ORPHAN: actor no canonico "${actorCanonical || 'N/A'}" - ${path_1.default.basename(filePath)}`, `Actor detectado: "${actorCanonical || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`, `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`);
+    }
+    const logText = normaliseText(parsed.sections.LOG || '');
+    if (logText === '') {
+        const ts = nowIso();
+        appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+            id: getNextGlitchId(),
+            timestamp: ts,
+            timestamp_label: canaryTimestampLabelFromIso(ts),
+            actor: 'Dispatcher',
+            module: 'argos_deposit_guard',
+            type: 'deposit_warning',
+            status: 'open',
+            summary: `Deposit con [LOG] vacio - ${path_1.default.basename(filePath)} (packet: ${parsed.packetId})`,
+            details: 'Se integrara shadow/glitch/captain pero no habra entrada en GLOBAL_LOG.',
+            next_step: 'El agente debe incluir [LOG] con contenido en futuros depositos.',
+            packet_id: parsed.packetId,
+            refId: parsed.packetId,
+            source: 'deposit_heartbeat'
+        });
+    }
     integrateClosure(parsed, {
         source: 'deposit_heartbeat',
         trigger,
@@ -2143,21 +2229,6 @@ function markStaleAgentsFromDeposits(staleMinutes = 60) {
             row.stale = true;
             row.stale_since = nowIso();
             changes += 1;
-            appendJsonlRecord(CAPTAIN_FEED_PATH, {
-                id: nextFeedMessageId(),
-                timestamp: nowIso(),
-                kind: 'crew_update',
-                speaker: 'crew',
-                sender_name: agentKey,
-                sender_role: 'agent',
-                audience: 'captain',
-                source: 'deposit_heartbeat',
-                summary: `[HEARTBEAT] ${agentKey} marcado stale`,
-                details: `Sin actividad registrada en > ${staleMinutes} minutos.`,
-                status: 'recorded',
-                tokens: 0,
-                refId: ''
-            });
             publishEvent('ia:stale', { agent: agentKey, stale: true, stale_minutes: staleMinutes });
         }
         if (!isStaleNow && wasStale) {
@@ -4376,7 +4447,7 @@ app.post('/api/remote/update', (req, res) => {
         }
         const details = normaliseText(req.body?.details);
         const packetRef = normaliseText(req.body?.packet_id) || normaliseText(req.body?.packetId) || normaliseText(req.body?.refId);
-        const canonicalSender = normalizeAgentName(claimedActor) || claimedActor || tokenAgent || 'ExternalAgent';
+        const canonicalSender = resolveCrewDisplayName(claimedActor || tokenAgent || 'ExternalAgent', normalizeAgentName(claimedActor) || claimedActor || tokenAgent || 'ExternalAgent');
         const timestamp = nowIso();
         const entryId = nextFeedMessageId();
         appendJsonlRecord(CAPTAIN_FEED_PATH, {
@@ -4704,16 +4775,14 @@ app.get('/api/chat', (req, res) => {
             });
         });
         rawMessages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-        // Deduplicacion LOCAL (Sliding Window): Solo descarta si es identico a uno de los ultimos 5 mensajes.
-        const messages = rawMessages.filter((msg, idx, self) => {
-            // Miramos hacia atras hasta 5 posiciones
-            for (let i = 1; i <= 5; i++) {
-                const prev = self[idx - i];
-                if (!prev)
-                    break;
-                if (msg.sender === prev.sender && msg.text === prev.text)
-                    return false;
-            }
+        const seenIds = new Set();
+        const messages = rawMessages.filter((msg) => {
+            const messageId = normaliseText(msg.id);
+            if (messageId === '')
+                return true;
+            if (seenIds.has(messageId))
+                return false;
+            seenIds.add(messageId);
             return true;
         });
         res.json({ messages });
@@ -4735,7 +4804,7 @@ app.post('/api/chat', (req, res) => {
         if (!summary)
             return res.status(400).json({ error: 'Missing summary' });
         const resolvedTokens = resolveEstimatedTokens(tokens, summary, details, req.body.refId, sender);
-        const canonicalSender = normalizeAgentName(String(sender || 'Antigravity')) || String(sender || 'Antigravity');
+        const canonicalSender = resolveCrewDisplayName(String(sender || 'Pi'), normalizeAgentName(String(sender || 'Pi')) || String(sender || 'Pi'));
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         const recordsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
         const record = {
@@ -5313,6 +5382,40 @@ app.get('/api/transcript/packet', (req, res) => {
             const agent = nameParts.slice(1).join('_');
             results.push({ agent, date, file, content: block });
         }
+        res.json({ packetId, transcripts: results });
+    }
+    catch (e) {
+        res.status(500).json({ error: 'Fallo buscando transcripts por packet', detail: String(e) });
+    }
+});
+// GET /api/transcript/:packetId
+// Alias REST limpio de /api/transcript/packet?packetId=X.
+// Sin autenticación — solo lectura, accesible por cualquier agente.
+app.get('/api/transcript/:packetId', (req, res) => {
+    try {
+        const packetId = normaliseText(req.params.packetId);
+        if (!packetId)
+            return res.status(400).json({ error: 'packetId requerido' });
+        const results = [];
+        if (!fs_1.default.existsSync(TRANSCRIPTS_DIR))
+            return res.json({ packetId, transcripts: [] });
+        const files = fs_1.default.readdirSync(TRANSCRIPTS_DIR).filter(f => f.endsWith('.md')).sort().reverse();
+        const anchor = `<!-- ${packetId} -->`;
+        for (const file of files) {
+            const content = fs_1.default.readFileSync(path_1.default.join(TRANSCRIPTS_DIR, file), 'utf-8');
+            if (!content.includes(anchor))
+                continue;
+            const start = content.indexOf(anchor);
+            const afterBlock = content.indexOf('\n---\n', start);
+            const end = afterBlock !== -1 ? afterBlock + 5 : content.length;
+            const block = content.slice(start, end).trim();
+            const nameParts = file.replace('.md', '').split('_');
+            const date = nameParts[0];
+            const agent = nameParts.slice(1).join('_');
+            results.push({ agent, date, file, content: block });
+        }
+        // Ordenar por fecha+agente asc para lectura cronológica
+        results.sort((a, b) => `${a.date}_${a.agent}`.localeCompare(`${b.date}_${b.agent}`));
         res.json({ packetId, transcripts: results });
     }
     catch (e) {

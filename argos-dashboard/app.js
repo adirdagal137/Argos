@@ -622,6 +622,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="task-actions">
                         <button type="button" class="task-edit-btn" data-task-id="${safeHtml(task.id)}">Editar</button>
+                        ${isDone ? `<button type="button" class="task-transcripts-btn" data-task-id="${safeHtml(task.id)}" title="Ver transcripts de todos los agentes para este packet">📄 Transcripts</button>` : ''}
                     </div>
                 </div>
                 <label class="task-checkbox-wrapper">
@@ -663,6 +664,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 editBtn.addEventListener('click', async (ev) => {
                     ev.stopPropagation();
                     await editTaskPacket(task.id);
+                });
+            }
+
+            const transcriptsBtn = item.querySelector('.task-transcripts-btn');
+            if (transcriptsBtn) {
+                transcriptsBtn.addEventListener('click', async (ev) => {
+                    ev.stopPropagation();
+                    await showPacketTranscripts(task.id);
                 });
             }
 
@@ -958,6 +967,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         pre.textContent = content;
         modalEventsList.appendChild(pre);
         overlay.classList.remove('hidden');
+    }
+
+    // Carga todos los transcripts de todos los agentes para un packetId y los muestra en el modal.
+    async function showPacketTranscripts(packetId) {
+        if (!packetId || !overlay || !modalQueryTitle || !modalEventsList) return;
+        modalQueryTitle.textContent = `Transcripts: ${packetId}`;
+        modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">Cargando transcripts…</p>';
+        overlay.classList.remove('hidden');
+        try {
+            const resp = await fetch(`${API_URL}/transcript/${encodeURIComponent(packetId)}`);
+            if (!resp.ok) {
+                modalEventsList.innerHTML = `<p style="padding:1rem;color:var(--accent-red)">Error ${resp.status} cargando transcripts.</p>`;
+                return;
+            }
+            const data = await resp.json();
+            modalEventsList.innerHTML = '';
+            if (!data.transcripts || data.transcripts.length === 0) {
+                modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">No hay transcripts para este packet.</p>';
+                return;
+            }
+            data.transcripts.forEach((entry) => {
+                const section = document.createElement('div');
+                section.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.08);padding:0.75rem 1rem;';
+                const header = document.createElement('div');
+                header.style.cssText = 'font-size:0.75rem;opacity:0.5;margin-bottom:0.4rem;';
+                header.textContent = `${entry.agent}  ·  ${entry.date}  ·  ${entry.file}`;
+                const pre = document.createElement('pre');
+                pre.style.cssText = 'white-space:pre-wrap;word-break:break-word;font-size:0.85rem;line-height:1.5;margin:0;';
+                pre.textContent = entry.content;
+                section.appendChild(header);
+                section.appendChild(pre);
+                modalEventsList.appendChild(section);
+            });
+        } catch (err) {
+            modalEventsList.innerHTML = `<p style="padding:1rem;color:var(--accent-red)">${String(err)}</p>`;
+        }
     }
 
     function setRowExpanded(row, expanded) {
