@@ -226,6 +226,7 @@ type TaskRecord = {
   time: string;
   zone: 'inbox' | 'in_progress' | 'done';
   type: string;
+  tag: string;
   priority: string;
   tokens_spent: number;
   mtimeMs: number;
