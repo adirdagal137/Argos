@@ -460,10 +460,18 @@ El feed es para comunicacion operativa: workpackets, hitos, bloqueos, decisiones
 
 Todo traspaso de mision debe vivir en ARGOS_RUNTIME/work_packets/.
 
-- inbox/: mision pendiente de tomar. (TYPE: task | bug | note | parked)
+- inbox/: mision pendiente de tomar.
 - in_progress/: mision activa.
 - done/: mision completada.
 - archived/: mision cerrada y congelada.
+
+Campos de clasificacion (obligatorios en cada work packet):
+- `ROOM`: `ARGOS | SCICLASSMATE | COMENIO | XUANXU | GENERAL`
+- `TYPE`: `strategy | build | integration | maintenance | bug | risk | errand`
+
+Defaults operativos del parser:
+- Si falta `ROOM`, se asigna `GENERAL`.
+- Si falta `TYPE`, se asigna `task` (compatibilidad historica).
 
 Los work packets con TYPE: bug aparecen en la pestana Bugs del dashboard.
 

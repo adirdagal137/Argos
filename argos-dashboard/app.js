@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const riskBar = document.getElementById('risk-bubbles-container');
     const activeMissionsCount = document.getElementById('active-missions-count');
     const activeAlertsCount = document.getElementById('active-alerts-count');
+    const roomFilterSelect = document.getElementById('room-filter-select');
     const forestContainer = document.getElementById('view-bosque');
     const vellocinoContainer = document.getElementById('view-vellocino');
     const sourcesBody = document.getElementById('sources-body');
@@ -67,6 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentProject = localStorage.getItem('argos_currentProject') || 'argos';
     let currentSubTarget = localStorage.getItem('argos_currentSubTarget') || 'subview-ordenes';
+    let currentRoomFilter = (localStorage.getItem('argos_roomFilter') || 'ALL').toUpperCase();
 
     // Global raw data for filtering
     let allRawTasks = [];
@@ -74,6 +76,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const navItems = document.querySelectorAll('.nav-item');
     const viewSections = document.querySelectorAll('.view-section');
+
+    const normalizeRoomFilter = (value) => {
+        const normalized = String(value || '').trim().toUpperCase();
+        const allowed = new Set(['ALL', 'ARGOS', 'SCICLASSMATE', 'COMENIO', 'XUANXU', 'GENERAL']);
+        return allowed.has(normalized) ? normalized : 'ALL';
+    };
+
+    currentRoomFilter = normalizeRoomFilter(currentRoomFilter);
+    if (roomFilterSelect) {
+        roomFilterSelect.value = currentRoomFilter;
+        roomFilterSelect.addEventListener('change', async (event) => {
+            currentRoomFilter = normalizeRoomFilter(event.target.value);
+            localStorage.setItem('argos_roomFilter', currentRoomFilter);
+            await hydrate();
+        });
+    }
 
     function activateView(targetId, clickedNav = null) {
         // Desactivar todas las secciones y navs
@@ -590,6 +608,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </h4>
                     <div class="task-meta">
                         <span>ID: <span class="task-id-link">${safeHtml(task.id)}</span></span>
+                        <span>|</span>
+                        <span>ROOM: ${safeHtml(task.room || 'GENERAL')}</span>
+                        <span>|</span>
+                        <span>TYPE: ${safeHtml(task.type || 'task')}</span>
+                        <span>|</span>
                         <span class="task-zone ${safeHtml(zone)}">${safeHtml(zone)}</span>
                         <span>|</span>
                         <span>Dirigido a: ${safeHtml(task.owner)}</span>
@@ -1369,10 +1392,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function hydrate() {
+        const roomQuery = currentRoomFilter && currentRoomFilter !== 'ALL'
+            ? `?room=${encodeURIComponent(currentRoomFilter)}`
+            : '';
         const endpoints = {
             status: `${API_URL.replace('/api', '')}/health`,
             state: `${API_URL}/state`,
-            tasks: `${API_URL}/tasks`,
+            tasks: `${API_URL}/tasks${roomQuery}`,
             chat: `${API_URL}/chat`,
             vector: `${API_URL}/vector`,
             iaStatus: `${API_URL}/ia/status`
@@ -1471,7 +1497,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`${API_URL}/tasks`, {
                 method: 'POST',
                 headers: CAPTAIN_UI_HEADERS,
-                body: JSON.stringify({ rawText })
+                body: JSON.stringify({
+                    rawText,
+                    room: currentRoomFilter === 'ALL' ? 'GENERAL' : currentRoomFilter
+                })
             });
 
             if (!response.ok) throw new Error('500 internal');

@@ -213,7 +213,38 @@ body {
 
 .topbar-actions {
     display: flex;
+    align-items: center;
     gap: 12px;
+}
+
+.topbar-room-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: rgba(7, 14, 10, 0.55);
+    color: var(--text-soft);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.topbar-room-filter select {
+    border: 1px solid rgba(127, 153, 132, 0.35);
+    border-radius: 8px;
+    background: rgba(6, 10, 7, 0.85);
+    color: var(--text-primary);
+    font-size: 11px;
+    padding: 4px 8px;
+    min-width: 130px;
+}
+
+.topbar-room-filter select:focus {
+    outline: none;
+    border-color: rgba(24, 169, 107, 0.65);
+    box-shadow: 0 0 0 2px rgba(24, 169, 107, 0.2);
 }
 
 .greeting h2 {
