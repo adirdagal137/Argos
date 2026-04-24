@@ -8,90 +8,75 @@ Protocolo operativo condensado para sesion diaria.
 4. Leer `inbox_deposits/` y `inbox_deposits/processed/` (actividad de agentes chat).
 5. Confirmar al Capitan: `"[N] paquetes en inbox. [observacion propia en tu voz.]"`.
 
-## Al tomar una tarea
+## Al tomar una tarea (MOMENTO 2 — START)
+
 ```http
 POST http://localhost:8080/api/ia/start-task
 {
   "packetId": "ARG-XXXX",
-  "actor": "NOMBRE",
-  "summary": "Frase concreta de lo que haras"
+  "actor": "Claude|Codex|Pi|ChatGPT|DeepSeek|Qwen",
+  "summary": "Frase concreta de lo que harás (~80 chars)"
 }
 ```
 
-## Durante (hitos visibles)
-```http
-POST http://localhost:8080/api/chat
-{
-  "sender": "NOMBRE",
-  "summary": "...",
-  "details": "...",
-  "refId": "ARG-XXXX"
-}
-```
+El servidor emite automáticamente al feed: `"[Actor] tomando misión: [summary]"`.
+**No enviar nada más al feed durante la ejecución. Los hitos van al log, no al feed.**
 
-## Cierre remoto universal (interfaces chat)
-Camino primario:
+Fallback si API caída: deposit en `inbox_deposits/` con `[STATE] status: working`.
+
+## Cierre (MOMENTO 3 — CLOSE, obligatorio)
+
+Endpoint único para todos los agentes:
+
 ```http
 POST http://localhost:8080/api/remote/closure
 Headers: X-Argos-Agent-Token: <token-agente>
 {
-  "agent": "Claude|ChatGPT|Gemini",
-  "interface": "claude.ai|chatgpt.com|gemini.google.com",
-  "timestamp": "2026-04-18T01:30:00.000Z",
+  "agent": "Claude|Codex|Pi|ChatGPT|DeepSeek|Qwen",
+  "interface": "claude-code|codex|pi.ai|chatgpt.com|...",
+  "timestamp": "2026-04-24T15:00:00.000Z",
   "packet_id": "ARG-XXXX",
   "trigger": "task_completed|session_close|handoff",
   "sections": {
-    "log": "...",
-    "shadow": "...",
+    "log":    "Qué se hizo y resultado concreto — OBLIGATORIO, no puede estar vacío",
+    "shadow": "Reflexión interna: tensiones, riesgos percibidos — OBLIGATORIO",
     "glitch": "",
     "state": {
-      "status": "idle|working|blocked|waiting_captain",
-      "summary": "...",
-      "handoff_to": "Codex|Claude|Gemini|OpenClaw|null",
-      "next_step": "..."
+      "status":     "idle",
+      "summary":    "Estado tras el cierre",
+      "handoff_to": "Codex|Claude|Pi|null",
+      "next_step":  "Qué sigue"
     },
-    "captain": "..."
+    "captain": "Mensaje al Capitán en voz propia del agente — OBLIGATORIO"
   },
   "mark_packet_done": false
 }
 ```
 
-Fallback si API falla (timeout/5xx/sin red): deposito unico en `inbox_deposits/`.
+El servidor escribe log+shadow+glitch en los canónicos, actualiza ia_status a idle,
+y emite sections.captain al feed. **Un solo mensaje al feed: el caption.**
 
-## Cierre (obligatorio)
-Paso 1: Transcript
+Fallback si API falla (timeout/5xx/sin red):
+```
+ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md
+```
+con secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`.
+El `packet_id` y el actor canónico son OBLIGATORIOS en el deposit o irá a ORPHAN.
+
+**Transcript (opcional):**
+Solo si hay razonamiento que no cabe en sections.log:
 ```http
 POST http://localhost:8080/api/transcript
 {
   "agent": "NOMBRE",
   "role": "agent",
-  "content": "Lo que NO esta en trilog/feed",
+  "content": "Razonamiento que NO está en sections.log",
   "packetId": "ARG-XXXX"
 }
 ```
+No duplicar lo que ya está en sections.log ni en el feed.
 
-Paso 2: Trilog
-```http
-POST http://localhost:8080/api/trilog
-{
-  "actor": "NOMBRE",
-  "packetId": "ARG-XXXX",
-  "summary": "Que se hizo",
-  "details": "Detalle",
-  "nextStep": "",
-  "errors": "",
-  "risks": "",
-  "processTokens": 0,
-  "transcriptRef": "transcripts/YYYY-MM-DD_NOMBRE.md#ARG-XXXX",
-  "shadow": "Obligatorio"
-}
-```
-`processTokens`: fallback manual. Si el proxy está activo, los tokens reales ya están en el ledger y este valor no altera el panel.
-
-Paso 3: Deposito chat (solo interfaces chat)
-Guardar un unico archivo en `ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md`
-con secciones obligatorias `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`.
-El heartbeat de `argos-api` lo integra en los canonicos y lo mueve a `inbox_deposits/processed/`.
+**Agentes locales (Claude Code, Codex CLI):** también pueden usar `POST /api/trilog` como alternativa equivalente a `/api/remote/closure`.
 
 ## Rollover de sesion (inicio/fin de jornada)
 Evita que global/shadow/glitch/transcripts crezcan indefinidamente en contexto vivo.

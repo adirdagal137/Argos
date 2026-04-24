@@ -1,5 +1,5 @@
 # INTER-AI PACT
-## v1.4 - Protocolo de Cierre Unificado [2026-04-18]
+## v1.5 - Ciclo de Vida Irrompible [2026-04-24]
 
 Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Antigravity y cualquier agente futuro que entre en Argos.
 
@@ -9,15 +9,43 @@ Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Antigravity y c
 
 Existen exactamente 5 tipos de registro. Cada uno tiene destino, formato y criterio propios.
 
-### 1.1 LOG â€” Acciones ejecutadas
+### 1.1 LOG — Acciones ejecutadas
+
 **Que va aqui:** Hitos operativos reales. Lo que se hizo, cuando, con que resultado.
 No va aqui: opiniones, riesgos no ejecutados, texto de conversacion literal.
+
 **Archivos:**
-- Resumen humano: ARGOS_GLOBAL_LOG.md (formato **[YYYY-MM-DD HH:MM Atlantic/Canary] VOZ NOMBRE:**)
-- Registro estructurado: events/argos.events.jsonl (JSON con fields: timestamp, actor, module, type, summary, artifacts, verification, next_step, errors, risks, packet_id)
-- **Campo packet_id (OBLIGATORIO):** ID del work packet del que emerge esta entrada de log. Sin ID de referencia, el log queda huerfano.
-- **Campo errors:** Errores encontrados y aprendizajes extraidos. Obligatorio si hubo friccion. Vacio ("") solo si ejecucion limpia.
-- **Campo risks:** Riesgos detectados. Vacio ("") si no aplica.
+- Resumen humano: `ARGOS_GLOBAL_LOG.md` (formato `**[YYYY-MM-DD HH:MM Atlantic/Canary] VOZ NOMBRE:**`)
+- Registro estructurado: `events/argos.events.jsonl` (JSON con fields: timestamp, actor, module, type, summary, artifacts, verification, next_step, errors, risks, packet_id)
+
+**Campos OBLIGATORIOS en cada entrada:**
+
+| Campo | Tipo | Regla |
+|-------|------|-------|
+| `timestamp` | ISO 8601 | Obligatorio siempre |
+| `actor` | string canónico | `Claude`, `Codex`, `Pi`, `ChatGPT`, `DeepSeek`, `Qwen`. Nunca: “Antigravity”, “IA”, “sistema”, “agente” |
+| `packet_id` | string | Obligatorio. Sin packet_id la entrada es inválida (ORPHAN). |
+| `summary` | string | Qué se hizo, resultado concreto. No el subject del packet. |
+| `errors` | string | Errores + aprendizajes. `””` solo si ejecución limpia. |
+| `risks` | string | Riesgos detectados. `””` si no aplica. |
+
+**Regla de actor canónico (CRÍTICA):** El campo `actor` usa siempre el nombre canónico del agente. Nunca “Antigravity”, “IA”, “sistema” u otro alias. El heartbeat rechazará entradas con actor no canónico en depósitos.
+
+**Ejemplo VÁLIDO:**
+```
+[2026-04-24 15:00 Atlantic/Canary] VOZ CLAUDE:
+MISION: Reforma protocolo bitácora
+WORK PACKET: ARG-REFORM-BITACORA-001
+DETALLES: Actualizados INTER_AI_PROTOCOL.md v1.5 y ARGOS_QUICKSTART.md.
+Añadida sección 2b (ciclo de vida), 1.7 (validaciones), ejemplo real de closure.
+SIGUIENTE: Codex implementa validaciones ORPHAN en heartbeat (ARG-REFORM-BITACORA-001-IMPL).
+RIESGOS: Codex debe leer la propuesta antes de tocar index.ts.
+```
+
+**Ejemplo INVÁLIDO** (rechazado por heartbeat si viene en depósito):
+```
+VOZ IA: Hice cosas en el sistema.   ← actor no canónico, sin packet_id, sin detalle
+```
 
 ### 1.2 TRANSCRIPT â€” Lo dicho FUERA de la webapp, sin duplicar el feed
 
@@ -132,6 +160,21 @@ Arquitectura activa en tres capas:
 - C (inactividad 60 min): heartbeat marca `stale` en `ia_status`.
 - D (agentes locales): escriben directo en canonicos; no usan `inbox_deposits/`.
 
+### 1.7 Validación de depósitos por heartbeat (ORPHAN)
+
+El heartbeat valida cada depósito de `inbox_deposits/` antes de integrarlo:
+
+| Condición | Comportamiento |
+|-----------|---------------|
+| Archivo no parseable (frontmatter roto, vacío) | Mueve a `processed/__invalid_<nombre>`. Entrada en events log. |
+| `packet_id` vacío o ausente | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
+| Actor no canónico (no es Claude/Codex/Pi/ChatGPT/DeepSeek/Qwen) | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
+| `[LOG]` vacío | Integra shadow/glitch/captain, omite entrada en LOG. Warning en glitch. |
+| `[CAPTAIN]` vacío | Integra log/shadow/glitch, no emite al feed. Sin warning. |
+| Depósito válido | Integra las 5 secciones. Mueve a `processed/<nombre>`. |
+
+**Nota:** El mecanismo ORPHAN está pendiente de implementación en argos-api (ver ARG-REFORM-BITACORA-001-IMPL). Hasta entonces el heartbeat integra ciegamente con fallback `actor=ChatAgent` y `packet_id=N/A`.
+
 ---
 
 ## 2. Ritual de inicio (cualquier agente, cualquier sesion)
@@ -187,7 +230,127 @@ El campo `summary` es lo que el Capitan ve. Debe ser concreto, no el SUBJECT cru
 
 ---
 
-## 3. Rituales de cierre por capa (v1.4)
+## 2b. Ciclo de vida de una orden — los 3 momentos
+
+Todo trabajo en Argos pasa por exactamente 3 momentos. El feed del Capitán recibe **exactamente 2 mensajes por orden**: uno en el START y uno en el CLOSE. Nada en medio.
+
+---
+
+### MOMENTO 1 — INICIO DE SESIÓN (sin ligación a orden específica)
+
+Antes de tomar cualquier tarea, todo tripulante lee (en orden):
+1. `ARGOS_QUICKSTART.md` — protocolo condensado
+2. `work_packets/inbox/` — qué hay pendiente
+3. `state/argos.state.json` — foco y riesgos activos
+4. `ARGOS_GLOBAL_LOG.md` (tail ~20 líneas) — qué se hizo recientemente
+
+**Este momento NO genera entrada de log ni mensaje al feed.**
+No hay fallback necesario: no se escribe nada.
+
+---
+
+### MOMENTO 2 — START DE ORDEN (al tomar un packet activo)
+
+El tripulante que **ejecuta** la orden (no quien la prepara) llama:
+
+```http
+POST http://localhost:8080/api/ia/start-task
+{
+  "packetId": "ARG-XXXX",
+  "actor":    "Claude|Codex|Pi|ChatGPT|DeepSeek|Qwen",
+  "summary":  "Frase concreta de lo que harás (~80 chars)"
+}
+```
+
+El servidor automáticamente:
+1. Mueve el packet de `inbox/` → `in_progress/`
+2. Actualiza `ia_status` → `working` en `state.json`
+3. Emite al feed del Capitán: `"[Actor] tomando misión: [summary]"`
+
+**Fallback si API no disponible:**
+Depositar en `inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md` con sección `[STATE]`:
+```
+status: working
+summary: <descripción breve>
+packet_id: ARG-XXXX
+```
+El heartbeat moverá `ia_status` a working en el siguiente ciclo.
+
+**Regla crítica:** Sin `start-task`, el Capitán no sabe quién trabaja. El `ia_status` queda stale y dispara alerta tras 60 min de inactividad.
+
+---
+
+### MOMENTO 3 — CIERRE DE ORDEN (al completar el trabajo)
+
+**Camino primario — todos los agentes:**
+
+```http
+POST http://localhost:8080/api/remote/closure
+Headers: X-Argos-Agent-Token: <token-agente>
+{
+  "agent":      "Claude|Codex|Pi|ChatGPT|DeepSeek|Qwen",
+  "interface":  "claude-code|codex|pi.ai|chatgpt.com|...",
+  "timestamp":  "2026-04-24T15:00:00.000Z",
+  "packet_id":  "ARG-XXXX",
+  "trigger":    "task_completed|session_close|handoff",
+  "sections": {
+    "log":    "Qué se hizo, resultado concreto, artefactos generados",
+    "shadow": "Reflexión interna — tensiones, riesgos percibidos, calibración",
+    "glitch": "",
+    "state": {
+      "status":     "idle",
+      "summary":    "Estado tras el cierre",
+      "handoff_to": "Codex|Claude|Pi|null",
+      "next_step":  "Qué sigue"
+    },
+    "captain": "Mensaje directo al Capitán — lo que necesita saber, en voz del agente"
+  },
+  "mark_packet_done": false
+}
+```
+
+El servidor automáticamente:
+1. Escribe `sections.log` en `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl`
+2. Escribe `sections.shadow` en `ARGOS_GLOBAL_SHADOW_LOG.md`
+3. Escribe `sections.glitch` en `ARGOS_GLOBAL_GLITCH_LOG.md` (si no vacío)
+4. Actualiza `ia_status` → `idle` en `state.json`
+5. Emite `sections.captain` al feed del Capitán
+
+**Fallback si API no disponible:**
+Depositar en `ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md`.
+El heartbeat integra en el próximo ciclo. El depósito DEBE tener `packet_id` y actor canónico o irá a ORPHAN.
+
+**Regla de bugs durante ejecución:**
+```
+sections.glitch: "[BUG] Descripción del bug — impacto observado"
+```
+No se necesita llamada separada al feed. El cierre lo captura todo.
+
+**Regla del feed (CRÍTICA):**
+El feed recibe exactamente **2 mensajes por orden**: START y CLOSE.
+No se envían hitos intermedios. Los hitos van al log, no al feed.
+
+---
+
+### Tabla de validaciones que hace argos-api
+
+| Campo | Endpoint | Validación actual | Fallo |
+|-------|----------|------------------|-------|
+| `packet_id` | `/api/remote/closure` | No vacío | 400 |
+| `agent` | `/api/remote/closure` | No vacío | 400 |
+| `sections.log` | `/api/remote/closure` | No vacío | 400 |
+| `sections.shadow` | `/api/remote/closure` | No vacío | 400 |
+| `sections.captain` | `/api/remote/closure` | No vacío | 400 |
+| `sections.state.status` | `/api/remote/closure` | idle/working/blocked/waiting_captain | 400 |
+| `trigger` | `/api/remote/closure` | task_completed/session_close/handoff | 400 |
+| Duplicado (agent+packet_id+timestamp) | `/api/remote/closure` | Idempotencia | 409 |
+| `actor` canónico | `/api/remote/closure` | Pendiente impl. (ARG-REFORM-BITACORA-001-IMPL) | — |
+| `packet_id` en deposit | heartbeat | Pendiente impl. → ORPHAN | — |
+| Actor canónico en deposit | heartbeat | Pendiente impl. → ORPHAN | — |
+
+---
+
+## 3. Rituales de cierre por capa (v1.5)
 
 La escritura canonica usa un formato unico de 5 secciones:
 `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`.
@@ -388,22 +551,26 @@ Git tag por hito:
 - Activacion local: git config core.hooksPath .githooks
 
 ---
-## RESUMEN EJECUTIVO â€” Ciclo completo de una tarea
+## RESUMEN EJECUTIVO — Ciclo completo de una tarea
 
 ```
-INICIO
-  1. Leer inbox + state + LOG reciente + work packet
-  2. Solo si hay ambiguedad o conflicto: GET /api/transcript?packetId=ARG-XXXX
-  3. POST /api/ia/start-task  â†’ widget se actualiza, packet va a in_progress
+MOMENTO 1 — INICIO DE SESIÓN (no genera log ni feed)
+  1. Leer ARGOS_QUICKSTART.md + inbox/ + state.json + tail LOG reciente
+  2. Solo si hay ambigüedad o conflicto: GET /api/transcript?packetId=ARG-XXXX
 
-DURANTE
-  â†’ POST /api/chat para hitos intermedios visibles al Capitan
+MOMENTO 2 — START (1 mensaje al feed)
+  3. POST /api/ia/start-task → “Claude tomando misión: [summary]” llega al feed
+     Fallback si API caída: deposit [STATE] status=working en inbox_deposits/
 
-CIERRE
-  4. POST /api/transcript  â†’ solo lo dicho FUERA de la webapp, sin duplicar trilog ni feed
-  5. POST /api/trilog      â†’ LOG + SHADOW + FEED + mueve packet a done
+MOMENTO 3 — CLOSE (1 mensaje al feed)
+  4. POST /api/remote/closure  → log + shadow + glitch + state + captain en una llamada
+     El servidor emite sections.captain al feed y mueve ia_status a idle.
+     Fallback si API caída: deposit completo en inbox_deposits/ (con packet_id y actor canónico)
 ```
 
-Sin start-task = el Capitan no sabe que estas trabajando.
-Sin trilog = el packet queda huerfano y dispara glitch de integridad.
-Transcript vacio = aceptable si el trilog ya lo dice todo. No-duplicacion es la regla.
+**2 mensajes por orden al feed: START y CLOSE. Nada más.**
+
+Sin start-task = Capitán no sabe quién trabaja; ia_status queda stale.
+Sin closure = packet huérfano; trilog guard dispara glitch.
+sections.log/shadow/captain vacíos = endpoint rechaza con 400.
+Transcript = opcional, solo si el razonamiento no cabe en sections.log.

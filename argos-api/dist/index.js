@@ -3863,6 +3863,7 @@ function loadTasksFromZone(zone) {
         const statusMatch = content.match(/STATUS:\s*(.*)/);
         const typeMatch = content.match(/TYPE:\s*(.*)/);
         const priorityMatch = content.match(/PRIORITY:\s*(.*)/);
+        const tagMatch = content.match(/TAG:\s*(.*)/);
         const stat = fs_1.default.statSync(fullPath);
         let priority = priorityMatch ? priorityMatch[1].trim().toLowerCase() : '';
         if (priority === '') {
@@ -3913,6 +3914,7 @@ function loadTasksFromZone(zone) {
             time: formatRelativeAge(stat.mtimeMs),
             zone,
             type: packetType,
+            tag: tagMatch ? tagMatch[1].trim().toLowerCase() : '',
             priority,
             tokens_spent: tokensMatch ? Number(tokensMatch[1]) : 0,
             mtimeMs: stat.mtimeMs,

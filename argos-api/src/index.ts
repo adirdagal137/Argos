@@ -226,6 +226,7 @@ type TaskRecord = {
   time: string;
   zone: 'inbox' | 'in_progress' | 'done';
   type: string;
+  tag: string;
   priority: string;
   tokens_spent: number;
   mtimeMs: number;
@@ -4517,6 +4518,7 @@ function loadTasksFromZone(zone: 'inbox' | 'in_progress' | 'done'): TaskRecord[]
     const statusMatch = content.match(/STATUS:\s*(.*)/);
     const typeMatch = content.match(/TYPE:\s*(.*)/);
     const priorityMatch = content.match(/PRIORITY:\s*(.*)/);
+    const tagMatch = content.match(/TAG:\s*(.*)/);
     const stat = fs.statSync(fullPath);
 
     let priority = priorityMatch ? priorityMatch[1].trim().toLowerCase() : '';
@@ -4562,6 +4564,7 @@ function loadTasksFromZone(zone: 'inbox' | 'in_progress' | 'done'): TaskRecord[]
       time: formatRelativeAge(stat.mtimeMs),
       zone,
       type: packetType,
+      tag: tagMatch ? tagMatch[1].trim().toLowerCase() : '',
       priority,
       tokens_spent: tokensMatch ? Number(tokensMatch[1]) : 0,
       mtimeMs: stat.mtimeMs,

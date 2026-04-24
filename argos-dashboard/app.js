@@ -65,8 +65,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let pendingTasks = [];
     let latestVisibleTasks = [];
 
-    let currentProject = 'argos';
-    let currentSubTarget = 'subview-ordenes';
+    let currentProject = localStorage.getItem('argos_currentProject') || 'argos';
+    let currentSubTarget = localStorage.getItem('argos_currentSubTarget') || 'subview-ordenes';
 
     // Global raw data for filtering
     let allRawTasks = [];
@@ -98,6 +98,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (riskBar) {
             riskBar.style.display = (targetId === 'view-monitorizacion' || targetId === 'view-bugs') ? 'flex' : 'none';
         }
+
+        localStorage.setItem('argos_activeView', targetId);
     }
 
     navItems.forEach((nav) => {
@@ -113,6 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (titleNode) {
                     titleNode.textContent = nav.textContent.trim().replace(/^#\s*/, '');
                 }
+                localStorage.setItem('argos_currentProject', currentProject);
                 // Refilter things now that project changed
                 renderTasks(allRawTasks);
                 if (allRawBugs.length > 0) renderBugs(allRawBugs);
@@ -152,6 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             subnav.classList.add('active');
             currentSubTarget = subnav.getAttribute('data-subtarget');
+            localStorage.setItem('argos_currentSubTarget', currentSubTarget);
             const tgt = document.getElementById(currentSubTarget);
             if (tgt) tgt.classList.add('active');
 
@@ -162,11 +166,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Estado inicial: ocultar alertas fuera de Bugs del Sistema.
-    const initialTarget = document.querySelector('.nav-item.active')?.getAttribute('data-target') || 'view-monitorizacion';
+    const initialTarget = localStorage.getItem('argos_activeView') || document.querySelector('.nav-item.active')?.getAttribute('data-target') || 'view-monitorizacion';
     activateView(initialTarget);
+    
+    // Si tenemos un currentProject guardado, intentamos forzar su titulo en el nav
+    const activeProjectNav = document.querySelector(`.nav-project[data-project="${currentProject}"]`);
+    if (activeProjectNav) {
+        const titleNode = document.getElementById('current-project-title');
+        if (titleNode) titleNode.textContent = activeProjectNav.textContent.trim().replace(/^#\s*/, '');
+    }
+
+    // Activar subnav guardada
+    const activeSubNav = document.querySelector(`.subnav-item[data-subtarget="${currentSubTarget}"]`);
+    if (activeSubNav) {
+        activeSubNav.click(); // Trigger click to set up the view correctly
+    }
+
     let lastTokenTotal = 0;
-    const masters = { 'Antigravity': 'val-antigravity', 'Claude': 'val-claude', 'Codex': 'val-codex', 'OpenClaw': 'val-openclaw' };
-    const bars = { 'Antigravity': 'bar-antigravity', 'Claude': 'bar-claude', 'Codex': 'bar-codex', 'OpenClaw': 'bar-openclaw' };
+    const masters = { 'Pi': 'val-pi', 'Claude': 'val-claude', 'Codex': 'val-codex', 'OpenClaw': 'val-openclaw' };
+    const bars = { 'Pi': 'bar-pi', 'Claude': 'bar-claude', 'Codex': 'bar-codex', 'OpenClaw': 'bar-openclaw' };
 
     function animateValue(id, start, end, duration) {
         const obj = document.getElementById(id);
@@ -363,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return !['done', 'closed', 'resolved', 'mitigado', 'mitigada'].some((token) => state.includes(token));
     }
 
-    // lastFeedMessages: { Codex: msg, Antigravity: msg, Claude: msg, OpenClaw: msg }
+    // lastFeedMessages: { Codex: msg, Pi: msg, Claude: msg, OpenClaw: msg }
     let lastFeedMessages = {};
 
     // Cache de ia_status — se actualiza desde hydrate y desde SSE.
@@ -372,7 +390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateFeedMessages(messages) {
         // Keep the most recent crew message per agent
-        const agents = ['Codex', 'Antigravity', 'Claude', 'OpenClaw'];
+        const agents = ['Codex', 'Pi', 'Claude', 'OpenClaw'];
         agents.forEach(agent => {
             const msg = [...messages].reverse().find(m =>
                 m.senderRole === 'agent' && m.sender && m.sender.toLowerCase().includes(agent.toLowerCase())
@@ -425,7 +443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const targets = [
             { name: 'Codex', selectors: ['#ia-status-codex', '[data-ia-status="Codex"]'] },
-            { name: 'Antigravity', selectors: ['#ia-status-antigravity', '[data-ia-status="Antigravity"]'] },
+            { name: 'Pi', selectors: ['#ia-status-pi', '[data-ia-status="Pi"]'] },
             { name: 'Claude', selectors: ['#ia-status-claude', '[data-ia-status="Claude"]'] },
             { name: 'OpenClaw', selectors: ['#ia-status-openclaw', '[data-ia-status="OpenClaw"]'] }
         ];
@@ -567,6 +585,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="task-info">
                     <h4>
                         <span class="priority-tag priority-${priority}">${priority}</span>
+                        ${task.tag === 'protocol' ? `<span class="protocol-badge" title="Protocol Packet">§ Protocol</span>` : ''}
                         ${safeHtml(task.title)}
                     </h4>
                     <div class="task-meta">
@@ -843,9 +862,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<button type="button" class="chat-transcript-btn" data-ref="${safeHtml(transcriptRef)}" title="Ver transcript literal">📄</button>`
                 : '';
 
+            const contentText = msg.text || [msg.summary, msg.details].filter(Boolean).join('\n\n') || '';
+
             wrap.innerHTML = `
                 <span class="sender">${safeHtml(senderLabel)}</span>
-                <p>${renderMultiline(msg.text || '')}</p>
+                <p>${renderMultiline(contentText)}</p>
                 <div class="chat-meta-bottom">
                     <div class="chat-meta-left">${editedTag}${editButton}${transcriptBtn}</div>
                     <span class="time">${safeHtml(msg.time || '--:--')}</span>
@@ -1325,7 +1346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function applyIaStatusToPanel(iaStatus) {
-        ['Claude', 'Antigravity', 'Codex', 'OpenClaw'].forEach(agent => {
+        ['Claude', 'Pi', 'Codex', 'OpenClaw'].forEach(agent => {
             const node = document.querySelector(`[data-ia-status="${agent}"]`);
             if (!node) return;
             const s = iaStatus[agent];
@@ -2117,7 +2138,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                             node.textContent = 'Standby';
                             node.style.color = 'var(--text-secondary)';
                         }
+                        triggerResonance(node.closest('.panel-box') || node.closest('.widget') || node.parentElement);
                     }
+                }
+                
+                if (data.topic === 'tasks:updated') {
+                    triggerResonance('#subview-ordenes');
+                }
+                if (data.topic === 'chat:updated') {
+                    triggerResonance('#chat-container');
                 }
             } catch (e) {
                 // Ignore parsing errors
