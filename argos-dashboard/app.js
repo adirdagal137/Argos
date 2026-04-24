@@ -585,7 +585,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="task-info">
                     <h4>
                         <span class="priority-tag priority-${priority}">${priority}</span>
-                        ${task.tag === 'protocol' ? `<span class="protocol-badge" title="Protocol Packet">§ Protocol</span>` : ''}
+                        ${task.tag && task.tag.includes('protocol') ? `<span class="protocol-badge" title="Protocol Packet">§ Protocol</span>` : ''}
                         ${safeHtml(task.title)}
                     </h4>
                     <div class="task-meta">

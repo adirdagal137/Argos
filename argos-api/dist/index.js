@@ -331,6 +331,23 @@ function normalizeAgentName(rawName) {
         return 'DeepSeek';
     return null;
 }
+const CANONICAL_PROTOCOL_AGENTS = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'DeepSeek', 'Qwen'];
+function normalizeProtocolAgentName(rawName) {
+    const cleaned = normaliseText(rawName);
+    if (cleaned === '')
+        return null;
+    if (CANONICAL_PROTOCOL_AGENTS.includes(cleaned)) {
+        return cleaned;
+    }
+    const normalizedLegacy = normalizeAgentName(cleaned);
+    if (normalizedLegacy === 'Claude')
+        return 'Claude';
+    if (normalizedLegacy === 'Codex')
+        return 'Codex';
+    if (normalizedLegacy === 'DeepSeek')
+        return 'DeepSeek';
+    return null;
+}
 // --- SOPORTE PARA SISTEMA VOCAL (V2) ---
 function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tokens = 0, refId = '') {
     const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
@@ -1448,6 +1465,13 @@ function parseRemoteClosurePayload(rawBody) {
     const trigger = triggerRaw;
     if (agent === '')
         return { payload: null, error: 'agent es obligatorio' };
+    const normalizedAgent = normalizeProtocolAgentName(agent);
+    if (!normalizedAgent || !CANONICAL_PROTOCOL_AGENTS.includes(normalizedAgent)) {
+        return {
+            payload: null,
+            error: `agent debe ser un nombre canonico. Validos: ${CANONICAL_PROTOCOL_AGENTS.join(', ')}`
+        };
+    }
     if (agentInterface === '')
         return { payload: null, error: 'interface es obligatorio' };
     if (timestamp === '')
@@ -1496,7 +1520,7 @@ function parseRemoteClosurePayload(rawBody) {
         return { payload: null, error: 'sections.state.summary no puede ser vacio' };
     return {
         payload: {
-            agent,
+            agent: normalizedAgent,
             interface: agentInterface,
             timestamp,
             packet_id: packetId,
@@ -2052,6 +2076,58 @@ function processSingleInboxDeposit(filePath, trigger) {
             source: 'deposit_heartbeat'
         });
         return false;
+    }
+    if (!parsed.packetId || parsed.packetId.trim() === '') {
+        const orphanDest = path_1.default.join(INBOX_DEPOSITS_PROCESSED_DIR, `__orphan_${path_1.default.basename(filePath)}`);
+        moveFileWithFallback(filePath, orphanDest);
+        appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+            id: getNextGlitchId(),
+            timestamp: nowIso(),
+            timestamp_label: canaryTimestampLabelFromIso(nowIso()),
+            actor: 'Dispatcher',
+            module: 'argos_deposit_guard',
+            type: 'orphan_deposit',
+            status: 'open',
+            summary: `Deposito ORPHAN: packet_id vacio - ${path_1.default.basename(filePath)}`,
+            details: 'El deposit no tiene packet_id. Movido a __orphan. Revisar deposito.',
+            next_step: 'Agente que genero el deposito debe hacer closure correcta con packet_id.',
+            source: 'deposit_heartbeat'
+        });
+        return false;
+    }
+    if (!normalizeProtocolAgentName(parsed.actorCanonical)) {
+        const orphanDest = path_1.default.join(INBOX_DEPOSITS_PROCESSED_DIR, `__orphan_${path_1.default.basename(filePath)}`);
+        moveFileWithFallback(filePath, orphanDest);
+        appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+            id: getNextGlitchId(),
+            timestamp: nowIso(),
+            timestamp_label: canaryTimestampLabelFromIso(nowIso()),
+            actor: 'Dispatcher',
+            module: 'argos_deposit_guard',
+            type: 'orphan_deposit',
+            status: 'open',
+            summary: `Deposito ORPHAN: actor no canonico "${parsed.actorCanonical}" - ${path_1.default.basename(filePath)}`,
+            details: `Actor detectado: "${parsed.actorCanonical}". Canonicos: ${CANONICAL_PROTOCOL_AGENTS.join(', ')}.`,
+            next_step: `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_AGENTS.join(', ')}`,
+            source: 'deposit_heartbeat'
+        });
+        return false;
+    }
+    const logText = normaliseText(parsed.sections.LOG || '');
+    if (logText === '') {
+        appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+            id: getNextGlitchId(),
+            timestamp: nowIso(),
+            timestamp_label: canaryTimestampLabelFromIso(nowIso()),
+            actor: 'Dispatcher',
+            module: 'argos_deposit_guard',
+            type: 'deposit_warning',
+            status: 'open',
+            summary: `Deposit con [LOG] vacio - ${path_1.default.basename(filePath)} (packet: ${parsed.packetId})`,
+            details: 'Se integrara shadow/glitch/captain pero no habra entrada en GLOBAL_LOG.',
+            next_step: 'El agente debe incluir [LOG] con contenido en futuros depositos.',
+            source: 'deposit_heartbeat'
+        });
     }
     integrateClosure(parsed, {
         source: 'deposit_heartbeat',
