@@ -333,8 +333,6 @@ body {
     justify-content: space-between;
     align-items: center;
     text-align: center;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--table-line);
 }
 .ops-header-item {
     flex: 1;

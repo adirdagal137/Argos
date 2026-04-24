@@ -474,7 +474,7 @@ function readHandoffEntriesForPacket(packetId) {
         const agent = headerMatch ? headerMatch[1] : 'Unknown';
         const timestamp = tsMatch ? tsMatch[1] : '';
         const fields = {};
-        const fieldRegex = /\*\*(\w[\w\s]*):\*\* (.+)/g;
+        const fieldRegex = /\*\*([^*:]+):\*\* (.+)/g;
         let m;
         while ((m = fieldRegex.exec(block)) !== null) {
             fields[m[1].toLowerCase()] = m[2].trim();

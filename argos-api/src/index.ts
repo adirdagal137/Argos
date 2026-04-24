@@ -773,7 +773,7 @@ function readHandoffEntriesForPacket(packetId: string): Array<{ agent: string; t
     const timestamp = tsMatch ? tsMatch[1] : '';
 
     const fields: Record<string, string> = {};
-    const fieldRegex = /\*\*(\w[\w\s]*):\*\* (.+)/g;
+    const fieldRegex = /\*\*([^*:]+):\*\* (.+)/g;
     let m: RegExpExecArray | null;
     while ((m = fieldRegex.exec(block)) !== null) {
       fields[m[1].toLowerCase()] = m[2].trim();
