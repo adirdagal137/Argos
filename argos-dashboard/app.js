@@ -622,7 +622,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="task-actions">
                         <button type="button" class="task-edit-btn" data-task-id="${safeHtml(task.id)}">Editar</button>
-                        ${isDone ? `<button type="button" class="task-transcripts-btn" data-task-id="${safeHtml(task.id)}" title="Ver transcripts de todos los agentes para este packet">📄 Transcripts</button>` : ''}
+                        ${isDone ? `<button type="button" class="task-transcripts-btn" data-task-id="${safeHtml(task.id)}" title="Ver handoff conversacional de este packet">💬 Handoff</button>` : ''}
                     </div>
                 </div>
                 <label class="task-checkbox-wrapper">
@@ -969,35 +969,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.classList.remove('hidden');
     }
 
-    // Carga todos los transcripts de todos los agentes para un packetId y los muestra en el modal.
+    // Carga las entradas de HANDOFF para un packetId y las muestra en el modal.
     async function showPacketTranscripts(packetId) {
         if (!packetId || !overlay || !modalQueryTitle || !modalEventsList) return;
-        modalQueryTitle.textContent = `Transcripts: ${packetId}`;
-        modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">Cargando transcripts…</p>';
+        modalQueryTitle.textContent = `Handoff: ${packetId}`;
+        modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">Cargando handoff…</p>';
         overlay.classList.remove('hidden');
         try {
-            const resp = await fetch(`${API_URL}/transcript/${encodeURIComponent(packetId)}`);
+            const resp = await fetch(`${API_URL}/handoff/${encodeURIComponent(packetId)}`);
             if (!resp.ok) {
-                modalEventsList.innerHTML = `<p style="padding:1rem;color:var(--accent-red)">Error ${resp.status} cargando transcripts.</p>`;
+                modalEventsList.innerHTML = `<p style="padding:1rem;color:var(--accent-red)">Error ${resp.status} cargando handoff.</p>`;
                 return;
             }
             const data = await resp.json();
             modalEventsList.innerHTML = '';
-            if (!data.transcripts || data.transcripts.length === 0) {
-                modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">No hay transcripts para este packet.</p>';
+            if (!data.entries || data.entries.length === 0) {
+                modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">No hay entradas de handoff para este packet.</p>';
                 return;
             }
-            data.transcripts.forEach((entry) => {
+            data.entries.forEach((entry) => {
                 const section = document.createElement('div');
                 section.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.08);padding:0.75rem 1rem;';
                 const header = document.createElement('div');
-                header.style.cssText = 'font-size:0.75rem;opacity:0.5;margin-bottom:0.4rem;';
-                header.textContent = `${entry.agent}  ·  ${entry.date}  ·  ${entry.file}`;
-                const pre = document.createElement('pre');
-                pre.style.cssText = 'white-space:pre-wrap;word-break:break-word;font-size:0.85rem;line-height:1.5;margin:0;';
-                pre.textContent = entry.content;
+                header.style.cssText = 'font-size:0.75rem;opacity:0.5;margin-bottom:0.6rem;text-transform:uppercase;letter-spacing:0.05em;';
+                header.textContent = `${entry.agent}  ·  ${entry.timestamp}`;
                 section.appendChild(header);
-                section.appendChild(pre);
+                const fields = entry.handoff || {};
+                const fieldOrder = ['contexto', 'decisión', 'continuidad', 'session ref', 'giros', 'descartado', 'riesgo'];
+                fieldOrder.forEach((key) => {
+                    if (!fields[key]) return;
+                    const row = document.createElement('div');
+                    row.style.cssText = 'margin-bottom:0.4rem;font-size:0.85rem;line-height:1.5;';
+                    row.innerHTML = `<span style="opacity:0.5;min-width:7rem;display:inline-block;">${key}</span>${safeHtml(fields[key])}`;
+                    section.appendChild(row);
+                });
                 modalEventsList.appendChild(section);
             });
         } catch (err) {

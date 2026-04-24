@@ -19,6 +19,7 @@ const DASHBOARD_DIR = path.join(__dirname, '..', '..', 'argos-dashboard');
 const ARGOS_GLOBAL_LOG_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
 const ARGOS_GLOBAL_SHADOW_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
 const ARGOS_GLOBAL_GLITCH_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const ARGOS_TOKENS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
@@ -309,6 +310,18 @@ type ParsedChatDeposit = {
 
 type RemoteClosureTrigger = 'task_completed' | 'session_close' | 'handoff';
 
+type HandoffPayload = {
+  // Obligatorios
+  contexto: string;     // qué planteó el Capitán (1-2 frases)
+  decision: string;     // qué se hizo y criterio decisivo (1 frase)
+  continuidad: string;  // qué necesita saber el siguiente agente (1-2 frases)
+  session_ref: string;  // plataforma + fecha + hora aprox. ej: "Claude/Cowork 2026-04-24 22:00"
+  // Opcionales
+  giros?: string;       // qué cambió o aclaró durante la conversación
+  descartado?: string;  // qué no se hizo y por qué
+  riesgo?: string;      // qué podría malinterpretarse al leer solo el cierre
+};
+
 type RemoteClosurePayload = {
   agent: string;
   interface: string;
@@ -326,6 +339,7 @@ type RemoteClosurePayload = {
       next_step: string;
     };
     captain: string;
+    handoff?: HandoffPayload;
   };
   mark_packet_done: boolean;
 };
@@ -706,6 +720,68 @@ function postToCrewFeed(sender: string, summary: string, details: string = '', k
   } catch (e) {
     console.error(`[VOCAL] Error publicando mensaje de ${canonicalSender}`, e);
   }
+}
+
+// ============ HANDOFF LOG ============
+
+function appendToHandoffLog(agent: string, packetId: string, handoff: HandoffPayload, timestampIso: string): void {
+  try {
+    if (!fs.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH)) {
+      fs.writeFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, '# ARGOS GLOBAL HANDOFF LOG\nContexto conversacional por packet. Append-only.\n\n---\n', 'utf-8');
+    }
+    const canaryTs = new Date(timestampIso).toLocaleString('sv-SE', {
+      timeZone: 'Atlantic/Canary', year: 'numeric', month: '2-digit',
+      day: '2-digit', hour: '2-digit', minute: '2-digit'
+    }).slice(0, 16);
+
+    const lines = [
+      `<!-- ${packetId} -->`,
+      `**[${canaryTs} Atlantic/Canary] VOZ ${agent.toUpperCase()} — HANDOFF ${packetId}:**`,
+      `**Contexto:** ${handoff.contexto}`,
+      `**Decisión:** ${handoff.decision}`,
+      `**Continuidad:** ${handoff.continuidad}`,
+      `**Session ref:** ${handoff.session_ref}`,
+    ];
+    if (handoff.giros)      lines.push(`**Giros:** ${handoff.giros}`);
+    if (handoff.descartado) lines.push(`**Descartado:** ${handoff.descartado}`);
+    if (handoff.riesgo)     lines.push(`**Riesgo:** ${handoff.riesgo}`);
+    lines.push('', '---', '');
+
+    fs.appendFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, lines.join('\n'), 'utf-8');
+  } catch (e) {
+    console.error('[HANDOFF] Error escribiendo handoff log', e);
+  }
+}
+
+function readHandoffEntriesForPacket(packetId: string): Array<{ agent: string; timestamp: string; handoff: Record<string, string> }> {
+  if (!fs.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH)) return [];
+  const content = fs.readFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, 'utf-8');
+  const anchor = `<!-- ${packetId} -->`;
+  const results: Array<{ agent: string; timestamp: string; handoff: Record<string, string> }> = [];
+
+  let searchFrom = 0;
+  while (true) {
+    const start = content.indexOf(anchor, searchFrom);
+    if (start === -1) break;
+    const blockEnd = content.indexOf('\n---\n', start);
+    const end = blockEnd !== -1 ? blockEnd : content.length;
+    const block = content.slice(start, end);
+
+    const headerMatch = block.match(/VOZ (\w+) — HANDOFF/);
+    const tsMatch = block.match(/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})/);
+    const agent = headerMatch ? headerMatch[1] : 'Unknown';
+    const timestamp = tsMatch ? tsMatch[1] : '';
+
+    const fields: Record<string, string> = {};
+    const fieldRegex = /\*\*(\w[\w\s]*):\*\* (.+)/g;
+    let m: RegExpExecArray | null;
+    while ((m = fieldRegex.exec(block)) !== null) {
+      fields[m[1].toLowerCase()] = m[2].trim();
+    }
+    results.push({ agent, timestamp, handoff: fields });
+    searchFrom = end + 1;
+  }
+  return results;
 }
 
 // ============ TRANSCRIPT SYSTEM ============
@@ -1987,6 +2063,27 @@ function parseRemoteClosurePayload(rawBody: unknown): { payload: RemoteClosurePa
   const handoffTo = handoffToRaw === null ? null : (normaliseText(handoffToRaw) || null);
   if (summary === '') return { payload: null, error: 'sections.state.summary no puede ser vacio' };
 
+  // Campo handoff opcional
+  let handoff: HandoffPayload | undefined;
+  const handoffRaw = sectionsRaw.handoff && typeof sectionsRaw.handoff === 'object'
+    ? (sectionsRaw.handoff as Record<string, unknown>)
+    : null;
+  if (handoffRaw) {
+    const contexto    = normaliseText(handoffRaw.contexto);
+    const decision    = normaliseText(handoffRaw.decision);
+    const continuidad = normaliseText(handoffRaw.continuidad);
+    const session_ref = normaliseText(handoffRaw.session_ref);
+    if (!contexto || !decision || !continuidad || !session_ref) {
+      return { payload: null, error: 'sections.handoff requiere contexto, decision, continuidad y session_ref' };
+    }
+    handoff = {
+      contexto, decision, continuidad, session_ref,
+      ...(handoffRaw.giros      ? { giros:      normaliseText(handoffRaw.giros) }      : {}),
+      ...(handoffRaw.descartado ? { descartado: normaliseText(handoffRaw.descartado) } : {}),
+      ...(handoffRaw.riesgo     ? { riesgo:     normaliseText(handoffRaw.riesgo) }     : {})
+    };
+  }
+
   return {
     payload: {
       agent: normalizedAgent,
@@ -2004,7 +2101,8 @@ function parseRemoteClosurePayload(rawBody: unknown): { payload: RemoteClosurePa
           handoff_to: handoffTo,
           next_step: nextStep
         },
-        captain
+        captain,
+        ...(handoff ? { handoff } : {})
       },
       mark_packet_done: Boolean(body.mark_packet_done)
     },
@@ -5253,6 +5351,10 @@ app.post('/api/remote/closure', (req: Request, res: Response) => {
       source: 'api:remote/closure'
     });
 
+    if (payload.sections.handoff) {
+      appendToHandoffLog(payload.agent, payload.packet_id, payload.sections.handoff, timestampIso);
+    }
+
     appendJsonlRecord(ARGOS_EVENTS_PATH, {
       timestamp: timestampIso,
       actor: normalizeAgentName(payload.agent) || payload.agent,
@@ -6089,6 +6191,21 @@ app.post('/api/trilog', (req: Request, res: Response) => {
   }
 });
 
+// ============ HANDOFF ENDPOINTS ============
+
+// GET /api/handoff/:packetId — sin token, lectura pública
+// Devuelve todas las entradas de ARGOS_GLOBAL_HANDOFF_LOG.md para ese packet.
+app.get('/api/handoff/:packetId', (req: Request, res: Response) => {
+  try {
+    const packetId = normaliseText(req.params.packetId);
+    if (!packetId) return res.status(400).json({ error: 'packetId requerido' });
+    const entries = readHandoffEntriesForPacket(packetId);
+    res.json({ packetId, entries });
+  } catch (e) {
+    res.status(500).json({ error: 'Fallo leyendo handoff log', detail: String(e) });
+  }
+});
+
 // ============ TRANSCRIPT ENDPOINTS ============
 
 // GET /api/transcript?agent=Claude&date=2026-04-12&packetId=ARG-XXXX
@@ -6657,8 +6774,8 @@ app.post('/api/ia/start-task', (req: Request, res: Response) => {
           : actor;
     postToCrewFeed(
       voiceName,
-      `Tomando misión: ${subject}`,
-      `ID: ${packetId} — en progreso.`,
+      `Tomando mision: ${subject}`,
+      `ID: ${packetId} - en progreso.`,
       'crew_update',
       0,
       packetId

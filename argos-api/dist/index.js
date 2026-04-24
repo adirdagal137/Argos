@@ -22,6 +22,7 @@ const DASHBOARD_DIR = path_1.default.join(__dirname, '..', '..', 'argos-dashboar
 const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
 const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
 const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const ARGOS_TOKENS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
@@ -422,6 +423,66 @@ function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tok
     catch (e) {
         console.error(`[VOCAL] Error publicando mensaje de ${canonicalSender}`, e);
     }
+}
+// ============ HANDOFF LOG ============
+function appendToHandoffLog(agent, packetId, handoff, timestampIso) {
+    try {
+        if (!fs_1.default.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH)) {
+            fs_1.default.writeFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, '# ARGOS GLOBAL HANDOFF LOG\nContexto conversacional por packet. Append-only.\n\n---\n', 'utf-8');
+        }
+        const canaryTs = new Date(timestampIso).toLocaleString('sv-SE', {
+            timeZone: 'Atlantic/Canary', year: 'numeric', month: '2-digit',
+            day: '2-digit', hour: '2-digit', minute: '2-digit'
+        }).slice(0, 16);
+        const lines = [
+            `<!-- ${packetId} -->`,
+            `**[${canaryTs} Atlantic/Canary] VOZ ${agent.toUpperCase()} — HANDOFF ${packetId}:**`,
+            `**Contexto:** ${handoff.contexto}`,
+            `**Decisión:** ${handoff.decision}`,
+            `**Continuidad:** ${handoff.continuidad}`,
+            `**Session ref:** ${handoff.session_ref}`,
+        ];
+        if (handoff.giros)
+            lines.push(`**Giros:** ${handoff.giros}`);
+        if (handoff.descartado)
+            lines.push(`**Descartado:** ${handoff.descartado}`);
+        if (handoff.riesgo)
+            lines.push(`**Riesgo:** ${handoff.riesgo}`);
+        lines.push('', '---', '');
+        fs_1.default.appendFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, lines.join('\n'), 'utf-8');
+    }
+    catch (e) {
+        console.error('[HANDOFF] Error escribiendo handoff log', e);
+    }
+}
+function readHandoffEntriesForPacket(packetId) {
+    if (!fs_1.default.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH))
+        return [];
+    const content = fs_1.default.readFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, 'utf-8');
+    const anchor = `<!-- ${packetId} -->`;
+    const results = [];
+    let searchFrom = 0;
+    while (true) {
+        const start = content.indexOf(anchor, searchFrom);
+        if (start === -1)
+            break;
+        const blockEnd = content.indexOf('\n---\n', start);
+        const end = blockEnd !== -1 ? blockEnd : content.length;
+        const block = content.slice(start, end);
+        const headerMatch = block.match(/VOZ (\w+) — HANDOFF/);
+        const tsMatch = block.match(/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})/);
+        const agent = headerMatch ? headerMatch[1] : 'Unknown';
+        const timestamp = tsMatch ? tsMatch[1] : '';
+        const fields = {};
+        const fieldRegex = /\*\*(\w[\w\s]*):\*\* (.+)/g;
+        let m;
+        while ((m = fieldRegex.exec(block)) !== null) {
+            fields[m[1].toLowerCase()] = m[2].trim();
+        }
+        results.push({ agent, timestamp, handoff: fields });
+        searchFrom = end + 1;
+    }
+    return results;
 }
 // ============ TRANSCRIPT SYSTEM ============
 function transcriptDateStr() {
@@ -1548,6 +1609,26 @@ function parseRemoteClosurePayload(rawBody) {
     const handoffTo = handoffToRaw === null ? null : (normaliseText(handoffToRaw) || null);
     if (summary === '')
         return { payload: null, error: 'sections.state.summary no puede ser vacio' };
+    // Campo handoff opcional
+    let handoff;
+    const handoffRaw = sectionsRaw.handoff && typeof sectionsRaw.handoff === 'object'
+        ? sectionsRaw.handoff
+        : null;
+    if (handoffRaw) {
+        const contexto = normaliseText(handoffRaw.contexto);
+        const decision = normaliseText(handoffRaw.decision);
+        const continuidad = normaliseText(handoffRaw.continuidad);
+        const session_ref = normaliseText(handoffRaw.session_ref);
+        if (!contexto || !decision || !continuidad || !session_ref) {
+            return { payload: null, error: 'sections.handoff requiere contexto, decision, continuidad y session_ref' };
+        }
+        handoff = {
+            contexto, decision, continuidad, session_ref,
+            ...(handoffRaw.giros ? { giros: normaliseText(handoffRaw.giros) } : {}),
+            ...(handoffRaw.descartado ? { descartado: normaliseText(handoffRaw.descartado) } : {}),
+            ...(handoffRaw.riesgo ? { riesgo: normaliseText(handoffRaw.riesgo) } : {})
+        };
+    }
     return {
         payload: {
             agent: normalizedAgent,
@@ -1565,7 +1646,8 @@ function parseRemoteClosurePayload(rawBody) {
                     handoff_to: handoffTo,
                     next_step: nextStep
                 },
-                captain
+                captain,
+                ...(handoff ? { handoff } : {})
             },
             mark_packet_done: Boolean(body.mark_packet_done)
         },
@@ -4543,6 +4625,9 @@ app.post('/api/remote/closure', (req, res) => {
             trigger: payload.trigger,
             source: 'api:remote/closure'
         });
+        if (payload.sections.handoff) {
+            appendToHandoffLog(payload.agent, payload.packet_id, payload.sections.handoff, timestampIso);
+        }
         appendJsonlRecord(ARGOS_EVENTS_PATH, {
             timestamp: timestampIso,
             actor: normalizeAgentName(payload.agent) || payload.agent,
@@ -5295,6 +5380,21 @@ app.post('/api/trilog', (req, res) => {
         res.status(500).json({ error: 'Fallo en tri-log de sesiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n', detail: String(error) });
     }
 });
+// ============ HANDOFF ENDPOINTS ============
+// GET /api/handoff/:packetId — sin token, lectura pública
+// Devuelve todas las entradas de ARGOS_GLOBAL_HANDOFF_LOG.md para ese packet.
+app.get('/api/handoff/:packetId', (req, res) => {
+    try {
+        const packetId = normaliseText(req.params.packetId);
+        if (!packetId)
+            return res.status(400).json({ error: 'packetId requerido' });
+        const entries = readHandoffEntriesForPacket(packetId);
+        res.json({ packetId, entries });
+    }
+    catch (e) {
+        res.status(500).json({ error: 'Fallo leyendo handoff log', detail: String(e) });
+    }
+});
 // ============ TRANSCRIPT ENDPOINTS ============
 // GET /api/transcript?agent=Claude&date=2026-04-12&packetId=ARG-XXXX
 // Devuelve el bloque de transcript (o el archivo completo si no se especifica packetId)
@@ -5819,7 +5919,7 @@ app.post('/api/ia/start-task', (req, res) => {
             : canonicalVoice === 'Pi'
                 ? 'Pi'
                 : actor;
-        postToCrewFeed(voiceName, `Tomando misión: ${subject}`, `ID: ${packetId} — en progreso.`, 'crew_update', 0, packetId);
+        postToCrewFeed(voiceName, `Tomando mision: ${subject}`, `ID: ${packetId} - en progreso.`, 'crew_update', 0, packetId);
         // Pub/Sub: notificar al dashboard en tiempo real
         publishEvent('ia:status_changed', { agent: normalizeAgentName(actor), status: 'active', task: packetId, subject });
         return res.json({

@@ -63,36 +63,38 @@ ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md
 con secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`.
 El `packet_id` y el actor canónico son OBLIGATORIOS en el deposit o irá a ORPHAN.
 
-**Transcript (opcional — recomendado para Claude Code y Codex):**
-Solo si hay razonamiento que no cabe en sections.log:
+**HANDOFF (opcional — recomendado, sin coste extra de tokens):**
+Captura el hilo conversacional que llevó a la decisión. NO es cajón de sastre técnico — eso va en `sections.log`. El HANDOFF responde: ¿qué quería el Capitán?, ¿qué opciones se consideraron?, ¿por qué esta salida y no otra?, ¿qué no debe malinterpretarse?
+
 ```http
-POST http://localhost:8080/api/transcript
-Headers: X-Argos-Agent-Token: <token-agente>
+POST http://localhost:8080/api/remote/closure
 {
-  "agent": "Claude|Codex|Pi|ChatGPT|DeepSeek",
-  "role": "agent",
-  "content": "Razonamiento que NO está en sections.log",
-  "packetId": "ARG-XXXX"
+  ...
+  "sections": {
+    "log": "...",
+    "shadow": "...",
+    "glitch": "",
+    "state": { ... },
+    "captain": "...",
+    "handoff": {
+      "contexto":    "Qué planteó el Capitán (1-2 frases)",
+      "decision":    "Qué se hizo y criterio decisivo (1 frase)",
+      "continuidad": "Qué necesita saber el siguiente agente (1-2 frases)",
+      "session_ref": "Claude/Cowork 2026-04-24 22:00",
+      "giros":       "(opcional) Qué cambió o aclaró durante la conversación",
+      "descartado":  "(opcional) Qué no se hizo y por qué",
+      "riesgo":      "(opcional) Qué podría malinterpretarse al leer solo el cierre"
+    }
+  }
 }
 ```
-No duplicar lo que ya está en sections.log ni en el feed.
 
-**Agentes sin acceso HTTP directo (ChatGPT, Pi):**
-Dictar este JSON al Capitán o a OpenClaw para que haga el POST:
-```json
-{
-  "agent": "ChatGPT",
-  "role": "agent",
-  "content": "<razonamiento interno o decisiones no obvias>",
-  "packetId": "ARG-XXXX"
-}
-```
+**Agentes sin HTTP directo (ChatGPT, Pi):** dictar el objeto `handoff` al Capitán en formato JSON; el Capitán incluye el campo en el POST de cierre.
 
-**Lectura de transcripts (cualquier agente, sin token):**
+**Lectura de HANDOFF (sin token):**
 ```http
-GET http://localhost:8080/api/transcript/ARG-XXXX
+GET http://localhost:8080/api/handoff/ARG-XXXX
 ```
-Devuelve todas las entradas de todos los agentes para ese packet, ordenadas cronológicamente.
 
 **Agentes locales (Claude Code, Codex CLI):** también pueden usar `POST /api/trilog` como alternativa equivalente a `/api/remote/closure`.
 
