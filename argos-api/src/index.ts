@@ -225,6 +225,7 @@ type TaskRecord = {
   status: string;
   time: string;
   zone: 'inbox' | 'in_progress' | 'done';
+  room: string;
   type: string;
   tag: string;
   priority: string;
@@ -245,6 +246,21 @@ type TokenRecord = {
   scope?: 'work' | 'report' | 'input';
   channel?: string;
 };
+
+const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'COMENIO', 'XUANXU', 'GENERAL']);
+const VALID_PACKET_TYPES = new Set(['strategy', 'build', 'integration', 'maintenance', 'bug', 'risk', 'errand', 'task']);
+
+function normalizeTaskRoom(rawValue: string): string {
+  const room = normaliseText(rawValue).toUpperCase();
+  if (room === '' || room === 'ALL') return 'GENERAL';
+  return VALID_PACKET_ROOMS.has(room) ? room : 'GENERAL';
+}
+
+function normalizeTaskType(rawValue: string): string {
+  const packetType = normaliseText(rawValue).toLowerCase();
+  if (packetType === '' || packetType === 'all') return 'task';
+  return VALID_PACKET_TYPES.has(packetType) ? packetType : 'task';
+}
 
 type TokenStats = {
   total: number;
@@ -4516,6 +4532,7 @@ function loadTasksFromZone(zone: 'inbox' | 'in_progress' | 'done'): TaskRecord[]
     const ownerMatch = content.match(/OWNER:\s*(.*)/);
     const subjectMatch = content.match(/SUBJECT:\s*(.*)/);
     const statusMatch = content.match(/STATUS:\s*(.*)/);
+    const roomMatch = content.match(/ROOM:\s*(.*)/);
     const typeMatch = content.match(/TYPE:\s*(.*)/);
     const priorityMatch = content.match(/PRIORITY:\s*(.*)/);
     const tagMatch = content.match(/TAG:\s*(.*)/);
@@ -4543,7 +4560,8 @@ function loadTasksFromZone(zone: 'inbox' | 'in_progress' | 'done'): TaskRecord[]
     if (zone === 'done') status = 'done';
     if (zone === 'inbox' && status === '') status = 'open';
 
-    const packetType = typeMatch ? typeMatch[1].trim().toLowerCase() : 'task';
+    const packetRoom = normalizeTaskRoom(roomMatch ? roomMatch[1] : '');
+    const packetType = normalizeTaskType(typeMatch ? typeMatch[1] : '');
     const tokensMatch = content.match(/TOKENS_SPENT:\s*(\d+)/);
     const createdAtMatch = content.match(/CREATED_AT:\s*(.*)/);
     const createdAtStr = createdAtMatch ? createdAtMatch[1].trim() : '';
@@ -4563,6 +4581,7 @@ function loadTasksFromZone(zone: 'inbox' | 'in_progress' | 'done'): TaskRecord[]
       status,
       time: formatRelativeAge(stat.mtimeMs),
       zone,
+      room: packetRoom,
       type: packetType,
       tag: tagMatch ? tagMatch[1].trim().toLowerCase() : '',
       priority,
@@ -5183,6 +5202,91 @@ app.post('/api/remote/closure', (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(500).json({ error: 'Fallo integrando remote closure', detail: String(error) });
+  }
+});
+
+// Crear work packet desde agente externo (ChatGPT, Pi, etc.)
+app.post('/api/remote/packet', (req: Request, res: Response) => {
+  try {
+    const auth = authenticateAgentRequest(req);
+    if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+    const tokenAgent = auth.tokenAgent;
+
+    const body = req.body && typeof req.body === 'object' ? req.body as Record<string, unknown> : {};
+    const agentRaw = normaliseText(body.agent as string || tokenAgent);
+    if (!ensureExternalActorMatchesToken(req, res, agentRaw)) return;
+
+    const subject = normaliseText(body.subject as string);
+    const objective = normaliseText(body.objective as string);
+    if (subject === '') return res.status(400).json({ error: 'subject es obligatorio' });
+    if (objective === '') return res.status(400).json({ error: 'objective es obligatorio' });
+
+    const roleRequested = normaliseText(body.role_requested as string) || 'Cualquiera';
+    const room = normalizeTaskRoom(normaliseText(body.room as string));
+    const type = normalizeTaskType(normaliseText(body.type as string));
+    const priority = normaliseText(body.priority as string) || '';
+
+    const pktId = `ARG-${Date.now()}`;
+    const packetSuffix = subjectToPacketSuffix(subject);
+    const wpPath = path.join(RUNTIME_DIR, 'work_packets', 'inbox', `${pktId}__${packetSuffix}.md`);
+
+    const priorityLine = priority !== '' ? `PRIORITY: ${priority}\n` : '';
+    const packetContent =
+      `[WORK_PACKET]\n` +
+      `ID: ${pktId}\n` +
+      `ROLE_REQUESTED: ${roleRequested}\n` +
+      `SUBJECT: ${subject}\n` +
+      `STATUS: open\n` +
+      `ROOM: ${room}\n` +
+      `TYPE: ${type}\n` +
+      `${priorityLine}` +
+      `CREATED_BY: ${agentRaw}\n` +
+      `TOKENS_SPENT: 0\n` +
+      `\n` +
+      `OBJECTIVE:\n` +
+      `${objective}\n` +
+      `[/WORK_PACKET]\n`;
+
+    fs.writeFileSync(wpPath, packetContent, 'utf-8');
+
+    appendJsonlRecord(ARGOS_EVENTS_PATH, {
+      timestamp: nowIso(),
+      actor: normalizeAgentName(agentRaw) || agentRaw,
+      module: 'argos',
+      type: 'packet_created',
+      packet_id: pktId,
+      refId: pktId,
+      summary: `Packet creado por ${agentRaw}: ${subject}`,
+      details: `objective=${objective.slice(0, 120)}`,
+      source: 'api:remote/packet'
+    });
+
+    const voiceName = normalizeAgentName(agentRaw) === 'Claude' ? 'Orfeo (Claude)' : agentRaw;
+    postToCrewFeed(
+      voiceName,
+      `Nuevo packet creado: ${subject} (${pktId})`,
+      objective.slice(0, 200),
+      'crew_update',
+      0,
+      pktId
+    );
+
+    const syncResult = runSyncState();
+    if (!syncResult.ok) {
+      console.warn('[ARGOS-API] sync_state fallo tras remote/packet:', syncResult.stderr || syncResult.stdout);
+    }
+
+    publishEvent('packet:assigned', {
+      id: pktId,
+      room,
+      type,
+      subject,
+      actor: roleRequested
+    });
+
+    return res.json({ status: 'ok', packet_id: pktId, subject, room, type, role_requested: roleRequested });
+  } catch (error) {
+    return res.status(500).json({ error: 'Fallo creando packet remoto', detail: String(error) });
   }
 });
 
@@ -6054,11 +6158,25 @@ app.get('/api/transcript/feed', (req: Request, res: Response) => {
 
 app.get('/api/tasks', (req: Request, res: Response) => {
   try {
+    const roomFilterRaw = normaliseText(String(req.query.room || '')).toUpperCase();
+    const typeFilterRaw = normaliseText(String(req.query.type || '')).toLowerCase();
+    const roomFilter = roomFilterRaw && roomFilterRaw !== 'ALL'
+      ? (VALID_PACKET_ROOMS.has(roomFilterRaw) ? roomFilterRaw : '__INVALID__')
+      : '';
+    const typeFilter = typeFilterRaw && typeFilterRaw !== 'all'
+      ? (VALID_PACKET_TYPES.has(typeFilterRaw) ? typeFilterRaw : '__invalid__')
+      : '';
+
     const tasks = [
       ...loadTasksFromZone('inbox'),
       ...loadTasksFromZone('in_progress'),
       ...loadTasksFromZone('done')
     ];
+    const filteredTasks = tasks.filter((task) => {
+      if (roomFilter !== '' && task.room !== roomFilter) return false;
+      if (typeFilter !== '' && task.type !== typeFilter) return false;
+      return true;
+    });
 
     // Orden canonico:
     // 1) Pendientes (open/in_progress): prioridad desc (high > mid > low), luego recencia desc
@@ -6071,10 +6189,10 @@ app.get('/api/tasks', (req: Request, res: Response) => {
       if (pb !== pa) return pb - pa; // mayor prioridad primero
       return recencyMs(b) - recencyMs(a);  // misma prioridad → mas reciente primero
     };
-    const pendingTasks = tasks
+    const pendingTasks = filteredTasks
       .filter((task) => task.status !== 'done')
       .sort(byPriorityThenRecency);
-    const doneTasks = tasks
+    const doneTasks = filteredTasks
       .filter((task) => task.status === 'done')
       .sort((a, b) => recencyMs(b) - recencyMs(a));
     const orderedTasks = [...pendingTasks, ...doneTasks];
@@ -6102,7 +6220,8 @@ app.get('/api/tasks/get', (req: Request, res: Response) => {
       resolved.zone === 'done' ? 'done' : resolved.zone === 'in_progress' ? 'in_progress' : 'open'
     );
     const objective = extractPacketObjective(resolved.content);
-    const packetType = getPacketField(resolved.content, 'TYPE') || 'task';
+    const packetRoom = normalizeTaskRoom(getPacketField(resolved.content, 'ROOM'));
+    const packetType = normalizeTaskType(getPacketField(resolved.content, 'TYPE'));
     const priority = getPacketField(resolved.content, 'PRIORITY') || 'low';
     const tokensSpent = Number(getPacketField(resolved.content, 'TOKENS_SPENT')) || 0;
 
@@ -6115,6 +6234,7 @@ app.get('/api/tasks/get', (req: Request, res: Response) => {
         status: currentStatus,
         objective,
         zone: resolved.zone,
+        room: packetRoom,
         type: packetType,
         priority,
         tokens_spent: tokensSpent,
@@ -6511,6 +6631,8 @@ app.post('/api/tasks', (req: Request, res: Response) => {
     const rawText = body.rawText as string;
     const owner = inferTaskOwner(rawText);
     const subject = inferTaskSubject(rawText);
+    const room = normalizeTaskRoom(typeof body.room === 'string' ? body.room : '');
+    const type = normalizeTaskType(typeof body.type === 'string' ? body.type : '');
     const pktId = `ARG-${Date.now()}`;
     const packetSuffix = subjectToPacketSuffix(subject);
     const wpPath = path.join(RUNTIME_DIR, 'work_packets', 'inbox', `${pktId}__${packetSuffix}.md`);
@@ -6520,6 +6642,8 @@ ID: ${pktId}
 ROLE_REQUESTED: ${owner}
 SUBJECT: ${subject}
 STATUS: open
+ROOM: ${room}
+TYPE: ${type}
 TOKENS_SPENT: ${estimateTokenCount(rawText)}
 
 OBJECTIVE:
@@ -6580,6 +6704,8 @@ ${rawText}
     publishEvent('packet:assigned', {
       id: pktId,
       priority: 'low', // Default as inferred in code above
+      room,
+      type,
       subject,
       actor: owner
     });
@@ -6588,6 +6714,8 @@ ${rawText}
       status: 'ok', 
       id: pktId, 
       owner, 
+      room,
+      type,
       subject,
       tokens: estimatedTokens
     });
