@@ -2441,3 +2441,29 @@ body {
     box-shadow: 0 2px 10px rgba(232, 64, 64, 0.4);
     transition: all 0.3s ease;
 }
+
+.protocol-badge {
+    display: inline-block;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(160, 100, 255, 0.15);
+    color: #c48eff;
+    border: 1px solid rgba(160, 100, 255, 0.3);
+    vertical-align: middle;
+    margin-right: 6px;
+    letter-spacing: 0.05em;
+}
+
+
+@keyframes panel-resonance {
+    0% { box-shadow: 0 0 0 rgba(24, 169, 107, 0); border-color: rgba(127, 153, 132, 0.18); }
+    50% { box-shadow: 0 0 15px rgba(24, 169, 107, 0.4); border-color: rgba(24, 169, 107, 0.8); }
+    100% { box-shadow: 0 0 0 rgba(24, 169, 107, 0); border-color: rgba(127, 153, 132, 0.18); }
+}
+.glow-resonance {
+    animation: panel-resonance 1.2s ease-out;
+}
+

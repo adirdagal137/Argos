@@ -1,5 +1,5 @@
 # INTER-AI PACT
-## v1.4 - Protocolo de Cierre Unificado [2026-04-18]
+## v1.5 - Ciclo de Vida Irrompible [2026-04-24]
 
 Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Antigravity y cualquier agente futuro que entre en Argos.
 
@@ -9,15 +9,43 @@ Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Antigravity y c
 
 Existen exactamente 5 tipos de registro. Cada uno tiene destino, formato y criterio propios.
 
-### 1.1 LOG â€” Acciones ejecutadas
+### 1.1 LOG — Acciones ejecutadas
+
 **Que va aqui:** Hitos operativos reales. Lo que se hizo, cuando, con que resultado.
 No va aqui: opiniones, riesgos no ejecutados, texto de conversacion literal.
+
 **Archivos:**
-- Resumen humano: ARGOS_GLOBAL_LOG.md (formato **[YYYY-MM-DD HH:MM Atlantic/Canary] VOZ NOMBRE:**)
-- Registro estructurado: events/argos.events.jsonl (JSON con fields: timestamp, actor, module, type, summary, artifacts, verification, next_step, errors, risks, packet_id)
-- **Campo packet_id (OBLIGATORIO):** ID del work packet del que emerge esta entrada de log. Sin ID de referencia, el log queda huerfano.
-- **Campo errors:** Errores encontrados y aprendizajes extraidos. Obligatorio si hubo friccion. Vacio ("") solo si ejecucion limpia.
-- **Campo risks:** Riesgos detectados. Vacio ("") si no aplica.
+- Resumen humano: `ARGOS_GLOBAL_LOG.md` (formato `**[YYYY-MM-DD HH:MM Atlantic/Canary] VOZ NOMBRE:**`)
+- Registro estructurado: `events/argos.events.jsonl` (JSON con fields: timestamp, actor, module, type, summary, artifacts, verification, next_step, errors, risks, packet_id)
+
+**Campos OBLIGATORIOS en cada entrada:**
+
+| Campo | Tipo | Regla |
+|-------|------|-------|
+| `timestamp` | ISO 8601 | Obligatorio siempre |
+| `actor` | string canónico | `Claude`, `Codex`, `Pi`, `ChatGPT`, `DeepSeek`, `Qwen`. Nunca: “Antigravity”, “IA”, “sistema”, “agente” |
+| `packet_id` | string | Obligatorio. Sin packet_id la entrada es inválida (ORPHAN). |
+| `summary` | string | Qué se hizo, resultado concreto. No el subject del packet. |
+| `errors` | string | Errores + aprendizajes. `””` solo si ejecución limpia. |
+| `risks` | string | Riesgos detectados. `””` si no aplica. |
+
+**Regla de actor canónico (CRÍTICA):** El campo `actor` usa siempre el nombre canónico del agente. Nunca “Antigravity”, “IA”, “sistema” u otro alias. El heartbeat rechazará entradas con actor no canónico en depósitos.
+
+**Ejemplo VÁLIDO:**
+```
+[2026-04-24 15:00 Atlantic/Canary] VOZ CLAUDE:
+MISION: Reforma protocolo bitácora
+WORK PACKET: ARG-REFORM-BITACORA-001
+DETALLES: Actualizados INTER_AI_PROTOCOL.md v1.5 y ARGOS_QUICKSTART.md.
+Añadida sección 2b (ciclo de vida), 1.7 (validaciones), ejemplo real de closure.
+SIGUIENTE: Codex implementa validaciones ORPHAN en heartbeat (ARG-REFORM-BITACORA-001-IMPL).
+RIESGOS: Codex debe leer la propuesta antes de tocar index.ts.
+```
+
+**Ejemplo INVÁLIDO** (rechazado por heartbeat si viene en depósito):
+```
+VOZ IA: Hice cosas en el sistema.   ← actor no canónico, sin packet_id, sin detalle
+```
 
 ### 1.2 TRANSCRIPT â€” Lo dicho FUERA de la webapp, sin duplicar el feed
 
