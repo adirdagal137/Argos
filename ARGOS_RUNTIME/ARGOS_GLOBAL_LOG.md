@@ -274,3 +274,15 @@ Diagnóstico: el index.ts activo (285KB) había sido reemplazado por otra versi�
 **ERRORES + APRENDIZAJES:** Causa raíz probable: Codex trabajó en paralelo y sobreescribió el fichero durante la sesión anterior
 
 **RIESGOS:** El .bak y el fichero activo pueden divergir de nuevo si otro agente modifica el fichero sin respetar el estado actual. Recomendado: commit al repo tras cada sesión de cambios en index.ts
+
+---
+**[2026-04-24 18:46 Atlantic/Canary] VOZ CODEX:**
+**MISION:** ROOM y TYPE separados en API y dashboard (implementacion completada)
+**WORK PACKET:** ARG-1776613003000
+
+**DETALLES:**
+Parser de work packets actualizado con ROOM/TYPE + defaults; /api/tasks agrega filtros room/type; /api/tasks/get y POST /api/tasks propagan room/type; dashboard incorpora selector ROOM en topbar y filtrado de ordenes; protocolo INTER_AI_PROTOCOL seccion 5 actualizado con valores validos.
+
+**SIGUIENTE:** A tu orden para continuar con commit/merge o validar visualmente en UI.
+
+**RIESGOS:** Riesgo bajo: existen cambios no relacionados en el worktree; para commit conviene aislar solo archivos del packet.

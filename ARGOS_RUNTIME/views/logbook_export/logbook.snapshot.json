@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-23T14:54:42.952Z",
+  "updated_at": "2026-04-24T17:46:28.392Z",
   "timezone": "Atlantic/Canary",
   "timestamp_policy": {
     "markdown_rule": "[YYYY-MM-DD HH:MM Atlantic/Canary]",
@@ -57,8 +57,33 @@
           "source": "ARGOS_GLOBAL_LOG.md",
           "entries": [
             {
+              "timestamp_label": "2026-04-24 18:46 Atlantic/Canary",
+              "actor": "Codex",
+              "summary": "ROOM y TYPE separados en API y dashboard (implementacion completada)",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "id": "ARG-1777036454218-858",
+              "timestamp_label": "2026-04-24 13:14",
+              "actor": "Cualquiera",
+              "summary": "# Registro de órdenes completadas (2026-04-24 14:20 UTC) - **ARG‑UI‑CONSOLIDATION‑001**...",
+              "status": "done",
+              "source": "work_packets/done/LOG_COMPLETED_2026-04-24.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-23 16:10 Atlantic/Canary",
+              "actor": "Claude",
+              "summary": "Bug fix post-migración: /api/bootstrap devolvía HTML por fichero truncado y ruta faltante",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
               "timestamp_label": "2026-04-22 16:14 Atlantic/Canary",
-              "actor": "CODEX",
+              "actor": "Codex",
               "summary": "Handoff de saneamiento de voz y residuos captain_input completado; fase 2 preparada para continuidad.",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -66,7 +91,7 @@
             },
             {
               "timestamp_label": "2026-04-22 11:00 Atlantic/Canary",
-              "actor": "CODEX",
+              "actor": "Codex",
               "summary": "Integracion automatica de deposito chat",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -74,7 +99,7 @@
             },
             {
               "timestamp_label": "2026-04-22 03:13 Atlantic/Canary",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "summary": "Reparar captain_feed timestamp falso + bug truncado index.ts (continuación trabajo Codex)",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -82,7 +107,7 @@
             },
             {
               "timestamp_label": "2026-04-22 02:52 Atlantic/Canary",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "summary": "argos-api migrado a ruta canonica ARGOS/argos-api, Antigravity eliminado",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -90,15 +115,23 @@
             },
             {
               "timestamp_label": "2026-04-22 02:52 Atlantic/Canary",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "summary": "Bearer token fix en argos-api",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
             },
             {
+              "timestamp_label": "2026-04-22 02:52 Atlantic/Canary",
+              "actor": "Claude",
+              "summary": "Bearer token fix en argos-api: /api/bootstrap acepta 4 formatos de autenticacion",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
               "timestamp_label": "2026-04-22 02:10 Atlantic/Canary",
-              "actor": "ORFEO (CLAUDE)",
+              "actor": "Claude",
               "summary": "Bearer token fix + migración argos-api a ruta canónica",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -106,7 +139,7 @@
             },
             {
               "timestamp_label": "2026-04-22 01:30 Atlantic/Canary",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "summary": "Integracion automatica de deposito chat",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -114,7 +147,7 @@
             },
             {
               "timestamp_label": "2026-04-22 01:00 Atlantic/Canary",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "summary": "Integracion automatica de deposito chat",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -122,8 +155,16 @@
             },
             {
               "timestamp_label": "2026-04-22 00:39 Atlantic/Canary",
-              "actor": "CODEX",
+              "actor": "Codex",
               "summary": "CIERRE",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-22 00:39 Atlantic/Canary",
+              "actor": "Codex",
+              "summary": "CIERRE: Bootstrap cloud + seguridad de escritura externa por token",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -146,8 +187,8 @@
             },
             {
               "timestamp_label": "2026-04-21 22:43 Atlantic/Canary",
-              "actor": "ANTIGRAVITY",
-              "summary": "CIERRE",
+              "actor": "Antigravity",
+              "summary": "CIERRE: Saneamiento de Vector de Ruta y corrección de mojibake global",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -170,8 +211,8 @@
             },
             {
               "timestamp_label": "2026-04-21 22:30 Atlantic/Canary",
-              "actor": "ANTIGRAVITY",
-              "summary": "INICIO",
+              "actor": "Antigravity",
+              "summary": "INICIO: Saneamiento de Vector de Ruta y corrección de mojibake global",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -186,8 +227,8 @@
             },
             {
               "timestamp_label": "2026-04-21 22:04 Atlantic/Canary",
-              "actor": "ANTIGRAVITY",
-              "summary": "LECCIÓN APRENDIDA",
+              "actor": "Antigravity",
+              "summary": "LECCIÓN APRENDIDA: Disciplina de mando y calibración de proactividad",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -251,14 +292,6 @@
             {
               "timestamp_label": "2026-04-18 20:15 Atlantic/Canary",
               "actor": "Claude",
-              "summary": "Integracion automatica de deposito chat",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-18 20:15 Atlantic/Canary",
-              "actor": "CLAUDE",
               "summary": "Integracion automatica de deposito chat",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -377,14 +410,6 @@
               "stream": "global"
             },
             {
-              "timestamp_label": "2026-04-18 02:42 Atlantic/Canary",
-              "actor": "CLAUDE",
-              "summary": "Verificación estado tunnel Cloudflare + cierre de sesión",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
               "timestamp_label": "2026-04-18 02:33 Atlantic/Canary",
               "actor": "Codex",
               "summary": "Implementado ARGOS-PROTO-0002",
@@ -394,8 +419,8 @@
             },
             {
               "timestamp_label": "2026-04-18 02:33 Atlantic/Canary",
-              "actor": "CODEX",
-              "summary": "Implementado ARGOS-PROTO-0002",
+              "actor": "Codex",
+              "summary": "Implementado ARGOS-PROTO-0002: cierre remoto universal con API pública, autenticación por token y protocolo v1.4",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -403,14 +428,6 @@
             {
               "timestamp_label": "2026-04-18 02:10 Atlantic/Canary",
               "actor": "Claude",
-              "summary": "Integracion automatica de deposito chat",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-18 02:10 Atlantic/Canary",
-              "actor": "CLAUDE",
               "summary": "Integracion automatica de deposito chat",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -433,14 +450,6 @@
               "stream": "global"
             },
             {
-              "timestamp_label": "2026-04-18 01:15 Atlantic/Canary",
-              "actor": "CLAUDE",
-              "summary": "Integracion automatica de deposito chat",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
               "timestamp_label": "2026-04-18 00:18 Atlantic/Canary",
               "actor": "Codex",
               "summary": "Implementada capa LIVE para coordinaci�n en tiempo real entre agentes",
@@ -449,24 +458,8 @@
               "stream": "global"
             },
             {
-              "timestamp_label": "2026-04-18 00:18 Atlantic/Canary",
-              "actor": "CODEX",
-              "summary": "Implementada capa LIVE para coordinaci�n en tiempo real entre agentes",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
               "timestamp_label": "2026-04-17 20:24 Atlantic/Canary",
               "actor": "Codex",
-              "summary": "Implementacion de lectura externa de transcripts/tokens para apps desktop y scheduler operativo",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 20:24 Atlantic/Canary",
-              "actor": "CODEX",
               "summary": "Implementacion de lectura externa de transcripts/tokens para apps desktop y scheduler operativo",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -491,14 +484,6 @@
             {
               "timestamp_label": "2026-04-17 19:30 Atlantic/Canary",
               "actor": "Antigravity",
-              "summary": "Saneamiento Web y Consolidación de Infraestructura Local",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 19:30 Atlantic/Canary",
-              "actor": "ANTIGRAVITY",
               "summary": "Saneamiento Web y Consolidación de Infraestructura Local",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -531,14 +516,6 @@
             {
               "timestamp_label": "2026-04-17 12:49 Atlantic/Canary",
               "actor": "Claude",
-              "summary": "Captura real de tokens implementada en argos-api",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 12:49 Atlantic/Canary",
-              "actor": "CLAUDE",
               "summary": "Captura real de tokens implementada en argos-api",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -634,7 +611,7 @@
             },
             {
               "timestamp_label": "2026-04-16 19:00 Atlantic/Canary",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "summary": "Integración de Qwen/OpenClaw en la tripulación ARGOS",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -642,7 +619,7 @@
             },
             {
               "timestamp_label": "2026-04-15 13:28 Atlantic/Canary",
-              "actor": "ANTIGRAVITY",
+              "actor": "Antigravity",
               "summary": "Erradicación de Pop-ups de PowerShell y Estabilización del Entorno (",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -689,7 +666,7 @@
             {
               "timestamp_label": "2026-04-13 01:10",
               "timestamp_precision": "minute",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "status": "done",
               "summary": "Tab Transcripts anadido a la bitacora tabular",
               "details": "Backend: GET /api/transcript/feed parseando todos los archivos del dia en transcripts/. Frontend: tab especial '📄 Transcripts' inyectado en renderStreamTabs(), renderTranscriptTab() con tabla 4 cols (tiempo/voz/ID/transcript), click en ID abre visor hermeneutico. CSS: transcript-table con table-layout:auto para cols fit.",
@@ -729,7 +706,7 @@
             {
               "timestamp_label": "2026-04-13 01:07",
               "timestamp_precision": "minute",
-              "actor": "ANTIGRAVITY",
+              "actor": "Antigravity",
               "status": "done",
               "summary": "Saneamiento de Argos",
               "details": "Restaurar orden en la comunicacion del sistema y asegurar la persistencia de las restricciones de agentes (Codex).\n\nACCIONES REALIZADAS:\n1. Implementado Protocolo Sigilo (Dispatcher silenciado).\n2. Unificada normalizacion de Nombres (fix voice hijacking).\n3. Restaurada restriccion de Codex en state.json.\n4. Ampliado TriLog-Guard a 4 carriles (Transcript obligatorio).",
@@ -739,7 +716,7 @@
             {
               "timestamp_label": "2026-04-13 01:04",
               "timestamp_precision": "minute",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "status": "done",
               "summary": "Sistema de transcript universal implementado + UI bitacora refactorizada",
               "details": "Backend: transcripts/ dir, appendToTranscript(), GET|POST /api/transcript, GET /api/transcript/packet, eliminacion de interactions_log de enrichArgosStreams (filtro en todos los modulos), buildEmptyLogbook() con columna transcriptRef. Frontend: mapEventSourceToLabel actualizado, columna transcriptRef como boton 📄, tab glitch condicional, renderPacketTranscripts() en panel hermeneutico, CSS para nuevos elementos. INTER_AI_PROTOCOL.md v1.3 + CLAUDE.md actualizados.",
@@ -787,7 +764,7 @@
             {
               "timestamp_label": "2026-04-13 00:06",
               "timestamp_precision": "minute",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "status": "done",
               "summary": "Protocolo universal de transcript implementado para todas las IAs",
               "details": "INTER_AI_PROTOCOL.md v1.3: INTERACTIONS reemplazado por TRANSCRIPT (transcripts/FECHA_AGENTE.md). CLAUDE.md: cierre ahora es transcript+trilog en ese orden. Backend: appendToTranscript, readTranscriptBlock, GET/POST /api/transcript, /api/transcript/list, transcriptRef en trilog+chat+feed. Frontend: botón 📄 en mensajes del feed abre transcript inline en visor de eventos. interactions_log eliminado. TypeScript: 0 errores.",
@@ -807,7 +784,7 @@
             {
               "timestamp_label": "2026-04-12 23:22",
               "timestamp_precision": "minute",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "status": "done",
               "summary": "Widget Estado IAs estabilizado y voz fantasma de Codex silenciada",
               "details": "3 fixes aplicados. Backend: isVoiceRestricted() guard en los postToCrewFeed del Dispatcher — agentes restricted ya no hablan en feed aunque tengan packets asignados. Frontend: (1) cachedIaStatus módulo-nivel actualizado por hydrate y SSE — renderIaStatus deja de hacer fetch extra en cada ciclo; (2) SSE handler de standby actualiza el DOM directamente sin llamar renderIaStatus; (3) hydrate() actualiza el cache ANTES de renderTasks/renderChat para que formatIaStatusLine tenga datos frescos siempre.",
@@ -827,7 +804,7 @@
             {
               "timestamp_label": "2026-04-12 22:26",
               "timestamp_precision": "minute",
-              "actor": "ANTIGRAVITY",
+              "actor": "Antigravity",
               "status": "done",
               "summary": "Actualizacion de motor local a Qwen3",
               "details": "Se reanudo la descarga pausada (5.2 GB), se verifico la presencia del modelo y se ajusto el timeout de la API a 60s para asegurar estabilidad en el primer encendido.",
@@ -855,7 +832,7 @@
             {
               "timestamp_label": "2026-04-12 20:31",
               "timestamp_precision": "minute",
-              "actor": "ANTIGRAVITY",
+              "actor": "Antigravity",
               "status": "done",
               "summary": "Implementacion de Inbox Observado Realtime y Notificaciones Pub/Sub",
               "details": "Se ha creado el endpoint /api/my-packets para filtrado por actor, se han anadido campos CREATED_AT y ESTIMATED_TIME al parseo de packets, y se ha integrado la notificacion automatica packet:assigned al crear tareas.",
@@ -875,7 +852,7 @@
             {
               "timestamp_label": "2026-04-12 20:30",
               "timestamp_precision": "minute",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "status": "done",
               "summary": "Bug identificado y corregido en formatIaStatusLine — ignoraba apiStatus.task_subject cuando status=active",
               "details": "hydrate() llama applyIaStatusToPanel (correcto, usa task_subject) y luego renderTasks→renderIaStatus→formatIaStatusLine (incorrecto: no verificaba status=active, caía directo a task.title del work packet genérico). ARG-1775828525682 era el primero en la cola Cualquiera, así que ambos agentes mostraban Reeditar UI de tokens. Fix: en formatIaStatusLine, añadir check para apiStatus.status===active con prioridad sobre el work packet de la lista.",
@@ -895,11 +872,42 @@
             {
               "timestamp_label": "2026-04-12 20:23",
               "timestamp_precision": "minute",
-              "actor": "CLAUDE",
+              "actor": "Claude",
               "status": "done",
               "summary": "Glitch identificado y corregido",
               "details": "El packet ARG-1775791234000 (ROLE_REQUESTED: Antigravity / Codex) fue escaneado por el Dispatcher a las 2:21 AM al moverlo a done. getVoiceForRole() comprobaba includes(codex) antes que includes(antigravity), devolviendo Codex como voz aunque Antigravity era el agente primario. Fix: split por / para extraer el agente primario antes de evaluar. Los tokens en el detalle del mensaje eran estimaciones del Dispatcher sobre el trabajo histórico, no gasto real de Codex (tokens:0 en el feed lo confirma).",
               "next_step": "",
+              "stream": "global"
+            },
+            {
+              "id": "ARG-1775943565720",
+              "timestamp_label": "2026-04-11 21:39",
+              "actor": "Cualquiera",
+              "summary": "EL widget de misiones alertas y sombra tiene un bug, cambia misiones de 13 a 0 y...",
+              "status": "done",
+              "source": "work_packets/done/ARG-1775943565720__EL_WIDGET_DE_MISIONES_ALERTAS_Y_SOMBRA_TIENE_UN_BUG_CAMBIA_MISIO.md",
+              "stream": "global"
+            },
+            {
+              "timestamp": "2026-04-10 02:44",
+              "actor": "Antigravity",
+              "module": "Argos UI",
+              "status": "finalizado",
+              "summary": "Construccion del Visor de Eventos y Burbujas de Alerta",
+              "details": "Se registra endpoints /api/risks y /api/events y un primer visor transversal de riesgos/eventos.",
+              "next_step": "Verificar que la UI y la historia consolidada alimenten bien ese visor.",
+              "source": "runtime:ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "timestamp": "2026-04-10 02:26",
+              "actor": "Antigravity",
+              "module": "Argos UI",
+              "status": "latente",
+              "summary": "Encolamiento de tarea estructural sobre glitches y refactorizacion del inbox",
+              "details": "Se formula la separacion del glitch log y el rediseño profundo de la pestana Cartas.",
+              "next_step": "Materializarlo en el patchset UI canonicamente asignado.",
+              "source": "runtime:ARGOS_GLOBAL_LOG.md",
               "stream": "global"
             }
           ]
@@ -4125,7 +4133,7 @@
             {
               "timestamp_label": "2026-04-07 14:30",
               "timestamp_precision": "minute",
-              "actor": "ChatGPT",
+              "actor": "Codex",
               "status": "done",
               "summary": "Se instancian logs raiz y separacion documental entre Argos y SCM8",
               "details": "Entrada historica preservada desde LOG_GENERAL",
@@ -5048,7 +5056,7 @@
             {
               "id": "G-001",
               "timestamp": "2026-04-07 14:12 Atlantic/Canary",
-              "actor": "ChatGPT",
+              "actor": "Codex",
               "module": "Argos raiz",
               "status": "mitigado",
               "summary": "mezcla de niveles documentales",

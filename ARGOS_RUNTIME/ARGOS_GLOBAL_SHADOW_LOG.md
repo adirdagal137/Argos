@@ -159,3 +159,10 @@ probe
 **TAREA:** Bug fix post-migración: /api/bootstrap devolvía HTML por fichero truncado y ruta faltante
 **SOMBRA:**
 El bug no era de orden de middlewares sino de código ausente — el handler desapareció del fichero. El express.static en línea 46 no era el culpable: /api/bootstrap no existe como archivo en el dashboard dir. Sin el handler registrado, el catch-all app.get(*) sirvió index.html correctamente según su diseño.
+
+---
+**[2026-04-24 18:46 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1776613003000
+**TAREA:** ROOM y TYPE separados en API y dashboard (implementacion completada)
+**SOMBRA:**
+Detecte que el tablero ya segmenta por proyecto por prefijo de ID y ahora se suma filtro por ROOM real; la dualidad puede confundir si ambos criterios divergen. Conviene decidir una jerarquia de filtros para evitar lecturas ambiguas.

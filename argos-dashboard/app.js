@@ -872,6 +872,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function renderChat(messages) {
         updateFeedMessages(messages);
+        const shouldAutoScroll = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 50;
         chatContainer.innerHTML = '';
         messages.forEach((msg) => {
             const wrap = document.createElement('div');
@@ -905,7 +906,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 }
             }
-            // Handler del botón de transcript
             const tBtn = wrap.querySelector('.chat-transcript-btn');
             if (tBtn) {
                 tBtn.addEventListener('click', async (e) => {
@@ -917,7 +917,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             chatContainer.appendChild(wrap);
         });
 
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        if (shouldAutoScroll) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
         renderIaStatus(latestVisibleTasks);
     }
 
