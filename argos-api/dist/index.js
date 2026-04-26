@@ -5387,8 +5387,10 @@ app.post('/api/chat', (req, res) => {
 });
 app.post('/api/chat/edit', (req, res) => {
     try {
-        const messageId = normaliseText(req.body.messageId);
-        const action = normaliseText(req.body.action).toLowerCase();
+        const messageId = normaliseText(req.body.messageId) ||
+            normaliseText(req.body.message_id) ||
+            normaliseText(req.body.id);
+        const action = normaliseText(req.body.action).toLowerCase() || (req.body.delete === true ? 'delete' : '');
         const summary = normaliseText(req.body.summary);
         const details = normaliseText(req.body.details);
         if (messageId === '')

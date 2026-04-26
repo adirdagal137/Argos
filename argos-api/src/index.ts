@@ -6233,8 +6233,11 @@ app.post('/api/chat', (req: Request, res: Response) => {
 
 app.post('/api/chat/edit', (req: Request, res: Response) => {
   try {
-    const messageId = normaliseText(req.body.messageId);
-    const action = normaliseText(req.body.action).toLowerCase();
+    const messageId =
+      normaliseText(req.body.messageId) ||
+      normaliseText(req.body.message_id) ||
+      normaliseText(req.body.id);
+    const action = normaliseText(req.body.action).toLowerCase() || (req.body.delete === true ? 'delete' : '');
     const summary = normaliseText(req.body.summary);
     const details = normaliseText(req.body.details);
 
