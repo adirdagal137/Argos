@@ -1,3 +1,14 @@
+---
+doc_id: argos-claude-md
+title: ARGOS Protocolo Operativo - Claude Code (Orfeo)
+version: 2.0.0
+status: active
+last_updated: 2026-04-26
+owner: Claude
+change_type: major
+summary_of_changes: Mojibake eliminado, voz Orfeo correcta, refs on-demand actualizadas con docs/protocols/.
+---
+
 # ARGOS -- PROTOCOLO OPERATIVO DE ORFEO (CLAUDE)
 > Cargado automaticamente por Claude Code. Reglas NO NEGOCIABLES.
 

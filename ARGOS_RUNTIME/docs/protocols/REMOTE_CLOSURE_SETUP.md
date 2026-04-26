@@ -1,3 +1,14 @@
+---
+doc_id: remote-closure-setup
+title: Remote Closure Setup
+version: 1.0.0
+status: active
+last_updated: 2026-04-21
+owner: Codex
+change_type: minor
+summary_of_changes: Movido de mail/ a docs/protocols/. Contenido original de ARGOS-PROTO-0002.
+---
+
 # Remote Closure Setup (ARGOS-PROTO-0002)
 
 This document configures remote session closure for chat interfaces using:

@@ -1,3 +1,16 @@
+---
+doc_id: inter-ai-protocol
+title: Inter-AI Pact
+version: 1.6.0
+status: active
+last_updated: 2026-04-26
+owner: Claude
+change_type: minor
+summary_of_changes: Banner referencia on-demand, actores canonicos actualizados (Pi/Antigravity/DeepSeek deprecated), tabla lectura rutinaria vs referencia, mojibake corregido.
+depends_on:
+  - argos-quickstart@cualquiera
+---
+
 # INTER-AI PACT
 ## v1.6 - Ciclo de Vida Irrompible [2026-04-26]
 
@@ -181,12 +194,22 @@ El heartbeat valida cada depósito de `inbox_deposits/` antes de integrarlo:
 |-----------|---------------|
 | Archivo no parseable (frontmatter roto, vacío) | Mueve a `processed/__invalid_<nombre>`. Entrada en events log. |
 | `packet_id` vacío o ausente | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
-| Actor no canónico (no es Claude/Codex/Pi/ChatGPT/OpenClaw/Qwen) | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
+| Actor no canónico (no es Claude/Codex/Gemini/ChatGPT/OpenClaw/Qwen) | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
 | `[LOG]` vacío | Integra shadow/glitch/captain, omite entrada en LOG. Warning en glitch. |
 | `[CAPTAIN]` vacío | Integra log/shadow/glitch, no emite al feed. Sin warning. |
 | Depósito válido | Integra las 5 secciones. Mueve a `processed/<nombre>`. |
 
 **Nota:** El mecanismo ORPHAN está pendiente de implementación en argos-api (ver ARG-REFORM-BITACORA-001-IMPL). Hasta entonces el heartbeat integra ciegamente con fallback `actor=ChatAgent` y `packet_id=N/A`.
+
+### 1.8 Regla de agente ante documento sin front matter (versionado)
+
+Todo agente que lea un archivo operativo Nivel 1 o 2 (ver REGISTRY.md) sin front matter YAML debe:
+1. Anotarlo en su log como glitch menor: `[GLITCH-MENOR] <ruta> sin front matter`.
+2. Continuar normalmente -- no bloquear la tarea en curso.
+3. Incluir en `next_step` del trilog: proponer al Capitan anadir front matter.
+
+No es necesario abrir un work packet inmediato; basta con documentarlo en el trilog.
+La plantilla de front matter obligatoria esta en `ARGOS_RUNTIME/tools/work_packet_template.md`.
 
 ---
 

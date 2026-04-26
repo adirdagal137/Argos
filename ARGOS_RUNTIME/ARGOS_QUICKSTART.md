@@ -1,3 +1,14 @@
+---
+doc_id: argos-quickstart
+title: ARGOS Quickstart
+version: 2.0.0
+status: active
+last_updated: 2026-04-26
+owner: Claude
+change_type: major
+summary_of_changes: Reescritura completa como tarjeta operativa. Carriles local/remote, actores canonicos, GIT_protocol y VERSION_protocol compactos.
+---
+
 # ARGOS QUICKSTART
 Protocolo operativo condensado. Lectura obligatoria al inicio de cada sesion.
 

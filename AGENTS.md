@@ -1,3 +1,14 @@
+---
+doc_id: argos-agents-md
+title: ARGOS Protocolo Operativo - Codex CLI
+version: 2.0.0
+status: active
+last_updated: 2026-04-26
+owner: Codex
+change_type: major
+summary_of_changes: Mojibake eliminado, voz Codex correcta, refs on-demand actualizadas con docs/protocols/.
+---
+
 # ARGOS -- PROTOCOLO OPERATIVO DE CODEX
 > Cargado automaticamente por Codex CLI. Reglas NO NEGOCIABLES.
 

@@ -1,3 +1,14 @@
+---
+doc_id: argos-readme-root
+title: ARGOS - El Navio
+version: 1.1.0
+status: active
+last_updated: 2026-04-26
+owner: Claude
+change_type: minor
+summary_of_changes: Actores canonicos actualizados, estructura docs/ reflejada, lectura de frio simplificada.
+---
+
 # ARGOS — El Navío
 
 Sistema de coordinación multi-IA operado por Rubén ("el Capitán").

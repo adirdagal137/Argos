@@ -1,3 +1,14 @@
+---
+doc_id: argos-registry
+title: ARGOS Registry - Indice Documental
+version: 2.0.0
+status: active
+last_updated: 2026-04-26
+owner: Claude
+change_type: major
+summary_of_changes: Reescritura completa con 6 categorias: lectura obligatoria, on-demand, por interfaz, legacy, logs vivos, herramientas.
+---
+
 # ARGOS REGISTRY
 Indice documental del runtime. Version global: ver `ARGOS_RUNTIME/argos.version`.
 
