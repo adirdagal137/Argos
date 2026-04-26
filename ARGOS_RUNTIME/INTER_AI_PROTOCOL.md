@@ -1,7 +1,7 @@
 # INTER-AI PACT
 ## v1.5 - Ciclo de Vida Irrompible [2026-04-24]
 
-Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Antigravity y cualquier agente futuro que entre en Argos.
+Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Pi y cualquier agente futuro que entre en Argos.
 
 ---
 
@@ -23,7 +23,7 @@ No va aqui: opiniones, riesgos no ejecutados, texto de conversacion literal.
 | Campo | Tipo | Regla |
 |-------|------|-------|
 | `timestamp` | ISO 8601 | Obligatorio siempre |
-| `actor` | string canónico | `Claude`, `Codex`, `Pi`, `ChatGPT`, `DeepSeek`, `Qwen`. Nunca: “Antigravity”, “IA”, “sistema”, “agente” |
+| `actor` | string canónico | `Claude`, `Codex`, `Pi`, `ChatGPT`, `OpenClaw`, `Qwen`. Nunca: “Antigravity”, “IA”, “sistema”, “agente” |
 | `packet_id` | string | Obligatorio. Sin packet_id la entrada es inválida (ORPHAN). |
 | `summary` | string | Qué se hizo, resultado concreto. No el subject del packet. |
 | `errors` | string | Errores + aprendizajes. `””` solo si ejecución limpia. |
@@ -53,7 +53,7 @@ VOZ IA: Hice cosas en el sistema.   ← actor no canónico, sin packet_id, sin d
 SOLO si ese contenido NO aparece ya en el captain_feed.
 - Claude: lo que dijo en Claude Code (esta conversacion). NO en la webapp.
 - ChatGPT/Codex: lo que dijo en la interfaz de ChatGPT. NO en la webapp.
-- Gemini/Antigravity: lo que dijo en la interfaz de Gemini. NO en la webapp.
+- Gemini/Pi: lo que dijo en la interfaz de Gemini. NO en la webapp.
 
 **Regla de no-duplicacion (CRITICA):**
 El captain_feed ya contiene trilog (summary, details, nextStep, errors, risks) y chats de hitos.
@@ -84,7 +84,7 @@ fallos de proceso (GLITCH), ni resumen de acciones que ya esta en el trilog.
 ---
 ```
 
-**Captura automatica (Gemini/Antigravity, Codex/ChatGPT, Qwen):**
+**Captura automatica (Gemini/Pi, Codex/ChatGPT, Qwen):**
 El servidor captura automaticamente el PROMPT del Capitan via POST /api/tasks.
 La IA escribe su RESPONSE incluyendo `literalResponse` en POST /api/chat, o haciendo POST /api/transcript al cerrar.
 El `literalResponse` debe ser el texto de la IA fuera del webapp â€” no un resumen del trilog.
@@ -176,7 +176,7 @@ El heartbeat valida cada depósito de `inbox_deposits/` antes de integrarlo:
 |-----------|---------------|
 | Archivo no parseable (frontmatter roto, vacío) | Mueve a `processed/__invalid_<nombre>`. Entrada en events log. |
 | `packet_id` vacío o ausente | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
-| Actor no canónico (no es Claude/Codex/Pi/ChatGPT/DeepSeek/Qwen) | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
+| Actor no canónico (no es Claude/Codex/Pi/ChatGPT/OpenClaw/Qwen) | Mueve a `processed/__orphan_<nombre>`. Entrada en glitch log. **No integra en canónico.** |
 | `[LOG]` vacío | Integra shadow/glitch/captain, omite entrada en LOG. Warning en glitch. |
 | `[CAPTAIN]` vacío | Integra log/shadow/glitch, no emite al feed. Sin warning. |
 | Depósito válido | Integra las 5 secciones. Mueve a `processed/<nombre>`. |
@@ -208,7 +208,7 @@ Regla de seguridad:
 - Sin token valido, la API rechaza con `401`.
 - Un token no puede actuar como otro agente en endpoints con actor explicito.
 
-### Nota sobre el ritual para agentes cloud (Claude, DeepSeek)
+### Nota sobre el ritual para agentes cloud (Claude, OpenClaw)
 
 Los docs de protocolo completo (`INTER_AI_PROTOCOL.md`, `ARGOS_CREW_VOICES.md`) son **referencia**, no lectura obligatoria en cada sesiÃ³n. El trilog + state.json + log tail son suficientes en el 90% de los casos. Leer los docs completos solo bajo ambigÃ¼edad de protocolo o conflicto entre IAs. Esto reduce significativamente el coste de tokens de arranque.
 
@@ -265,7 +265,7 @@ El tripulante que **ejecuta** la orden (no quien la prepara) llama:
 POST http://localhost:8080/api/ia/start-task
 {
   "packetId": "ARG-XXXX",
-  "actor":    "Claude|Codex|Pi|ChatGPT|DeepSeek|Qwen",
+  "actor":    "Claude|Codex|Pi|ChatGPT|OpenClaw|Qwen",
   "summary":  "Frase concreta de lo que harás (~80 chars)"
 }
 ```
@@ -296,7 +296,7 @@ El heartbeat moverá `ia_status` a working en el siguiente ciclo.
 POST http://localhost:8080/api/remote/closure
 Headers: X-Argos-Agent-Token: <token-agente>
 {
-  "agent":      "Claude|Codex|Pi|ChatGPT|DeepSeek|Qwen",
+  "agent":      "Claude|Codex|Pi|ChatGPT|OpenClaw|Qwen",
   "interface":  "claude-code|codex|pi.ai|chatgpt.com|...",
   "timestamp":  "2026-04-24T15:00:00.000Z",
   "packet_id":  "ARG-XXXX",
@@ -432,7 +432,7 @@ Los tokens se capturan automÃ¡ticamente â€” no se estiman.
 
 ### 4.1 Captura automÃ¡tica por capa
 
-**Agentes cloud (Claude, Antigravity, Codex)**
+**Agentes cloud (Claude, Pi, Codex)**
 argos-api actÃºa como proxy transparente. Cada llamada a la API real pasa por:
 ```
 ANTHROPIC_BASE_URL=http://localhost:8080/proxy/anthropic
@@ -441,8 +441,8 @@ OPENAI_BASE_URL=http://localhost:8080/proxy/openai
 ```
 El proxy lee `usage` de la respuesta (o los eventos SSE finales en streaming) y escribe al ledger sin coste adicional.
 
-**Qwen / DeepSeek (Ollama local)**
-`callOllama()` extrae `prompt_eval_count` + `eval_count` de cada respuesta Ollama. Se registran en el ledger como agente `DeepSeek`, scope `work`.
+**Qwen / OpenClaw (Ollama local)**
+`callOllama()` extrae `prompt_eval_count` + `eval_count` de cada respuesta Ollama. se registran en el ledger como agente `OpenClaw`, scope `work`.
 
 **OpenClaw (webhook)**
 `POST http://localhost:8080/hooks/argos` recibe payloads de OpenClaw con `prompt_eval_count` / `eval_count` y los registra directamente.
@@ -501,7 +501,7 @@ Todos los archivos del runtime se escriben en UTF-8 SIN BOM.
 El `ARGOS_GLOBAL_LOG.md` se archiva diariamente.
 - Archivo activo: `ARGOS_GLOBAL_LOG.md` â€” solo entradas del dÃ­a en curso + Ãºltimas 2-3 entradas del dÃ­a anterior como contexto.
 - Archivo histÃ³rico: `events/logs/ARGOS_GLOBAL_LOG_archive_YYYYMMDD.md` â€” snapshot del log completo hasta esa fecha.
-- Responsable del archivado: Qwen (cuando estÃ© operativo). Hasta entonces: manual o Antigravity.
+- Responsable del archivado: Qwen (cuando estÃ© operativo). Hasta entonces: manual o Pi.
 
 ### State de packets
 El `state/argos.state.json` solo contiene packets con estado activo (`inbox`, `in_progress`, `open`, `parked`).

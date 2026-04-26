@@ -359,6 +359,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return div;
     }
 
+    function formatRiskLevel(value) {
+        const risk = String(value || '').trim().toLowerCase();
+        if (!risk) return { label: '--', className: '' };
+        if (risk === 'none') return { label: '🟢 none', className: 'bubble-risk-none' };
+        if (risk === 'low') return { label: '🟡 low', className: 'bubble-risk-low' };
+        if (risk === 'medium') return { label: '🟠 medium', className: 'bubble-risk-medium' };
+        if (risk === 'high') return { label: '🔴 high', className: 'bubble-risk-high' };
+        if (risk === 'blocked') return { label: '⛔ blocked', className: 'bubble-risk-blocked' };
+        return { label: risk, className: '' };
+    }
+
     function compactTaskTitle(title) {
         const text = String(title || '').trim();
         if (!text) return 'Sin orden activa';
@@ -622,7 +633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="task-actions">
                         <button type="button" class="task-edit-btn" data-task-id="${safeHtml(task.id)}">Editar</button>
-                        ${isDone ? `<button type="button" class="task-transcripts-btn" data-task-id="${safeHtml(task.id)}" title="Ver transcripts de todos los agentes para este packet">📄 Transcripts</button>` : ''}
+                        ${isDone ? `<button type="button" class="task-transcripts-btn" data-task-id="${safeHtml(task.id)}" title="Ver handoff conversacional de este packet">💬 Handoff</button>` : ''}
                     </div>
                 </div>
                 <label class="task-checkbox-wrapper">
@@ -815,7 +826,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function editTaskPacket(packetId) {
         if (!packetId) return;
         try {
-            const readResponse = await fetch(`${API_URL}/tasks/get?packetId=${encodeURIComponent(packetId)}`);
+            const readResponse = await fetch(`${API_URL}/workpackets/${encodeURIComponent(packetId)}`);
             if (!readResponse.ok) {
                 showToast(`No pude leer ${packetId}.`);
                 return;
@@ -830,7 +841,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const nextOwnerRaw = window.prompt(`Editar responsable de ${packetId}:`, packet.owner || 'Cualquiera');
+            const nextOwnerRaw = window.prompt(`Editar responsable de ${packetId}:`, packet.assigned_to || packet.role_requested || 'Cualquiera');
             if (nextOwnerRaw === null) return;
             const nextOwner = String(nextOwnerRaw || '').trim();
             if (!nextOwner) {
@@ -854,13 +865,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const updateResponse = await fetch(`${API_URL}/tasks/update`, {
-                method: 'POST',
+            const updateResponse = await fetch(`${API_URL}/workpackets/${encodeURIComponent(packetId)}`, {
+                method: 'PATCH',
                 headers: CAPTAIN_UI_HEADERS,
                 body: JSON.stringify({
-                    packetId,
                     subject: nextSubject,
-                    owner: nextOwner,
+                    role_requested: packet.role_requested || nextOwner,
+                    assigned_to: nextOwner,
                     status: nextStatus,
                     objective: nextObjective,
                     actor: 'Ruben Thor'
@@ -969,35 +980,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.classList.remove('hidden');
     }
 
-    // Carga todos los transcripts de todos los agentes para un packetId y los muestra en el modal.
+    // Carga las entradas de HANDOFF para un packetId y las muestra en el modal.
     async function showPacketTranscripts(packetId) {
         if (!packetId || !overlay || !modalQueryTitle || !modalEventsList) return;
-        modalQueryTitle.textContent = `Transcripts: ${packetId}`;
-        modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">Cargando transcripts…</p>';
+        modalQueryTitle.textContent = `Handoff: ${packetId}`;
+        modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">Cargando handoff…</p>';
         overlay.classList.remove('hidden');
         try {
-            const resp = await fetch(`${API_URL}/transcript/${encodeURIComponent(packetId)}`);
+            const resp = await fetch(`${API_URL}/handoff/${encodeURIComponent(packetId)}`);
             if (!resp.ok) {
-                modalEventsList.innerHTML = `<p style="padding:1rem;color:var(--accent-red)">Error ${resp.status} cargando transcripts.</p>`;
+                modalEventsList.innerHTML = `<p style="padding:1rem;color:var(--accent-red)">Error ${resp.status} cargando handoff.</p>`;
                 return;
             }
             const data = await resp.json();
             modalEventsList.innerHTML = '';
-            if (!data.transcripts || data.transcripts.length === 0) {
-                modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">No hay transcripts para este packet.</p>';
+            if (!data.entries || data.entries.length === 0) {
+                modalEventsList.innerHTML = '<p style="padding:1rem;opacity:0.6">No hay entradas de handoff para este packet.</p>';
                 return;
             }
-            data.transcripts.forEach((entry) => {
+            data.entries.forEach((entry) => {
                 const section = document.createElement('div');
                 section.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.08);padding:0.75rem 1rem;';
                 const header = document.createElement('div');
-                header.style.cssText = 'font-size:0.75rem;opacity:0.5;margin-bottom:0.4rem;';
-                header.textContent = `${entry.agent}  ·  ${entry.date}  ·  ${entry.file}`;
-                const pre = document.createElement('pre');
-                pre.style.cssText = 'white-space:pre-wrap;word-break:break-word;font-size:0.85rem;line-height:1.5;margin:0;';
-                pre.textContent = entry.content;
+                header.style.cssText = 'font-size:0.75rem;opacity:0.5;margin-bottom:0.6rem;text-transform:uppercase;letter-spacing:0.05em;';
+                header.textContent = `${entry.agent}  ·  ${entry.timestamp}`;
                 section.appendChild(header);
-                section.appendChild(pre);
+                const fields = entry.handoff || {};
+                const fieldOrder = ['contexto', 'decisión', 'continuidad', 'session ref', 'giros', 'descartado', 'riesgo'];
+                fieldOrder.forEach((key) => {
+                    if (!fields[key]) return;
+                    const row = document.createElement('div');
+                    row.style.cssText = 'margin-bottom:0.4rem;font-size:0.85rem;line-height:1.5;';
+                    row.innerHTML = `<span style="opacity:0.5;min-width:7rem;display:inline-block;">${key}</span>${safeHtml(fields[key])}`;
+                    section.appendChild(row);
+                });
                 modalEventsList.appendChild(section);
             });
         } catch (err) {
@@ -1215,6 +1231,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         entries.forEach((entry) => {
             const row = document.createElement('tr');
             row.className = 'logbook-row';
+            if (entry.lifecycle_event) {
+                row.classList.add('logbook-row-lifecycle');
+            }
             row.addEventListener('click', (event) => {
                 event.stopPropagation();
                 const shouldExpand = expandedLogbookRow !== row;
@@ -1231,6 +1250,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let value = entry[column.id] || '--';
                 if (column.id === 'timestamp_label') {
                     value = formatMaritimeDate(value, entry.timestamp_precision);
+                }
+                if (column.id === 'summary' && entry.mission) {
+                    value = entry.mission;
+                }
+                if (column.id === 'risk_level') {
+                    const risk = formatRiskLevel(value);
+                    value = risk.label;
+                    if (risk.className) {
+                        td.dataset.extraBubbleClass = risk.className;
+                    }
                 }
 
                 // transcriptRef — render as 📄 button instead of raw text
@@ -1261,6 +1290,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     extraClass = 'is-imprecise';
                 } else if (column.id === 'actor' && value !== '--') {
                     extraClass = `bubble-agent-${value.toLowerCase().replace(/\s+/g, '-')}`;
+                } else if (column.id === 'status' && String(value).toLowerCase() === 'blocked' && entry.handoff_active) {
+                    extraClass = 'bubble-status-blocked-handoff';
+                } else if (column.id === 'summary' && entry.lifecycle_event) {
+                    extraClass = 'bubble-lifecycle-event';
+                } else if (column.id === 'risk_level' && td.dataset.extraBubbleClass) {
+                    extraClass = td.dataset.extraBubbleClass;
                 }
 
                 const bubble = buildBubbleCell(value, extraClass);
@@ -2048,10 +2083,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const taskIds = Array.from(selectedTasks);
             const promises = taskIds.map(id => 
-                fetch(`${API_URL}/tasks/update`, {
-                    method: 'POST',
+                fetch(`${API_URL}/workpackets/${encodeURIComponent(id)}`, {
+                    method: 'PATCH',
                     headers: CAPTAIN_UI_HEADERS,
-                    body: JSON.stringify({ packetId: id, status: 'done', actor: 'Ruben Thor' })
+                    body: JSON.stringify({ status: 'done', actor: 'Ruben Thor' })
                 })
             );
 

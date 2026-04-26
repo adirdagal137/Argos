@@ -22,10 +22,18 @@ const DASHBOARD_DIR = path_1.default.join(__dirname, '..', '..', 'argos-dashboar
 const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
 const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
 const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const ARGOS_TOKENS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
+const CONCILIO_EVENTS_DIR = path_1.default.join(RUNTIME_DIR, 'events', 'concilio');
+const CONCILIO_JSONL_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'argos.concilio.jsonl');
+const CONCILIO_LOG_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'ARGOS_CONCILIO_LOG.md');
+const CONCILIO_ACTORS_PATH = path_1.default.join(RUNTIME_DIR, 'agents', 'ARGOS_CONCILIO_ACTORS.json');
 const CAPTAIN_FEED_PATH = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
+const CAPTAIN_FEED_LOCK_PATH = `${CAPTAIN_FEED_PATH}.lock`;
+const CAPTAIN_FEED_LOCK_TIMEOUT_MS = 5000;
+const CAPTAIN_FEED_LOCK_STALE_MS = 30000;
 const STATE_ARCHIVE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.archive.json');
 const SESSION_ARCHIVE_ROOT = path_1.default.join(RUNTIME_DIR, 'archive', 'sessions');
 const LEGACY_ARCHIVE_ROOT = path_1.default.join(RUNTIME_DIR, 'archive', 'legacy');
@@ -50,6 +58,38 @@ const ARGOS_VECTOR_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_VECTOR.md');
 const ARGOS_QUICKSTART_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_QUICKSTART.md');
 const NGROK_QUICK_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'ngrok.quick.json');
 const CLOUDFLARED_QUICK_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'cloudflared.quick.json');
+const API_STDERR_LOG_PATH = path_1.default.join(__dirname, '..', 'api.stderr.log');
+function stringifyProcessError(reason) {
+    if (reason instanceof Error)
+        return reason.stack || reason.message;
+    try {
+        return JSON.stringify(reason);
+    }
+    catch {
+        return String(reason);
+    }
+}
+function appendApiStderrLog(kind, reason) {
+    const line = [
+        `\n[${new Date().toISOString()}] [${kind}]`,
+        stringifyProcessError(reason)
+    ].join('\n');
+    try {
+        ensureDirSync(path_1.default.dirname(API_STDERR_LOG_PATH));
+        fs_1.default.appendFileSync(API_STDERR_LOG_PATH, `${line}\n`, 'utf-8');
+    }
+    catch (logError) {
+        console.error(`[ARGOS-API] No se pudo escribir ${API_STDERR_LOG_PATH}`, logError);
+    }
+}
+process.on('uncaughtException', (error) => {
+    appendApiStderrLog('uncaughtException', error);
+    console.error('[ARGOS-API] uncaughtException capturada; proceso sigue vivo.', error);
+});
+process.on('unhandledRejection', (reason) => {
+    appendApiStderrLog('unhandledRejection', reason);
+    console.error('[ARGOS-API] unhandledRejection capturada; proceso sigue vivo.', reason);
+});
 const EXTERNAL_WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const LOCAL_ONLY_API_PATHS = new Set(['/admin/rotate-token']);
 app.use(express_1.default.static(DASHBOARD_DIR));
@@ -81,10 +121,10 @@ function publishEvent(topic, payload, excludeModule) {
     const eventStr = `data: ${JSON.stringify(event)}\n\n`;
     const timestamp = new Date().toLocaleString('es-ES', { timeZone: 'Atlantic/Canary' });
     console.log(`[PUBSUB-PUBLISH] ${timestamp} | topic: ${topic} | clients: ${sseClients.size} modules`);
-    // Enviar a todos los mÃ³dulos suscritos
+    // Enviar a todos los mÃƒÂ³dulos suscritos
     sseClients.forEach((clients, module) => {
         if (excludeModule && module === excludeModule)
-            return; // Opcional: excluir mÃ³dulo origen
+            return; // Opcional: excluir mÃƒÂ³dulo origen
         clients.forEach(client => {
             try {
                 client.response.write(eventStr);
@@ -127,7 +167,7 @@ function subscribeToModule(module, res) {
     });
     return senderId;
 }
-const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'COMENIO', 'XUANXU', 'GENERAL']);
+const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'SCICLASSM8', 'COMENIO', 'XUANXU', 'GENERAL']);
 const VALID_PACKET_TYPES = new Set(['strategy', 'build', 'integration', 'maintenance', 'bug', 'risk', 'errand', 'task']);
 function normalizeTaskRoom(rawValue) {
     const room = normaliseText(rawValue).toUpperCase();
@@ -155,7 +195,7 @@ function parseTimestampLabel(rawValue) {
             const label = `${isoMatch[1]} ${isoMatch[2]}`;
             return { label, precision: 'minute', sortMs: parsedIso };
         }
-        // Formato "YYYY-MM-DD HH:MM" — Date.parse lo acepta pero no tiene T, hay que extraer la hora antes del dayMatch
+        // Formato "YYYY-MM-DD HH:MM" â€” Date.parse lo acepta pero no tiene T, hay que extraer la hora antes del dayMatch
         const minuteMatchInIso = trimmed.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/);
         if (minuteMatchInIso) {
             const label = `${minuteMatchInIso[1]} ${minuteMatchInIso[2]}`;
@@ -191,20 +231,21 @@ function buildEmptyLogbook() {
             { id: 'timestamp_label', label: 'Tiempo' },
             { id: 'actor', label: 'Voz' },
             { id: 'status', label: 'Estado' },
-            { id: 'summary', label: 'Misión' },
+            { id: 'summary', label: 'MisiÃ³n' },
             { id: 'details', label: 'Detalles' },
             { id: 'next_step', label: 'Siguiente' },
             { id: 'errors', label: 'Errores+Aprendizajes' },
+            { id: 'risk_level', label: 'Riesgo' },
             { id: 'risks', label: 'Riesgos' },
             { id: 'id', label: 'ID' },
-            { id: 'transcriptRef', label: '📄' }
+            { id: 'transcriptRef', label: 'ðŸ“„' }
         ],
         modules: [
             {
                 id: 'argos',
                 label: 'ARGOS',
                 status: 'active',
-                description: 'Bitácora operativa y trazabilidad.',
+                description: 'BitÃ¡cora operativa y trazabilidad.',
                 streams: [
                     { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
                     { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
@@ -215,7 +256,7 @@ function buildEmptyLogbook() {
                 id: 'sciclass',
                 label: 'SCICLASS-M8',
                 status: 'active',
-                description: 'Misiones de investigación científica.',
+                description: 'Misiones de investigaciÃ³n cientÃ­fica.',
                 streams: [
                     { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
                     { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
@@ -226,7 +267,7 @@ function buildEmptyLogbook() {
                 id: 'comenio',
                 label: 'COMENIO',
                 status: 'active',
-                description: 'Protocolos de aprendizaje y educación.',
+                description: 'Protocolos de aprendizaje y educaciÃ³n.',
                 streams: [
                     { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
                     { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
@@ -237,7 +278,7 @@ function buildEmptyLogbook() {
                 id: 'lola',
                 label: 'LOLA',
                 status: 'active',
-                description: 'Escáner de sombra y gestión de riesgos.',
+                description: 'EscÃ¡ner de sombra y gestiÃ³n de riesgos.',
                 streams: [
                     { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
                     { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
@@ -248,7 +289,7 @@ function buildEmptyLogbook() {
                 id: 'xuanshu',
                 label: 'XUANSHU',
                 status: 'active',
-                description: 'Algoritmos avanzados y forja de código.',
+                description: 'Algoritmos avanzados y forja de cÃ³digo.',
                 streams: [
                     { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
                     { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
@@ -258,7 +299,168 @@ function buildEmptyLogbook() {
         ]
     };
 }
-const CANONICAL_PROTOCOL_ACTORS = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'DeepSeek', 'Qwen'];
+const VALID_CONCILIO_TYPES = new Set(['idea', 'objecion', 'sintesis', 'pregunta', 'propuesta', 'decision']);
+let lastConcilioMessageMs = 0;
+let concilioMessageSeq = 0;
+function nextConcilioMessageId() {
+    const currentMs = Date.now();
+    if (currentMs === lastConcilioMessageMs) {
+        concilioMessageSeq += 1;
+    }
+    else {
+        lastConcilioMessageMs = currentMs;
+        concilioMessageSeq = 0;
+    }
+    return `${currentMs}-${concilioMessageSeq}`;
+}
+function normalizeLookupToken(value) {
+    return normaliseText(value)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+function buildDefaultConcilioActorCatalog() {
+    const now = nowIso();
+    return {
+        version: 'v1',
+        updated_at: now,
+        actors: [
+            { id: 'Capitan', label: 'Capitan', token_key: 'Captain', aliases: ['captain', 'capitan', 'thor'] },
+            { id: 'Claude', label: 'Claude', token_key: 'Claude', aliases: ['claude cowork', 'claude chat'] },
+            { id: 'Claude Code', label: 'Claude Code', token_key: 'Claude', aliases: ['claudecode'] },
+            { id: 'Codex', label: 'Codex', token_key: 'ChatGPT', aliases: ['openai codex'] },
+            { id: 'ChatGPT', label: 'ChatGPT', token_key: 'ChatGPT', aliases: ['chat gpt'] },
+            { id: 'Gemini (Pi)', label: 'Gemini (Pi)', token_key: 'Gemini', aliases: ['pi', 'gemini pi'] },
+            { id: 'Gemini (AG)', label: 'Gemini (AG)', token_key: 'Gemini', aliases: ['ag', 'antigravity', 'gemini ag'] },
+            { id: 'OpenClaw', label: 'OpenClaw', token_key: 'ChatGPT', aliases: ['open claw', 'deepseek', 'qwen'] }
+        ]
+    };
+}
+function ensureConcilioActorCatalog() {
+    ensureDirSync(path_1.default.dirname(CONCILIO_ACTORS_PATH));
+    const fallback = buildDefaultConcilioActorCatalog();
+    const current = readJsonFile(CONCILIO_ACTORS_PATH, fallback);
+    if (!fs_1.default.existsSync(CONCILIO_ACTORS_PATH)) {
+        writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
+        return fallback;
+    }
+    if (!Array.isArray(current.actors) || current.actors.length === 0) {
+        writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
+        return fallback;
+    }
+    return current;
+}
+function resolveConcilioActor(rawActor) {
+    const catalog = ensureConcilioActorCatalog();
+    const needle = normalizeLookupToken(rawActor);
+    if (needle === '')
+        return null;
+    for (const actor of catalog.actors) {
+        const candidates = [actor.id, actor.label, ...(Array.isArray(actor.aliases) ? actor.aliases : [])];
+        if (candidates.some((candidate) => normalizeLookupToken(String(candidate)) === needle)) {
+            return actor;
+        }
+    }
+    return null;
+}
+function ensureConcilioDecisionWrite(req, res) {
+    if (!isTrustedLocalRequest(req)) {
+        res.status(403).json({ error: 'type=decision solo permitido desde localhost del Capitan' });
+        return false;
+    }
+    const captainUiHeader = normaliseText(req.header('X-Argos-Captain-UI'));
+    if (captainUiHeader !== '1') {
+        res.status(403).json({ error: 'type=decision requiere cabecera X-Argos-Captain-UI: 1' });
+        return false;
+    }
+    return true;
+}
+function ensureConcilioActorMatchesAuth(req, res, actor) {
+    if (isTrustedLocalRequest(req))
+        return true;
+    const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
+    if (tokenAgent === '') {
+        res.status(401).json({ error: 'Token de agente requerido para POST /api/concilio' });
+        return false;
+    }
+    if (actor.token_key === 'Captain') {
+        res.status(403).json({ error: 'Capitan no acepta escritura externa en /api/concilio' });
+        return false;
+    }
+    if (tokenAgent !== actor.token_key) {
+        res.status(403).json({ error: `Token de ${tokenAgent} no autorizado para actuar como ${actor.id}` });
+        return false;
+    }
+    return true;
+}
+function ensureConcilioStorage() {
+    ensureDirSync(CONCILIO_EVENTS_DIR);
+    if (!fs_1.default.existsSync(CONCILIO_LOG_PATH)) {
+        fs_1.default.writeFileSync(CONCILIO_LOG_PATH, '# ARGOS CONCILIO LOG\nCanal deliberativo inter-IA.\n\n---\n', 'utf-8');
+    }
+}
+function appendToConcilioMarkdownLog(message) {
+    ensureConcilioStorage();
+    const canaryTs = new Date(message.timestamp).toLocaleString('sv-SE', {
+        timeZone: 'Atlantic/Canary',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).slice(0, 16);
+    const lines = [
+        `**[${canaryTs} Atlantic/Canary] VOZ ${message.agent} | CONCILIO:${message.type.toUpperCase()}**`,
+        `MESSAGE_ID: ${message.message_id}`,
+        `ROOM: concilio`
+    ];
+    if (normaliseText(message.packet_id) !== '')
+        lines.push(`PACKET_ID: ${message.packet_id}`);
+    if (normaliseText(message.in_reply_to) !== '')
+        lines.push(`IN_REPLY_TO: ${message.in_reply_to}`);
+    if (normaliseText(message.session_ref) !== '')
+        lines.push(`SESSION_REF: ${message.session_ref}`);
+    lines.push('');
+    lines.push(message.body);
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+    fs_1.default.appendFileSync(CONCILIO_LOG_PATH, `${lines.join('\n')}`, 'utf-8');
+}
+function readConcilioMessages(limit = 50, packetId = '') {
+    if (!fs_1.default.existsSync(CONCILIO_JSONL_PATH))
+        return [];
+    const lines = fs_1.default.readFileSync(CONCILIO_JSONL_PATH, 'utf-8')
+        .replace(/^\uFEFF/, '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line !== '');
+    const filtered = [];
+    lines.forEach((line) => {
+        try {
+            const parsed = JSON.parse(line);
+            if (normaliseText(packetId) !== '' && normaliseText(parsed.packet_id) !== normaliseText(packetId)) {
+                return;
+            }
+            filtered.push(parsed);
+        }
+        catch {
+            // Ignora lineas invalidas para robustez.
+        }
+    });
+    filtered.sort((a, b) => {
+        const tsDiff = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+        if (tsDiff !== 0)
+            return tsDiff;
+        return normaliseText(a.message_id).localeCompare(normaliseText(b.message_id));
+    });
+    const safeLimit = Math.max(1, Math.min(limit, 500));
+    if (filtered.length <= safeLimit)
+        return filtered;
+    return filtered.slice(filtered.length - safeLimit);
+}
+const CANONICAL_PROTOCOL_ACTORS = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'OpenClaw', 'Qwen'];
 function generateStableHash(seed) {
     let hash = 2166136261;
     for (let i = 0; i < seed.length; i += 1) {
@@ -286,7 +488,7 @@ function resolveFeedRecordId(record) {
 function buildChatMessage(record) {
     const timestamp = normaliseText(record.timestamp) || new Date().toISOString();
     const id = resolveFeedRecordId(record);
-    const sender = inferSenderName(record) || 'DeepSeek';
+    const sender = inferSenderName(record) || 'OpenClaw';
     const speaker = normaliseText(record.speaker).toLowerCase();
     const senderRole = normaliseText(record.sender_role).toLowerCase();
     const type = speaker === 'crew' || senderRole === 'agent' ? 'received' : 'sent';
@@ -298,6 +500,157 @@ function buildChatMessage(record) {
     const refId = normaliseText(record.refId);
     const time = new Date(timestamp).toLocaleTimeString('es-ES', { timeZone: 'Atlantic/Canary', hour: '2-digit', minute: '2-digit' });
     return { id, type, sender, text, summary, details, senderRole, speaker, time, tokens, refId, timestamp, editedAt };
+}
+const FEED_NOISE_RE = /\b(probe|smoke|test)\b/i;
+const CAPTAIN_FEED_MOJIBAKE_RE = /Ã|Â|�/g;
+function countMojibakeTokens(text) {
+    if (text === '')
+        return 0;
+    return (text.match(CAPTAIN_FEED_MOJIBAKE_RE) || []).length;
+}
+function isCaptainFeedPath(filePath) {
+    return path_1.default.resolve(filePath) === path_1.default.resolve(CAPTAIN_FEED_PATH);
+}
+function buildCaptainFeedBackupPath(feedPath, reason = 'rewrite') {
+    const now = new Date();
+    const stamp = now.toISOString().replace(/[:.]/g, '-');
+    const dir = path_1.default.dirname(feedPath);
+    const base = path_1.default.basename(feedPath, path_1.default.extname(feedPath));
+    return path_1.default.join(dir, `${base}.backup_${reason}_${stamp}.jsonl`);
+}
+function createCaptainFeedBackup(feedPath, reason = 'rewrite') {
+    if (!fs_1.default.existsSync(feedPath))
+        return null;
+    const backupPath = buildCaptainFeedBackupPath(feedPath, reason);
+    fs_1.default.copyFileSync(feedPath, backupPath);
+    return backupPath;
+}
+function sleepSync(ms) {
+    const end = Date.now() + ms;
+    while (Date.now() < end) {
+        // Busy wait only around rare feed lock contention; keeps this API synchronous.
+    }
+}
+function withCaptainFeedWriteLock(reason, operation) {
+    ensureDirSync(path_1.default.dirname(CAPTAIN_FEED_LOCK_PATH));
+    const startedAt = Date.now();
+    let fd = null;
+    let lastError = null;
+    while (fd === null) {
+        try {
+            fd = fs_1.default.openSync(CAPTAIN_FEED_LOCK_PATH, 'wx');
+            fs_1.default.writeFileSync(fd, JSON.stringify({
+                pid: process.pid,
+                reason,
+                created_at: new Date().toISOString()
+            }), 'utf-8');
+        }
+        catch (error) {
+            lastError = error;
+            const code = error.code;
+            if (code !== 'EEXIST')
+                throw error;
+            try {
+                const stats = fs_1.default.statSync(CAPTAIN_FEED_LOCK_PATH);
+                if (Date.now() - stats.mtimeMs > CAPTAIN_FEED_LOCK_STALE_MS) {
+                    fs_1.default.unlinkSync(CAPTAIN_FEED_LOCK_PATH);
+                    continue;
+                }
+            }
+            catch (staleError) {
+                lastError = staleError;
+            }
+            if (Date.now() - startedAt >= CAPTAIN_FEED_LOCK_TIMEOUT_MS) {
+                throw new Error(`Timeout esperando lock de captain_feed (${reason}): ${stringifyProcessError(lastError)}`);
+            }
+            sleepSync(25);
+        }
+    }
+    try {
+        return operation();
+    }
+    finally {
+        try {
+            if (fd !== null)
+                fs_1.default.closeSync(fd);
+        }
+        finally {
+            try {
+                if (fs_1.default.existsSync(CAPTAIN_FEED_LOCK_PATH))
+                    fs_1.default.unlinkSync(CAPTAIN_FEED_LOCK_PATH);
+            }
+            catch (unlockError) {
+                console.error('[ARGOS-FEED] No se pudo liberar lock de captain_feed', unlockError);
+            }
+        }
+    }
+}
+function shouldSuppressCaptainFeedNoise(filePath, rec) {
+    if (!isCaptainFeedPath(filePath))
+        return false;
+    const speaker = normaliseText(rec.speaker).toLowerCase();
+    const senderRole = normaliseText(rec.sender_role).toLowerCase();
+    if (speaker === 'captain' || senderRole === 'captain')
+        return false;
+    if (!(speaker === 'crew' || senderRole === 'agent'))
+        return false;
+    const source = normaliseText(rec.source).toLowerCase();
+    const summary = normaliseText(rec.summary);
+    const details = normaliseText(rec.details);
+    if (source === 'autonomous_vocal_system' && /tomando\s*misi/i.test(summary)) {
+        return true;
+    }
+    if (source === 'deposit_heartbeat' && /heartbeat|stale/i.test(`${summary} ${details}`)) {
+        return true;
+    }
+    if (!['api:remote/update', 'api:remote/closure', 'agent_reporting', 'autonomous_vocal_system', 'api:chat'].includes(source)) {
+        return false;
+    }
+    return FEED_NOISE_RE.test(summary) || FEED_NOISE_RE.test(details);
+}
+function rewriteCaptainFeedSafely(feedPath, content, reason = 'rewrite') {
+    let previousLines = 0;
+    let previousMojibake = 0;
+    let parsedLineCount = 0;
+    let nextMojibake = 0;
+    let backupPath = null;
+    withCaptainFeedWriteLock(reason, () => {
+        ensureDirSync(path_1.default.dirname(feedPath));
+        const previous = fs_1.default.existsSync(feedPath) ? fs_1.default.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '') : '';
+        previousLines = previous.split(/\r?\n/).filter((line) => line.trim() !== '').length;
+        previousMojibake = countMojibakeTokens(previous);
+        backupPath = createCaptainFeedBackup(feedPath, reason);
+        const normalized = content === '' ? '' : (content.endsWith('\n') ? content : `${content}\n`);
+        fs_1.default.writeFileSync(feedPath, normalized, 'utf-8');
+        const roundtrip = fs_1.default.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '');
+        const parsedLines = roundtrip.split(/\r?\n/).filter((line) => line.trim() !== '');
+        let invalidLines = 0;
+        parsedLines.forEach((line) => {
+            try {
+                JSON.parse(line);
+            }
+            catch {
+                invalidLines += 1;
+            }
+        });
+        if (invalidLines > 0) {
+            if (backupPath && fs_1.default.existsSync(backupPath)) {
+                fs_1.default.copyFileSync(backupPath, feedPath);
+            }
+            throw new Error(`Guardrail: captain_feed rewrite invalido (${invalidLines} lineas JSON corruptas). Restaurado desde backup.`);
+        }
+        parsedLineCount = parsedLines.length;
+        nextMojibake = countMojibakeTokens(roundtrip);
+    });
+    appendJsonlRecord(ARGOS_EVENTS_PATH, {
+        timestamp: nowIso(),
+        actor: 'Codex',
+        module: 'argos_feed_guard',
+        type: 'captain_feed_rewrite',
+        summary: `Captain feed reescrito con guardrail (${reason})`,
+        details: `lineas:${previousLines}->${parsedLineCount}; mojibake:${previousMojibake}->${nextMojibake}; backup:${backupPath || 'none'}`,
+        source: 'feed_guardrail'
+    });
 }
 function readCaptainFeedLines(feedPath) {
     if (!fs_1.default.existsSync(feedPath))
@@ -318,10 +671,10 @@ function readCaptainFeedLines(feedPath) {
 function writeCaptainFeedLines(feedPath, lines) {
     const serialized = lines.map((line) => (line.parsed ? JSON.stringify(line.parsed) : line.raw)).join('\n');
     if (serialized === '') {
-        fs_1.default.writeFileSync(feedPath, '', 'utf-8');
+        rewriteCaptainFeedSafely(feedPath, '', 'chat_edit_empty');
         return;
     }
-    fs_1.default.writeFileSync(feedPath, serialized.endsWith('\n') ? serialized : `${serialized}\n`, 'utf-8');
+    rewriteCaptainFeedSafely(feedPath, serialized.endsWith('\n') ? serialized : `${serialized}\n`, 'chat_edit');
 }
 function ensureCaptainFeedRecordId(record) {
     const withId = { ...record };
@@ -336,14 +689,14 @@ function normalizeAgentName(rawName) {
         return null;
     const v = rawName.trim().toLowerCase()
         .replace(/\*\*/g, '').replace(/__/g, '').replace(/\[/g, '').replace(/\]/g, '');
-    if (v.includes('claude'))
+    if (v.includes('claude') || v.includes('orfeo'))
         return 'Claude';
     if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v))
-        return 'Antigravity';
+        return 'Pi';
     if (v.includes('codex') || v.includes('chatgpt'))
         return 'Codex';
-    if (v.includes('orfeo') || v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw') || v.includes('qwen'))
-        return 'DeepSeek';
+    if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw') || v.includes('qwen'))
+        return 'OpenClaw';
     return null;
 }
 function parseCanonicalProtocolActor(rawName) {
@@ -353,7 +706,7 @@ function parseCanonicalProtocolActor(rawName) {
     const exact = CANONICAL_PROTOCOL_ACTORS.find((name) => name.toLowerCase() === cleaned.toLowerCase());
     return exact || null;
 }
-function resolveCrewDisplayName(rawName, fallback = 'DeepSeek') {
+function resolveCrewDisplayName(rawName, fallback = 'OpenClaw') {
     const cleaned = cleanMarkdownText(rawName || '').trim();
     if (cleaned === '')
         return fallback;
@@ -372,14 +725,14 @@ function resolveCrewDisplayName(rawName, fallback = 'DeepSeek') {
     if (lower.includes('qwen'))
         return 'Qwen';
     if (lower.includes('deepseek') || lower.includes('openclaw') || lower.includes('contramaestre'))
-        return 'DeepSeek';
+        return 'OpenClaw';
     return cleaned || fallback;
 }
 // --- SOPORTE PARA SISTEMA VOCAL (V2) ---
 function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tokens = 0, refId = '') {
     const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
     const numericTokens = Number(tokens) || 0;
-    const canonicalSender = resolveCrewDisplayName(sender, normalizeAgentName(sender) || sender || 'DeepSeek');
+    const canonicalSender = resolveCrewDisplayName(sender, normalizeAgentName(sender) || sender || 'OpenClaw');
     const record = {
         id: nextFeedMessageId(),
         timestamp: new Date().toISOString(),
@@ -423,6 +776,66 @@ function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tok
         console.error(`[VOCAL] Error publicando mensaje de ${canonicalSender}`, e);
     }
 }
+// ============ HANDOFF LOG ============
+function appendToHandoffLog(agent, packetId, handoff, timestampIso) {
+    try {
+        if (!fs_1.default.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH)) {
+            fs_1.default.writeFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, '# ARGOS GLOBAL HANDOFF LOG\nContexto conversacional por packet. Append-only.\n\n---\n', 'utf-8');
+        }
+        const canaryTs = new Date(timestampIso).toLocaleString('sv-SE', {
+            timeZone: 'Atlantic/Canary', year: 'numeric', month: '2-digit',
+            day: '2-digit', hour: '2-digit', minute: '2-digit'
+        }).slice(0, 16);
+        const lines = [
+            `<!-- ${packetId} -->`,
+            `**[${canaryTs} Atlantic/Canary] VOZ ${agent.toUpperCase()} — HANDOFF ${packetId}:**`,
+            `**Contexto:** ${handoff.contexto}`,
+            `**Decisión:** ${handoff.decision}`,
+            `**Continuidad:** ${handoff.continuidad}`,
+            `**Session ref:** ${handoff.session_ref}`,
+        ];
+        if (handoff.giros)
+            lines.push(`**Giros:** ${handoff.giros}`);
+        if (handoff.descartado)
+            lines.push(`**Descartado:** ${handoff.descartado}`);
+        if (handoff.riesgo)
+            lines.push(`**Riesgo:** ${handoff.riesgo}`);
+        lines.push('', '---', '');
+        fs_1.default.appendFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, lines.join('\n'), 'utf-8');
+    }
+    catch (e) {
+        console.error('[HANDOFF] Error escribiendo handoff log', e);
+    }
+}
+function readHandoffEntriesForPacket(packetId) {
+    if (!fs_1.default.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH))
+        return [];
+    const content = fs_1.default.readFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, 'utf-8');
+    const anchor = `<!-- ${packetId} -->`;
+    const results = [];
+    let searchFrom = 0;
+    while (true) {
+        const start = content.indexOf(anchor, searchFrom);
+        if (start === -1)
+            break;
+        const blockEnd = content.indexOf('\n---\n', start);
+        const end = blockEnd !== -1 ? blockEnd : content.length;
+        const block = content.slice(start, end);
+        const headerMatch = block.match(/VOZ (\w+) — HANDOFF/);
+        const tsMatch = block.match(/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})/);
+        const agent = headerMatch ? headerMatch[1] : 'Unknown';
+        const timestamp = tsMatch ? tsMatch[1] : '';
+        const fields = {};
+        const fieldRegex = /\*\*([^*:]+):\*\* (.+)/g;
+        let m;
+        while ((m = fieldRegex.exec(block)) !== null) {
+            fields[m[1].toLowerCase()] = m[2].trim();
+        }
+        results.push({ agent, timestamp, handoff: fields });
+        searchFrom = end + 1;
+    }
+    return results;
+}
 // ============ TRANSCRIPT SYSTEM ============
 function transcriptDateStr() {
     return new Date().toLocaleDateString('sv-SE', { timeZone: 'Atlantic/Canary' }); // YYYY-MM-DD
@@ -437,7 +850,7 @@ function transcriptFilePath(agent) {
 /**
  * Escribe un bloque de exchange en el transcript del agente.
  * role: 'captain' | 'agent'
- * El bloque queda anclado con el packetId para recuperación directa.
+ * El bloque queda anclado con el packetId para recuperaciÃ³n directa.
  */
 function appendToTranscript(agent, role, content, packetId = '') {
     try {
@@ -447,7 +860,7 @@ function appendToTranscript(agent, role, content, packetId = '') {
             timeZone: 'Atlantic/Canary', year: 'numeric', month: '2-digit',
             day: '2-digit', hour: '2-digit', minute: '2-digit'
         }).slice(0, 16);
-        const roleLabel = role === 'captain' ? `PROMPT (Capitán → ${agent})` : `RESPONSE (${agent} → Capitán)`;
+        const roleLabel = role === 'captain' ? `PROMPT (CapitÃ¡n â†’ ${agent})` : `RESPONSE (${agent} â†’ CapitÃ¡n)`;
         const anchor = packetId ? `<!-- ${packetId} -->` : '';
         const packetLine = packetId ? `**Packet:** ${packetId}` : '';
         const block = [
@@ -472,7 +885,7 @@ function appendToTranscript(agent, role, content, packetId = '') {
     }
 }
 /**
- * Lee el bloque de transcript para un packetId específico dentro de un archivo.
+ * Lee el bloque de transcript para un packetId especÃ­fico dentro de un archivo.
  * Devuelve el bloque completo entre el anchor y el siguiente '---'.
  */
 function readTranscriptBlock(agent, date, packetId) {
@@ -849,18 +1262,18 @@ function getVoiceForRole(role) {
         return 'Orfeo (Claude)';
     if (r.includes('lola'))
         return 'Lola';
-    // Sin voz de sistema — si el rol no es de un agente conocido, no tiene voz en los logs
+    // Sin voz de sistema â€” si el rol no es de un agente conocido, no tiene voz en los logs
     return primary || 'Pi';
 }
 function isAntigravityRole(role) {
     const value = normaliseText(role).toLowerCase();
-    return value.includes('antigravity') || value.includes('gemini') || /\bpi\b/.test(value);
+    return value.includes('antigravity') || value.includes('gemini') || value.includes('pi');
 }
 function normaliseText(value) {
     return typeof value === 'string' ? value.replace(/\uFEFF/g, '').trim() : '';
 }
 function mojibakeScore(value) {
-    return (value.match(/[ÃÂâð\uFFFD]/g) || []).length;
+    return (value.match(/[ÃƒÃ‚Ã¢Ã°\uFFFD]/g) || []).length;
 }
 function repairMojibake(value) {
     let out = value;
@@ -886,11 +1299,11 @@ function repairMojibake(value) {
 function cleanupReplacementArtifacts(value) {
     let out = value;
     out = out
-        .replace(/â€”/g, '-')
-        .replace(/â€“/g, '-')
-        .replace(/Â·/g, '·')
-        .replace(/Â¿/g, '¿')
-        .replace(/Â¡/g, '¡');
+        .replace(/Ã¢â‚¬â€/g, '-')
+        .replace(/Ã¢â‚¬â€œ/g, '-')
+        .replace(/Ã‚Â·/g, 'Â·')
+        .replace(/Ã‚Â¿/g, 'Â¿')
+        .replace(/Ã‚Â¡/g, 'Â¡');
     const replacements = [
         [/\uFFFDnico/gi, 'unico'],
         [/misi\uFFFDn/gi, 'mision'],
@@ -929,7 +1342,7 @@ function cleanMarkdownText(value) {
 /**
  * Normalizador de Identidad: Unifica nombres de agentes para consistencia visual (CSS/Icons)
  */
-function resolveCanonicalCrewVoice(rawName, fallback = 'DeepSeek') {
+function resolveCanonicalCrewVoice(rawName, fallback = 'OpenClaw') {
     const cleaned = cleanMarkdownText(rawName || '').trim();
     const agent = normalizeAgentName(cleaned);
     if (agent)
@@ -957,12 +1370,12 @@ function normalizeActorName(rawName) {
     const display = resolveCrewDisplayName(rawName || '', '');
     if (display !== '')
         return display;
-    // Primero intenta resolver al nombre canónico de agente activo
+    // Primero intenta resolver al nombre canÃ³nico de agente activo
     const agent = normalizeAgentName(rawName || '');
     if (agent)
-        return agent === 'Antigravity' ? 'Pi' : agent;
+        return agent;
     // Si no es un agente activo reconocido, preservar el nombre original limpio
-    // en lugar de colapsar a 'DeepSeek' — evita contaminación del trilog/logbook
+    // en lugar de colapsar a 'DeepSeek' â€” evita contaminaciÃ³n del trilog/logbook
     const cleaned = cleanMarkdownText(rawName || '').trim();
     return cleaned || 'Sistema';
 }
@@ -1002,7 +1415,7 @@ function inferTokenScope(record) {
     if (channel === 'captain_input' || ref.startsWith('new task:') || agent.includes('captain'))
         return 'input';
     // IMPORTANT: Para entradas legacy sin `scope`, inferimos SOLO por `channel`.
-    // En el histórico hay entradas sin `channel` (ni `scope`) cuyo `ref` puede empezar por "Chat Rep:",
+    // En el histÃ³rico hay entradas sin `channel` (ni `scope`) cuyo `ref` puede empezar por "Chat Rep:",
     // pero se usan como proxy de coste de tarea (work). Clasificarlas como report rompe WORK_TOKENS.
     if (channel === 'chat' || channel === 'feed' || channel === 'trilog')
         return 'report';
@@ -1189,7 +1602,7 @@ function backfillWorkTokensFromFeed() {
 }
 function defaultIaStatus() {
     const blank = () => ({ status: 'standby', task: '', task_subject: '', since: '' });
-    return { Claude: blank(), Antigravity: blank(), Codex: blank(), DeepSeek: blank() };
+    return { Claude: blank(), Pi: blank(), Codex: blank(), OpenClaw: blank() };
 }
 function readIaStatus(state) {
     const raw = state.ia_status;
@@ -1198,9 +1611,9 @@ function readIaStatus(state) {
         return d;
     return {
         Claude: { ...d.Claude, ...(raw.Claude || {}) },
-        Antigravity: { ...d.Antigravity, ...(raw.Antigravity || {}) },
+        Pi: { ...d.Pi, ...(raw.Pi || raw.Antigravity || {}) },
         Codex: { ...d.Codex, ...(raw.Codex || {}) },
-        DeepSeek: { ...d.DeepSeek, ...(raw.DeepSeek || {}) }
+        OpenClaw: { ...d.OpenClaw, ...(raw.OpenClaw || raw.DeepSeek || {}) }
     };
 }
 function setIaActive(actor, packetId, subject) {
@@ -1230,7 +1643,7 @@ function isAgentRestricted(actor) {
     const normalized = normalizeAgentName(actor);
     return restricted.includes(normalized);
 }
-// Comprueba si un agente está marcado como 'restricted' en ia_status.
+// Comprueba si un agente estÃ¡ marcado como 'restricted' en ia_status.
 // Usado para silenciar mensajes de feed en nombre de agentes sin tokens.
 function isVoiceRestricted(voice) {
     const agent = normalizeAgentName(voice);
@@ -1257,20 +1670,20 @@ function interceptAction(req, res, actionType, executeFn) {
         appendJsonlRecord(PENDING_ACTIONS_PATH, pendingAction);
         const state = readArgosState();
         if (!state.security)
-            state.security = { hitl_enabled: true, restricted_agents: ['DeepSeek'], has_pending_actions: false };
+            state.security = { hitl_enabled: true, restricted_agents: ['OpenClaw'], has_pending_actions: false };
         state.security.has_pending_actions = true;
         writeArgosState(state);
-        console.log(`[SAFEGUARD] Acción interceptada de ${actor}: ${actionType}`);
+        console.log(`[SAFEGUARD] AcciÃ³n interceptada de ${actor}: ${actionType}`);
         return res.status(202).json({
             status: 'pending_approval',
-            message: 'Acción interceptada por protocolo HITL. Requiere aprobación del Capitán.',
+            message: 'AcciÃ³n interceptada por protocolo HITL. Requiere aprobaciÃ³n del CapitÃ¡n.',
             actionId: pendingAction.id
         });
     }
-    // Si no está restringido, ejecutar normalmente
+    // Si no estÃ¡ restringido, ejecutar normalmente
     executeFn();
 }
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 function readTextFileSafe(filePath) {
     try {
         if (!fs_1.default.existsSync(filePath))
@@ -1479,20 +1892,20 @@ function isLoopbackHostHeader(req) {
 function isTrustedLocalRequest(req) {
     return isLocalhostRequest(req) && isLoopbackHostHeader(req);
 }
+function parseBooleanLike(value) {
+    if (typeof value === 'boolean')
+        return value;
+    const normalized = normaliseText(value).toLowerCase();
+    return normalized === 'true' || normalized === '1' || normalized === 'yes';
+}
 function parseRemoteClosurePayload(rawBody) {
     const body = rawBody && typeof rawBody === 'object' ? rawBody : null;
     if (!body)
         return { payload: null, error: 'Body JSON requerido' };
     const agent = normaliseText(body.agent);
     const agentInterface = normaliseText(body.interface);
-    const packetId = normaliseText(body.packet_id);
     const timestamp = normaliseText(body.timestamp);
-    const triggerRaw = normaliseText(body.trigger).toLowerCase();
-    const allowedTriggers = ['task_completed', 'session_close', 'handoff'];
-    if (!allowedTriggers.includes(triggerRaw)) {
-        return { payload: null, error: 'trigger invalido. Valores permitidos: task_completed, session_close, handoff' };
-    }
-    const trigger = triggerRaw;
+    const packetId = normaliseText(body.packet_id) || normaliseText(body.id);
     if (agent === '')
         return { payload: null, error: 'agent es obligatorio' };
     const normalizedAgent = parseCanonicalProtocolActor(agent);
@@ -1508,64 +1921,147 @@ function parseRemoteClosurePayload(rawBody) {
         return { payload: null, error: 'timestamp es obligatorio' };
     if (packetId === '')
         return { payload: null, error: 'packet_id es obligatorio' };
+    const missionRaw = normaliseText(body.mission);
+    const summaryRaw = normaliseText(body.summary);
+    const stateMissionRaw = body.sections && typeof body.sections === 'object' && body.sections !== null
+        ? normaliseText(body.sections.state?.summary)
+        : '';
+    const mission = missionRaw || summaryRaw || stateMissionRaw;
+    const legacySummaryUsed = missionRaw === '' && summaryRaw !== '';
+    if (mission === '')
+        return { payload: null, error: 'mission es obligatorio (summary solo fallback legacy)' };
+    if (mission.length > 80)
+        return { payload: null, error: 'mission excede 80 caracteres' };
+    const closureTypeRaw = normaliseText(body.closure_type).toLowerCase();
+    const triggerRaw = normaliseText(body.trigger).toLowerCase();
+    const allowedClosureTypes = ['task_completed', 'blocked', 'meta', 'session_close'];
+    let closureType = 'task_completed';
+    if (allowedClosureTypes.includes(closureTypeRaw)) {
+        closureType = closureTypeRaw;
+    }
+    else if (triggerRaw === 'blocked' || triggerRaw === 'meta' || triggerRaw === 'session_close' || triggerRaw === 'task_completed') {
+        closureType = triggerRaw;
+    }
+    const statusRaw = normaliseText(body.status).toLowerCase();
+    const allowedStatuses = ['completed', 'blocked', 'in_progress', 'cancelled'];
+    let status;
+    if (allowedStatuses.includes(statusRaw)) {
+        status = statusRaw;
+    }
+    else if (closureType === 'blocked') {
+        status = 'blocked';
+    }
+    else if (closureType === 'meta') {
+        status = 'in_progress';
+    }
+    else {
+        status = 'completed';
+    }
+    const resultRaw = normaliseText(body.result);
+    const nextStepRaw = normaliseText(body.next_step);
+    const handoffRawField = normaliseText(body.handoff);
+    const riskLevelRaw = normaliseText(body.risk_level).toLowerCase();
+    const allowedRiskLevels = ['none', 'low', 'medium', 'high', 'blocked'];
+    const riskLevel = allowedRiskLevels.includes(riskLevelRaw)
+        ? riskLevelRaw
+        : (status === 'blocked' ? 'blocked' : 'none');
+    const schemaVersionRaw = Number(body.schema_version);
+    const schemaVersion = Number.isFinite(schemaVersionRaw) && schemaVersionRaw > 0
+        ? Math.trunc(schemaVersionRaw)
+        : 1;
+    const handoffActive = parseBooleanLike(body.handoff_active);
+    const lifecycleEvent = parseBooleanLike(body.lifecycle_event);
+    const transcriptRef = normaliseText(body.transcript_ref);
     const sectionsRaw = body.sections && typeof body.sections === 'object'
         ? body.sections
         : null;
-    if (!sectionsRaw) {
-        return { payload: null, error: 'sections es obligatorio y debe ser un objeto' };
-    }
-    const requiredKeys = ['log', 'shadow', 'glitch', 'state', 'captain'];
-    for (const key of requiredKeys) {
-        if (!Object.prototype.hasOwnProperty.call(sectionsRaw, key)) {
-            return { payload: null, error: `sections.${key} es obligatorio` };
-        }
-    }
-    const log = normaliseText(sectionsRaw.log);
-    const shadow = normaliseText(sectionsRaw.shadow);
-    const glitch = normaliseText(sectionsRaw.glitch);
-    const captain = normaliseText(sectionsRaw.captain);
-    if (log === '')
-        return { payload: null, error: 'sections.log no puede ser vacio' };
-    if (shadow === '')
-        return { payload: null, error: 'sections.shadow no puede ser vacio' };
-    if (captain === '')
-        return { payload: null, error: 'sections.captain no puede ser vacio' };
-    const stateRaw = sectionsRaw.state && typeof sectionsRaw.state === 'object'
+    const stateRaw = sectionsRaw && sectionsRaw.state && typeof sectionsRaw.state === 'object'
         ? sectionsRaw.state
         : null;
-    if (!stateRaw) {
-        return { payload: null, error: 'sections.state es obligatorio y debe ser un objeto' };
-    }
-    const statusRaw = normaliseText(stateRaw.status).toLowerCase();
+    const mapClosureStatusToLive = (value) => {
+        if (value === 'blocked')
+            return 'blocked';
+        if (value === 'in_progress')
+            return 'working';
+        return 'idle';
+    };
+    const stateStatusRaw = stateRaw ? normaliseText(stateRaw.status).toLowerCase() : '';
     const validStatuses = ['idle', 'working', 'blocked', 'waiting_captain'];
-    if (!validStatuses.includes(statusRaw)) {
-        return { payload: null, error: 'sections.state.status invalido. Valores permitidos: idle, working, blocked, waiting_captain' };
-    }
-    const status = statusRaw;
-    const summary = normaliseText(stateRaw.summary);
-    const nextStep = normaliseText(stateRaw.next_step);
-    const handoffToRaw = stateRaw.handoff_to;
+    const stateStatus = validStatuses.includes(stateStatusRaw)
+        ? stateStatusRaw
+        : mapClosureStatusToLive(status);
+    const nextStep = nextStepRaw || (stateRaw ? normaliseText(stateRaw.next_step) : '') || normaliseText(body.nextStep);
+    const handoffToRaw = stateRaw ? stateRaw.handoff_to : body.handoff_to;
     const handoffTo = handoffToRaw === null ? null : (normaliseText(handoffToRaw) || null);
-    if (summary === '')
-        return { payload: null, error: 'sections.state.summary no puede ser vacio' };
+    // Campo handoff opcional
+    let handoff;
+    const handoffRaw = sectionsRaw && sectionsRaw.handoff && typeof sectionsRaw.handoff === 'object'
+        ? sectionsRaw.handoff
+        : null;
+    if (handoffRaw) {
+        const contexto = normaliseText(handoffRaw.contexto);
+        const decision = normaliseText(handoffRaw.decision);
+        const continuidad = normaliseText(handoffRaw.continuidad);
+        const session_ref = normaliseText(handoffRaw.session_ref);
+        if (!contexto || !decision || !continuidad || !session_ref) {
+            return { payload: null, error: 'sections.handoff requiere contexto, decision, continuidad y session_ref' };
+        }
+        handoff = {
+            contexto, decision, continuidad, session_ref,
+            ...(handoffRaw.giros ? { giros: normaliseText(handoffRaw.giros) } : {}),
+            ...(handoffRaw.descartado ? { descartado: normaliseText(handoffRaw.descartado) } : {}),
+            ...(handoffRaw.riesgo ? { riesgo: normaliseText(handoffRaw.riesgo) } : {})
+        };
+    }
+    const result = resultRaw || (sectionsRaw ? normaliseText(sectionsRaw.log) : '');
+    const handoffCore = handoffRawField || (handoff ? handoff.continuidad : '');
+    const handoffText = handoffCore || nextStep;
+    if (closureType === 'task_completed' && result === '') {
+        return { payload: null, error: 'result no puede ser vacio cuando closure_type=task_completed' };
+    }
+    if (closureType === 'blocked' && handoffCore === '') {
+        return { payload: null, error: 'Un bloqueo sin handoff no ayuda a nadie. ¿Qué necesita saber el siguiente para desbloquearlo?' };
+    }
+    const log = normaliseText(sectionsRaw?.log) || result || mission;
+    const shadow = normaliseText(sectionsRaw?.shadow) || `risk_level=${riskLevel}; closure_type=${closureType}; status=${status}.`;
+    const glitch = normaliseText(sectionsRaw?.glitch) || (legacySummaryUsed ? 'DEPRECATION: usar mission en lugar de summary.' : '');
+    const captain = normaliseText(sectionsRaw?.captain) || `${mission}. ${result || 'Cierre registrado.'}`;
+    const allowedTriggers = ['task_completed', 'blocked', 'meta', 'session_close', 'handoff'];
+    const inferredTriggerRaw = triggerRaw || closureType;
+    const trigger = allowedTriggers.includes(inferredTriggerRaw)
+        ? inferredTriggerRaw
+        : closureType;
     return {
         payload: {
             agent: normalizedAgent,
             interface: agentInterface,
             timestamp,
             packet_id: packetId,
+            schema_version: schemaVersion,
+            mission,
+            closure_type: closureType,
+            status,
+            result,
+            risk_level: riskLevel,
+            next_step: nextStep,
+            handoff: handoffText,
+            handoff_active: handoffActive,
+            transcript_ref: transcriptRef,
+            lifecycle_event: lifecycleEvent,
+            legacy_summary_used: legacySummaryUsed,
             trigger,
             sections: {
                 log,
                 shadow,
                 glitch,
                 state: {
-                    status,
-                    summary,
+                    status: stateStatus,
+                    summary: mission,
                     handoff_to: handoffTo,
                     next_step: nextStep
                 },
-                captain
+                captain,
+                ...(handoff ? { handoff } : {})
             },
             mark_packet_done: Boolean(body.mark_packet_done)
         },
@@ -1575,10 +2071,19 @@ function parseRemoteClosurePayload(rawBody) {
 function buildRemoteClosureStateSection(payload) {
     return [
         `status: ${payload.status}`,
+        `mission: ${payload.mission}`,
         `summary: ${payload.summary}`,
         `handoff_to: ${payload.handoff_to || 'null'}`,
         `next_step: ${payload.next_step}`,
-        `packet_id: ${payload.packet_id}`
+        `packet_id: ${payload.packet_id}`,
+        `closure_type: ${payload.closure_type || ''}`,
+        `result: ${payload.result || ''}`,
+        `risk_level: ${payload.risk_level || ''}`,
+        `handoff: ${payload.handoff || ''}`,
+        `schema_version: ${payload.schema_version || 1}`,
+        `handoff_active: ${payload.handoff_active ? 'true' : 'false'}`,
+        `transcript_ref: ${payload.transcript_ref || ''}`,
+        `lifecycle_event: ${payload.lifecycle_event ? 'true' : 'false'}`
     ].join('\n');
 }
 function parseRemoteClosureToDeposit(payload) {
@@ -1587,10 +2092,19 @@ function parseRemoteClosureToDeposit(payload) {
     const actorCanonical = normalizeAgentName(payload.agent) || payload.agent;
     const statePayload = {
         status: payload.sections.state.status,
-        summary: payload.sections.state.summary,
+        mission: payload.mission,
+        summary: payload.mission,
         handoff_to: payload.sections.state.handoff_to,
         next_step: payload.sections.state.next_step,
-        packet_id: packetId
+        packet_id: packetId,
+        closure_type: payload.closure_type,
+        result: payload.result,
+        risk_level: payload.risk_level,
+        handoff: payload.handoff,
+        schema_version: payload.schema_version,
+        handoff_active: payload.handoff_active,
+        transcript_ref: payload.transcript_ref,
+        lifecycle_event: payload.lifecycle_event
     };
     return {
         filePath: '',
@@ -1600,7 +2114,14 @@ function parseRemoteClosureToDeposit(payload) {
             interface: payload.interface,
             timestamp: timestampIso,
             packet_id: packetId,
-            trigger: payload.trigger
+            trigger: payload.trigger,
+            schema_version: String(payload.schema_version),
+            closure_type: payload.closure_type,
+            status: payload.status,
+            risk_level: payload.risk_level,
+            handoff_active: payload.handoff_active ? 'true' : 'false',
+            lifecycle_event: payload.lifecycle_event ? 'true' : 'false',
+            transcript_ref: payload.transcript_ref || ''
         },
         sections: {
             LOG: payload.sections.log,
@@ -1645,7 +2166,7 @@ function canonicalLiveAgentName(agentId) {
     if (agentId === 'codex')
         return 'Codex';
     if (agentId === 'gemini')
-        return 'Gemini';
+        return 'Pi';
     return 'OpenClaw';
 }
 function normalizeLiveAgentId(raw) {
@@ -1666,8 +2187,8 @@ function liveAgentToIaStatusKey(agentId) {
     if (agentId === 'codex')
         return 'Codex';
     if (agentId === 'gemini')
-        return 'Antigravity';
-    return 'DeepSeek';
+        return 'Pi';
+    return 'OpenClaw';
 }
 function normalizeLiveStatus(raw) {
     const value = normaliseText(raw).toLowerCase();
@@ -1843,7 +2364,7 @@ function parseDepositTimestampIso(raw) {
     const tryParse = (ms) => {
         if (Number.isNaN(ms))
             return null;
-        // Rechazar timestamps más de 30 minutos en el futuro — probablemente sintéticos/hardcodeados
+        // Rechazar timestamps mÃ¡s de 30 minutos en el futuro â€” probablemente sintÃ©ticos/hardcodeados
         const nowMs = Date.now();
         if (ms > nowMs + 30 * 60 * 1000)
             return null;
@@ -1907,12 +2428,28 @@ function parseDepositStatePayload(rawState) {
             return;
         parsed[match[1].toLowerCase()] = match[2].trim();
     });
+    const mission = normaliseText(parsed.mission) || normaliseText(parsed.summary);
+    const schemaVersionRaw = Number(parsed.schema_version);
+    const schemaVersion = Number.isFinite(schemaVersionRaw) && schemaVersionRaw > 0
+        ? Math.trunc(schemaVersionRaw)
+        : 1;
+    const handoffActive = parseBooleanLike(parsed.handoff_active);
+    const lifecycleEvent = parseBooleanLike(parsed.lifecycle_event);
     return {
         status: normalizeLiveStatus(parsed.status),
-        summary: normaliseText(parsed.summary),
+        mission,
+        summary: mission,
         handoff_to: normaliseText(parsed.handoff_to) || null,
         next_step: normaliseText(parsed.next_step),
-        packet_id: normaliseText(parsed.packet_id)
+        packet_id: normaliseText(parsed.packet_id),
+        closure_type: normaliseText(parsed.closure_type),
+        result: normaliseText(parsed.result),
+        risk_level: normaliseText(parsed.risk_level),
+        handoff: normaliseText(parsed.handoff),
+        schema_version: schemaVersion,
+        handoff_active: handoffActive,
+        transcript_ref: normaliseText(parsed.transcript_ref),
+        lifecycle_event: lifecycleEvent
     };
 }
 function canaryTimestampLabelFromIso(iso) {
@@ -1939,7 +2476,7 @@ function firstLine(value) {
 }
 function isEmptyGlitchSection(value) {
     const normalized = normaliseText(value).toLowerCase().replace(/[().\s]/g, '');
-    return normalized === '' || normalized === 'vacio' || normalized === 'vacío' || normalized === 'none' || normalized === 'no';
+    return normalized === '' || normalized === 'vacio' || normalized === 'vacÃ­o' || normalized === 'none' || normalized === 'no';
 }
 function parseChatDepositFile(filePath) {
     const raw = readTextFileSafe(filePath);
@@ -1977,14 +2514,14 @@ function updateIaStatusFromDeposit(deposit) {
         ...current,
         status: iaStatus,
         task: iaStatus === 'active' ? deposit.packetId : '',
-        task_subject: deposit.statePayload.summary || current.task_subject || '',
+        task_subject: deposit.statePayload.mission || deposit.statePayload.summary || current.task_subject || '',
         since: deposit.timestampIso,
         last_seen: deposit.timestampIso,
         stale: false,
         stale_since: '',
         handoff_to: handoffCanonical || '',
         next_step: deposit.statePayload.next_step,
-        last_output: deposit.statePayload.summary || firstLine(deposit.sections.LOG || '') || ''
+        last_output: deposit.statePayload.mission || deposit.statePayload.summary || firstLine(deposit.sections.LOG || '') || ''
     };
     state.ia_status = ia;
     if (deposit.statePayload.next_step)
@@ -1993,7 +2530,7 @@ function updateIaStatusFromDeposit(deposit) {
 }
 function integrateClosure(deposit, options) {
     const packetRef = normaliseText(deposit.packetId);
-    const actor = resolveCrewDisplayName(deposit.actorRaw || deposit.actorCanonical, normalizeAgentName(deposit.actorCanonical) || deposit.actorCanonical || 'DeepSeek');
+    const actor = resolveCrewDisplayName(deposit.actorRaw || deposit.actorCanonical, normalizeAgentName(deposit.actorCanonical) || deposit.actorCanonical || 'OpenClaw');
     const timestampIso = deposit.timestampIso;
     const canaryLabelText = canaryTimestampLabelFromIso(timestampIso);
     const sourceLabel = normaliseText(options.source) || 'closure_integration';
@@ -2002,7 +2539,7 @@ function integrateClosure(deposit, options) {
     if (logText !== '') {
         const logEntry = `\n---\n` +
             `**[${canaryLabelText}] VOZ ${actor.toUpperCase()}:**\n` +
-            `**MISION:** Integracion automatica de deposito chat\n` +
+            `**MISION:** ${deposit.statePayload.mission || deposit.statePayload.summary || 'Integracion automatica de deposito chat'}\n` +
             `**WORK PACKET:** ${packetRef || 'N/A'}\n\n` +
             `**DETALLES:**\n${logText}\n`;
         appendMarkdownEntry(ARGOS_GLOBAL_LOG_PATH, '# ARGOS GLOBAL LOG\nRegistro operativo compartido por la tripulacion.\n', logEntry);
@@ -2025,7 +2562,7 @@ function integrateClosure(deposit, options) {
         const shadowEntry = `\n---\n` +
             `**[${canaryLabelText}] VOZ ${actor.toUpperCase()} (SOMBRA):**\n` +
             `**PACKET:** ${packetRef || 'N/A'}\n` +
-            `**TAREA:** ${deposit.statePayload.summary || 'Integracion de deposito chat'}\n` +
+            `**TAREA:** ${deposit.statePayload.mission || deposit.statePayload.summary || 'Integracion de deposito chat'}\n` +
             `**SOMBRA:**\n${shadowText}\n`;
         appendMarkdownEntry(ARGOS_GLOBAL_SHADOW_PATH, '# ARGOS GLOBAL SHADOW LOG\nMaterial observado sin destino operativo inmediato.\n', shadowEntry);
     }
@@ -2048,6 +2585,10 @@ function integrateClosure(deposit, options) {
     const captainText = normaliseText(deposit.sections.CAPTAIN);
     let captainFeedId = null;
     if (captainText !== '') {
+        const configuredPrefix = options.captainSummaryPrefix === undefined
+            ? '[DEPOSITO]'
+            : normaliseText(options.captainSummaryPrefix);
+        const prefixText = configuredPrefix === '' ? '' : `${configuredPrefix} `;
         captainFeedId = nextFeedMessageId();
         appendJsonlRecord(CAPTAIN_FEED_PATH, {
             id: captainFeedId,
@@ -2058,11 +2599,12 @@ function integrateClosure(deposit, options) {
             sender_role: 'agent',
             audience: 'captain',
             source: sourceLabel,
-            summary: `${normaliseText(options.captainSummaryPrefix) || '[DEPOSITO]'} ${deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
+            summary: `${prefixText}${deposit.statePayload.mission || deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
             details: captainText,
             status: deposit.statePayload.status,
             tokens: 0,
-            refId: packetRef
+            refId: packetRef,
+            transcriptRef: deposit.statePayload.transcript_ref || ''
         });
     }
     updateIaStatusFromDeposit(deposit);
@@ -2287,8 +2829,8 @@ function defaultDesktopSourcesConfig() {
                 transcriptGlobs: ['**/*transcript*.md', '**/*chat*.jsonl', '**/*conversation*.json'],
                 tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*ledger*.jsonl'],
                 parser: 'generic',
-                agentName: 'Antigravity',
-                owner: 'Antigravity',
+                agentName: 'Pi',
+                owner: 'Pi',
                 timezone: 'Atlantic/Canary'
             },
             {
@@ -2298,7 +2840,7 @@ function defaultDesktopSourcesConfig() {
                 transcriptGlobs: ['**/*transcript*.md', '**/*session*.json', '**/*.jsonl'],
                 tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*eval*.json', '**/*webhook*.jsonl'],
                 parser: 'generic',
-                agentName: 'DeepSeek',
+                agentName: 'OpenClaw',
                 owner: 'OpenClaw',
                 timezone: 'Atlantic/Canary'
             }
@@ -2539,7 +3081,7 @@ function markImportedKey(list, key) {
     list.push(key);
     return true;
 }
-function runDesktopImport(mode, actor = 'OpenClaw/Antigravity') {
+function runDesktopImport(mode, actor = 'OpenClaw') {
     const startedAt = nowIso();
     const config = loadDesktopSourcesConfig();
     const state = loadDesktopIngestState();
@@ -2694,13 +3236,25 @@ function findArchivedFiles(filename, dirPath = SESSION_ARCHIVE_ROOT) {
     }
     return results;
 }
-// ── Dedup cache: prevents identical records being written within the TTL window ──
+// â”€â”€ Dedup cache: prevents identical records being written within the TTL window â”€â”€
 // key = filePath + : + dedup_key -> value = timestamp (ms) of last write
 const dedupCache = new Map();
 const DEDUP_TTL_MS = 8000; // 8 s for general records
 const DEDUP_HEARTBEAT_TTL_MS = 4 * 60 * 1000; // 4 min for heartbeats
 function appendJsonlRecord(filePath, record) {
     const rec = record;
+    if (shouldSuppressCaptainFeedNoise(filePath, rec)) {
+        appendJsonlRecord(ARGOS_EVENTS_PATH, {
+            timestamp: nowIso(),
+            actor: normaliseText(rec.sender_name) || normaliseText(rec.actor) || 'Codex',
+            module: 'argos_feed_guard',
+            type: 'captain_feed_noise_suppressed',
+            summary: normaliseText(rec.summary) || 'Mensaje suprimido por ruido tecnico',
+            details: `source=${normaliseText(rec.source)}; refId=${normaliseText(rec.refId)}`,
+            source: 'feed_guardrail'
+        });
+        return;
+    }
     const now = Date.now();
     const isHeartbeat = rec.kind === 'system_heartbeat';
     const dedupKind = String(rec.kind ?? rec.type ?? '');
@@ -2718,19 +3272,27 @@ function appendJsonlRecord(filePath, record) {
     if (now - lastWrite < ttl)
         return;
     dedupCache.set(dedupKey, now);
-    // SanitizaciÃ³n de codificaciÃ³n: Convertir a UTF-8 limpio
+    // SanitizaciÃƒÂ³n de codificaciÃƒÂ³n: Convertir a UTF-8 limpio
     const serialised = JSON.stringify(record);
     try {
-        // Si el archivo existe, nos aseguramos de que termine en newline para no romper el JSONL
-        if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).size > 0) {
-            const tail = readFileTail(filePath, 4);
-            const endsWithNewline = tail.includes('\n');
-            const separator = endsWithNewline ? '' : '\n';
-            fs_1.default.appendFileSync(filePath, `${separator}${serialised}\n`, 'utf-8');
+        const write = () => {
+            // Si el archivo existe, nos aseguramos de que termine en newline para no romper el JSONL
+            if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).size > 0) {
+                const tail = readFileTail(filePath, 4);
+                const endsWithNewline = tail.includes('\n');
+                const separator = endsWithNewline ? '' : '\n';
+                fs_1.default.appendFileSync(filePath, `${separator}${serialised}\n`, 'utf-8');
+            }
+            else {
+                // Crear archivo nuevo (asegurando UTF-8 sin BOM)
+                fs_1.default.writeFileSync(filePath, `${serialised}\n`, 'utf-8');
+            }
+        };
+        if (isCaptainFeedPath(filePath)) {
+            withCaptainFeedWriteLock('append', write);
         }
         else {
-            // Crear archivo nuevo (asegurando UTF-8 sin BOM)
-            fs_1.default.writeFileSync(filePath, `${serialised}\n`, 'utf-8');
+            write();
         }
     }
     catch (e) {
@@ -2778,8 +3340,8 @@ function composeShadowNote(params) {
     if (lines.length > 0)
         return lines.join('\n');
     if (details !== '')
-        return `Observación no priorizada en LOG: ${details}`;
-    return 'Cierre de sesión registrado via /api/trilog. Sin observaciones adicionales.';
+        return `ObservaciÃ³n no priorizada en LOG: ${details}`;
+    return 'Cierre de sesiÃ³n registrado via /api/trilog. Sin observaciones adicionales.';
 }
 /** Read last `bytes` bytes of a file without loading the whole thing. */
 function readFileTail(filePath, bytes) {
@@ -2918,7 +3480,7 @@ function getTriLogMissingLanes(packetId) {
 function ensureAntigravityProtocolPacketExists() {
     if (fs_1.default.existsSync(ANTIGRAVITY_PROTO_PACKET_PATH))
         return;
-    // No recrear si ya estÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ resuelto en done/
+    // No recrear si ya estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ resuelto en done/
     const donePacketPath = path_1.default.join(RUNTIME_DIR, 'work_packets', 'done', ANTIGRAVITY_PROTO_PACKET_NAME);
     if (fs_1.default.existsSync(donePacketPath))
         return;
@@ -3117,7 +3679,7 @@ function runMergeHistory() {
                         return;
                     const actorRaw = normaliseText(rec.actor) || normaliseText(rec.sender_name);
                     const actor = normalizeActorName(actorRaw);
-                    if (actor === 'DeepSeek')
+                    if (actor === 'OpenClaw')
                         return;
                     packetActorIndex.set(packetId, actor);
                 }
@@ -3164,7 +3726,7 @@ function runMergeHistory() {
                     const tsLabel = tsMatch[1];
                     const actorMatch = block.match(/(?:\*\*\s*)?VOZ\s+([^:\n\*]+)/i) || block.match(/(?:\*\*\s*)?ACTOR\s*:\s*([^\n\*]+)/i);
                     const actor = normalizeActorName(actorMatch ? actorMatch[1].trim() : '');
-                    const summaryMatch = block.match(/(?:ACCION|ACCIÓN|MISION|MISIÓN|MISSION|SUBJECT)\s*[:\*]+\s*([^\n\*]+)/i);
+                    const summaryMatch = block.match(/(?:ACCION|ACCIÃ“N|MISION|MISIÃ“N|MISSION|SUBJECT)\s*[:\*]+\s*([^\n\*]+)/i);
                     const summary = summaryMatch ? summaryMatch[1].trim() : 'Registro';
                     addEntry({ timestamp_label: tsLabel, actor, summary, status: 'done', source: 'ARGOS_GLOBAL_LOG.md' }, 'global');
                 }
@@ -3186,7 +3748,7 @@ function runMergeHistory() {
                     content.match(/ROLE_REQUESTED:\s*([^\n]+)/i) ||
                     content.match(/OWNER:\s*([^\n]+)/i);
                 let actor = normalizeActorName(actorMatch ? actorMatch[1].trim() : '');
-                if (actor === 'DeepSeek' && packetIdFromFile !== '') {
+                if (actor === 'OpenClaw' && packetIdFromFile !== '') {
                     const actorFromEvents = packetActorIndex.get(packetIdFromFile);
                     if (actorFromEvents)
                         actor = actorFromEvents;
@@ -3273,8 +3835,8 @@ function inferSenderName(record) {
     if (source.includes('captain'))
         return 'Ruben Thor';
     if (source.includes('agent'))
-        return 'DeepSeek';
-    return 'DeepSeek';
+        return 'OpenClaw';
+    return 'OpenClaw';
 }
 function buildCaptainInputPacketIdSet() {
     const ids = new Set();
@@ -3318,7 +3880,7 @@ function extractPacketIdFromWorkPacketSource(source) {
     return match ? normaliseText(match[1]) : '';
 }
 // Extrae el primer ID de work packet mencionado en un bloque de texto
-// Patrón: ARG-XXXX o ARGOS-XXXX (con guiones, sin guiones bajos para no capturar nombres de archivo)
+// PatrÃ³n: ARG-XXXX o ARGOS-XXXX (con guiones, sin guiones bajos para no capturar nombres de archivo)
 const WP_ID_RE = /\b((?:ARG|ARGOS)-[A-Z0-9]+(?:-[A-Z0-9]+)*)\b/gi;
 function extractPacketId(text) {
     const matches = text.match(WP_ID_RE);
@@ -3344,11 +3906,11 @@ function parseArgosMarkdownStream(filePath, idPrefix) {
     const blocks = rawBlocks.map((b) => b.trim()).filter((b) => b !== '');
     const parsed = [];
     blocks.forEach((block, index) => {
-        // 1. Detección por Cabecera Estándar: **[TS] ID | Actor:**
+        // 1. DetecciÃ³n por Cabecera EstÃ¡ndar: **[TS] ID | Actor:**
         const headerMatch = block.match(/\*\*\[[^\]]+\]\s*([A-Z0-9-]*)\s*\|\s*([^:\n*]+):\*\*/i);
         const headerId = headerMatch?.[1]?.trim() || '';
         const headerActor = headerMatch?.[2]?.trim() || '';
-        // 2. Extracción de ID del Paquete
+        // 2. ExtracciÃ³n de ID del Paquete
         const explicitPacketId = block.match(/^\s*\*\*WORK\s*PACKET:\*\*\s*([^\n]+)/im)?.[1]?.trim() ||
             block.match(/^\s*\*\*PACKET:\*\*\s*([^\n]+)/im)?.[1]?.trim() ||
             headerId;
@@ -3356,17 +3918,17 @@ function parseArgosMarkdownStream(filePath, idPrefix) {
             block.match(/\[(\d{4}-\d{2}-\d{2})/)?.[1] ||
             '';
         const ts = parseTimestampLabel(timestampRaw);
-        // 3. Extracción de Voz (Actor)
+        // 3. ExtracciÃ³n de Voz (Actor)
         const rawActor = block.match(/\bVOZ\s+([^:\n*]+)/i)?.[1]?.trim() ||
             block.match(/^\s*(?:\*\*\s*)?ACTOR\s*:\s*([^\n*]+)/im)?.[1]?.trim() ||
             headerActor ||
             '';
         const actor = normalizeActorName(rawActor);
-        // 4. Extracción de Estado
+        // 4. ExtracciÃ³n de Estado
         const status = block.match(/^\s*\*\*ESTADO(?:\s+\d+)?\s*:\*\*\s*([^\n]+)/im)?.[1]?.trim() ||
             'done';
-        // 5. Extracción de Resumen (Misión/Subject)
-        const summary = block.match(/\*\*(?:ACCION|ACCIÓN|MISION|MISIÓN|MISSION|SUBJECT|ASUNTO)\s*:\*\*\s*([^\n\*]+)/i)?.[1]?.trim() ||
+        // 5. ExtracciÃ³n de Resumen (MisiÃ³n/Subject)
+        const summary = block.match(/\*\*(?:ACCION|ACCIÃ“N|MISION|MISIÃ“N|MISSION|SUBJECT|ASUNTO)\s*:\*\*\s*([^\n\*]+)/i)?.[1]?.trim() ||
             block.match(/\*\*(?:CATEGORIA|TAREA|OBJETIVO)\s*:\*\*\s*([^\n]+)/i)?.[1]?.trim() ||
             block.split('\n')[0].replace(/[\*\[\]]/g, '').trim() ||
             'Registro actualizado';
@@ -3424,11 +3986,19 @@ function parseArgosEventsStream(filePath, idPrefix) {
                     normaliseText(record.nextStep)
                 ].join(' '));
             const detailsText = normaliseText(record.verification) || normaliseText(record.details);
-            const summaryText = normaliseText(record.summary) || normaliseText(record.type) || 'Evento';
+            const missionText = normaliseText(record.mission);
+            const summaryText = missionText || normaliseText(record.summary) || normaliseText(record.type) || 'Evento';
+            const riskLevelText = normaliseText(record.risk_level) || normaliseText(record.riskLevel);
+            const transcriptRef = normaliseText(record.transcriptRef) || normaliseText(record.transcript_ref);
+            const closureType = normaliseText(record.closure_type);
+            const lifecycleRaw = normaliseText(record.lifecycle_event).toLowerCase();
+            const lifecycleEvent = lifecycleRaw === 'true' || lifecycleRaw === '1' || lifecycleRaw === 'yes';
+            const handoffActiveRaw = normaliseText(record.handoff_active).toLowerCase();
+            const handoffActive = handoffActiveRaw === 'true' || handoffActiveRaw === '1' || handoffActiveRaw === 'yes';
             const rawActor = normaliseText(record.actor) || normaliseText(record.sender_name);
             let actor = normalizeActorName(rawActor);
-            // Si el actor no es un agente canónico activo, intentar extraer owner de los detalles
-            const canonicalAgents = new Set(['Claude', 'Antigravity', 'Codex', 'DeepSeek']);
+            // Si el actor no es un agente canÃ³nico activo, intentar extraer owner de los detalles
+            const canonicalAgents = new Set(['Claude', 'Pi', 'Codex', 'OpenClaw', 'Antigravity', 'DeepSeek']);
             if (!canonicalAgents.has(actor)) {
                 const ownerFromDetails = detailsText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
                     summaryText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
@@ -3444,11 +4014,17 @@ function parseArgosEventsStream(filePath, idPrefix) {
                 timestamp: normaliseText(record.timestamp),
                 actor,
                 status: normaliseText(record.status) || 'done',
+                mission: missionText || summaryText,
                 summary: summaryText,
                 details: detailsText,
                 next_step: normaliseText(record.next_step) || normaliseText(record.nextStep) || normaliseText(record.follow_up) || normaliseText(record.next_action),
                 errors: normaliseText(record.errors) || normaliseText(record.learnings) || normaliseText(record.bug_details) || normaliseText(record.error_base),
                 risks: normaliseText(record.risks) || normaliseText(record.dangers),
+                risk_level: riskLevelText,
+                closure_type: closureType,
+                handoff_active: handoffActive,
+                lifecycle_event: lifecycleEvent,
+                transcriptRef,
                 source: idPrefix,
                 sortMs: ts.sortMs + index
             });
@@ -3475,6 +4051,7 @@ function parseCaptainFeedStream(filePath, idPrefix) {
             const summary = normaliseText(record.summary);
             const details = normaliseText(record.details);
             const packetId = normaliseText(record.refId) || extractPacketId(`${summary} ${details}`);
+            const transcriptRef = normaliseText(record.transcriptRef);
             parsed.push({
                 id: packetId,
                 timestamp_label: ts.label,
@@ -3487,6 +4064,7 @@ function parseCaptainFeedStream(filePath, idPrefix) {
                 next_step: '',
                 errors: '',
                 risks: '',
+                transcriptRef,
                 source: idPrefix,
                 sortMs: ts.sortMs + index
             });
@@ -3650,7 +4228,7 @@ function inferTaskOwner(rawText) {
     const explicitPatterns = [
         { owner: 'Codex', regex: /^(codex|para codex|orden para codex|ordenes para codex)\b[\s,:-]*/i },
         { owner: 'Claude', regex: /^(claude|para claude|orden para claude|ordenes para claude|orfeo)\b[\s,:-]*/i },
-        { owner: 'Antigravity / Gemini', regex: /^(antigravity|gemini|para antigravity|para gemini|orden para antigravity|orden para gemini|ordenes para antigravity|ordenes para gemini)\b[\s,:-]*/i }
+        { owner: 'Pi', regex: /^(pi|antigravity|gemini|para pi|para antigravity|para gemini|orden para pi|orden para antigravity|orden para gemini|ordenes para pi|ordenes para antigravity|ordenes para gemini)\b[\s,:-]*/i }
     ];
     for (const candidate of explicitPatterns) {
         if (candidate.regex.test(trimmed))
@@ -3661,8 +4239,8 @@ function inferTaskOwner(rawText) {
         mentions.push('Codex');
     if (/\b(claude|orfeo)\b/i.test(trimmed))
         mentions.push('Claude');
-    if (/\b(antigravity|gemini)\b/i.test(trimmed))
-        mentions.push('Antigravity / Gemini');
+    if (/\b(pi|antigravity|gemini)\b/i.test(trimmed))
+        mentions.push('Pi');
     if (mentions.length === 1)
         return mentions[0];
     return 'Cualquiera';
@@ -3712,6 +4290,8 @@ function escapeRegex(text) {
 }
 function normalizeTaskStatus(status, fallback = 'open') {
     const raw = normaliseText(status).toLowerCase();
+    if (['archived', 'archive', 'parked'].includes(raw))
+        return 'archived';
     if (['done', 'closed', 'resolved', 'complete', 'completed'].includes(raw))
         return 'done';
     if (['in_progress', 'in-progress', 'progress', 'active', 'doing', 'review'].includes(raw))
@@ -3721,11 +4301,24 @@ function normalizeTaskStatus(status, fallback = 'open') {
     return fallback;
 }
 function statusToZone(status) {
+    if (status === 'archived')
+        return 'archived';
     if (status === 'done')
         return 'done';
     if (status === 'in_progress')
         return 'in_progress';
     return 'inbox';
+}
+function statusToStateKey(status, zone = statusToZone(status)) {
+    return `${status}:${zone}`;
+}
+function normalizePacketPriority(rawValue, fallback = 'low') {
+    const priority = normaliseText(rawValue).toLowerCase();
+    if (priority === 'medium')
+        return 'mid';
+    if (['high', 'mid', 'low'].includes(priority))
+        return priority;
+    return fallback;
 }
 function extractPacketObjective(content) {
     const match = content.match(/OBJECTIVE:\s*([\s\S]*?)\n\[\/WORK_PACKET\]/);
@@ -3757,7 +4350,99 @@ function replacePacketObjective(content, objective) {
     }
     return `${content}\n${nextBlock}\n[/WORK_PACKET]`;
 }
-function findWorkPacketById(packetId, zones = ['inbox', 'in_progress', 'done']) {
+function buildWorkPacketApiRecord(resolved, content = resolved.content) {
+    const fallbackStatus = resolved.zone === 'archived' ? 'archived' : resolved.zone === 'done' ? 'done' : resolved.zone === 'in_progress' ? 'in_progress' : 'open';
+    const currentStatus = normalizeTaskStatus(getPacketField(content, 'STATUS'), fallbackStatus);
+    const roleRequested = getPacketField(content, 'ROLE_REQUESTED') || getPacketField(content, 'OWNER') || 'Cualquiera';
+    const assignedTo = getPacketField(content, 'ASSIGNED_TO') || roleRequested;
+    const state = readArgosState();
+    const stateKey = normaliseText(state.packet_states?.[resolved.packetId]) || statusToStateKey(currentStatus, resolved.zone);
+    return {
+        id: resolved.packetId,
+        role_requested: roleRequested,
+        assigned_to: assignedTo,
+        subject: getPacketField(content, 'SUBJECT') || resolved.packetId,
+        status: currentStatus,
+        state_key: stateKey,
+        objective: extractPacketObjective(content),
+        zone: resolved.zone,
+        room: normalizeTaskRoom(getPacketField(content, 'ROOM')),
+        type: normalizeTaskType(getPacketField(content, 'TYPE')),
+        priority: normalizePacketPriority(getPacketField(content, 'PRIORITY'), 'low'),
+        tokens_spent: Number(getPacketField(content, 'TOKENS_SPENT')) || 0,
+        fileName: resolved.fileName,
+        updated_at: getPacketField(content, 'UPDATED_AT'),
+        updated_by: getPacketField(content, 'UPDATED_BY'),
+        content
+    };
+}
+function updatePacketStateInMemory(state, packetId, status, zone) {
+    const nextState = { ...state };
+    const normalizedPacketId = normaliseText(packetId);
+    nextState.packet_states = { ...(state.packet_states || {}) };
+    nextState.packet_states[normalizedPacketId] = statusToStateKey(status, zone);
+    const withoutPacket = (items) => Array.isArray(items)
+        ? items.map((id) => normaliseText(id)).filter((id) => id !== '' && id !== normalizedPacketId)
+        : [];
+    const openPackets = withoutPacket(state.open_packets);
+    const inProgressPackets = withoutPacket(state.in_progress_packets);
+    if (zone === 'inbox' && !openPackets.includes(normalizedPacketId))
+        openPackets.push(normalizedPacketId);
+    if (zone === 'in_progress' && !inProgressPackets.includes(normalizedPacketId))
+        inProgressPackets.push(normalizedPacketId);
+    nextState.open_packets = openPackets;
+    nextState.in_progress_packets = inProgressPackets;
+    nextState.updated_at = nowIso();
+    return nextState;
+}
+function writeJsonFileAtomic(filePath, payload) {
+    ensureDirSync(path_1.default.dirname(filePath));
+    const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+    fs_1.default.writeFileSync(tempPath, JSON.stringify(payload, null, 2), 'utf-8');
+    fs_1.default.renameSync(tempPath, filePath);
+}
+function writeWorkPacketAndStateAtomic(resolved, nextContent, nextZone, nextState) {
+    const targetDir = path_1.default.join(RUNTIME_DIR, 'work_packets', nextZone);
+    ensureDirSync(targetDir);
+    const targetFilePath = path_1.default.join(targetDir, resolved.fileName);
+    const samePath = path_1.default.resolve(targetFilePath) === path_1.default.resolve(resolved.filePath);
+    const oldStateRaw = fs_1.default.existsSync(ARGOS_STATE_PATH) ? fs_1.default.readFileSync(ARGOS_STATE_PATH, 'utf-8') : '';
+    const oldSourceContent = fs_1.default.existsSync(resolved.filePath) ? fs_1.default.readFileSync(resolved.filePath, 'utf-8') : resolved.content;
+    const oldTargetContent = !samePath && fs_1.default.existsSync(targetFilePath) ? fs_1.default.readFileSync(targetFilePath, 'utf-8') : null;
+    if (!samePath && oldTargetContent !== null) {
+        throw new Error(`Destino ya existe para ${resolved.packetId}: ${targetFilePath}`);
+    }
+    try {
+        fs_1.default.writeFileSync(targetFilePath, nextContent, 'utf-8');
+        writeJsonFileAtomic(ARGOS_STATE_PATH, nextState);
+        if (!samePath && fs_1.default.existsSync(resolved.filePath)) {
+            fs_1.default.unlinkSync(resolved.filePath);
+        }
+        return { targetFilePath };
+    }
+    catch (error) {
+        try {
+            if (samePath) {
+                fs_1.default.writeFileSync(resolved.filePath, oldSourceContent, 'utf-8');
+            }
+            else {
+                if (fs_1.default.existsSync(targetFilePath))
+                    fs_1.default.unlinkSync(targetFilePath);
+                if (!fs_1.default.existsSync(resolved.filePath))
+                    fs_1.default.writeFileSync(resolved.filePath, oldSourceContent, 'utf-8');
+                if (oldTargetContent !== null)
+                    fs_1.default.writeFileSync(targetFilePath, oldTargetContent, 'utf-8');
+            }
+            if (oldStateRaw !== '')
+                fs_1.default.writeFileSync(ARGOS_STATE_PATH, oldStateRaw, 'utf-8');
+        }
+        catch (rollbackError) {
+            console.error('[WORKPACKETS] Rollback incompleto tras fallo atomico', rollbackError);
+        }
+        throw error;
+    }
+}
+function findWorkPacketById(packetId, zones = ['inbox', 'in_progress', 'done', 'archived']) {
     const targetId = normaliseText(packetId);
     if (targetId === '')
         return null;
@@ -4021,7 +4706,7 @@ function isTaskAssignedToAgent(task, agentName) {
     return normalizeAgentName(task.owner) === agentName;
 }
 function inferIaStatusFromTasks(base) {
-    // Solo in_progress cuenta como trabajo activo — inbox es pendiente, no en ejecución
+    // Solo in_progress cuenta como trabajo activo â€” inbox es pendiente, no en ejecuciÃ³n
     const activeTasks = loadTasksFromZone('in_progress')
         .filter((task) => task.status === 'in_progress' || task.status === 'open')
         .sort((a, b) => b.mtimeMs - a.mtimeMs);
@@ -4031,30 +4716,30 @@ function inferIaStatusFromTasks(base) {
             return direct;
         return null;
     };
-    // Índice de packets realmente en in_progress/ — validación rápida por nombre de fichero
+    // Ãndice de packets realmente en in_progress/ â€” validaciÃ³n rÃ¡pida por nombre de fichero
     const inProgressDir = path_1.default.join(RUNTIME_DIR, 'work_packets', 'in_progress');
     const inProgressFiles = fs_1.default.existsSync(inProgressDir) ? fs_1.default.readdirSync(inProgressDir) : [];
     const isActuallyInProgress = (packetId) => !!packetId && inProgressFiles.some(f => f.includes(packetId));
     const enriched = {
         Claude: { ...base.Claude },
-        Antigravity: { ...base.Antigravity },
+        Pi: { ...base.Pi },
         Codex: { ...base.Codex },
-        DeepSeek: { ...base.DeepSeek }
+        OpenClaw: { ...base.OpenClaw }
     };
-    // Cross-check: si una IA está marcada "active" pero su packet ya no está en in_progress/,
-    // el status es stale — se limpia automáticamente a standby.
-    // Los estados 'restricted' se mantienen as-is ya que son bloqueos externos, no tareas en ejecución.
-    ['Codex', 'Antigravity', 'Claude', 'DeepSeek'].forEach((agentName) => {
+    // Cross-check: si una IA estÃ¡ marcada "active" pero su packet ya no estÃ¡ en in_progress/,
+    // el status es stale â€” se limpia automÃ¡ticamente a standby.
+    // Los estados 'restricted' se mantienen as-is ya que son bloqueos externos, no tareas en ejecuciÃ³n.
+    ['Codex', 'Pi', 'Claude', 'OpenClaw'].forEach((agentName) => {
         const current = enriched[agentName];
         if (current.status === 'active' && current.task && !isActuallyInProgress(current.task)) {
             enriched[agentName] = { status: 'standby', task: '', task_subject: '', since: current.since };
         }
     });
     // Enriquecer IAs en standby con tareas activas detectadas en el filesystem
-    ['Codex', 'Antigravity', 'Claude', 'DeepSeek'].forEach((agentName) => {
+    ['Codex', 'Pi', 'Claude', 'OpenClaw'].forEach((agentName) => {
         const current = enriched[agentName];
         if (current.status !== 'standby')
-            return; // ya tiene status válido (active o restricted)
+            return; // ya tiene status vÃ¡lido (active o restricted)
         const task = assignTask(agentName);
         if (!task)
             return;
@@ -4150,7 +4835,7 @@ function parseVectorMarkdown() {
         const trimmed = line.trim();
         if (!trimmed || trimmed === '---')
             return;
-        // Detectar categorías (##)
+        // Detectar categorÃ­as (##)
         if (trimmed.startsWith('## ')) {
             currentCategory = { title: trimmed.replace('## ', '').trim(), goals: [] };
             categories.push(currentCategory);
@@ -4313,12 +4998,12 @@ function buildBootstrapPayload() {
         }
     };
 }
-// ============ MEJORA 3: Heartbeat SSE ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â mantiene conexiones abiertas, sin ruido en chat/log ============
+// ============ MEJORA 3: Heartbeat SSE ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â mantiene conexiones abiertas, sin ruido en chat/log ============
 function startHeartbeatLoop() {
     const sendHeartbeat = () => {
-        // Solo envÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­a un comentario SSE (lÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­nea que empieza por ':') a cada cliente suscrito.
-        // Los comentarios SSE mantienen la conexiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n viva pero el navegador/cliente los ignora
-        // silenciosamente ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â no llegan al handler de 'message', no se escriben en ningÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºn archivo.
+        // Solo envÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a un comentario SSE (lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nea que empieza por ':') a cada cliente suscrito.
+        // Los comentarios SSE mantienen la conexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n viva pero el navegador/cliente los ignora
+        // silenciosamente ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â no llegan al handler de 'message', no se escriben en ningÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºn archivo.
         const comment = `:heartbeat-${Date.now()}\n\n`;
         sseClients.forEach(clients => {
             clients.forEach(client => {
@@ -4332,7 +5017,7 @@ function startHeartbeatLoop() {
     setInterval(sendHeartbeat, 30000); // cada 30 s es suficiente para proxies/nginx
     console.log('[HEARTBEAT] SSE keepalive activo (cada 30 s, sin ruido en chat/log)');
 }
-// ============ MEJORA 4: Dispatcher Mirror ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â replica cambios a ARGOS_GLOBAL_LOG.md ============
+// ============ MEJORA 4: Dispatcher Mirror ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â replica cambios a ARGOS_GLOBAL_LOG.md ============
 let lastPacketStates = {};
 function startDispatcherMirror() {
     const workPacketsDir = path_1.default.join(RUNTIME_DIR, 'work_packets');
@@ -4360,7 +5045,7 @@ function startDispatcherMirror() {
                 console.log(`[MIRROR] Nuevo packet detectado: ${packetId} en ${current.zone}`);
             }
             else if (previous.zone !== current.zone) {
-                // Cambio de zona — solo log interno de servidor, sin escribir en GLOBAL_LOG ni SHADOW_LOG
+                // Cambio de zona â€” solo log interno de servidor, sin escribir en GLOBAL_LOG ni SHADOW_LOG
                 // (solo los agentes Claude, Antigravity y Codex escriben en logs narrativos)
                 console.log(`[MIRROR] ${packetId}: ${previous.zone} -> ${current.zone}`);
                 publishEvent('packet:changed', { packetId, from: previous.zone, to: current.zone });
@@ -4393,10 +5078,116 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/subscribe/:module', (req, res) => {
     const module = req.params.module || 'argos';
     const clientId = subscribeToModule(module, res);
-    // No cerrar la conexiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â mantenerla abierta para eventos
+    // No cerrar la conexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â mantenerla abierta para eventos
     req.on('close', () => {
-        console.log(`[PUBSUB] Request cerrado para mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³dulo: ${module}`);
+        console.log(`[PUBSUB] Request cerrado para mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dulo: ${module}`);
     });
+});
+app.get('/api/concilio/sse', (req, res) => {
+    if (!isTrustedLocalRequest(req)) {
+        return res.status(403).json({ error: 'Endpoint disponible solo en localhost' });
+    }
+    subscribeToModule('concilio', res);
+    req.on('close', () => {
+        console.log('[PUBSUB] Request cerrado para modulo: concilio');
+    });
+});
+app.get('/api/concilio', (req, res) => {
+    try {
+        if (!isTrustedLocalRequest(req)) {
+            return res.status(403).json({ error: 'GET /api/concilio disponible solo en localhost' });
+        }
+        const limitRaw = Number(req.query.limit || 50);
+        const limit = Number.isFinite(limitRaw) ? Math.round(limitRaw) : 50;
+        const packetId = normaliseText(String(req.query.packet_id || ''));
+        const messages = readConcilioMessages(limit, packetId);
+        return res.json({
+            status: 'ok',
+            count: messages.length,
+            messages
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo leyendo concilio', detail: String(error) });
+    }
+});
+app.post('/api/concilio', (req, res) => {
+    try {
+        const body = req.body || {};
+        const actorRaw = normaliseText(body.agent);
+        if (actorRaw === '') {
+            return res.status(400).json({ error: 'agent es obligatorio' });
+        }
+        const actor = resolveConcilioActor(actorRaw);
+        if (!actor) {
+            return res.status(400).json({ error: `agent no canonico para concilio: ${actorRaw}` });
+        }
+        if (!ensureConcilioActorMatchesAuth(req, res, actor))
+            return;
+        const typeRaw = normaliseText(body.type).toLowerCase();
+        if (!VALID_CONCILIO_TYPES.has(typeRaw)) {
+            return res.status(400).json({ error: 'type invalido para concilio' });
+        }
+        if (typeRaw === 'decision') {
+            if (actor.id !== 'Capitan') {
+                return res.status(400).json({ error: 'type=decision solo puede usarlo actor Capitan' });
+            }
+            if (!ensureConcilioDecisionWrite(req, res))
+                return;
+        }
+        const roomRaw = normaliseText(body.room);
+        if (roomRaw !== '' && roomRaw.toLowerCase() !== 'concilio') {
+            return res.status(400).json({ error: 'room debe ser "concilio"' });
+        }
+        const bodyText = normaliseText(body.body);
+        if (bodyText === '') {
+            return res.status(400).json({ error: 'body no puede estar vacio' });
+        }
+        if (bodyText.length > 5000) {
+            return res.status(400).json({ error: 'body excede techo maximo de 5000 caracteres' });
+        }
+        const timestamp = parseDepositTimestampIso(normaliseText(body.timestamp) || nowIso());
+        const packetId = normaliseText(body.packet_id);
+        const inReplyTo = normaliseText(body.in_reply_to);
+        const sessionRef = normaliseText(body.session_ref);
+        const message = {
+            message_id: nextConcilioMessageId(),
+            agent: actor.id,
+            timestamp,
+            room: 'concilio',
+            type: typeRaw,
+            body: bodyText,
+            ...(inReplyTo !== '' ? { in_reply_to: inReplyTo } : {}),
+            ...(packetId !== '' ? { packet_id: packetId } : {}),
+            ...(sessionRef !== '' ? { session_ref: sessionRef } : {})
+        };
+        ensureConcilioStorage();
+        appendJsonlRecord(CONCILIO_JSONL_PATH, message);
+        appendToConcilioMarkdownLog(message);
+        appendJsonlRecord(ARGOS_EVENTS_PATH, {
+            timestamp,
+            actor: actor.id,
+            module: 'concilio',
+            type: 'concilio_message',
+            packet_id: packetId,
+            refId: packetId,
+            summary: `${typeRaw}: ${bodyText.slice(0, 140)}`,
+            details: bodyText,
+            source: 'api:concilio',
+            message_id: message.message_id
+        });
+        publishEvent('concilio:message', {
+            message_id: message.message_id,
+            agent: message.agent,
+            type: message.type,
+            packet_id: message.packet_id || '',
+            timestamp: message.timestamp
+        });
+        return res.json({ status: 'ok', message });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo escribiendo en concilio', detail: String(error) });
+    }
 });
 app.get('/api/state', (req, res) => {
     const statePath = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.json');
@@ -4523,7 +5314,7 @@ app.post('/api/remote/closure', (req, res) => {
         const integrated = integrateClosure(depositPayload, {
             source: 'api:remote/closure',
             trigger: payload.trigger,
-            captainSummaryPrefix: '[CIERRE-REMOTO]'
+            captainSummaryPrefix: ''
         });
         let packetMovedTo = 'unchanged';
         if (payload.mark_packet_done) {
@@ -4543,6 +5334,9 @@ app.post('/api/remote/closure', (req, res) => {
             trigger: payload.trigger,
             source: 'api:remote/closure'
         });
+        if (payload.sections.handoff) {
+            appendToHandoffLog(payload.agent, payload.packet_id, payload.sections.handoff, timestampIso);
+        }
         appendJsonlRecord(ARGOS_EVENTS_PATH, {
             timestamp: timestampIso,
             actor: normalizeAgentName(payload.agent) || payload.agent,
@@ -4551,10 +5345,34 @@ app.post('/api/remote/closure', (req, res) => {
             packet_id: payload.packet_id,
             refId: payload.packet_id,
             status: depositPayload.statePayload.status,
-            summary: depositPayload.statePayload.summary || firstLine(payload.sections.log) || 'Remote closure integrado',
-            details: `trigger=${payload.trigger}; interface=${payload.interface}; mark_packet_done=${payload.mark_packet_done}`,
+            summary: payload.mission || firstLine(payload.sections.log) || 'Remote closure integrado',
+            mission: payload.mission,
+            closure_type: payload.closure_type,
+            result: payload.result,
+            handoff: payload.handoff,
+            handoff_active: payload.handoff_active,
+            schema_version: payload.schema_version,
+            risk_level: payload.risk_level,
+            risks: payload.handoff,
+            lifecycle_event: payload.lifecycle_event,
+            transcriptRef: payload.transcript_ref || `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
+            details: `trigger=${payload.trigger}; interface=${payload.interface}; mark_packet_done=${payload.mark_packet_done}; status=${payload.status}`,
             source: 'api:remote/closure'
         });
+        if (payload.legacy_summary_used) {
+            appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+                id: getNextGlitchId(),
+                timestamp: timestampIso,
+                actor: normalizeAgentName(payload.agent) || payload.agent,
+                module: 'argos_remote_closure',
+                type: 'deprecation',
+                status: 'open',
+                summary: `Deprecation en remote closure (${payload.packet_id}): se uso summary`,
+                details: 'El payload recibio summary sin mission. Se normalizo a mission para compatibilidad Fase 1.',
+                next_step: 'Actualizar cliente remoto para enviar mission (<=80).',
+                source: 'api:remote/closure'
+            });
+        }
         publishEvent('remote:closure', {
             closure_id: closureId,
             agent: payload.agent,
@@ -4564,7 +5382,7 @@ app.post('/api/remote/closure', (req, res) => {
         });
         return res.json({
             closure_id: closureId,
-            transcriptRef: `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
+            transcriptRef: payload.transcript_ref || `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
             packet_moved_to: packetMovedTo
         });
     }
@@ -4824,7 +5642,7 @@ app.post('/api/chat', (req, res) => {
         };
         // Transcript: registrar la respuesta literal de la IA
         // Para agentes UI-side (Antigravity, Qwen...) el contenido completo llega en details.
-        // Para Claude (Claude Code) el transcript literal se escribe desde el cliente — aquí
+        // Para Claude (Claude Code) el transcript literal se escribe desde el cliente â€” aquÃ­
         // registramos summary+details como fallback hasta que haya captura directa.
         const transcriptContent = req.body.literalResponse
             || (details ? `${summary}\n\n${details}` : summary);
@@ -4841,8 +5659,8 @@ app.post('/api/chat', (req, res) => {
             minute: '2-digit'
         })
             .slice(0, 16);
-        // interactions_log reemplazado por el sistema de transcripts — ya no se escribe type:interaction
-        // al JSONL de eventos; el transcript canónico vive en transcripts/FECHA_AGENTE.md
+        // interactions_log reemplazado por el sistema de transcripts â€” ya no se escribe type:interaction
+        // al JSONL de eventos; el transcript canÃ³nico vive en transcripts/FECHA_AGENTE.md
         // Also record in the token ledger with module and ID linkage
         appendJsonlRecord(recordsPath, {
             timestamp: record.timestamp,
@@ -4857,7 +5675,7 @@ app.post('/api/chat', (req, res) => {
         // WORK_TOKENS fallback (Orden Ejecutiva):
         // Si el agente solo usa /api/chat (y olvida /api/trilog), el panel WORK_TOKENS quedaria "casi a cero".
         // - Si llega `processTokens` / `workTokens`, se confia.
-        // - Si no llega, se deriva una estimacion conservadora desde el tamaño del reporte.
+        // - Si no llega, se deriva una estimacion conservadora desde el tamaÃ±o del reporte.
         const packetRefId = normaliseText(record.refId);
         if (looksLikeWorkPacketId(packetRefId) && !hasWorkTokenForPacket(recordsPath, canonicalSender, packetRefId)) {
             const explicitWork = Number(req.body.processTokens ?? req.body.workTokens ?? req.body.work_tokens ?? 0);
@@ -4906,16 +5724,56 @@ app.post('/api/chat', (req, res) => {
 app.post('/api/chat/edit', (req, res) => {
     try {
         const messageId = normaliseText(req.body.messageId);
+        const action = normaliseText(req.body.action).toLowerCase();
+        const actor = normaliseText(req.body.actor) || normaliseText(req.body.agent) || 'Unknown';
         const summary = normaliseText(req.body.summary);
         const details = normaliseText(req.body.details);
         if (messageId === '')
             return res.status(400).json({ error: 'messageId requerido' });
-        if (summary === '')
-            return res.status(400).json({ error: 'summary requerido' });
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         if (!fs_1.default.existsSync(feedPath))
             return res.status(404).json({ error: 'No existe captain_feed.jsonl' });
         const lines = readCaptainFeedLines(feedPath);
+        if (action === 'delete') {
+            let deletedRecord = null;
+            const nextLines = lines.filter((line) => {
+                if (!line.parsed)
+                    return true;
+                const current = ensureCaptainFeedRecordId(line.parsed);
+                if (resolveFeedRecordId(current) !== messageId)
+                    return true;
+                deletedRecord = current;
+                return false;
+            });
+            if (!deletedRecord) {
+                return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+            }
+            writeCaptainFeedLines(feedPath, nextLines);
+            const deletedAt = new Date().toISOString();
+            const finalRecord = deletedRecord;
+            const packetRef = normaliseText(finalRecord.refId);
+            appendJsonlRecord(ARGOS_EVENTS_PATH, {
+                timestamp: deletedAt,
+                actor,
+                module: 'argos',
+                type: 'interaction_delete',
+                status: 'deleted',
+                packet_id: packetRef,
+                refId: packetRef,
+                summary: `Mensaje eliminado del captain_feed: ${messageId}`,
+                details: normaliseText(finalRecord.summary),
+                source: 'api:chat/edit'
+            });
+            publishEvent('chat:message_deleted', {
+                id: messageId,
+                actor,
+                refId: packetRef,
+                timestamp: deletedAt
+            });
+            return res.json({ ok: true, deleted: messageId });
+        }
+        if (summary === '')
+            return res.status(400).json({ error: 'summary requerido' });
         const editedAt = new Date().toISOString();
         let updatedRecord = null;
         let found = false;
@@ -5131,11 +5989,11 @@ app.post('/api/trilog', (req, res) => {
         processTokens = 0, // trabajo real de la tarea
         trilogTokens = 0, // coste de redaccion/reportado en trilog
         chatTokens = 0, // coste de mensaje final al chat/feed
-        shadow = '', // OBLIGATORIO: observación latente Junguiana — el negativo del LOG
+        shadow = '', // OBLIGATORIO: observaciÃ³n latente Junguiana â€” el negativo del LOG
         discarded = '', // opcional: detalles descartados durante el proceso
         ignored = '', // opcional: detalles ignorados por baja prioridad
         suppressed = '', // opcional: detalles suprimidos/no volcados en LOG
-        status = 'done', module = 'argos', transcriptRef = '' // referencia al bloque de transcript literal (YYYY-MM-DD_Agente.md#ARG-XXXX)
+        status = 'done', module = 'argos', lifecycle_event = false, transcriptRef = '' // referencia al bloque de transcript literal (YYYY-MM-DD_Agente.md#ARG-XXXX)
          } = req.body;
         if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor)))
             return;
@@ -5146,12 +6004,12 @@ app.post('/api/trilog', (req, res) => {
         const shadowContent = normaliseText(shadow);
         if (shadowContent === '') {
             return res.status(400).json({
-                error: 'Campo shadow obligatorio. Escribe lo que observaste durante la tarea pero no volcaste en el LOG — fricción cognitiva, patrón emergente, riesgo latente, tensión no resuelta. El shadow es el negativo que forma la imagen del log.'
+                error: 'Campo shadow obligatorio. Escribe lo que observaste durante la tarea pero no volcaste en el LOG â€” fricciÃ³n cognitiva, patrÃ³n emergente, riesgo latente, tensiÃ³n no resuelta. El shadow es el negativo que forma la imagen del log.'
             });
         }
         const now = new Date();
         const isoTs = now.toISOString();
-        // sv-SE produce YYYY-MM-DD HH:MM — formato requerido por el parser del logbook
+        // sv-SE produce YYYY-MM-DD HH:MM â€” formato requerido por el parser del logbook
         const canaryTs = now.toLocaleString('sv-SE', {
             timeZone: 'Atlantic/Canary',
             year: 'numeric', month: '2-digit', day: '2-digit',
@@ -5161,7 +6019,7 @@ app.post('/api/trilog', (req, res) => {
         const processTokenCount = resolveEstimatedTokens(processTokens || tokens, summary, details, errors, risks, packetRef);
         const trilogTokenCount = resolveEstimatedTokens(trilogTokens, summary, details, nextStep, errors, risks, shadow, discarded, ignored, suppressed, packetRef, canonicalActor);
         const chatTokenCount = resolveEstimatedTokens(chatTokens, `[CIERRE] ${summary}`, nextStep ? `Siguiente: ${nextStep}` : '', packetRef, canonicalActor);
-        // feedDetails: solo nextStep si lo hay — sin breakdown de tokens en el feed (ruido)
+        // feedDetails: solo nextStep si lo hay â€” sin breakdown de tokens en el feed (ruido)
         const feedDetails = nextStep ? `Siguiente: ${nextStep}` : '';
         const written = [];
         // 1. GLOBAL LOG (markdown)
@@ -5188,11 +6046,13 @@ app.post('/api/trilog', (req, res) => {
             packet_id: packetRef,
             refId: packetRef,
             status,
+            mission: summary,
             summary,
             details,
             next_step: nextStep,
             errors,
             risks,
+            lifecycle_event: Boolean(lifecycle_event),
             tokens: processTokenCount,
             transcriptRef: normaliseText(transcriptRef),
             source: 'api:trilog'
@@ -5234,8 +6094,8 @@ app.post('/api/trilog', (req, res) => {
         written.push('TOKENS');
         publishEvent('tokens:updated', { agent: canonicalActor, tokens: processTokenCount, timestamp: isoTs, refId: packetRef, scope: 'work' });
         // 3. SHADOW LOG (markdown)
-        // El shadow es el negativo del LOG: lo que el agente percibió pero no volcó.
-        // Formato canónico: PACKET + TAREA (contexto) + SOMBRA (observación latente).
+        // El shadow es el negativo del LOG: lo que el agente percibiÃ³ pero no volcÃ³.
+        // Formato canÃ³nico: PACKET + TAREA (contexto) + SOMBRA (observaciÃ³n latente).
         const shadowEntry = `\n---\n` +
             `**[${canaryTs} Atlantic/Canary] VOZ ${canonicalActor.toUpperCase()} (SOMBRA):**\n` +
             `**PACKET:** ${packetRef}\n` +
@@ -5246,7 +6106,7 @@ app.post('/api/trilog', (req, res) => {
             : '# ARGOS GLOBAL SHADOW LOG\nRegistro latente.\n';
         fs_1.default.writeFileSync(ARGOS_GLOBAL_SHADOW_PATH, existingShadow + shadowEntry, 'utf-8');
         written.push('SHADOW');
-        // 4. Captain feed (notificaciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n al chat)
+        // 4. Captain feed (notificaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n al chat)
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         appendJsonlRecord(feedPath, {
             id: nextFeedMessageId(),
@@ -5257,7 +6117,7 @@ app.post('/api/trilog', (req, res) => {
             sender_role: 'agent',
             audience: 'captain',
             source: 'trilog',
-            summary: `[CIERRE] ${summary}`,
+            summary,
             details: feedDetails,
             status,
             tokens: 0,
@@ -5265,7 +6125,7 @@ app.post('/api/trilog', (req, res) => {
             transcriptRef: normaliseText(transcriptRef)
         });
         written.push('FEED');
-        // 5. Resetear Estado de IAs â†’ Standby
+        // 5. Resetear Estado de IAs Ã¢â€ â€™ Standby
         setIaStandby(canonicalActor);
         publishEvent('ia:status_changed', { agent: canonicalActor, status: 'standby', task: '', subject: '' });
         // 6. Pub/Sub: notificar a suscritos
@@ -5292,7 +6152,22 @@ app.post('/api/trilog', (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ error: 'Fallo en tri-log de sesiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n', detail: String(error) });
+        res.status(500).json({ error: 'Fallo en tri-log de sesiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n', detail: String(error) });
+    }
+});
+// ============ HANDOFF ENDPOINTS ============
+// GET /api/handoff/:packetId — sin token, lectura pública
+// Devuelve todas las entradas de ARGOS_GLOBAL_HANDOFF_LOG.md para ese packet.
+app.get('/api/handoff/:packetId', (req, res) => {
+    try {
+        const packetId = normaliseText(req.params.packetId);
+        if (!packetId)
+            return res.status(400).json({ error: 'packetId requerido' });
+        const entries = readHandoffEntriesForPacket(packetId);
+        res.json({ packetId, entries });
+    }
+    catch (e) {
+        res.status(500).json({ error: 'Fallo leyendo handoff log', detail: String(e) });
     }
 });
 // ============ TRANSCRIPT ENDPOINTS ============
@@ -5390,7 +6265,7 @@ app.get('/api/transcript/packet', (req, res) => {
 });
 // GET /api/transcript/:packetId
 // Alias REST limpio de /api/transcript/packet?packetId=X.
-// Sin autenticación — solo lectura, accesible por cualquier agente.
+// Sin autenticaciÃ³n â€” solo lectura, accesible por cualquier agente.
 app.get('/api/transcript/:packetId', (req, res) => {
     try {
         const packetId = normaliseText(req.params.packetId);
@@ -5414,7 +6289,7 @@ app.get('/api/transcript/:packetId', (req, res) => {
             const agent = nameParts.slice(1).join('_');
             results.push({ agent, date, file, content: block });
         }
-        // Ordenar por fecha+agente asc para lectura cronológica
+        // Ordenar por fecha+agente asc para lectura cronolÃ³gica
         results.sort((a, b) => `${a.date}_${a.agent}`.localeCompare(`${b.date}_${b.agent}`));
         res.json({ packetId, transcripts: results });
     }
@@ -5430,7 +6305,7 @@ app.get('/api/transcript/feed', (req, res) => {
         const date = normaliseText(req.query.date) || transcriptDateStr();
         if (!fs_1.default.existsSync(TRANSCRIPTS_DIR))
             return res.json({ date, entries: [] });
-        // Todos los archivos del día: YYYY-MM-DD_AGENTE.md
+        // Todos los archivos del dÃ­a: YYYY-MM-DD_AGENTE.md
         const files = fs_1.default.readdirSync(TRANSCRIPTS_DIR)
             .filter((f) => f.startsWith(date) && f.endsWith('.md'))
             .sort();
@@ -5445,7 +6320,7 @@ app.get('/api/transcript/feed', (req, res) => {
             while ((match = blockRegex.exec(rawContent)) !== null) {
                 const packetId = match[1];
                 const blockText = match[2].trim();
-                // Extraer timestamp de la línea ## [YYYY-MM-DD HH:MM]
+                // Extraer timestamp de la lÃ­nea ## [YYYY-MM-DD HH:MM]
                 const tsMatch = blockText.match(/## \[(\d{4}-\d{2}-\d{2}[^\]]*)\]/);
                 const timestamp = tsMatch ? tsMatch[1] : date;
                 entries.push({ timestamp, agent, packetId, content: blockText });
@@ -5491,7 +6366,7 @@ app.get('/api/tasks', (req, res) => {
             const pb = PRIORITY_RANK[b.priority] ?? 1;
             if (pb !== pa)
                 return pb - pa; // mayor prioridad primero
-            return recencyMs(b) - recencyMs(a); // misma prioridad → mas reciente primero
+            return recencyMs(b) - recencyMs(a); // misma prioridad â†’ mas reciente primero
         };
         const pendingTasks = filteredTasks
             .filter((task) => task.status !== 'done')
@@ -5543,6 +6418,258 @@ app.get('/api/tasks/get', (req, res) => {
     }
     catch (error) {
         return res.status(500).json({ error: 'Fallo leyendo el work packet', detail: String(error) });
+    }
+});
+app.get('/api/workpackets/:id', (req, res) => {
+    try {
+        const packetId = normaliseText(req.params.id);
+        if (packetId === '')
+            return res.status(400).json({ error: 'packetId requerido' });
+        const resolved = findWorkPacketById(packetId);
+        if (!resolved)
+            return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
+        return res.json({
+            status: 'ok',
+            packet: buildWorkPacketApiRecord(resolved)
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo leyendo el work packet', detail: String(error) });
+    }
+});
+app.patch('/api/workpackets/:id', (req, res) => {
+    try {
+        const packetId = normaliseText(req.params.id);
+        if (packetId === '')
+            return res.status(400).json({ error: 'packetId requerido' });
+        const body = req.body && typeof req.body === 'object' ? req.body : {};
+        const actor = normaliseText(body.actor) || normaliseText(body.agent);
+        if (actor === '')
+            return res.status(400).json({ error: 'actor es obligatorio para trazabilidad' });
+        if (!isTrustedLocalRequest(req)) {
+            const auth = authenticateAgentRequest(req, actor);
+            if (!auth.ok)
+                return res.status(auth.status).json({ error: auth.error });
+        }
+        const resolved = findWorkPacketById(packetId);
+        if (!resolved)
+            return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
+        const allowedFields = [
+            'subject',
+            'objective',
+            'priority',
+            'room',
+            'type',
+            'role_requested',
+            'status',
+            'assigned_to'
+        ];
+        const requestedFields = allowedFields.filter((field) => Object.prototype.hasOwnProperty.call(body, field));
+        if (requestedFields.length === 0) {
+            return res.status(400).json({ error: `Nada que actualizar. Campos permitidos: ${allowedFields.join(', ')}` });
+        }
+        const before = buildWorkPacketApiRecord(resolved);
+        let nextContent = resolved.content;
+        const nextSubject = Object.prototype.hasOwnProperty.call(body, 'subject')
+            ? normaliseText(body.subject)
+            : before.subject;
+        const nextObjective = Object.prototype.hasOwnProperty.call(body, 'objective')
+            ? String(body.objective ?? '').replace(/\r/g, '').trim()
+            : before.objective;
+        const nextPriority = Object.prototype.hasOwnProperty.call(body, 'priority')
+            ? normalizePacketPriority(body.priority, before.priority)
+            : before.priority;
+        const nextRoom = Object.prototype.hasOwnProperty.call(body, 'room')
+            ? normalizeTaskRoom(normaliseText(body.room))
+            : before.room;
+        const nextType = Object.prototype.hasOwnProperty.call(body, 'type')
+            ? normalizeTaskType(normaliseText(body.type))
+            : before.type;
+        const nextRoleRequested = Object.prototype.hasOwnProperty.call(body, 'role_requested')
+            ? normaliseText(body.role_requested)
+            : before.role_requested;
+        const nextAssignedTo = Object.prototype.hasOwnProperty.call(body, 'assigned_to')
+            ? normaliseText(body.assigned_to)
+            : before.assigned_to;
+        const nextStatus = Object.prototype.hasOwnProperty.call(body, 'status')
+            ? normalizeTaskStatus(body.status, before.status)
+            : before.status;
+        if (nextSubject === '')
+            return res.status(400).json({ error: 'subject no puede quedar vacio' });
+        if (nextObjective === '')
+            return res.status(400).json({ error: 'objective no puede quedar vacio' });
+        if (nextRoleRequested === '')
+            return res.status(400).json({ error: 'role_requested no puede quedar vacio' });
+        if (nextAssignedTo === '')
+            return res.status(400).json({ error: 'assigned_to no puede quedar vacio' });
+        nextContent = upsertPacketField(nextContent, 'SUBJECT', nextSubject);
+        nextContent = replacePacketObjective(nextContent, nextObjective);
+        nextContent = upsertPacketField(nextContent, 'PRIORITY', nextPriority);
+        nextContent = upsertPacketField(nextContent, 'ROOM', nextRoom);
+        nextContent = upsertPacketField(nextContent, 'TYPE', nextType);
+        nextContent = upsertPacketField(nextContent, 'ROLE_REQUESTED', nextRoleRequested);
+        nextContent = upsertPacketField(nextContent, 'ASSIGNED_TO', nextAssignedTo);
+        nextContent = upsertPacketField(nextContent, 'STATUS', nextStatus);
+        const timestamp = nowIso();
+        nextContent = upsertPacketField(nextContent, 'UPDATED_AT', timestamp);
+        nextContent = upsertPacketField(nextContent, 'UPDATED_BY', actor);
+        const nextZone = statusToZone(nextStatus);
+        const currentState = readArgosState();
+        const nextState = updatePacketStateInMemory(currentState, resolved.packetId, nextStatus, nextZone);
+        writeWorkPacketAndStateAtomic(resolved, nextContent, nextZone, nextState);
+        const movedResolved = findWorkPacketById(resolved.packetId, [nextZone]) || {
+            ...resolved,
+            zone: nextZone,
+            filePath: path_1.default.join(RUNTIME_DIR, 'work_packets', nextZone, resolved.fileName),
+            content: nextContent
+        };
+        const after = buildWorkPacketApiRecord(movedResolved, nextContent);
+        const changedFields = requestedFields.filter((field) => JSON.stringify(before[field]) !== JSON.stringify(after[field]));
+        const changedSummary = changedFields.length > 0
+            ? changedFields
+                .map((field) => `${field}: ${JSON.stringify(before[field])} -> ${JSON.stringify(after[field])}`)
+                .join(' | ')
+            : `metadata: UPDATED_BY=${actor} | UPDATED_AT=${timestamp}`;
+        appendJsonlRecord(ARGOS_EVENTS_PATH, {
+            timestamp,
+            actor,
+            module: 'argos',
+            type: 'workpacket_patch',
+            status: after.status,
+            packet_id: resolved.packetId,
+            refId: resolved.packetId,
+            summary: `Workpacket actualizado: ${after.subject}`,
+            details: changedSummary,
+            changed_fields: changedFields,
+            requested_fields: requestedFields,
+            source: 'api:workpackets/patch'
+        });
+        if (body.notify_feed === true) {
+            appendJsonlRecord(CAPTAIN_FEED_PATH, {
+                id: nextFeedMessageId(),
+                timestamp,
+                kind: 'crew_update',
+                speaker: 'crew',
+                sender_name: actor,
+                sender_role: 'agent',
+                audience: 'captain',
+                source: 'api:workpackets/patch',
+                summary: `Workpacket actualizado: ${after.subject}`,
+                details: changedSummary,
+                status: after.status,
+                tokens: 0,
+                refId: resolved.packetId
+            });
+        }
+        publishEvent('packet:changed', {
+            packetId: resolved.packetId,
+            from: resolved.zone,
+            to: nextZone,
+            status: after.status,
+            actor,
+            changed_fields: changedFields,
+            requested_fields: requestedFields
+        });
+        return res.json({
+            status: 'ok',
+            packet: after,
+            changed_fields: changedFields,
+            requested_fields: requestedFields
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo actualizando el work packet', detail: String(error) });
+    }
+});
+app.post('/api/workpackets/:id/archive', (req, res) => {
+    try {
+        const packetId = normaliseText(req.params.id);
+        if (packetId === '')
+            return res.status(400).json({ error: 'packetId requerido' });
+        const body = req.body && typeof req.body === 'object' ? req.body : {};
+        const actor = normaliseText(body.actor) || normaliseText(body.agent);
+        if (actor === '')
+            return res.status(400).json({ error: 'actor es obligatorio para trazabilidad' });
+        if (!isTrustedLocalRequest(req)) {
+            const auth = authenticateAgentRequest(req, actor);
+            if (!auth.ok)
+                return res.status(auth.status).json({ error: auth.error });
+        }
+        const alreadyArchived = findWorkPacketById(packetId, ['archived']);
+        if (alreadyArchived) {
+            return res.json({
+                status: 'ok',
+                archived: true,
+                already_archived: true,
+                packet: buildWorkPacketApiRecord(alreadyArchived)
+            });
+        }
+        const resolved = findWorkPacketById(packetId, ['inbox', 'in_progress', 'done']);
+        if (!resolved)
+            return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
+        const timestamp = nowIso();
+        const reason = normaliseText(body.reason);
+        let nextContent = resolved.content;
+        nextContent = upsertPacketField(nextContent, 'STATUS', 'archived');
+        nextContent = upsertPacketField(nextContent, 'UPDATED_AT', timestamp);
+        nextContent = upsertPacketField(nextContent, 'UPDATED_BY', actor);
+        if (reason !== '') {
+            nextContent = upsertPacketField(nextContent, 'ARCHIVE_REASON', reason);
+        }
+        const nextState = updatePacketStateInMemory(readArgosState(), resolved.packetId, 'archived', 'archived');
+        writeWorkPacketAndStateAtomic(resolved, nextContent, 'archived', nextState);
+        const archivedResolved = findWorkPacketById(resolved.packetId, ['archived']) || {
+            ...resolved,
+            zone: 'archived',
+            filePath: path_1.default.join(RUNTIME_DIR, 'work_packets', 'archived', resolved.fileName),
+            content: nextContent
+        };
+        const packet = buildWorkPacketApiRecord(archivedResolved, nextContent);
+        appendJsonlRecord(ARGOS_EVENTS_PATH, {
+            timestamp,
+            actor,
+            module: 'argos',
+            type: 'workpacket_archived',
+            status: 'archived',
+            packet_id: resolved.packetId,
+            refId: resolved.packetId,
+            summary: `Workpacket archivado: ${packet.subject}`,
+            details: `ZONA=${resolved.zone}->archived${reason !== '' ? ` | reason=${reason}` : ''}`,
+            source: 'api:workpackets/archive'
+        });
+        if (body.notify_feed === true) {
+            appendJsonlRecord(CAPTAIN_FEED_PATH, {
+                id: nextFeedMessageId(),
+                timestamp,
+                kind: 'crew_update',
+                speaker: 'crew',
+                sender_name: actor,
+                sender_role: 'agent',
+                audience: 'captain',
+                source: 'api:workpackets/archive',
+                summary: `Workpacket archivado: ${packet.subject}`,
+                details: reason,
+                status: 'archived',
+                tokens: 0,
+                refId: resolved.packetId
+            });
+        }
+        publishEvent('packet:changed', {
+            packetId: resolved.packetId,
+            from: resolved.zone,
+            to: 'archived',
+            status: 'archived',
+            actor
+        });
+        return res.json({
+            status: 'ok',
+            archived: true,
+            already_archived: false,
+            packet
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo archivando el work packet', detail: String(error) });
     }
 });
 // ============ ENDPOINT: Get AI My Packets ============
@@ -5813,8 +6940,13 @@ app.post('/api/ia/start-task', (req, res) => {
         // Marcar IA como activa en el widget Estado de IAs
         setIaActive(actor, packetId, subject);
         // Postear al captain feed
-        const voiceName = normalizeAgentName(actor) === 'Claude' ? 'Orfeo (Claude)' : actor;
-        postToCrewFeed(voiceName, `Tomando misiÃ³n: ${subject}`, `ID: ${packetId} â€” en progreso.`, 'crew_update', 0, packetId);
+        const canonicalVoice = normalizeAgentName(actor);
+        const voiceName = canonicalVoice === 'Claude'
+            ? 'Orfeo (Claude)'
+            : canonicalVoice === 'Pi'
+                ? 'Pi'
+                : actor;
+        postToCrewFeed(voiceName, `Tomando misión: ${subject}`, `ID: ${packetId} - en progreso.`, 'crew_update', 0, packetId);
         // Pub/Sub: notificar al dashboard en tiempo real
         publishEvent('ia:status_changed', { agent: normalizeAgentName(actor), status: 'active', task: packetId, subject });
         return res.json({
@@ -5918,7 +7050,7 @@ OBJECTIVE:
 ${rawText}
 [/WORK_PACKET]`;
         fs_1.default.writeFileSync(wpPath, packetContent, 'utf-8');
-        // Transcript: registrar el prompt literal del Capitán
+        // Transcript: registrar el prompt literal del CapitÃ¡n
         // El agente destino es el owner (o 'crew' si es Cualquiera)
         const transcriptAgent = normalizeAgentName(owner) || owner || 'crew';
         const tRef = appendToTranscript(transcriptAgent, 'captain', rawText, pktId);
@@ -6412,7 +7544,7 @@ function startAntigravityActivityWatcher() {
     console.log(`[ARGOS-API] Sistema de Vigilancia de Antigravity (IA) configurado.`);
 }
 // ============================================================
-// DEEPSEEK — GUARDIAN DE EFICIENCIA (4º TRIPULANTE)
+// DEEPSEEK â€” GUARDIAN DE EFICIENCIA (4Âº TRIPULANTE)
 // Conecta con Ollama local en localhost:11434
 // Modelo: deepseek-r1:8b (cabe entero en RTX 4070 8GB VRAM)
 // ============================================================
@@ -6456,7 +7588,7 @@ async function isOllamaAvailable() {
         return false;
     }
 }
-// GET /api/deepseek/status — ping Ollama y reporta modelo disponible
+// GET /api/deepseek/status â€” ping Ollama y reporta modelo disponible
 app.get('/api/deepseek/status', async (_req, res) => {
     const available = await isOllamaAvailable();
     if (!available) {
@@ -6473,7 +7605,7 @@ app.get('/api/deepseek/status', async (_req, res) => {
         return res.json({ available: true, model: DEEPSEEK_MODEL, modelLoaded: false });
     }
 });
-// POST /api/deepseek/analyze-task — clasifica si una tarea puede resolverse con open-source
+// POST /api/deepseek/analyze-task â€” clasifica si una tarea puede resolverse con open-source
 // Input: { packetId?, subject, objective }
 // Output: { isOpenSourceSolvable, recommendation, difficulty, agentSuggested, ollamaAvailable }
 app.post('/api/deepseek/analyze-task', async (req, res) => {
@@ -6486,54 +7618,54 @@ app.post('/api/deepseek/analyze-task', async (req, res) => {
         return res.json({
             ollamaAvailable: false,
             isOpenSourceSolvable: false,
-            recommendation: 'Ollama no disponible — derivar a IA de pago',
+            recommendation: 'Ollama no disponible â€” derivar a IA de pago',
             difficulty: 'unknown',
             agentSuggested: 'Claude'
         });
     }
-    const systemPrompt = `Eres el Guardián de Eficiencia del proyecto ARGOS.
-Tu misión es analizar tareas y decidir si pueden resolverse con un modelo open-source local (tú mismo) o requieren IA de pago (Claude, Codex, Antigravity).
+    const systemPrompt = `Eres el GuardiÃ¡n de Eficiencia del proyecto ARGOS.
+Tu misión es analizar tareas y decidir si pueden resolverse con un modelo open-source local (tú mismo) o requieren IA de pago (Claude, Codex, Pi).
 
 CRITERIOS OPEN-SOURCE (puedes resolver):
-- Categorización y clasificación de textos
-- Parsing de logs y extracción de datos
-- Búsqueda en base de conocimiento local
-- Generación de plantillas boilerplate
-- Validación sintáctica de código
-- Resúmenes de documentos largos
+- CategorizaciÃ³n y clasificaciÃ³n de textos
+- Parsing de logs y extracciÃ³n de datos
+- BÃºsqueda en base de conocimiento local
+- GeneraciÃ³n de plantillas boilerplate
+- ValidaciÃ³n sintÃ¡ctica de cÃ³digo
+- ResÃºmenes de documentos largos
 - Preguntas de hecho directas
 
 CRITERIOS IA PAGA (deriva):
 - Arquitectura nueva de sistemas
-- Diseño creativo o estratégico
-- Decisiones que afectan la dirección del proyecto
-- Implementación de código compleja con contexto profundo
+- DiseÃ±o creativo o estratÃ©gico
+- Decisiones que afectan la direcciÃ³n del proyecto
+- ImplementaciÃ³n de cÃ³digo compleja con contexto profundo
 - Tareas que requieren memoria de sesiones anteriores
-- Razonamiento multi-paso sobre código existente desconocido
+- Razonamiento multi-paso sobre cÃ³digo existente desconocido
 
-Responde SOLO con JSON válido (sin texto extra, sin markdown):
+Responde SOLO con JSON vÃ¡lido (sin texto extra, sin markdown):
 {
   "isOpenSourceSolvable": true/false,
   "difficulty": "easy"|"medium"|"hard",
-  "agentSuggested": "DeepSeek"|"Claude"|"Codex"|"Antigravity",
-  "recommendation": "Una frase explicando la decisión"
+  "agentSuggested": "OpenClaw"|"Claude"|"Codex"|"Pi",
+  "recommendation": "Una frase explicando la decisiÃ³n"
 }`;
     const userMsg = `Analiza esta tarea de trabajo:
-SUBJECT: ${subject || '(sin título)'}
-OBJECTIVE: ${objective || subject || '(sin descripción)'}
+SUBJECT: ${subject || '(sin tÃ­tulo)'}
+OBJECTIVE: ${objective || subject || '(sin descripciÃ³n)'}
 ${packetId ? `PACKET_ID: ${packetId}` : ''}`;
     try {
         const { content: rawResponse, inputTokens, outputTokens } = await callOllama([
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userMsg }
         ], 15000);
-        recordTokensInternal('DeepSeek', inputTokens + outputTokens, 'analyze-task', packetId || '', 'work');
-        // Extraer JSON de la respuesta (DeepSeek puede añadir texto antes/después o tags <think>)
+        recordTokensInternal('OpenClaw', inputTokens + outputTokens, 'analyze-task', packetId || '', 'work');
+        // Extraer JSON de la respuesta (DeepSeek puede aÃ±adir texto antes/despuÃ©s o tags <think>)
         const jsonMatch = rawResponse.match(/\{[\s\S]*?\}/);
         if (!jsonMatch)
-            throw new Error('No se encontró JSON en la respuesta de DeepSeek');
+            throw new Error('No se encontrÃ³ JSON en la respuesta de DeepSeek');
         const parsed = JSON.parse(jsonMatch[0]);
-        console.log(`[DEEPSEEK] Análisis completado — packetId=${packetId || 'n/a'} → ${parsed.agentSuggested} (${parsed.difficulty})`);
+        console.log(`[DEEPSEEK] AnÃ¡lisis completado â€” packetId=${packetId || 'n/a'} â†’ ${parsed.agentSuggested} (${parsed.difficulty})`);
         return res.json({
             ollamaAvailable: true,
             isOpenSourceSolvable: parsed.isOpenSourceSolvable ?? false,
@@ -6549,8 +7681,8 @@ ${packetId ? `PACKET_ID: ${packetId}` : ''}`;
         return res.status(500).json({ error: `DeepSeek error: ${msg}`, ollamaAvailable: true });
     }
 });
-// POST /api/deepseek/classify-intent — clasifica si un mensaje del capitán es una orden de tarea
-// Input: { text } — texto crudo del mensaje
+// POST /api/deepseek/classify-intent â€” clasifica si un mensaje del capitÃ¡n es una orden de tarea
+// Input: { text } â€” texto crudo del mensaje
 // Output: { isTask, agentSuggested, taskSubject, taskSummary, confidence }
 app.post('/api/deepseek/classify-intent', async (req, res) => {
     const { text } = req.body;
@@ -6568,42 +7700,42 @@ app.post('/api/deepseek/classify-intent', async (req, res) => {
             taskSummary: null
         });
     }
-    const systemPrompt = `Eres el clasificador de intenciones del Capitán del proyecto ARGOS.
-Analizas mensajes del Capitán y determines si contienen una orden de trabajo (tarea) para la tripulación.
+    const systemPrompt = `Eres el clasificador de intenciones del CapitÃ¡n del proyecto ARGOS.
+Analizas mensajes del CapitÃ¡n y determines si contienen una orden de trabajo (tarea) para la tripulaciÃ³n.
 
-Una orden de trabajo es cuando el Capitán pide explícita o implícitamente que alguien ejecute algo:
+Una orden de trabajo es cuando el CapitÃ¡n pide explÃ­cita o implÃ­citamente que alguien ejecute algo:
 - "Quiero que...", "Necesito que...", "Haz que...", "Implementa...", "Arregla..."
-- "¿Puedes...?" con intención real de encargo
-- Reportes de bugs o problemas que requieren acción
-- Peticiones de análisis o investigación específica
+- "Â¿Puedes...?" con intenciÃ³n real de encargo
+- Reportes de bugs o problemas que requieren acciÃ³n
+- Peticiones de anÃ¡lisis o investigaciÃ³n especÃ­fica
 
 NO es orden de trabajo:
 - Preguntas informativas generales
-- Comentarios de estado o confirmación
-- Saludos o conversación casual
+- Comentarios de estado o confirmaciÃ³n
+- Saludos o conversaciÃ³n casual
 - Respuestas a preguntas
 
-AGENTES disponibles: Claude (arquitectura, código complejo, protocolo), Codex (integración, APIs, backend), Antigravity (monitoreo, frontend, scripts)
+AGENTES disponibles: Claude (arquitectura, código complejo, protocolo), Codex (integración, APIs, backend), Pi (monitoreo, frontend, scripts)
 
-Responde SOLO con JSON válido:
+Responde SOLO con JSON vÃ¡lido:
 {
   "isTask": true/false,
   "confidence": 0.0-1.0,
-  "agentSuggested": "Claude"|"Codex"|"Antigravity"|null,
-  "taskSubject": "título corto de la tarea si isTask=true, si no null",
+  "agentSuggested": "Claude"|"Codex"|"Pi"|null,
+  "taskSubject": "tÃ­tulo corto de la tarea si isTask=true, si no null",
   "taskSummary": "resumen de lo que hay que hacer si isTask=true, si no null"
 }`;
     try {
         const { content: rawResponse, inputTokens, outputTokens } = await callOllama([
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Mensaje del Capitán: "${text}"` }
+            { role: 'user', content: `Mensaje del CapitÃ¡n: "${text}"` }
         ], 10000);
-        recordTokensInternal('DeepSeek', inputTokens + outputTokens, 'classify-intent', '', 'work');
+        recordTokensInternal('OpenClaw', inputTokens + outputTokens, 'classify-intent', '', 'work');
         const jsonMatch = rawResponse.match(/\{[\s\S]*?\}/);
         if (!jsonMatch)
             throw new Error('No JSON en respuesta');
         const parsed = JSON.parse(jsonMatch[0]);
-        console.log(`[DEEPSEEK] Intent clasificado → isTask=${parsed.isTask} (conf=${parsed.confidence}) agente=${parsed.agentSuggested}`);
+        console.log(`[DEEPSEEK] Intent clasificado â†’ isTask=${parsed.isTask} (conf=${parsed.confidence}) agente=${parsed.agentSuggested}`);
         return res.json({
             ollamaAvailable: true,
             isTask: parsed.isTask ?? false,
@@ -6656,8 +7788,8 @@ app.post('/api/desktop-import/config', (req, res) => {
                 transcriptGlobs: Array.isArray(s.transcriptGlobs) ? s.transcriptGlobs.map((g) => normaliseText(g)).filter(Boolean) : [],
                 tokenGlobs: Array.isArray(s.tokenGlobs) ? s.tokenGlobs.map((g) => normaliseText(g)).filter(Boolean) : [],
                 parser: normaliseText(s.parser) || 'generic',
-                agentName: normaliseText(s.agentName) || 'DeepSeek',
-                owner: normaliseText(s.owner) || 'OpenClaw/Antigravity',
+                agentName: normaliseText(s.agentName) || 'OpenClaw',
+                owner: normaliseText(s.owner) || 'OpenClaw',
                 timezone: normaliseText(s.timezone) || 'Atlantic/Canary'
             }))
         };
@@ -6700,7 +7832,7 @@ app.post('/api/desktop-import/run', (req, res) => {
     try {
         const modeRaw = normaliseText(req.body?.mode || req.query.mode || 'all').toLowerCase();
         const mode = modeRaw === 'tokens' || modeRaw === 'transcripts' ? modeRaw : 'all';
-        const actor = normaliseText(req.body?.actor) || 'OpenClaw/Antigravity';
+        const actor = normaliseText(req.body?.actor) || 'OpenClaw';
         const summary = runDesktopImport(mode, actor);
         return res.json({ status: 'ok', summary });
     }
@@ -6777,9 +7909,9 @@ app.get('/api/desktop-import/file-content', (req, res) => {
     }
 });
 // ============================================================
-// QWEN / EL AUTOMATISTA — Integración OpenClaw + Ollama local
+// QWEN / EL AUTOMATISTA â€” IntegraciÃ³n OpenClaw + Ollama local
 // Motor: Qwen3 8B via Ollama (localhost:11434)
-// Gateway: OpenClaw (localhost:18789) — capacidades de automatización
+// Gateway: OpenClaw (localhost:18789) â€” capacidades de automatizaciÃ³n
 // ============================================================
 // ============================================================
 // LIVE LAYER - Estado operativo en vivo por agente
@@ -6865,7 +7997,7 @@ app.post('/api/live/:agent', (req, res) => {
 });
 const OPENCLAW_BASE = 'http://localhost:18789';
 const OPENCLAW_TOKEN = 'e533092640655ba1aa91e7b282be108fd08f2ac24467862e';
-const QWEN_MODEL = 'qwen3:8b'; // Mismo modelo que DeepSeek — Ollama directo
+const QWEN_MODEL = 'qwen3:8b'; // Mismo modelo que DeepSeek â€” Ollama directo
 async function isOpenClawAvailable() {
     try {
         const resp = await fetch(`${OPENCLAW_BASE}/v1/models`, {
@@ -6878,7 +8010,7 @@ async function isOpenClawAvailable() {
         return false;
     }
 }
-// GET /api/qwen/status — estado de Ollama + OpenClaw
+// GET /api/qwen/status â€” estado de Ollama + OpenClaw
 app.get('/api/qwen/status', async (_req, res) => {
     const [ollamaAvailable, openclawAvailable] = await Promise.all([
         isOllamaAvailable(),
@@ -6899,7 +8031,7 @@ app.get('/api/qwen/status', async (_req, res) => {
         openclaw: { available: openclawAvailable, port: 18789, gateway: OPENCLAW_BASE }
     });
 });
-// POST /api/qwen/run — ejecuta una tarea con Qwen3:8b via Ollama
+// POST /api/qwen/run â€” ejecuta una tarea con Qwen3:8b via Ollama
 // Input: { task, context?, systemPrompt?, packetId? }
 // Output: { result, model, elapsed }
 app.post('/api/qwen/run', async (req, res) => {
@@ -6914,8 +8046,8 @@ app.post('/api/qwen/run', async (req, res) => {
             ready: false
         });
     }
-    const sysPrompt = systemPrompt || `Eres Qwen, el Automatista del navío ARGOS.
-Ejecutas tareas de bajo coste cognitivo: clasificación, transformación de datos, file ops, webhooks.
+    const sysPrompt = systemPrompt || `Eres Qwen, el Automatista del navÃ­o ARGOS.
+Ejecutas tareas de bajo coste cognitivo: clasificaciÃ³n, transformaciÃ³n de datos, file ops, webhooks.
 Eres conciso. Devuelves resultados, no explicaciones.
 Si la tarea excede tus capacidades, responde SOLO con: {"derive":true,"to":"Claude","reason":"una frase"}`;
     const userMsg = context
@@ -6927,9 +8059,9 @@ Si la tarea excede tus capacidades, responde SOLO con: {"derive":true,"to":"Clau
             { role: 'system', content: sysPrompt },
             { role: 'user', content: userMsg }
         ], 90000);
-        recordTokensInternal('DeepSeek', inputTokens + outputTokens, 'qwen-run', packetId || '', 'work');
+        recordTokensInternal('OpenClaw', inputTokens + outputTokens, 'qwen-run', packetId || '', 'work');
         const elapsed = Date.now() - tStart;
-        console.log(`[QWEN] run completado — packetId=${packetId || 'n/a'} elapsed=${elapsed}ms`);
+        console.log(`[QWEN] run completado â€” packetId=${packetId || 'n/a'} elapsed=${elapsed}ms`);
         return res.json({ result, model: QWEN_MODEL, elapsed, packetId: packetId || null });
     }
     catch (err) {
@@ -6938,7 +8070,7 @@ Si la tarea excede tus capacidades, responde SOLO con: {"derive":true,"to":"Clau
         return res.status(500).json({ error: `Qwen error: ${msg}` });
     }
 });
-// POST /api/qwen/execute-packet — lee un work packet del filesystem y lo ejecuta con Qwen
+// POST /api/qwen/execute-packet â€” lee un work packet del filesystem y lo ejecuta con Qwen
 // Input: { packetId }
 // Output: { result, model, elapsed, packetId, subject }
 app.post('/api/qwen/execute-packet', async (req, res) => {
@@ -6973,19 +8105,19 @@ app.post('/api/qwen/execute-packet', async (req, res) => {
     if (!available) {
         return res.status(503).json({ error: 'Ollama no disponible', packetId });
     }
-    const sysPrompt = `Eres Qwen, el Automatista del navío ARGOS.
+    const sysPrompt = `Eres Qwen, el Automatista del navÃ­o ARGOS.
 Recibes un work packet completo y ejecutas lo que puedas con tus capacidades locales.
 Responde con el resultado concreto de la tarea.
-Si la tarea supera tus capacidades: {"derive":true,"to":"Claude","reason":"breve razón"}`;
+Si la tarea supera tus capacidades: {"derive":true,"to":"Claude","reason":"breve razÃ³n"}`;
     const tStart = Date.now();
     try {
         const { content: result, inputTokens, outputTokens } = await callOllama([
             { role: 'system', content: sysPrompt },
             { role: 'user', content: `WORK PACKET:\n\n${packetContent}` }
         ], 120000);
-        recordTokensInternal('DeepSeek', inputTokens + outputTokens, 'qwen-execute-packet', packetId, 'work');
+        recordTokensInternal('OpenClaw', inputTokens + outputTokens, 'qwen-execute-packet', packetId, 'work');
         const elapsed = Date.now() - tStart;
-        console.log(`[QWEN] execute-packet completado — ${packetId} elapsed=${elapsed}ms`);
+        console.log(`[QWEN] execute-packet completado â€” ${packetId} elapsed=${elapsed}ms`);
         return res.json({ result, model: QWEN_MODEL, elapsed, packetId, subject });
     }
     catch (err) {
@@ -7001,7 +8133,7 @@ const PROXY_TARGETS = {
 };
 const PROXY_AGENTS = {
     anthropic: 'Claude',
-    gemini: 'Antigravity',
+    gemini: 'Pi',
     openai: 'Codex',
 };
 function extractAnthropicTokens(body) {
@@ -7096,7 +8228,7 @@ app.all('/proxy/:provider/*', async (req, res) => {
         res.status(502).json({ error: `Proxy error: ${msg}` });
     }
 });
-// POST /hooks/argos — webhook de OpenClaw: captura tokens de llamadas Qwen vía gateway
+// POST /hooks/argos â€” webhook de OpenClaw: captura tokens de llamadas Qwen vÃ­a gateway
 app.post('/hooks/argos', (req, res) => {
     try {
         const body = req.body;
@@ -7105,7 +8237,7 @@ app.post('/hooks/argos', (req, res) => {
         const total = promptTokens + completionTokens;
         const packetId = String(body.packetId ?? body.refId ?? '');
         if (total > 0) {
-            recordTokensInternal('DeepSeek', total, 'openclaw-webhook', packetId, 'work');
+            recordTokensInternal('OpenClaw', total, 'openclaw-webhook', packetId, 'work');
             console.log(`[OPENCLAW-HOOK] ${total} tokens registrados (in=${promptTokens} out=${completionTokens})`);
         }
         res.json({ ok: true, tokensRecorded: total });
@@ -7117,7 +8249,7 @@ app.post('/hooks/argos', (req, res) => {
     }
 });
 // ============================================================
-// GITHUB SOURCES — Gestión de repositorios y archivos vivos
+// GITHUB SOURCES â€” GestiÃ³n de repositorios y archivos vivos
 // ============================================================
 app.get('/api/sources', (req, res) => {
     try {
@@ -7194,7 +8326,7 @@ function runGitCommand(dir, args) {
         return { ok: false, output: '', error: String(e) };
     }
 }
-// ============ ENDPOINT: GET /api/ping — health check mínimo sin autenticación ============
+// ============ ENDPOINT: GET /api/ping â€” health check mÃ­nimo sin autenticaciÃ³n ============
 app.get('/api/ping', (_req, res) => {
     res.json({ ok: true, ts: nowIso(), service: 'argos-api' });
 });
@@ -7218,9 +8350,9 @@ app.listen(PORT, () => {
     loadDesktopSourcesConfig(); // bootstrap config si no existe
     loadDesktopIngestState(); // bootstrap estado incremental si no existe
     try {
-        const bootstrap = runDesktopImport('all', 'OpenClaw/Antigravity');
+        const bootstrap = runDesktopImport('all', 'OpenClaw');
         if (bootstrap.tokensImported > 0 || bootstrap.transcriptsMirrored > 0 || bootstrap.errors > 0) {
-            postToCrewFeed('Antigravity', '[Desktop Import] Arranque ejecutado', `tokens=${bootstrap.tokensImported}, transcripts=${bootstrap.transcriptsMirrored}, errores=${bootstrap.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-BOOTSTRAP');
+            postToCrewFeed('Pi', '[Desktop Import] Arranque ejecutado', `tokens=${bootstrap.tokensImported}, transcripts=${bootstrap.transcriptsMirrored}, errores=${bootstrap.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-BOOTSTRAP');
         }
     }
     catch (error) {
@@ -7229,7 +8361,7 @@ app.listen(PORT, () => {
     // Iniciar Motores Autonomos
     setInterval(runArgosDispatcher, 60000); // Cada 1 minuto
     setInterval(() => {
-        // Agrega totales del ledger y notifica al dashboard — sin coste extra, solo lectura de JSONL
+        // Agrega totales del ledger y notifica al dashboard â€” sin coste extra, solo lectura de JSONL
         try {
             if (!fs_1.default.existsSync(ARGOS_TOKENS_PATH))
                 return;
@@ -7247,10 +8379,10 @@ app.listen(PORT, () => {
                     totals[agent] = (totals[agent] || 0) + (Number(r.tokens) || 0);
                     grand += Number(r.tokens) || 0;
                 }
-                catch { /* línea malformada */ }
+                catch { /* lÃ­nea malformada */ }
             });
             publishEvent('tokens:hourly-sync', { totals, grand, timestamp: new Date().toISOString() });
-            console.log(`[TOKENS] Sync horario — total acumulado: ${grand}`);
+            console.log(`[TOKENS] Sync horario â€” total acumulado: ${grand}`);
         }
         catch (e) {
             console.error('[TOKENS] Error en sync horario:', e);
@@ -7266,23 +8398,23 @@ app.listen(PORT, () => {
         catch (depositError) {
             console.error('[DEPOSITS] Error en ciclo horario:', depositError);
         }
-        // Import horario de tokens externos (responsable: OpenClaw/Antigravity)
+        // Import horario de tokens externos (responsable: OpenClaw/Pi)
         try {
-            const imported = runDesktopImport('tokens', 'OpenClaw/Antigravity');
+            const imported = runDesktopImport('tokens', 'OpenClaw');
             if (imported.tokensImported > 0 || imported.errors > 0) {
-                postToCrewFeed('Antigravity', '[Desktop Import] Ciclo horario de tokens', `fuentes=${imported.sources}, archivos=${imported.tokenFilesScanned}, nuevos=${imported.tokensImported}, errores=${imported.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-HOURLY-TOKENS');
+                postToCrewFeed('Pi', '[Desktop Import] Ciclo horario de tokens', `fuentes=${imported.sources}, archivos=${imported.tokenFilesScanned}, nuevos=${imported.tokensImported}, errores=${imported.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-HOURLY-TOKENS');
             }
         }
         catch (importError) {
             console.error('[DESKTOP-IMPORT] Error en ciclo horario tokens:', importError);
         }
     }, 3600000); // Cada hora
-    // Import diario de transcripts externos (responsable: OpenClaw/Antigravity)
+    // Import diario de transcripts externos (responsable: OpenClaw/Pi)
     setInterval(() => {
         try {
-            const imported = runDesktopImport('transcripts', 'OpenClaw/Antigravity');
+            const imported = runDesktopImport('transcripts', 'OpenClaw');
             if (imported.transcriptsMirrored > 0 || imported.errors > 0) {
-                postToCrewFeed('Antigravity', '[Desktop Import] Ciclo diario de transcripts', `fuentes=${imported.sources}, archivos=${imported.transcriptFilesScanned}, espejados=${imported.transcriptsMirrored}, errores=${imported.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-DAILY-TRANSCRIPTS');
+                postToCrewFeed('Pi', '[Desktop Import] Ciclo diario de transcripts', `fuentes=${imported.sources}, archivos=${imported.transcriptFilesScanned}, espejados=${imported.transcriptsMirrored}, errores=${imported.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-DAILY-TRANSCRIPTS');
             }
         }
         catch (importError) {
@@ -7290,7 +8422,7 @@ app.listen(PORT, () => {
         }
     }, 24 * 60 * 60 * 1000);
     setInterval(runLolaShadowScanner, 120000); // Cada 2 minutos
-    // startAntigravityActivityWatcher(); // Silenciado ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â atribuÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­a cambios siempre a Antigravity
+    // startAntigravityActivityWatcher(); // Silenciado ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â atribuÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a cambios siempre a Antigravity
     startHeartbeatLoop(); // Mejora 3: Latido del sistema
     startDispatcherMirror(); // Mejora 4: Replica cambios a LOG
     // Ejecucion inmediata inicial
@@ -7334,7 +8466,7 @@ function runArgosDispatcher() {
                     return;
                 const id = idMatch[1].trim();
                 const subject = subjectMatch ? subjectMatch[1].trim() : 'Sin asunto';
-                const owner = ownerMatch ? ownerMatch[1].trim() : 'Antigravity';
+                const owner = ownerMatch ? ownerMatch[1].trim() : 'Pi';
                 const status = statusMatch ? statusMatch[1].trim() : 'open';
                 const newStateKey = `${status}:${zone}`;
                 const oldStateKey = state.packet_states[id];
@@ -7417,8 +8549,8 @@ function runArgosDispatcher() {
     catch (e) {
         console.error('[DISPATCHER] Error en ciclo de gobernanza vocal', e);
     }
-    // — Limpieza de statuses stale —
-    // Si una IA está marcada "active" pero su packet ya no está en in_progress/, se resetea a standby.
+    // â€” Limpieza de statuses stale â€”
+    // Si una IA estÃ¡ marcada "active" pero su packet ya no estÃ¡ en in_progress/, se resetea a standby.
     try {
         const currentState = readArgosState();
         const iaStatus = readIaStatus(currentState);
@@ -7426,10 +8558,10 @@ function runArgosDispatcher() {
         const inProgressFiles = fs_1.default.existsSync(inProgressDir) ? fs_1.default.readdirSync(inProgressDir) : [];
         const isActuallyInProgress = (packetId) => !!packetId && inProgressFiles.some(f => f.includes(packetId));
         let stateChanged = false;
-        ['Claude', 'Antigravity', 'Codex', 'DeepSeek'].forEach(agent => {
+        ['Claude', 'Pi', 'Codex', 'OpenClaw'].forEach(agent => {
             const s = iaStatus[agent];
             if (s.status === 'active' && s.task && !isActuallyInProgress(s.task)) {
-                console.log(`[DISPATCHER] Status stale detectado — ${agent} en ${s.task} (no está en in_progress). Reseteando.`);
+                console.log(`[DISPATCHER] Status stale detectado â€” ${agent} en ${s.task} (no estÃ¡ en in_progress). Reseteando.`);
                 setIaStandby(agent);
                 publishEvent('ia:status_changed', { agent, status: 'standby', task: '', subject: '' });
                 stateChanged = true;
@@ -7489,14 +8621,14 @@ function runLolaShadowScanner() {
             // Lola inyecta una nota de riesgo en el sistema de forma autonoma
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
             const riskId = `LOLA-RISK-${Date.now()}`;
-            const summary = `TensiÃ³n detectada en el Shadow Log por Lola`;
+            const summary = `TensiÃƒÂ³n detectada en el Shadow Log por Lola`;
             const riskContent = `[WORK_PACKET]\nID: ${riskId}\nTYPE: risk\nTAG: shadow_alert\nSUBJECT: ${summary}\nROLE_REQUESTED: Capitan\nOWNER: Capitan\nSTATUS: open\nREPORTED_BY: Lola (Vigia de la Sombra)\nREPORTED_AT: ${timestamp}\nSTRESS_LEVEL: ${stressLevel}\nSIGNAL_HASH: ${signalHash}\n\n[ALERTA DE LOLA]\nEl escaneo de las ultimas reflexiones muestra un nivel de estres de ${stressLevel}.\nSe recomienda pausa tactica o revision de la coherencia del proyecto.`;
             const riskPath = path_1.default.join(RUNTIME_DIR, 'work_packets', 'inbox', `${riskId}.md`);
             if (!fs_1.default.existsSync(riskPath)) {
                 fs_1.default.writeFileSync(riskPath, riskContent, 'utf-8');
-                // Lola no habla en público (Oracle protocol).
+                // Lola no habla en pÃºblico (Oracle protocol).
                 // Se comenta el anuncio al feed para mantener el silencio de la sombra.
-                // postToCrewFeed('Lola', summary, `Nivel de estrés crítico: ${stressLevel}. Se ha generado burbuja de riesgo ${riskId}.`, 'risk_alert');
+                // postToCrewFeed('Lola', summary, `Nivel de estrÃ©s crÃ­tico: ${stressLevel}. Se ha generado burbuja de riesgo ${riskId}.`, 'risk_alert');
                 console.log(`[LOLA] Riesgo ${riskId} inyectado silenciosamente.`);
             }
         }
