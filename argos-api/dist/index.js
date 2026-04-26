@@ -26,6 +26,10 @@ const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GL
 const ARGOS_EVENTS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const ARGOS_TOKENS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
+const CONCILIO_EVENTS_DIR = path_1.default.join(RUNTIME_DIR, 'events', 'concilio');
+const CONCILIO_JSONL_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'argos.concilio.jsonl');
+const CONCILIO_LOG_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'ARGOS_CONCILIO_LOG.md');
+const CONCILIO_ACTORS_PATH = path_1.default.join(RUNTIME_DIR, 'agents', 'ARGOS_CONCILIO_ACTORS.json');
 const CAPTAIN_FEED_PATH = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
 const STATE_ARCHIVE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.archive.json');
 const SESSION_ARCHIVE_ROOT = path_1.default.join(RUNTIME_DIR, 'archive', 'sessions');
@@ -128,7 +132,142 @@ function subscribeToModule(module, res) {
     });
     return senderId;
 }
-const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'COMENIO', 'XUANXU', 'GENERAL']);
+const VALID_CONCILIO_MESSAGE_TYPES = new Set(['idea', 'objecion', 'sintesis', 'pregunta', 'propuesta', 'decision']);
+let lastConcilioMsgMs = 0;
+let concilioMsgSeq = 0;
+function nextConcilioMessageId() {
+    const nowMs = Date.now();
+    if (nowMs === lastConcilioMsgMs) {
+        concilioMsgSeq += 1;
+    }
+    else {
+        lastConcilioMsgMs = nowMs;
+        concilioMsgSeq = 0;
+    }
+    return `${nowMs}-${concilioMsgSeq}`;
+}
+function normalizeConcilioLookup(value) {
+    return normaliseText(value)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+function buildDefaultConcilioActorsCatalog() {
+    return {
+        version: 'v1',
+        updated_at: nowIso(),
+        actors: [
+            { id: 'Capitan', label: 'Capitan', token_key: 'Captain', enabled: true, aliases: ['captain', 'thor'] },
+            { id: 'Claude', label: 'Claude', token_key: 'Claude', enabled: true, aliases: ['claude cowork', 'claude chat'] },
+            { id: 'Claude Code', label: 'Claude Code', token_key: 'Claude', enabled: true, aliases: ['claudecode'] },
+            { id: 'Codex', label: 'Codex', token_key: 'ChatGPT', enabled: true, aliases: ['openai codex'] },
+            { id: 'ChatGPT', label: 'ChatGPT', token_key: 'ChatGPT', enabled: true, aliases: ['chat gpt'] },
+            { id: 'OpenClaw', label: 'OpenClaw', token_key: 'ChatGPT', enabled: true, aliases: ['open claw', 'qwen', 'deepseek'] },
+            { id: 'Gemini (Pi)', label: 'Gemini (Pi)', token_key: 'Gemini', enabled: false, notes: 'draft', aliases: ['pi', 'gemini pi'] },
+            { id: 'Gemini (AG)', label: 'Gemini (AG)', token_key: 'Gemini', enabled: false, notes: 'draft', aliases: ['ag', 'antigravity', 'gemini ag'] }
+        ]
+    };
+}
+function ensureConcilioActorsCatalog() {
+    ensureDirSync(path_1.default.dirname(CONCILIO_ACTORS_PATH));
+    const fallback = buildDefaultConcilioActorsCatalog();
+    if (!fs_1.default.existsSync(CONCILIO_ACTORS_PATH)) {
+        writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
+        return fallback;
+    }
+    const parsed = readJsonFile(CONCILIO_ACTORS_PATH, fallback);
+    if (!Array.isArray(parsed.actors) || parsed.actors.length === 0) {
+        writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
+        return fallback;
+    }
+    return parsed;
+}
+function findConcilioActor(rawActor) {
+    const needle = normalizeConcilioLookup(rawActor);
+    if (needle === '')
+        return null;
+    const catalog = ensureConcilioActorsCatalog();
+    for (const actor of catalog.actors) {
+        const candidates = [actor.id, actor.label, ...(Array.isArray(actor.aliases) ? actor.aliases : [])];
+        if (candidates.some((v) => normalizeConcilioLookup(String(v)) === needle)) {
+            return actor;
+        }
+    }
+    return null;
+}
+function ensureConcilioStorage() {
+    ensureDirSync(CONCILIO_EVENTS_DIR);
+    if (!fs_1.default.existsSync(CONCILIO_LOG_PATH)) {
+        fs_1.default.writeFileSync(CONCILIO_LOG_PATH, '# ARGOS CONCILIO LOG\nCanal deliberativo inter-IA.\n\n---\n', 'utf-8');
+    }
+}
+function appendConcilioMarkdown(message) {
+    ensureConcilioStorage();
+    const canaryTs = new Date(message.timestamp).toLocaleString('sv-SE', {
+        timeZone: 'Atlantic/Canary',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).slice(0, 16);
+    const lines = [
+        `**[${canaryTs} Atlantic/Canary] VOZ ${message.agent} | CONCILIO:${message.type.toUpperCase()}**`,
+        `MESSAGE_ID: ${message.message_id}`,
+        `ROOM: concilio`
+    ];
+    if (normaliseText(message.packet_id) !== '')
+        lines.push(`PACKET_ID: ${message.packet_id}`);
+    if (normaliseText(message.in_reply_to) !== '')
+        lines.push(`IN_REPLY_TO: ${message.in_reply_to}`);
+    if (normaliseText(message.session_ref) !== '')
+        lines.push(`SESSION_REF: ${message.session_ref}`);
+    lines.push('', message.body, '', '---', '');
+    fs_1.default.appendFileSync(CONCILIO_LOG_PATH, lines.join('\n'), 'utf-8');
+}
+function readConcilioMessages(limitRaw, packetIdRaw) {
+    if (!fs_1.default.existsSync(CONCILIO_JSONL_PATH))
+        return [];
+    const safeLimit = Math.max(1, Math.min(Number.isFinite(limitRaw) ? Math.round(limitRaw) : 50, 500));
+    const packetId = normaliseText(packetIdRaw);
+    const lines = fs_1.default.readFileSync(CONCILIO_JSONL_PATH, 'utf-8')
+        .replace(/^\uFEFF/, '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line !== '');
+    const rows = [];
+    lines.forEach((line) => {
+        try {
+            const parsed = JSON.parse(line);
+            if (packetId !== '' && normaliseText(parsed.packet_id) !== packetId)
+                return;
+            rows.push(parsed);
+        }
+        catch {
+            // Ignora lineas corruptas para no romper lectura.
+        }
+    });
+    rows.sort((a, b) => {
+        const tsDelta = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+        if (tsDelta !== 0)
+            return tsDelta;
+        return normaliseText(a.message_id).localeCompare(normaliseText(b.message_id));
+    });
+    return rows.length <= safeLimit ? rows : rows.slice(rows.length - safeLimit);
+}
+function ensureConcilioReadAccess(req, res) {
+    if (isTrustedLocalRequest(req))
+        return true;
+    const auth = authenticateAgentRequest(req);
+    if (!auth.ok) {
+        res.status(auth.status).json({ error: auth.error });
+        return false;
+    }
+    res.locals.authenticatedAgent = auth.tokenAgent;
+    return true;
+}
+const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'COMENIO', 'XUANXU', 'GENERAL', 'CONCILIO']);
 const VALID_PACKET_TYPES = new Set(['strategy', 'build', 'integration', 'maintenance', 'bug', 'risk', 'errand', 'task']);
 function normalizeTaskRoom(rawValue) {
     const room = normaliseText(rawValue).toUpperCase();
@@ -4600,6 +4739,120 @@ app.get('/api/subscribe/:module', (req, res) => {
     req.on('close', () => {
         console.log(`[PUBSUB] Request cerrado para mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dulo: ${module}`);
     });
+});
+app.get('/api/concilio/sse', (req, res) => {
+    if (!ensureConcilioReadAccess(req, res))
+        return;
+    subscribeToModule('concilio', res);
+    req.on('close', () => {
+        console.log('[PUBSUB] Request cerrado para modulo: concilio');
+    });
+});
+app.get('/api/concilio', (req, res) => {
+    try {
+        if (!ensureConcilioReadAccess(req, res))
+            return;
+        const limitRaw = Number(req.query.limit || 50);
+        const packetId = normaliseText(String(req.query.packet_id || ''));
+        const messages = readConcilioMessages(limitRaw, packetId);
+        return res.json({
+            status: 'ok',
+            count: messages.length,
+            messages
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo leyendo concilio', detail: String(error) });
+    }
+});
+app.post('/api/concilio', (req, res) => {
+    try {
+        const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
+        const actorRaw = normaliseText(req.body?.agent || tokenAgent);
+        if (actorRaw === '') {
+            return res.status(400).json({ error: 'agent es obligatorio' });
+        }
+        const actor = findConcilioActor(actorRaw);
+        if (!actor) {
+            return res.status(400).json({ error: `actor no canonico para concilio: ${actorRaw}` });
+        }
+        if (actor.enabled === false) {
+            return res.status(409).json({ error: `actor en draft: ${actor.id}. Habilitar en ${path_1.default.basename(CONCILIO_ACTORS_PATH)}` });
+        }
+        if (!isTrustedLocalRequest(req)) {
+            if (tokenAgent === '') {
+                return res.status(401).json({ error: 'Token requerido para POST /api/concilio' });
+            }
+            if (actor.token_key === 'Captain') {
+                return res.status(403).json({ error: 'Capitan solo puede escribir decision desde localhost' });
+            }
+            if (tokenAgent !== actor.token_key) {
+                return res.status(403).json({ error: `Token de ${tokenAgent} no autorizado para actor ${actor.id}` });
+            }
+        }
+        const messageType = normaliseText(req.body?.type).toLowerCase();
+        if (!VALID_CONCILIO_MESSAGE_TYPES.has(messageType)) {
+            return res.status(400).json({ error: 'type invalido para concilio' });
+        }
+        const roomValue = normaliseText(req.body?.room || 'concilio').toLowerCase();
+        if (roomValue !== 'concilio') {
+            return res.status(400).json({ error: 'room debe ser concilio' });
+        }
+        const body = normaliseText(req.body?.body);
+        if (body === '') {
+            return res.status(400).json({ error: 'body no puede estar vacio' });
+        }
+        if (body.length > 5000) {
+            return res.status(400).json({ error: 'body excede 5000 caracteres' });
+        }
+        if (messageType === 'decision') {
+            if (actor.id !== 'Capitan') {
+                return res.status(400).json({ error: 'type=decision solo aceptado para actor Capitan' });
+            }
+            if (!isTrustedLocalRequest(req) || normaliseText(req.header('X-Argos-Captain-UI')) !== '1') {
+                return res.status(403).json({ error: 'type=decision requiere localhost + X-Argos-Captain-UI: 1' });
+            }
+        }
+        const packetId = normaliseText(req.body?.packet_id);
+        const timestamp = parseDepositTimestampIso(normaliseText(req.body?.timestamp) || nowIso());
+        const message = {
+            message_id: nextConcilioMessageId(),
+            agent: actor.id,
+            timestamp,
+            room: 'concilio',
+            type: messageType,
+            body,
+            ...(normaliseText(req.body?.in_reply_to) !== '' ? { in_reply_to: normaliseText(req.body?.in_reply_to) } : {}),
+            ...(packetId !== '' ? { packet_id: packetId } : {}),
+            ...(normaliseText(req.body?.session_ref) !== '' ? { session_ref: normaliseText(req.body?.session_ref) } : {})
+        };
+        ensureConcilioStorage();
+        appendJsonlRecord(CONCILIO_JSONL_PATH, message);
+        appendConcilioMarkdown(message);
+        appendJsonlRecord(ARGOS_EVENTS_PATH, {
+            timestamp,
+            actor: actor.id,
+            module: 'concilio',
+            type: 'concilio_message',
+            packet_id: packetId,
+            refId: packetId,
+            summary: `${message.type}: ${message.body.substring(0, 140)}`,
+            details: message.body,
+            source: 'api:concilio',
+            message_id: message.message_id
+        });
+        publishEvent('concilio:message', {
+            message_id: message.message_id,
+            timestamp: message.timestamp,
+            agent: message.agent,
+            type: message.type,
+            packet_id: message.packet_id || ''
+        });
+        return res.json({ status: 'ok', message });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo escribiendo concilio', detail: String(error) });
+    }
 });
 app.get('/api/state', (req, res) => {
     const statePath = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.json');

@@ -1,0 +1,64 @@
+{
+  "version": "v1",
+  "updated_at": "2026-04-26T20:00:00.000Z",
+  "actors": [
+    {
+      "id": "Capitan",
+      "label": "Capitan",
+      "token_key": "Captain",
+      "enabled": true,
+      "aliases": ["captain", "thor"]
+    },
+    {
+      "id": "Claude",
+      "label": "Claude",
+      "token_key": "Claude",
+      "enabled": true,
+      "aliases": ["claude cowork", "claude chat"]
+    },
+    {
+      "id": "Claude Code",
+      "label": "Claude Code",
+      "token_key": "Claude",
+      "enabled": true,
+      "aliases": ["claudecode"]
+    },
+    {
+      "id": "Codex",
+      "label": "Codex",
+      "token_key": "ChatGPT",
+      "enabled": true,
+      "aliases": ["openai codex"]
+    },
+    {
+      "id": "ChatGPT",
+      "label": "ChatGPT",
+      "token_key": "ChatGPT",
+      "enabled": true,
+      "aliases": ["chat gpt"]
+    },
+    {
+      "id": "OpenClaw",
+      "label": "OpenClaw",
+      "token_key": "ChatGPT",
+      "enabled": true,
+      "aliases": ["open claw", "qwen", "deepseek"]
+    },
+    {
+      "id": "Gemini (Pi)",
+      "label": "Gemini (Pi)",
+      "token_key": "Gemini",
+      "enabled": false,
+      "notes": "draft",
+      "aliases": ["pi", "gemini pi"]
+    },
+    {
+      "id": "Gemini (AG)",
+      "label": "Gemini (AG)",
+      "token_key": "Gemini",
+      "enabled": false,
+      "notes": "draft",
+      "aliases": ["ag", "antigravity", "gemini ag"]
+    }
+  ]
+}
