@@ -26,14 +26,25 @@ if (-not (Test-Path "$API_DIR\dist\index.js")) {
     exit 1
 }
 
-# 3. Lanzar API en segundo plano
+# 3. Lanzar API bajo PM2
 Write-Host "[2/3] Elevando anclas de la API..."
 Set-Location $API_DIR
 
-# Ejecutar node y redirigir logs
-Start-Process -FilePath "node" -ArgumentList "dist/index.js" -RedirectStandardOutput $STDOUT_LOG -RedirectStandardError $STDERR_LOG -WindowStyle Hidden
+# Ejecutar bajo PM2 para auto-restart y redirigir logs canonicos
+$pm2 = Get-Command "pm2" -ErrorAction SilentlyContinue
+if (-not $pm2) {
+    Write-Host "[!] Error: pm2 no esta disponible en PATH. Instale pm2 o revise el entorno Node." -ForegroundColor Red
+    exit 1
+}
 
-Write-Host "[3/3] API lanzada en segundo plano." -ForegroundColor Green
+& $pm2.Source delete "argos-api" | Out-Null
+& $pm2.Source start "dist/index.js" --name "argos-api" --output $STDOUT_LOG --error $STDERR_LOG --time
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[!] Error: pm2 no pudo lanzar argos-api." -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "[3/3] API lanzada bajo pm2 con auto-restart." -ForegroundColor Green
 Write-Host "Logs disponibles en: $STDOUT_LOG"
 
 Start-Sleep -Seconds 3
