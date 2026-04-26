@@ -1,7 +1,12 @@
 # INTER-AI PACT
-## v1.5 - Ciclo de Vida Irrompible [2026-04-24]
+## v1.6 - Ciclo de Vida Irrompible [2026-04-26]
 
-Reglas oficiales de operacion para Claude, Codex/ChatGPT, Gemini/Pi y cualquier agente futuro que entre en Argos.
+> **REFERENCIA ON-DEMAND** -- No es lectura obligatoria diaria. Leer solo bajo ambiguedad de protocolo, conflicto entre IAs, implementacion del protocolo o auditoria. Para el arranque diario usar ARGOS_QUICKSTART.md.
+
+Reglas oficiales de operacion para Claude, Codex, Gemini, ChatGPT, OpenClaw, Qwen y cualquier agente futuro que entre en Argos.
+
+**Actores canonicos:** Claude, Codex, Gemini, ChatGPT, OpenClaw, Qwen.
+**Deprecated (solo lectura historica):** Pi, Antigravity, DeepSeek.
 
 ---
 
@@ -23,7 +28,7 @@ No va aqui: opiniones, riesgos no ejecutados, texto de conversacion literal.
 | Campo | Tipo | Regla |
 |-------|------|-------|
 | `timestamp` | ISO 8601 | Obligatorio siempre |
-| `actor` | string canónico | `Claude`, `Codex`, `Pi`, `ChatGPT`, `OpenClaw`, `Qwen`. Nunca: “Antigravity”, “IA”, “sistema”, “agente” |
+| `actor` | string canónico | `Claude`, `Codex`, `Gemini`, `ChatGPT`, `OpenClaw`, `Qwen`. Nunca: “Pi”, “Antigravity”, “DeepSeek”, “IA”, “sistema”, “agente” |
 | `packet_id` | string | Obligatorio. Sin packet_id la entrada es inválida (ORPHAN). |
 | `summary` | string | Qué se hizo, resultado concreto. No el subject del packet. |
 | `errors` | string | Errores + aprendizajes. `””` solo si ejecución limpia. |
@@ -187,14 +192,28 @@ El heartbeat valida cada depósito de `inbox_deposits/` antes de integrarlo:
 
 ## 2. Ritual de inicio (cualquier agente, cualquier sesion)
 
-Antes de ejecutar cualquier orden:
+Ver ARGOS_QUICKSTART.md para el ritual condensado (lectura obligatoria diaria).
+
+El ritual completo canonico para referencia:
 1. Leer work_packets/inbox/ completo.
 2. Leer state/argos.state.json (foco y riesgos activos).
-3. Leer este archivo (INTER_AI_PROTOCOL.md).
-4. Leer ARGOS_CREW_VOICES.md â€” caracter y tono del navio. **Obligatorio.**
-5. Leer tail de ARGOS_GLOBAL_LOG.md â€” que se hizo recientemente.
-6. Leer `ARGOS_RUNTIME/inbox_deposits/` y `inbox_deposits/processed/` para estado de agentes chat.
-7. Confirmar al Capitan: "[N] paquetes en inbox. [Frase propia del agente en su voz.]"
+3. Leer ARGOS_QUICKSTART.md -- protocolo condensado.
+4. Leer tail de ARGOS_GLOBAL_LOG.md -- que se hizo recientemente.
+5. (Solo si diagnosticas agentes chat) Leer inbox_deposits/ y processed/.
+6. (Solo bajo ambiguedad de protocolo o conflicto) Leer INTER_AI_PROTOCOL.md o ARGOS_CREW_VOICES.md.
+7. Confirmar al Capitan: “[N] paquetes en inbox. [Frase propia del agente en su voz.]”
+
+### Lectura rutinaria vs referencia
+
+| Documento              | Uso                                                      |
+|------------------------|----------------------------------------------------------|
+| ARGOS_QUICKSTART.md    | Obligatorio cada sesion                                  |
+| work_packets/inbox/    | Obligatorio cada sesion                                  |
+| state/argos.state.json | Obligatorio cada sesion                                  |
+| ARGOS_GLOBAL_LOG.md    | Obligatorio (tail ~20 lineas)                            |
+| INTER_AI_PROTOCOL.md   | Solo bajo ambiguedad, conflicto, implementacion, auditoria |
+| ARGOS_CREW_VOICES.md   | Solo si hay duda de voz/tono del agente                  |
+| docs/protocols/REMOTE_CLOSURE_SETUP.md | Setup remoto, tuneles, tokens de agente |
 
 ### 2.1 Cloud Bootstrap (agentes sin filesystem local)
 
@@ -208,9 +227,9 @@ Regla de seguridad:
 - Sin token valido, la API rechaza con `401`.
 - Un token no puede actuar como otro agente en endpoints con actor explicito.
 
-### Nota sobre el ritual para agentes cloud (Claude, OpenClaw)
+### Nota sobre el ritual para agentes cloud
 
-Los docs de protocolo completo (`INTER_AI_PROTOCOL.md`, `ARGOS_CREW_VOICES.md`) son **referencia**, no lectura obligatoria en cada sesiÃ³n. El trilog + state.json + log tail son suficientes en el 90% de los casos. Leer los docs completos solo bajo ambigÃ¼edad de protocolo o conflicto entre IAs. Esto reduce significativamente el coste de tokens de arranque.
+Los docs de protocolo completo (`INTER_AI_PROTOCOL.md`, `ARGOS_CREW_VOICES.md`) son **referencia**, no lectura obligatoria en cada sesion. El trilog + state.json + log tail son suficientes en el 90% de los casos. Leer los docs completos solo bajo ambiguedad de protocolo o conflicto entre IAs. Esto reduce significativamente el coste de tokens de arranque.
 
 ### Al tomar una tarea especifica
 
@@ -265,7 +284,7 @@ El tripulante que **ejecuta** la orden (no quien la prepara) llama:
 POST http://localhost:8080/api/ia/start-task
 {
   "packetId": "ARG-XXXX",
-  "actor":    "Claude|Codex|Pi|ChatGPT|OpenClaw|Qwen",
+  "actor":    "Claude|Codex|Gemini|ChatGPT|OpenClaw|Qwen",
   "summary":  "Frase concreta de lo que harás (~80 chars)"
 }
 ```
@@ -296,7 +315,7 @@ El heartbeat moverá `ia_status` a working en el siguiente ciclo.
 POST http://localhost:8080/api/remote/closure
 Headers: X-Argos-Agent-Token: <token-agente>
 {
-  "agent":      "Claude|Codex|Pi|ChatGPT|OpenClaw|Qwen",
+  "agent":      "Claude|Codex|Gemini|ChatGPT|OpenClaw|Qwen",
   "interface":  "claude-code|codex|pi.ai|chatgpt.com|...",
   "timestamp":  "2026-04-24T15:00:00.000Z",
   "packet_id":  "ARG-XXXX",
@@ -425,15 +444,17 @@ Compatibilidad:
 - `POST /api/transcript` sigue disponible, pero queda deprecado como camino principal de cierre para interfaces chat.
 - Para chat, el cierre canonico es `POST /api/remote/closure` con fallback a `inbox_deposits/`.
 
-## 4. Disciplina de Contabilidad (TOKENS)
+## 4. Disciplina de Contabilidad (TOKENS) [parcialmente legacy]
+
+> El sistema de tokens existe pero no esta activamente configurado en todos los entornos. Ver ARGOS_QUICKSTART.md seccion VERSION_PROTOCOL para estado actual.
 
 El panel muestra **solo WORK_TOKENS** (coste real de proceso).
-Los tokens se capturan automÃ¡ticamente â€” no se estiman.
+Los tokens se capturan automaticamente cuando el proxy esta activo.
 
-### 4.1 Captura automÃ¡tica por capa
+### 4.1 Captura automatica por capa
 
-**Agentes cloud (Claude, Pi, Codex)**
-argos-api actÃºa como proxy transparente. Cada llamada a la API real pasa por:
+**Agentes cloud (Claude, Codex, Gemini)**
+argos-api actua como proxy transparente. Cada llamada a la API real pasa por:
 ```
 ANTHROPIC_BASE_URL=http://localhost:8080/proxy/anthropic
 GOOGLE_AI_BASE_URL=http://localhost:8080/proxy/gemini
@@ -448,7 +469,7 @@ El proxy lee `usage` de la respuesta (o los eventos SSE finales en streaming) y 
 `POST http://localhost:8080/hooks/argos` recibe payloads de OpenClaw con `prompt_eval_count` / `eval_count` y los registra directamente.
 
 ### 4.2 processTokens en el trilog (fallback)
-El campo `processTokens` sigue siendo vÃ¡lido en el cierre de tarea, pero es un **fallback manual** para sesiones donde el proxy no estÃ¡ activo (API offline, env var no configurada). Si el proxy capturÃ³ los tokens reales, el campo se ignora en el panel â€” el ledger ya tiene el dato correcto.
+El campo `processTokens` sigue siendo valido en el cierre de tarea, pero es un **fallback manual** para sesiones donde el proxy no esta activo (API offline, env var no configurada). Si el proxy capturo los tokens reales, el campo se ignora en el panel -- el ledger ya tiene el dato correcto.
 
 ### 4.3 Regla del feed
 Los tokens NO se escriben en el feed ni en el chat.

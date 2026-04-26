@@ -1,0 +1,98 @@
+{
+  "argos_version": "0.4.0",
+  "last_updated": "2026-04-26",
+  "updated_by": "Claude",
+  "packet_ref": "ARG-20260426-DOC-CONTEXT-HYGIENE",
+  "documents": {
+    "argos-quickstart": {
+      "path": "ARGOS_RUNTIME/ARGOS_QUICKSTART.md",
+      "version": "2.0.0",
+      "status": "active",
+      "tier": 1,
+      "owner": "Claude",
+      "last_updated": "2026-04-26",
+      "summary": "Tarjeta operativa minima: inicio, actores, carriles, start, close, git, version."
+    },
+    "inter-ai-protocol": {
+      "path": "ARGOS_RUNTIME/INTER_AI_PROTOCOL.md",
+      "version": "1.6.0",
+      "status": "active",
+      "tier": 2,
+      "owner": "Claude",
+      "last_updated": "2026-04-26",
+      "summary": "Protocolo completo: taxonomia, ciclo de vida, validaciones. Referencia on-demand."
+    },
+    "argos-crew-voices": {
+      "path": "ARGOS_RUNTIME/ARGOS_CREW_VOICES.md",
+      "version": "1.1.0",
+      "status": "active",
+      "tier": 2,
+      "owner": "Claude",
+      "last_updated": "2026-04-26",
+      "summary": "Voz y caracter de cada agente de la tripulacion."
+    },
+    "argos-vector": {
+      "path": "ARGOS_RUNTIME/ARGOS_VECTOR.md",
+      "version": "1.0.0",
+      "status": "active",
+      "tier": 2,
+      "owner": "Claude",
+      "last_updated": "2026-04-26",
+      "summary": "Estado estrategico, deuda tecnica activa y bloqueos resueltos."
+    },
+    "registry": {
+      "path": "ARGOS_RUNTIME/REGISTRY.md",
+      "version": "2.0.0",
+      "status": "active",
+      "tier": 2,
+      "owner": "Claude",
+      "last_updated": "2026-04-26",
+      "summary": "Indice documental del runtime con rutas y descripcion por categoria."
+    },
+    "remote-closure-setup": {
+      "path": "ARGOS_RUNTIME/docs/protocols/REMOTE_CLOSURE_SETUP.md",
+      "version": "1.0.0",
+      "status": "active",
+      "tier": 2,
+      "owner": "Codex",
+      "last_updated": "2026-04-21",
+      "summary": "Setup de cierre remoto: tuneles, tokens de agente, instrucciones por interfaz."
+    },
+    "claude-md": {
+      "path": "CLAUDE.md",
+      "version": "2.0.0",
+      "status": "active",
+      "tier": 1,
+      "owner": "Claude",
+      "last_updated": "2026-04-26",
+      "summary": "Arranque de Claude Code (Orfeo): lectura obligatoria, referencias on-demand."
+    },
+    "agents-md": {
+      "path": "AGENTS.md",
+      "version": "2.0.0",
+      "status": "active",
+      "tier": 1,
+      "owner": "Codex",
+      "last_updated": "2026-04-26",
+      "summary": "Arranque de Codex CLI: lectura obligatoria, referencias on-demand."
+    },
+    "readme-root": {
+      "path": "README.md",
+      "version": "1.1.0",
+      "status": "active",
+      "tier": 3,
+      "owner": "Claude",
+      "last_updated": "2026-04-26",
+      "summary": "Descripcion del repositorio ARGOS para lectura externa."
+    },
+    "readme-runtime": {
+      "path": "ARGOS_RUNTIME/README.md",
+      "version": "1.0.0",
+      "status": "active",
+      "tier": 3,
+      "owner": "Claude",
+      "last_updated": "2026-04-21",
+      "summary": "Introduccion al runtime ARGOS_RUNTIME."
+    }
+  }
+}
