@@ -18,7 +18,7 @@ Protocolo operativo condensado. Lectura obligatoria al inicio de cada sesion.
 
 1. Leer `work_packets/inbox/` -- que hay pendiente.
 2. Leer `state/argos.state.json` -- foco y riesgos activos.
-3. Leer tail de `ARGOS_GLOBAL_LOG.md` -- que se hizo recientemente.
+3. Leer tail de `logs/current/ARGOS_GLOBAL_LOG.md` -- que se hizo recientemente.
 4. (Solo si diagnosticas agentes chat o cierres remotos) Leer `inbox_deposits/`.
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion propia en tu voz.]"
 

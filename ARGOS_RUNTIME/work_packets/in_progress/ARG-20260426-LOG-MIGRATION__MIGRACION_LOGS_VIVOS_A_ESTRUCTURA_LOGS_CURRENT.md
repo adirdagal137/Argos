@@ -6,7 +6,7 @@ TAG: architecture, logs, migration, filesystem
 SUBJECT: Migracion logs vivos a ARGOS_RUNTIME/logs/current/ (Fase 7 de DOC-CONTEXT-HYGIENE)
 ROLE_REQUESTED: Codex
 OWNER: Codex
-STATUS: open
+STATUS: in_progress
 PRIORITY: low
 REPORTED_BY: Claude
 REPORTED_AT: 2026-04-26

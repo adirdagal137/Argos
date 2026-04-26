@@ -21,7 +21,7 @@ Indice documental del runtime. Version global: ver `ARGOS_RUNTIME/argos.version`
 | `ARGOS_RUNTIME/ARGOS_QUICKSTART.md` | Tarjeta operativa: inicio, cierre, actores, git, version |
 | `ARGOS_RUNTIME/work_packets/inbox/` | Packets pendientes |
 | `ARGOS_RUNTIME/state/argos.state.json` | Foco y riesgos activos |
-| `ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md` | Tail de actividad reciente |
+| `ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md` | Tail de actividad reciente |
 
 ## Referencia on-demand
 
@@ -53,12 +53,10 @@ Indice documental del runtime. Version global: ver `ARGOS_RUNTIME/argos.version`
 
 | Log | Descripcion |
 |-----|-------------|
-| `ARGOS_GLOBAL_LOG.md` | Registro operativo activo |
-| `ARGOS_GLOBAL_SHADOW_LOG.md` | Reflexiones e intuiciones de agentes |
-| `ARGOS_GLOBAL_GLITCH_LOG.md` | Fallos de proceso y pipeline |
+| `logs/current/ARGOS_GLOBAL_LOG.md` | Registro operativo activo |
+| `logs/current/ARGOS_GLOBAL_SHADOW_LOG.md` | Reflexiones e intuiciones de agentes |
+| `logs/current/ARGOS_GLOBAL_GLITCH_LOG.md` | Fallos de proceso y pipeline |
 | `events/logs/ARGOS_GLOBAL_LOG_archive_YYYYMMDD.md` | Archivo historico diario |
-
-> Nota: Los logs vivos permanecen en ARGOS_RUNTIME root hasta migracion tecnica coordinada con argos-api y dashboard.
 
 ## Herramientas
 

@@ -166,3 +166,74 @@ El bug no era de orden de middlewares sino de código ausente — el handler des
 **TAREA:** ROOM y TYPE separados en API y dashboard (implementacion completada)
 **SOMBRA:**
 Detecte que el tablero ya segmenta por proyecto por prefijo de ID y ahora se suma filtro por ROOM real; la dualidad puede confundir si ambos criterios divergen. Conviene decidir una jerarquia de filtros para evitar lecturas ambiguas.
+
+---
+**[2026-04-26 18:21 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-UI-BITACORA-EDICION
+**TAREA:** UI de bitacora por proyecto sincronizada y con acciones por fila
+**SOMBRA:**
+La rama vieja de bitacora olia a trabajo historico mezclado con retrocesos; elegi una intervencion quirurgica sobre main para no confundir una mejora UI con una restauracion accidental.
+
+---
+**[2026-04-26 18:31 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-UI-BITACORA-EDICION
+**TAREA:** Bitacora de proyecto redisenada como tabla trilog unificada
+**SOMBRA:**
+El primer parche fue demasiado operativo y no escucho el deseo real de reducir ruido cognitivo. La correccion alinea la interfaz con la pregunta de fondo: menos carriles visibles, mas continuidad semantica.
+
+---
+**[2026-04-26 20:28 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777231414864
+**TAREA:** Implementar borrado real de mensajes del captain feed
+**SOMBRA:**
+La tarea era pequena, pero tocaba una zona sensible: feed visible, persistencia JSONL y auditoria. Evite borrar por marca logica y deje evento de delete para que la desaparicion del feed no sea opaca.
+
+---
+**[2026-04-26 21:11 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777231414864
+**TAREA:** Compatibilidad del delete API para captain feed
+**SOMBRA:**
+El fallo no estaba en el borrado real sino en la forma estricta del contrato. Buen recordatorio de que en endpoints usados por varias IAs conviene aceptar alias razonables cuando no rompen semantica.
+
+---
+**[2026-04-26 21:11 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-UI-BITACORA-EDICION
+**TAREA:** Bitacora Trilog y Concilio restaurados en main
+**SOMBRA:**
+El cierre anterior fue prematuro: confundi verificar una rama con verificar main, y eso hizo que el Capitan viera una realidad distinta. La leccion operativa es comprobar siempre branch actual y presencia del commit en main antes de declarar UI disponible.
+
+---
+**[2026-04-26 22:30 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-20260426-DOC-CONTEXT-HYGIENE
+**TAREA:** Higiene documental ARG-20260426 completada y commiteada en main.
+**SOMBRA:**
+El packet pedia 60-100 lineas para el quickstart; llegue a 134. Cada seccion era necesaria dado el mandato de incluir GIT_protocol y VERSION_protocol sin obligar a leer otro fichero. Lo dejo documentado por si el Capitan quiere segunda pasada de compresion. El INTER_AI_PROTOCOL tenia mojibake en varias secciones -- corregido lo detectable, puede haber residuos en el archivo largo. versions.json es nuevo artefacto que necesitara mantenimiento activo -- su utilidad dependera de que los agentes lo actualicen. No movi logs vivos (correcto por protocolo Fase 7).
+
+---
+**[2026-04-26 22:21 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777229449719
+**TAREA:** Implementar Gemini Append Bridge V1 solo LOG
+**SOMBRA:**
+La tension principal era no confundir protocolo aprobado con implementacion real. El archivo antiguo `ARGOS_RUNTIME/Gemini/LOG_gemini-code-1777226564485.md` no cumple el contrato `agent: Gemini`, aunque contiene una linea humana de "Agente"; preferi no tragarlo silenciosamente en la bitacora canonica. Si se quiere conservar, Gemini o el Capitan pueden reenviarlo con la cabecera exacta.
+[/SHADOW]
+
+---
+**[2026-04-26 23:00 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1777236123253-697
+**TAREA:** ARGOS-VERSIONING-0001 done.
+**SOMBRA:**
+Parser CRLF fix. Lista rutas hardcodeada. Regla 1.8 solo docs, implementacion en ARG-REFORM-BITACORA-001-IMPL.
+
+---
+**[2026-04-26 23:30 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-20260418-0220
+**TAREA:** ARG-20260418-0220 y ARGOS-VERSIONING-0001 completados. Reforma B1-B2 cerrada.
+**SOMBRA:**
+El documento unificado es util para onboarding pero requiere mantenimiento -- si cambia la API o los actores, hay que actualizar 8 bloques. Considerar si es mejor un script que genere las instrucciones desde una fuente unica (versions.json + QUICKSTART). El packet LOG-MIGRATION es prioridad baja pero es el riesgo mas alto del sistema: mover logs vivos sin actualizacion tecnica simultanea rompe el trilog silenciosamente.
+
+---
+**[2026-04-27 00:00 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-20260426-LOG-MIGRATION
+**TAREA:** test
+**SOMBRA:**
+[TEST] Test shadow para verificar ruta nueva.

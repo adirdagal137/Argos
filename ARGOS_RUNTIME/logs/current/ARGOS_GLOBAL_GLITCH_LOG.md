@@ -1203,3 +1203,711 @@ Fallo consistente 401 Unauthorized al intentar acceder a /api/bootstrap vía web
 **OWNER:** Cualquiera
 **DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Cualquiera. Subject: EL widget de misiones alertas y sombra tiene un bug, cambia misiones de 13 a 0 y...
 **SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-129 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1775915097259
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Lola — más datos en sus reportes de alerta, perfeccionar análisis
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-130 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776613003000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Codex. Subject: Añadir campos ROOM y TYPE al schema de work packets y al dispatcher
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-131 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776613004000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Reforma del cierre mínimo — transcript pasa a privado/opcional, trilog+shadow son el único obligatorio
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-132 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776806232518
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Nota: Claude debe usar el medio de POST y FETCH para acceder a los archivos del...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-133 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776811289539
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Cualquiera. Subject: Sigue saltando el scroll en el feed cada vez que se refresca el estado de la web. Ideas...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-134 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776813558224
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Cualquiera. Subject: Tenemos que volver a establecer una forma de recuperar transcripts completos, todavía...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-135 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776816000001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Codex. Subject: Bootstrap — aceptar Bearer token además de X-Argos-Agent-Token
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-136 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776826258409
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Cualquiera. Subject: Lola requerida para que los shadow log cobren orden, si
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-137 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777049395470
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW. Owner detectado: Cualquiera. Subject: Importante: Hay que establecer un hook en el API para transcripts de chatGPT
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-138 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777052788376
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW. Owner detectado: Cualquiera. Subject: Las alertas de Lola deberían perdurar al menos 5 segundos en pantalla... Y creo que no...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-139 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-140 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777100000001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW. Owner detectado: Claude. Subject: Sin asunto
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-141 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-142 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-143 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204633030
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Endpoints de edición y gestión completa de workpackets
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-144 | TRILOG GUARD:**
+**WORK PACKET:** ARG-CONCILIO-CORE
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Consolidación de Reformas Constitucionales — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-145 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777221515268-968
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Cualquiera. Subject: # ARG-GIT-MERGE-001 — argos_commit.ps1: modo -Merge y auditoría de ramas huérfanas...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-146 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-ACTORS-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Normalizar actores canónicos en index.ts — Pi sustituye a Antigravity, OpenClaw sustituye a DeepSeek
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-147 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-BITACORA-001-IMPL
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Implementar validaciones ORPHAN en heartbeat y actor canónico en /api/remote/closure
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-148 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-LOG-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Endurecer protocolo de logs — obligatorio para todas las IAs sin excepción
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-149 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-SCHEMA-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Schema canónico de cierre v1 + trilog de ciclo de vida de work packets
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-150 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-UI-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Widget "Estado de IAs" → renombrar "Tripulación" + fix state.json desincronizado
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-151 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-VOICES-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Pi reemplaza a Antigravity — actualizar voces, mandatos y protocolo
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-152 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-ARCH-0004
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Cerrar decision arquitectonica - scope de escritura de la webapp en ARGOS_RUNTIME
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-153 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776474386624-573
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Cualquiera. Subject: # WORK PACKET — ARGOS-PROTO-0002 **ID:** ARGOS-PROTO-0002 **Título:** Cierre Remoto...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-154 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:13 Atlantic/Canary] G-155 | TRILOG GUARD:**
+**WORK PACKET:** LOLA-RISK-1776424632454
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Capitan
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Capitan. Subject: TensiÃ³n detectada en el Shadow Log por Lola
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-156 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776613003000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Codex. Subject: Añadir campos ROOM y TYPE al schema de work packets y al dispatcher
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-157 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776613004000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Reforma del cierre mínimo — transcript pasa a privado/opcional, trilog+shadow son el único obligatorio
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-158 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776806232518
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Nota: Claude debe usar el medio de POST y FETCH para acceder a los archivos del...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-159 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776816000001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Codex. Subject: Bootstrap — aceptar Bearer token además de X-Argos-Agent-Token
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-160 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-BITACORA-001-IMPL
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Implementar validaciones ORPHAN en heartbeat y actor canónico en /api/remote/closure
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-161 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-LOG-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Endurecer protocolo de logs — obligatorio para todas las IAs sin excepción
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-162 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-UI-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Widget "Estado de IAs" → renombrar "Tripulación" + fix state.json desincronizado
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-163 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-ARCH-0004
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Cerrar decision arquitectonica - scope de escritura de la webapp en ARGOS_RUNTIME
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-164 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776474386624-573
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Cualquiera. Subject: # WORK PACKET — ARGOS-PROTO-0002 **ID:** ARGOS-PROTO-0002 **Título:** Cierre Remoto...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:41 Atlantic/Canary] G-165 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-166 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776613003000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Codex. Subject: Añadir campos ROOM y TYPE al schema de work packets y al dispatcher
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-167 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776613004000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Reforma del cierre mínimo — transcript pasa a privado/opcional, trilog+shadow son el único obligatorio
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-168 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776806232518
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Nota: Claude debe usar el medio de POST y FETCH para acceder a los archivos del...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-169 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776816000001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Codex. Subject: Bootstrap — aceptar Bearer token además de X-Argos-Agent-Token
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-170 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-BITACORA-001-IMPL
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Implementar validaciones ORPHAN en heartbeat y actor canónico en /api/remote/closure
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-171 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-LOG-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Endurecer protocolo de logs — obligatorio para todas las IAs sin excepción
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-172 | TRILOG GUARD:**
+**WORK PACKET:** ARG-REFORM-UI-001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Widget "Estado de IAs" → renombrar "Tripulación" + fix state.json desincronizado
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-173 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-ARCH-0004
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Cerrar decision arquitectonica - scope de escritura de la webapp en ARGOS_RUNTIME
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-174 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776474386624-573
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Cualquiera
+**DETALLE:** Lane(s) ausentes: TRANSCRIPT. Owner detectado: Cualquiera. Subject: # WORK PACKET — ARGOS-PROTO-0002 **ID:** ARGOS-PROTO-0002 **Título:** Cierre Remoto...
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 18:42 Atlantic/Canary] G-175 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 19:00 Atlantic/Canary] G-176 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 19:00 Atlantic/Canary] G-177 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 19:00 Atlantic/Canary] G-178 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 19:14 Atlantic/Canary] G-179 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 19:14 Atlantic/Canary] G-180 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 19:14 Atlantic/Canary] G-181 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 19:14 Atlantic/Canary] G-182 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 20:29 Atlantic/Canary] G-183 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 20:29 Atlantic/Canary] G-184 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 20:29 Atlantic/Canary] G-185 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 20:29 Atlantic/Canary] G-186 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 21:08 Atlantic/Canary] G-187 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 21:08 Atlantic/Canary] G-188 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 21:08 Atlantic/Canary] G-189 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 21:08 Atlantic/Canary] G-190 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-26 22:21 Atlantic/Canary] VOZ CODEX (GLITCH):**
+**PACKET:** ARG-1777229449719
+El cierre HTTP por `/api/remote/closure` fallo con 401 porque `agent_tokens.json` no contiene token de Codex. Se uso este deposit fallback canonico.
+[/GLITCH]
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-191 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-192 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-193 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-194 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-195 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-196 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-197 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-198 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-199 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-200 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-201 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:04 Atlantic/Canary] G-202 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:05 Atlantic/Canary] G-203 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777082515019
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Auditoría y saneamiento de work-packets desactualizados, duplicados o absorbidos
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:05 Atlantic/Canary] G-204 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204259254
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:05 Atlantic/Canary] G-205 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777204463244
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Pi
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Pi. Subject: Revisión Concilio v1 protocolo completo — ABSORBIDO POR ARG-CONCILIO-001
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 00:05 Atlantic/Canary] G-206 | TRILOG GUARD:**
+**WORK PACKET:** ARGOS-TIFIS-0001
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.

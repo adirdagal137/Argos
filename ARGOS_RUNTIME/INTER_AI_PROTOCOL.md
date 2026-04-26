@@ -221,7 +221,7 @@ El ritual completo canonico para referencia:
 1. Leer work_packets/inbox/ completo.
 2. Leer state/argos.state.json (foco y riesgos activos).
 3. Leer ARGOS_QUICKSTART.md -- protocolo condensado.
-4. Leer tail de ARGOS_GLOBAL_LOG.md -- que se hizo recientemente.
+4. Leer tail de `logs/current/ARGOS_GLOBAL_LOG.md` -- que se hizo recientemente.
 5. (Solo si diagnosticas agentes chat) Leer inbox_deposits/ y processed/.
 6. (Solo bajo ambiguedad de protocolo o conflicto) Leer INTER_AI_PROTOCOL.md o ARGOS_CREW_VOICES.md.
 7. Confirmar al Capitan: “[N] paquetes en inbox. [Frase propia del agente en su voz.]”
@@ -233,7 +233,7 @@ El ritual completo canonico para referencia:
 | ARGOS_QUICKSTART.md    | Obligatorio cada sesion                                  |
 | work_packets/inbox/    | Obligatorio cada sesion                                  |
 | state/argos.state.json | Obligatorio cada sesion                                  |
-| ARGOS_GLOBAL_LOG.md    | Obligatorio (tail ~20 lineas)                            |
+| `logs/current/ARGOS_GLOBAL_LOG.md` | Obligatorio (tail ~20 lineas)              |
 | INTER_AI_PROTOCOL.md   | Solo bajo ambiguedad, conflicto, implementacion, auditoria |
 | ARGOS_CREW_VOICES.md   | Solo si hay duda de voz/tono del agente                  |
 | docs/protocols/REMOTE_CLOSURE_SETUP.md | Setup remoto, tuneles, tokens de agente |

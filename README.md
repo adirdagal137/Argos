@@ -82,7 +82,7 @@ Lo que **no** está aquí (vive en local/Drive):
 2. **`ARGOS_RUNTIME/ARGOS_QUICKSTART.md`** — tarjeta operativa: inicio, cierre, actores, git
 3. **`ARGOS_RUNTIME/work_packets/inbox/`** — qué hay pendiente
 4. **`ARGOS_RUNTIME/state/argos.state.json`** — foco y riesgos activos
-5. **`ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md`** (tail) — qué se hizo recientemente
+5. **`ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md`** (tail) — qué se hizo recientemente
 
 Solo bajo ambigüedad o conflicto:
 - `ARGOS_RUNTIME/INTER_AI_PROTOCOL.md` — protocolo completo
