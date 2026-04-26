@@ -174,6 +174,7 @@ Invoke-RestMethod -Method Get `
 Edicion parcial con trazabilidad. Campos permitidos: `subject`, `objective`, `priority`, `room`, `type`,
 `role_requested`, `status`, `assigned_to`. `actor` es obligatorio. En escritura externa usar token de agente.
 El PATCH actualiza en una sola operacion el `.md` canonico y `state/argos.state.json::packet_states`.
+ROOM validos actuales: `ARGOS`, `SCICLASSMATE`, `SCICLASSM8`, `COMENIO`, `XUANXU`, `GENERAL`.
 
 ```powershell
 Invoke-RestMethod -Method Patch `
@@ -190,6 +191,21 @@ Invoke-RestMethod -Method Patch `
 ```
 
 `notify_feed` solo emite al captain feed si vale `true`; por defecto el cambio queda en eventos/SSE sin ruido humano.
+
+Archivado fisico dedicado:
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "http://localhost:8080/api/workpackets/ARG-XXXX/archive" `
+  -Headers @{ "X-Argos-Agent-Token" = "<token-agente>" } `
+  -ContentType "application/json" `
+  -Body (@{
+    actor = "Claude"
+    reason = "Duplicado absorbido"
+    notify_feed = $false
+  } | ConvertTo-Json -Compress)
+```
+
+El endpoint mueve el `.md` a `work_packets/archived/` y deja `packet_states[ID] = "archived:archived"`.
 
 ### Regla general
 Cada agente ejecuta `argos_commit.ps1` al **cerrar sesion** si modifico archivos constitutivos.

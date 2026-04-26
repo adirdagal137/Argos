@@ -31,6 +31,9 @@ const CONCILIO_JSONL_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'argos.conc
 const CONCILIO_LOG_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'ARGOS_CONCILIO_LOG.md');
 const CONCILIO_ACTORS_PATH = path_1.default.join(RUNTIME_DIR, 'agents', 'ARGOS_CONCILIO_ACTORS.json');
 const CAPTAIN_FEED_PATH = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
+const CAPTAIN_FEED_LOCK_PATH = `${CAPTAIN_FEED_PATH}.lock`;
+const CAPTAIN_FEED_LOCK_TIMEOUT_MS = 5000;
+const CAPTAIN_FEED_LOCK_STALE_MS = 30000;
 const STATE_ARCHIVE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.archive.json');
 const SESSION_ARCHIVE_ROOT = path_1.default.join(RUNTIME_DIR, 'archive', 'sessions');
 const LEGACY_ARCHIVE_ROOT = path_1.default.join(RUNTIME_DIR, 'archive', 'legacy');
@@ -55,6 +58,38 @@ const ARGOS_VECTOR_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_VECTOR.md');
 const ARGOS_QUICKSTART_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_QUICKSTART.md');
 const NGROK_QUICK_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'ngrok.quick.json');
 const CLOUDFLARED_QUICK_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'cloudflared.quick.json');
+const API_STDERR_LOG_PATH = path_1.default.join(__dirname, '..', 'api.stderr.log');
+function stringifyProcessError(reason) {
+    if (reason instanceof Error)
+        return reason.stack || reason.message;
+    try {
+        return JSON.stringify(reason);
+    }
+    catch {
+        return String(reason);
+    }
+}
+function appendApiStderrLog(kind, reason) {
+    const line = [
+        `\n[${new Date().toISOString()}] [${kind}]`,
+        stringifyProcessError(reason)
+    ].join('\n');
+    try {
+        ensureDirSync(path_1.default.dirname(API_STDERR_LOG_PATH));
+        fs_1.default.appendFileSync(API_STDERR_LOG_PATH, `${line}\n`, 'utf-8');
+    }
+    catch (logError) {
+        console.error(`[ARGOS-API] No se pudo escribir ${API_STDERR_LOG_PATH}`, logError);
+    }
+}
+process.on('uncaughtException', (error) => {
+    appendApiStderrLog('uncaughtException', error);
+    console.error('[ARGOS-API] uncaughtException capturada; proceso sigue vivo.', error);
+});
+process.on('unhandledRejection', (reason) => {
+    appendApiStderrLog('unhandledRejection', reason);
+    console.error('[ARGOS-API] unhandledRejection capturada; proceso sigue vivo.', reason);
+});
 const EXTERNAL_WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const LOCAL_ONLY_API_PATHS = new Set(['/admin/rotate-token']);
 app.use(express_1.default.static(DASHBOARD_DIR));
@@ -132,7 +167,7 @@ function subscribeToModule(module, res) {
     });
     return senderId;
 }
-const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'COMENIO', 'XUANXU', 'GENERAL']);
+const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'SCICLASSM8', 'COMENIO', 'XUANXU', 'GENERAL']);
 const VALID_PACKET_TYPES = new Set(['strategy', 'build', 'integration', 'maintenance', 'bug', 'risk', 'errand', 'task']);
 function normalizeTaskRoom(rawValue) {
     const room = normaliseText(rawValue).toUpperCase();
@@ -490,6 +525,66 @@ function createCaptainFeedBackup(feedPath, reason = 'rewrite') {
     fs_1.default.copyFileSync(feedPath, backupPath);
     return backupPath;
 }
+function sleepSync(ms) {
+    const end = Date.now() + ms;
+    while (Date.now() < end) {
+        // Busy wait only around rare feed lock contention; keeps this API synchronous.
+    }
+}
+function withCaptainFeedWriteLock(reason, operation) {
+    ensureDirSync(path_1.default.dirname(CAPTAIN_FEED_LOCK_PATH));
+    const startedAt = Date.now();
+    let fd = null;
+    let lastError = null;
+    while (fd === null) {
+        try {
+            fd = fs_1.default.openSync(CAPTAIN_FEED_LOCK_PATH, 'wx');
+            fs_1.default.writeFileSync(fd, JSON.stringify({
+                pid: process.pid,
+                reason,
+                created_at: new Date().toISOString()
+            }), 'utf-8');
+        }
+        catch (error) {
+            lastError = error;
+            const code = error.code;
+            if (code !== 'EEXIST')
+                throw error;
+            try {
+                const stats = fs_1.default.statSync(CAPTAIN_FEED_LOCK_PATH);
+                if (Date.now() - stats.mtimeMs > CAPTAIN_FEED_LOCK_STALE_MS) {
+                    fs_1.default.unlinkSync(CAPTAIN_FEED_LOCK_PATH);
+                    continue;
+                }
+            }
+            catch (staleError) {
+                lastError = staleError;
+            }
+            if (Date.now() - startedAt >= CAPTAIN_FEED_LOCK_TIMEOUT_MS) {
+                throw new Error(`Timeout esperando lock de captain_feed (${reason}): ${stringifyProcessError(lastError)}`);
+            }
+            sleepSync(25);
+        }
+    }
+    try {
+        return operation();
+    }
+    finally {
+        try {
+            if (fd !== null)
+                fs_1.default.closeSync(fd);
+        }
+        finally {
+            try {
+                if (fs_1.default.existsSync(CAPTAIN_FEED_LOCK_PATH))
+                    fs_1.default.unlinkSync(CAPTAIN_FEED_LOCK_PATH);
+            }
+            catch (unlockError) {
+                console.error('[ARGOS-FEED] No se pudo liberar lock de captain_feed', unlockError);
+            }
+        }
+    }
+}
 function shouldSuppressCaptainFeedNoise(filePath, rec) {
     if (!isCaptainFeedPath(filePath))
         return false;
@@ -514,38 +609,46 @@ function shouldSuppressCaptainFeedNoise(filePath, rec) {
     return FEED_NOISE_RE.test(summary) || FEED_NOISE_RE.test(details);
 }
 function rewriteCaptainFeedSafely(feedPath, content, reason = 'rewrite') {
-    ensureDirSync(path_1.default.dirname(feedPath));
-    const previous = fs_1.default.existsSync(feedPath) ? fs_1.default.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '') : '';
-    const previousLines = previous.split(/\r?\n/).filter((line) => line.trim() !== '').length;
-    const previousMojibake = countMojibakeTokens(previous);
-    const backupPath = createCaptainFeedBackup(feedPath, reason);
-    const normalized = content === '' ? '' : (content.endsWith('\n') ? content : `${content}\n`);
-    fs_1.default.writeFileSync(feedPath, normalized, 'utf-8');
-    const roundtrip = fs_1.default.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '');
-    const parsedLines = roundtrip.split(/\r?\n/).filter((line) => line.trim() !== '');
-    let invalidLines = 0;
-    parsedLines.forEach((line) => {
-        try {
-            JSON.parse(line);
+    let previousLines = 0;
+    let previousMojibake = 0;
+    let parsedLineCount = 0;
+    let nextMojibake = 0;
+    let backupPath = null;
+    withCaptainFeedWriteLock(reason, () => {
+        ensureDirSync(path_1.default.dirname(feedPath));
+        const previous = fs_1.default.existsSync(feedPath) ? fs_1.default.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '') : '';
+        previousLines = previous.split(/\r?\n/).filter((line) => line.trim() !== '').length;
+        previousMojibake = countMojibakeTokens(previous);
+        backupPath = createCaptainFeedBackup(feedPath, reason);
+        const normalized = content === '' ? '' : (content.endsWith('\n') ? content : `${content}\n`);
+        fs_1.default.writeFileSync(feedPath, normalized, 'utf-8');
+        const roundtrip = fs_1.default.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '');
+        const parsedLines = roundtrip.split(/\r?\n/).filter((line) => line.trim() !== '');
+        let invalidLines = 0;
+        parsedLines.forEach((line) => {
+            try {
+                JSON.parse(line);
+            }
+            catch {
+                invalidLines += 1;
+            }
+        });
+        if (invalidLines > 0) {
+            if (backupPath && fs_1.default.existsSync(backupPath)) {
+                fs_1.default.copyFileSync(backupPath, feedPath);
+            }
+            throw new Error(`Guardrail: captain_feed rewrite invalido (${invalidLines} lineas JSON corruptas). Restaurado desde backup.`);
         }
-        catch {
-            invalidLines += 1;
-        }
+        parsedLineCount = parsedLines.length;
+        nextMojibake = countMojibakeTokens(roundtrip);
     });
-    if (invalidLines > 0) {
-        if (backupPath && fs_1.default.existsSync(backupPath)) {
-            fs_1.default.copyFileSync(backupPath, feedPath);
-        }
-        throw new Error(`Guardrail: captain_feed rewrite invalido (${invalidLines} lineas JSON corruptas). Restaurado desde backup.`);
-    }
-    const nextMojibake = countMojibakeTokens(roundtrip);
     appendJsonlRecord(ARGOS_EVENTS_PATH, {
         timestamp: nowIso(),
         actor: 'Codex',
         module: 'argos_feed_guard',
         type: 'captain_feed_rewrite',
         summary: `Captain feed reescrito con guardrail (${reason})`,
-        details: `lineas:${previousLines}->${parsedLines.length}; mojibake:${previousMojibake}->${nextMojibake}; backup:${backupPath || 'none'}`,
+        details: `lineas:${previousLines}->${parsedLineCount}; mojibake:${previousMojibake}->${nextMojibake}; backup:${backupPath || 'none'}`,
         source: 'feed_guardrail'
     });
 }
@@ -3172,16 +3275,24 @@ function appendJsonlRecord(filePath, record) {
     // SanitizaciÃƒÂ³n de codificaciÃƒÂ³n: Convertir a UTF-8 limpio
     const serialised = JSON.stringify(record);
     try {
-        // Si el archivo existe, nos aseguramos de que termine en newline para no romper el JSONL
-        if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).size > 0) {
-            const tail = readFileTail(filePath, 4);
-            const endsWithNewline = tail.includes('\n');
-            const separator = endsWithNewline ? '' : '\n';
-            fs_1.default.appendFileSync(filePath, `${separator}${serialised}\n`, 'utf-8');
+        const write = () => {
+            // Si el archivo existe, nos aseguramos de que termine en newline para no romper el JSONL
+            if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).size > 0) {
+                const tail = readFileTail(filePath, 4);
+                const endsWithNewline = tail.includes('\n');
+                const separator = endsWithNewline ? '' : '\n';
+                fs_1.default.appendFileSync(filePath, `${separator}${serialised}\n`, 'utf-8');
+            }
+            else {
+                // Crear archivo nuevo (asegurando UTF-8 sin BOM)
+                fs_1.default.writeFileSync(filePath, `${serialised}\n`, 'utf-8');
+            }
+        };
+        if (isCaptainFeedPath(filePath)) {
+            withCaptainFeedWriteLock('append', write);
         }
         else {
-            // Crear archivo nuevo (asegurando UTF-8 sin BOM)
-            fs_1.default.writeFileSync(filePath, `${serialised}\n`, 'utf-8');
+            write();
         }
     }
     catch (e) {
@@ -4179,6 +4290,8 @@ function escapeRegex(text) {
 }
 function normalizeTaskStatus(status, fallback = 'open') {
     const raw = normaliseText(status).toLowerCase();
+    if (['archived', 'archive', 'parked'].includes(raw))
+        return 'archived';
     if (['done', 'closed', 'resolved', 'complete', 'completed'].includes(raw))
         return 'done';
     if (['in_progress', 'in-progress', 'progress', 'active', 'doing', 'review'].includes(raw))
@@ -4188,6 +4301,8 @@ function normalizeTaskStatus(status, fallback = 'open') {
     return fallback;
 }
 function statusToZone(status) {
+    if (status === 'archived')
+        return 'archived';
     if (status === 'done')
         return 'done';
     if (status === 'in_progress')
@@ -4236,7 +4351,7 @@ function replacePacketObjective(content, objective) {
     return `${content}\n${nextBlock}\n[/WORK_PACKET]`;
 }
 function buildWorkPacketApiRecord(resolved, content = resolved.content) {
-    const fallbackStatus = resolved.zone === 'done' ? 'done' : resolved.zone === 'in_progress' ? 'in_progress' : 'open';
+    const fallbackStatus = resolved.zone === 'archived' ? 'archived' : resolved.zone === 'done' ? 'done' : resolved.zone === 'in_progress' ? 'in_progress' : 'open';
     const currentStatus = normalizeTaskStatus(getPacketField(content, 'STATUS'), fallbackStatus);
     const roleRequested = getPacketField(content, 'ROLE_REQUESTED') || getPacketField(content, 'OWNER') || 'Cualquiera';
     const assignedTo = getPacketField(content, 'ASSIGNED_TO') || roleRequested;
@@ -4327,7 +4442,7 @@ function writeWorkPacketAndStateAtomic(resolved, nextContent, nextZone, nextStat
         throw error;
     }
 }
-function findWorkPacketById(packetId, zones = ['inbox', 'in_progress', 'done']) {
+function findWorkPacketById(packetId, zones = ['inbox', 'in_progress', 'done', 'archived']) {
     const targetId = normaliseText(packetId);
     if (targetId === '')
         return null;
@@ -5609,16 +5724,56 @@ app.post('/api/chat', (req, res) => {
 app.post('/api/chat/edit', (req, res) => {
     try {
         const messageId = normaliseText(req.body.messageId);
+        const action = normaliseText(req.body.action).toLowerCase();
+        const actor = normaliseText(req.body.actor) || normaliseText(req.body.agent) || 'Unknown';
         const summary = normaliseText(req.body.summary);
         const details = normaliseText(req.body.details);
         if (messageId === '')
             return res.status(400).json({ error: 'messageId requerido' });
-        if (summary === '')
-            return res.status(400).json({ error: 'summary requerido' });
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         if (!fs_1.default.existsSync(feedPath))
             return res.status(404).json({ error: 'No existe captain_feed.jsonl' });
         const lines = readCaptainFeedLines(feedPath);
+        if (action === 'delete') {
+            let deletedRecord = null;
+            const nextLines = lines.filter((line) => {
+                if (!line.parsed)
+                    return true;
+                const current = ensureCaptainFeedRecordId(line.parsed);
+                if (resolveFeedRecordId(current) !== messageId)
+                    return true;
+                deletedRecord = current;
+                return false;
+            });
+            if (!deletedRecord) {
+                return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+            }
+            writeCaptainFeedLines(feedPath, nextLines);
+            const deletedAt = new Date().toISOString();
+            const finalRecord = deletedRecord;
+            const packetRef = normaliseText(finalRecord.refId);
+            appendJsonlRecord(ARGOS_EVENTS_PATH, {
+                timestamp: deletedAt,
+                actor,
+                module: 'argos',
+                type: 'interaction_delete',
+                status: 'deleted',
+                packet_id: packetRef,
+                refId: packetRef,
+                summary: `Mensaje eliminado del captain_feed: ${messageId}`,
+                details: normaliseText(finalRecord.summary),
+                source: 'api:chat/edit'
+            });
+            publishEvent('chat:message_deleted', {
+                id: messageId,
+                actor,
+                refId: packetRef,
+                timestamp: deletedAt
+            });
+            return res.json({ ok: true, deleted: messageId });
+        }
+        if (summary === '')
+            return res.status(400).json({ error: 'summary requerido' });
         const editedAt = new Date().toISOString();
         let updatedRecord = null;
         let found = false;
@@ -6424,6 +6579,97 @@ app.patch('/api/workpackets/:id', (req, res) => {
     }
     catch (error) {
         return res.status(500).json({ error: 'Fallo actualizando el work packet', detail: String(error) });
+    }
+});
+app.post('/api/workpackets/:id/archive', (req, res) => {
+    try {
+        const packetId = normaliseText(req.params.id);
+        if (packetId === '')
+            return res.status(400).json({ error: 'packetId requerido' });
+        const body = req.body && typeof req.body === 'object' ? req.body : {};
+        const actor = normaliseText(body.actor) || normaliseText(body.agent);
+        if (actor === '')
+            return res.status(400).json({ error: 'actor es obligatorio para trazabilidad' });
+        if (!isTrustedLocalRequest(req)) {
+            const auth = authenticateAgentRequest(req, actor);
+            if (!auth.ok)
+                return res.status(auth.status).json({ error: auth.error });
+        }
+        const alreadyArchived = findWorkPacketById(packetId, ['archived']);
+        if (alreadyArchived) {
+            return res.json({
+                status: 'ok',
+                archived: true,
+                already_archived: true,
+                packet: buildWorkPacketApiRecord(alreadyArchived)
+            });
+        }
+        const resolved = findWorkPacketById(packetId, ['inbox', 'in_progress', 'done']);
+        if (!resolved)
+            return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
+        const timestamp = nowIso();
+        const reason = normaliseText(body.reason);
+        let nextContent = resolved.content;
+        nextContent = upsertPacketField(nextContent, 'STATUS', 'archived');
+        nextContent = upsertPacketField(nextContent, 'UPDATED_AT', timestamp);
+        nextContent = upsertPacketField(nextContent, 'UPDATED_BY', actor);
+        if (reason !== '') {
+            nextContent = upsertPacketField(nextContent, 'ARCHIVE_REASON', reason);
+        }
+        const nextState = updatePacketStateInMemory(readArgosState(), resolved.packetId, 'archived', 'archived');
+        writeWorkPacketAndStateAtomic(resolved, nextContent, 'archived', nextState);
+        const archivedResolved = findWorkPacketById(resolved.packetId, ['archived']) || {
+            ...resolved,
+            zone: 'archived',
+            filePath: path_1.default.join(RUNTIME_DIR, 'work_packets', 'archived', resolved.fileName),
+            content: nextContent
+        };
+        const packet = buildWorkPacketApiRecord(archivedResolved, nextContent);
+        appendJsonlRecord(ARGOS_EVENTS_PATH, {
+            timestamp,
+            actor,
+            module: 'argos',
+            type: 'workpacket_archived',
+            status: 'archived',
+            packet_id: resolved.packetId,
+            refId: resolved.packetId,
+            summary: `Workpacket archivado: ${packet.subject}`,
+            details: `ZONA=${resolved.zone}->archived${reason !== '' ? ` | reason=${reason}` : ''}`,
+            source: 'api:workpackets/archive'
+        });
+        if (body.notify_feed === true) {
+            appendJsonlRecord(CAPTAIN_FEED_PATH, {
+                id: nextFeedMessageId(),
+                timestamp,
+                kind: 'crew_update',
+                speaker: 'crew',
+                sender_name: actor,
+                sender_role: 'agent',
+                audience: 'captain',
+                source: 'api:workpackets/archive',
+                summary: `Workpacket archivado: ${packet.subject}`,
+                details: reason,
+                status: 'archived',
+                tokens: 0,
+                refId: resolved.packetId
+            });
+        }
+        publishEvent('packet:changed', {
+            packetId: resolved.packetId,
+            from: resolved.zone,
+            to: 'archived',
+            status: 'archived',
+            actor
+        });
+        return res.json({
+            status: 'ok',
+            archived: true,
+            already_archived: false,
+            packet
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo archivando el work packet', detail: String(error) });
     }
 });
 // ============ ENDPOINT: Get AI My Packets ============
