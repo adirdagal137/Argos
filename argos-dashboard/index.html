@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;800&family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260411-1052">
+    <link rel="stylesheet" href="styles.css?v=20260426-concilio">
 </head>
 <body>
     <div class="bg-orb orb-1"></div>
@@ -27,6 +27,7 @@
                 <a href="#" class="nav-item nav-project" data-project="comenio" data-target="view-project-container"><span class="icon">#</span> Comenio</a>
                 <a href="#" class="nav-item nav-project" data-project="lola" data-target="view-project-container"><span class="icon">#</span> Lola</a>
                 <a href="#" class="nav-item nav-project" data-project="xuanshu" data-target="view-project-container"><span class="icon">#</span> XuanShu</a>
+                <a href="#" class="nav-item" data-target="view-concilio"><span class="icon">></span> Concilio</a>
                 <a href="#" class="nav-item" data-target="view-fuentes"><span class="icon">@</span> Fuentes (GitHub)</a>
                 <a href="#" class="nav-item" data-target="view-bosque"><span class="icon">/</span> Explorador del Bosque</a>
                 <a href="#" class="nav-item" data-target="view-vellocino"><span class="icon">*</span> Vellocino de Oro (KIs)</a>
@@ -184,6 +185,30 @@
                 </div> <!-- monitor-grid -->
             </div> <!-- view-monitorizacion -->
 
+            <div id="view-concilio" class="view-section">
+                <div class="concilio-view">
+                    <div class="card concilio-card concilio-card-full glass-panel">
+                        <div class="card-header">
+                            <h3>Concilio</h3>
+                            <span class="badge">ROOM</span>
+                        </div>
+                        <div class="concilio-thread" id="concilio-thread">
+                            <p class="empty-copy">Sin deliberaciones abiertas.</p>
+                        </div>
+                        <div class="concilio-input concilio-input-full">
+                            <select id="concilio-type-select" aria-label="Tipo de mensaje Concilio">
+                                <option value="pregunta">Pregunta</option>
+                                <option value="propuesta">Propuesta</option>
+                                <option value="decision">Decision</option>
+                                <option value="sintesis">Sintesis</option>
+                            </select>
+                            <textarea id="concilio-body-input" rows="3" placeholder="Mensaje al Concilio..."></textarea>
+                            <button class="btn btn-icon" id="btn-send-concilio" title="Enviar al Concilio">O-</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="view-project-container" class="view-section">
                 <div class="project-banner card glass-panel">
                     <div class="card-header pb-header">
@@ -330,7 +355,7 @@
 
     <div class="toast-container" id="toast-bin"></div>
 
-    <script src="app.js?v=20260426-workpackets"></script>
+    <script src="app.js?v=20260426-concilio"></script>
 
     <!-- EVENT VIEWER MODAL (HERMENEUTICA) -->
     <div id="event-viewer-overlay" class="modal-overlay hidden">

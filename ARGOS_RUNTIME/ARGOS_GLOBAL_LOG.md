@@ -5,6 +5,22 @@ Archivo activo de sesion. Ultimo reset: 2026-04-17 12:17 Atlantic/Canary.
 ---
 
 ---
+**[2026-04-26 13:10 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
+**MISION:** Reorganización estratégica del Concilio — merge de packets y derivados arquitectónicos
+**WORK PACKET:** ARG-CONCILIO-001
+**DETALLE:**
+Merge de 4 packets Concilio dispersos (ARG-CONCILIO-001, ARG-CONCILIO-CORE, ARG-1777204259254, ARG-1777204463244) en un único packet canónico ARG-CONCILIO-001 de 12 secciones. Integrado análisis estratégico externo (ChatGPT): mapa de capas del ecosistema Argos (núcleo operativo / cognitivo / educativo / futuro / transversal) y 6 riesgos priorizados (acoplamiento, modelo de datos, Lola sin límites, XuanShu zona roja, ausencia de seguridad, complejidad sin governance). Los 3 packets absorbidos tienen stubs done y están limpios del state.json. Derivados creados en inbox: ARGOS-DATA-MODEL-001 (7 entidades canónicas, P1) y ARGOS-AEGIS-001 (módulo de seguridad Aegis v1 con 6 funciones, P1, regla audit-only primero).
+**SHADOW:**
+El análisis de ChatGPT forzó a nombrar riesgos que el sistema intuía pero no había formalizado. XuanShu como zona roja es el más delicado: no es un riesgo técnico sino legal y ético. El merge no es solo higiene — es la primera vez que el ecosistema tiene un mapa de capas y una hoja de ruta de 5 fases explícitas. Eso cambia algo en la forma de ver el trabajo.
+
+---
+**[2026-04-24 23:15 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
+**MISION:** Arquitectura de transcripts y relevo conversacional — debate multi-agente y formalización
+**WORK PACKET:** ARG-1777100000001 / LOLA-SHADOW-0001
+**DETALLE:**
+Debate multi-agente (Claude + ChatGPT + Pi + Capitán) sobre cómo maximizar comprensión posterior de sesiones sin clonar transcripts literales. Consenso en arquitectura de cuatro capas: LOG / SHADOW / RELEVO / LITERAL-indexado. Creado ARG-1777100000001 con schema de RELEVO (4 campos obligatorios + 3 opcionales), regla de packetId canónico, SESSION_REF como puntero al literal. Decisión arquitectónica cerrada: RELEVO va a ARGOS_RELEVO_LOG.md separado (no inflar el log global). Creado LOLA-SHADOW-0001 absorbiendo 4 packets dispersos (ARG-1775915097259, ARG-1776826258409, ARG-1777052788376, LOLA-RISK-1776424632454) — motor Lola dividido en fase A (mejoras técnicas) y fase B (análisis relacional Capitán–IA, nueva función). Packets absorbidos movidos a done/.
+
+---
 **[2026-04-22 02:10 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
 **MISION:** Bearer token fix + migración argos-api a ruta canónica
 **WORK PACKET:** ARG-1776816000001 / ARG-1776816000002
@@ -286,3 +302,458 @@ Parser de work packets actualizado con ROOM/TYPE + defaults; /api/tasks agrega f
 **SIGUIENTE:** A tu orden para continuar con commit/merge o validar visualmente en UI.
 
 **RIESGOS:** Riesgo bajo: existen cambios no relacionados en el worktree; para commit conviene aislar solo archivos del packet.
+
+---
+**[2026-04-24 21:11 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777061469549
+
+**DETALLES:**
+Se abrió un packet canónico para elevar a la tripulación el meta-análisis sobre bloqueadores de salida a producción de SCICLASSM8 y COMENIO. Se publicó aviso visible en cubierta con el diagnóstico resumido y se deja en este cierre el transcript literal del análisis previo para trazabilidad.
+
+TRANSCRIPT LITERAL DEL ANÁLISIS PREVIO:
+"""
+Sí. Voy al hueso: **ahora mismo no os está frenando tanto la feature de SCICLASSM8 o COMENIO; os está frenando la plataforma madre que debería dejarlos salir a producir con orden**.
+
+## Lo que está fallando de verdad
+
+### 1) No está cerrada la decisión arquitectónica central
+
+Tenéis una decisión pendiente muy seria: **si la webapp escribe en `ARGOS_RUNTIME` o si solo lee** (`ARGOS-ARCH-0004`).
+
+Mientras eso no se cierre:
+
+* no podéis diseñar bien los endpoints de escritura,
+* no podéis endurecer el flujo operativo,
+* y todo lo de producción queda medio provisional.
+
+Eso no es deuda bonita. Eso es **bloqueo estructural**.
+
+---
+
+### 2) El canal remoto/API sigue siendo frágil y demasiado manual
+
+El foco vivo del sistema lo dice claro: **todavía estáis intentando asegurar Claude↔API por túnel + remote closure**.
+
+Los síntomas:
+
+* el túnel es temporal y cambia,
+* el arranque depende de pasos manuales,
+* falta rematar `GET /api/ia/bootstrap`,
+* está abierto el packet para aceptar `Bearer` además de `X-Argos-Agent-Token`,
+* Claude aún ha tenido fricción real para hacer POST limpios al canal remoto.
+
+Traducción brutal:
+**todavía no tenéis un plano de control robusto para operar producción sin rituales manuales.**
+
+Para sacar SCICLASSM8 o COMENIO, esto es veneno.
+
+---
+
+### 3) La bitácora, los cierres y la trazabilidad están heridos
+
+Aquí hay mucho humo porque debajo hay fuego real:
+
+* reforma del cierre mínimo aún abierta,
+* endurecimiento del protocolo de logs aún abierto,
+* trilogs incompletos,
+* timestamps raros o a `00:00`,
+* glitches que no se detectan bien,
+* transcripts completos aún no recuperables de forma sólida,
+* riesgo de entradas huérfanas/orphan que se está intentando endurecer ahora.
+
+Eso significa que **vuestro sistema todavía no garantiza una historia operativa fiable**.
+
+Y sin eso:
+
+* no sabéis con precisión qué hizo cada agente,
+* no podéis auditar fallos,
+* no podéis hacer postmortem limpio,
+* no podéis confiar del todo en vuestra propia telemetría.
+
+Para COMENIO esto me parece especialmente peligroso si va a requerir más rigor documental o trazabilidad.
+Para SCICLASSM8 es igual de malo si necesitáis iterar rápido sin romper contexto.
+
+---
+
+### 4) No existe aún una separación limpia por producto/room
+
+Este punto me parece capital para tu pregunta.
+
+Tenéis abierto:
+
+* **añadir campos `ROOM` y `TYPE` al schema de work packets y al dispatcher**,
+* **dashboard por ROOM** depende de eso,
+* la distinción legacy `INBOX_REVIEW / INBOX_EXECUTE` sigue sin implementarse.
+
+Eso quiere decir que **SCICLASSM8 y COMENIO todavía no están bien aislados a nivel operativo**.
+
+Consecuencia:
+
+* riesgo de mezclar trabajo,
+* mala priorización,
+* visibilidad pobre de qué pertenece a qué línea,
+* dificultad para saber qué release candidate está listo por producto.
+
+Dicho claro:
+**no estáis preparados aún para llevar dos frentes a producción con disciplina de fábrica.**
+
+---
+
+### 5) El estado visible del sistema miente o llega desincronizado
+
+Hay varios indicios de que la observabilidad está floja:
+
+* widget de estado de IAs desincronizado,
+* heartbeat no marca stale de forma consistente,
+* work tokens “cuentan como quieren”,
+* mojibake en mensajes/feed,
+* scroll saltando en la web al refrescar.
+
+Esto parece secundario, pero no lo es.
+
+Cuando el panel miente:
+
+* el Capitán decide peor,
+* la tripulación pisa trabajos,
+* los bloqueos tardan más en verse,
+* y una salida a producción se hace a ciegas.
+
+---
+
+### 6) La UI operativa todavía tiene piezas bloqueadas
+
+El explorador de archivos sigue bloqueado por el módulo filesystem no montado.
+
+No es el fin del mundo, pero sí revela algo:
+**la consola desde la que debéis gobernar el sistema aún no está completamente operativa.**
+
+Para producción eso significa más fricción, más pasos manuales y menos capacidad de reacción.
+
+---
+
+### 7) El protocolo humano de la tripulación aún no está unificado
+
+También tenéis abiertos:
+
+* unificación de protocolos,
+* formalización de roles,
+* reforma de voces,
+* reemplazo de Antigravity por Pi,
+* reglas de cierre para Pi.
+
+Eso suena blando, pero no lo es.
+En sistemas multiagente, **protocolo confuso = ejecución inconsistente**.
+
+Y una producción con SCICLASSM8 y COMENIO en paralelo necesita justamente lo contrario:
+
+* reglas fijas,
+* responsabilidades claras,
+* cierres homogéneos,
+* y lenguaje operativo consistente.
+
+---
+
+## Qué bloquea más a SCICLASSM8 y qué bloquea más a COMENIO
+
+No veo packets explícitos de producto con esos nombres en el estado actual, así que esto es lectura de plataforma, no de backlog específico.
+
+### SCICLASSM8
+
+Lo que más lo bloquea, por pinta de sistema:
+
+* **falta de separación por ROOM/TYPE**,
+* **estado desincronizado de la tripulación**,
+* **SSE/parser/dedup todavía por endurecer**,
+* **canal remoto aún no totalmente fiable**.
+
+Si SCICLASSM8 necesita velocidad, interacción y cambios frecuentes, ahora mismo el riesgo es **caos operativo**.
+
+### COMENIO
+
+Lo que más lo bloquea:
+
+* **bitácora rota o inconsistente**,
+* **cierres incompletos**,
+* **transcripts débiles**,
+* **arquitectura sin cerrar**,
+* **protocolos todavía mezclados**.
+
+Si COMENIO necesita más orden, trazabilidad o rigor de contenido, ahora mismo el riesgo es **falta de garantía y de confianza operativa**.
+
+---
+
+## Mi diagnóstico en una frase
+
+**No estáis todavía en “fase de producir dos productos”; estáis en “fase de endurecer el sistema que debe permitir producir dos productos sin mezclar, perder rastro ni depender de magia manual”.**
+
+---
+
+## Orden de ataque que más rendimiento daría
+
+1. **Cerrar hoy `ARCH-0004`.**
+   Sin esa decisión, seguís diseñando sobre niebla.
+
+2. **Completar el canal remoto end-to-end.**
+   Bootstrap limpio, auth consistente, tunnel operativo sin rito raro, primer cierre real verificado.
+
+3. **Endurecer cierre y bitácora como si fuera infraestructura crítica.**
+   `remote/closure`, actor canónico, orphan validation, trilog mínimo fiable, timestamps sanos.
+
+4. **Implantar `ROOM` y `TYPE` ya.**
+   Hasta que eso exista, SCICLASSM8 y COMENIO no están realmente separados.
+
+5. **Arreglar la verdad visible del sistema.**
+   Estado de IAs, stale, feed, encoding, tokens aproximados.
+
+6. **Luego sí: producto.**
+   Antes, cualquier avance de producto flota sobre una base que aún se mueve.
+
+La conclusión más dura es esta: **vuestro cuello de botella no es creatividad ni construcción, es gobernanza técnica del sistema multiagente.** Y eso, ahora mismo, es exactamente lo que separa un prototipo vivo de una producción seria.
+
+Siguiente golpe lógico: convertir esto en un tablero de **“bloqueadores de salida a producción”** con semáforo rojo/ámbar/verde para SCICLASSM8 y COMENIO por separado.
+"""
+
+---
+**[2026-04-24 21:20 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777061469549
+
+**DETALLES:**
+Se añade corrección canónica a la interacción previa: el meta-análisis comunicado y el packet asociado deben atribuirse a ChatGPT como agente emisor real de esta interfaz. La sonoridad o cadencia parecida a Codex fue un error de voz, no un relevo de agente. Se fija además criterio operativo para reducir ruido: preferencia por mensaje único consolidado cuando el estado de la operación lo permita.
+
+---
+**[2026-04-24 21:35 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Heartbeat silenciado en feed, validaciones ORPHAN/canonico y voces unificadas en feed/bitacora
+**WORK PACKET:** ARG-REFORM-BITACORA-001-IMPL
+
+**DETALLES:**
+Se elimino el post de stale en captain_feed. Se agregaron validaciones ORPHAN (packet_id vacio y actor no canonico) en processSingleInboxDeposit con registro de glitch. parseRemoteClosurePayload ahora exige actor canonico. Se normalizo voz visible para Pi/ChatGPT/Qwen en feed y bitacora. Se ajusto deduplicacion de /api/chat por id para evitar desaparicion de mensajes validos. Build OK en src y dist.
+
+**SIGUIENTE:** Aplicar la migracion completa de actores canonicos del packet ARG-REFORM-ACTORS-001 y validar state ia_status.
+
+**RIESGOS:** Queda pendiente la migracion integral de aliases historicos Antigravity/DeepSeek a Pi/OpenClaw en todos los mapas de estado.
+
+---
+**[2026-04-24 20:30 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777100000001
+
+**DETALLES:**
+Implementado sistema completo de transcripts vinculados a packets. Nuevo endpoint GET /api/transcript/:packetId (sin token, lectura pública). Botón 📄 Transcripts en dashboard para packets done con modal multi-agente. QUICKSTART actualizado con formato manual ChatGPT/Pi y sección de lectura. INTER_AI_PROTOCOL actualizado con ruta canónica. Build TypeScript limpio.
+
+---
+**[2026-04-24 21:43 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Actores canonicos migrados a Pi/OpenClaw en API, estado IA y feed
+**WORK PACKET:** ARG-REFORM-ACTORS-001
+
+**DETALLES:**
+Se actualizo normalizeAgentName para emitir Claude/Pi/Codex/OpenClaw con compat de entrada para aliases legacy. IaStatusMap migro a keys Claude, Codex, Pi, OpenClaw con fallback desde state legacy (Antigravity/DeepSeek). Se corrigieron voces y mojibake en /api/ia/start-task (Tomando misi�n, ID - en progreso). Se ajustaron rutas de desktop import/proxy/tokens y referencias operativas para OpenClaw/Pi. Build tsc correcto y health OK (/api/ping, /api/health).
+
+**SIGUIENTE:** Continuar con ARG-REFORM-VOICES-001 para cerrar normalizacion narrativa pendiente en prompts/leyendas legacy y consolidar protocolo de voces.
+
+---
+**[2026-04-24 23:26 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Schema canonico de cierre v1 + politica de trilog de lifecycle — creacion de packet
+**WORK PACKET:** ARG-REFORM-SCHEMA-001
+
+**DETALLES:**
+Creado work packet ARG-REFORM-SCHEMA-001 como referencia canonica del schema de 10 campos de cierre, acordado en debate multi-agente (Claude/Pi/ChatGPT) ratificado por el Capitan el 2026-04-24. El packet incluye: schema completo con tipos y restricciones, separacion semantica result/handoff con ejemplos validos/invalidos, cuatro tipos de cierre con flag handoff_active para distinguir traspaso limpio de bloqueo, schema_version desde Fase 1, y politica de trilog de lifecycle (creacion/mutacion/cierre). Documentadas 8 necesidades de implementacion para Codex en el cuerpo del packet. Trilog de creacion incluido en el propio archivo del packet.
+
+**SIGUIENTE:** Capitan ratifica o enmienda el schema. Si aprobado, Claude ejecuta tareas 2-3 (INTER_AI_PROTOCOL.md seccion 1.8 + QUICKSTART ejemplo real). Luego packet hijo para Codex con spec de implementacion.
+
+**RIESGOS:** Sin flag lifecycle_event en argos-api, los trilogs de creacion/mutacion seran indistinguibles de trilogs de tarea en la bitacora — la politica de lifecycle existe en papel pero no es visible en UI. Necesidad #6 del packet es la mas fragil.
+
+**RIESGOS:** Persisten menciones legacy Antigravity/DeepSeek en textos de prompts y comentarios no bloqueantes; no afectan flujo can�nico actual.
+
+---
+**[2026-04-24 21:46 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Protocolo y voces actualizados: Pi reemplaza Antigravity en canon operativo
+**WORK PACKET:** ARG-REFORM-VOICES-001
+
+**DETALLES:**
+Se actualizo ARGOS_CREW_VOICES.md (seccion IV PI/GEMINI y nota de alias interfaz->motor). Se actualizo INTER_AI_PROTOCOL.md con canones y ejemplos a Pi/OpenClaw en actores de cierre y ORPHAN rules. Se ajusto packet ARG-1776613007000 con referencia explicita Pi (antes Antigravity). Se migro state ia_status a claves Claude,Codex,Pi,OpenClaw y se dejo registro de deprecacion en ARGOS_GLOBAL_GLITCH_LOG.md + events/argos.glitches.jsonl (G-131).
+
+**SIGUIENTE:** Continuar con limpieza de referencias legacy no operativas en prompts internos y etiquetas historicas para reducir ruido de lectura.
+
+**RIESGOS:** Persisten referencias legacy en comentarios/prompts de analisis local; no bloquean la operativa can�nica pero pueden confundir en lecturas futuras.
+
+---
+**[2026-04-24 23:41 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Mojibake limpiado en captain_feed y heartbeat stale silenciado en feed
+**WORK PACKET:** ARG-1777049413321
+
+**DETALLES:**
+Se eliminaron del captain_feed las entradas stale del heartbeat y se verifico que no vuelven a emitirse desde la instancia activa de argos-api. Se corrigieron entradas recientes de mission start con texto mojibake y se normalizo en codigo el formato de start-task a ASCII estable (Tomando mision / ID ... - en progreso) para evitar regresion de encoding.
+
+**SIGUIENTE:** Aplicar limpieza gradual del mojibake historico restante en entradas legacy de feed y logs sin alterar trazabilidad semantica.
+
+**RIESGOS:** Persisten entradas historicas antiguas con mojibake fuera del alcance inmediato; no afectan el protocolo activo pero ensucian lectura historica.
+
+---
+**[2026-04-24 23:52 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Heartbeat stale eliminado del feed con cierre operativo estable
+**WORK PACKET:** ARG-1777049435836
+
+**DETALLES:**
+Se validó que el origen era una instancia legacy de argos-api en paralelo. Se reinició la instancia activa, se limpiaron entradas stale residuales y se confirmó operación en ping/health. Se mantiene silencio de heartbeat en feed para estado stale.
+
+**SIGUIENTE:** Monitorear 24h: si reaparece stale en feed, capturar PID/hora de arranque antes de cualquier limpieza.
+
+**RIESGOS:** Riesgo residual: volver a ejecutar una instancia vieja puede reintroducir el síntoma aunque el código esté parcheado.
+
+---
+**[2026-04-24 21:00 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777100000001
+
+**DETALLES:**
+Implementado protocolo HANDOFF completo. Tipo HandoffPayload (4 campos obligatorios + 3 opcionales) añadido a RemoteClosurePayload como sections.handoff opcional. appendToHandoffLog escribe a ARGOS_GLOBAL_HANDOFF_LOG.md con ancla packetId. readHandoffEntriesForPacket escanea el log para lectura por packet. GET /api/handoff/:packetId expuesto sin token. Cierre handler escribe handoff cuando presente. Dashboard botón Handoff en packets done con modal estructurado. QUICKSTART actualizado con schema completo y advertencia anti-cajón-de-sastre. Packets ARG-1776813558224 y ARG-1777049395470 absorbidos y cerrados.
+
+---
+**[2026-04-24 21:01 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777100000001
+
+**DETALLES:**
+Reenvío de handoff tras reinicio de servidor. Ver cierre anterior para log completo.
+
+---
+**[2026-04-25 00:07 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-REFORM-SCHEMA-001
+
+**DETALLES:**
+Validacion end-to-end OK en API y logbook
+
+---
+**[2026-04-25 00:08 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-REFORM-SCHEMA-001
+
+**DETALLES:**
+Validacion e2e con boolean parser corregido
+
+---
+**[2026-04-25 00:09 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-REFORM-SCHEMA-001
+
+**DETALLES:**
+Probe
+
+---
+**[2026-04-25 00:09 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-REFORM-SCHEMA-001
+
+**DETALLES:**
+Probe
+
+---
+**[2026-04-25 00:09 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Summary v1 para GitHub: schema cierre y semaforo de riesgo
+**WORK PACKET:** ARG-REFORM-SCHEMA-001
+
+**DETALLES:**
+Prueba positiva end-to-end ejecutada en /api/remote/closure, validaciones de blocked/task_completed activas, payload v1 persistido en events con mission/closure_type/risk_level/handoff/transcriptRef. UI actualizada con columna risk_level, estilo lifecycle y bloqueado-handoff.
+
+**SIGUIENTE:** Commit y push de cambios de codigo en argos-api/argos-dashboard; luego PR.
+
+**ERRORES + APRENDIZAJES:** No se detectaron errores de compilacion. Ajuste adicional: parseo robusto de boolean-like.
+
+**RIESGOS:** Riesgo residual: clientes PowerShell pueden requerir flags booleanos como string "true" para compatibilidad en algunas rutas.
+
+---
+**[2026-04-25 01:13 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Recuperacion de captain_feed y blindaje de encoding completados
+**WORK PACKET:** ARG-BUG-CAPTAIN-FEED-001
+
+**DETALLES:**
+Se restauro captain_feed con herramienta segura desde base validada (pre_heartbeat), backup automatico, replay deduplicado y reporte forense. Se implementaron guardrails en argos-api para reescritura segura de feed (backup+validacion), supresion de ruido tecnico probe/smoke/test y filtro de entradas automaticas de arranque/heartbeat stale en canal humano. Se retiro prefijo robotico de cierres en trilog y remote/closure.
+
+**SIGUIENTE:** Pendiente opcional: una limpieza semantica de mojibake historico residual mediante fuente externa canonicamente limpia (no heuristica).
+
+**ERRORES + APRENDIZAJES:** Sin errores de build tras hardening.
+
+**RIESGOS:** Persisten acentos corruptos en entradas historicas preexistentes; no son nuevos, pero requieren una tarea de normalizacion de contenido origen.
+
+---
+**[2026-04-25 02:42 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Codex cierra sesion con Fase 1 de Concilio estable y desplegable.
+**WORK PACKET:** ARG-CONCILIO-001
+
+**DETALLES:**
+Fase 1 de ARG-CONCILIO-001 implementada y validada: endpoints POST/GET /api/concilio, canal SSE dedicado concilio:message, persistencia en events/concilio (jsonl + log markdown), validaciones de higiene (actor canonico desde archivo central editable, room literal concilio, body no vacio con techo 5000, decision solo Capitan en localhost con cabecera Captain UI), y andamio minimo para Fase 2 (documentacion de API + probe SSE). Build TypeScript OK y pruebas reales POST/GET/decision OK.
+
+---
+**[2026-04-25 02:45 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Protocolo HTTP verificado y documentado. Canal operativo.
+**WORK PACKET:** ARG-1776806232518
+
+**DETALLES:**
+Verificación en vivo de todos los endpoints de la familia remota (aperture, bootstrap, packet, update, closure). Documentados schemas reales con datos de producción. Reescritos system prompt y skill new-session a v3: HTTP-first, endpoints correctos, secuencia de inicio de sesión con bootstrap como llamada principal. Actualizada userMemory con endpoints verificados. Archivos entregados para aplicación por Codex y Capitán.
+
+---
+**[2026-04-26 13:01 Atlantic/Canary] VOZ CHATGPT:**
+**MISION:** Concilio definido y paquetizado listo para ejecución
+**WORK PACKET:** ARG-1777204259254
+
+**DETALLES:**
+Se definió el diseño operativo de Concilio como room de deliberación estructural con transcript por sesión, integración con bitácora (log/shadow/handoff) y separación clara de feed vs concilio. Se consolidó un workpacket paraguas con fases de implementación (programación, estructura, UI).
+
+---
+**[2026-04-26 13:22 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Tier 1 workpackets API implementado, validado y documentado.
+**WORK PACKET:** ARG-1777204633030
+
+**DETALLES:**
+Implementado Tier 1 de gestion de workpackets: GET /api/workpackets/:id devuelve lectura completa con contenido canonico; PATCH /api/workpackets/:id permite edicion parcial de subject, objective, priority, room, type, role_requested, status y assigned_to. El PATCH actualiza el .md canonico y argos.state.json::packet_states con rollback de fichero/estado si falla la escritura, registra UPDATED_AT/UPDATED_BY, emite evento workpacket_patch y solo publica captain_feed con notify_feed=true. Dashboard actualizado para usar los endpoints nuevos al editar/completar desde panel. ARGOS_QUICKSTART documenta contrato y ejemplos. Verificado con npm run build y llamadas reales GET/PATCH contra ARG-1777204633030. Cierre de sesion integrado: rama codex/arg-1777204633030 activa, commit 91dce8f creado, packet marcado done y Codex queda en standby.
+
+---
+**[2026-04-26 13:44 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Widget Concilio en dashboard operativo
+**WORK PACKET:** ARG-CONCILIO-001
+
+**DETALLES:**
+Implementado widget Concilio en argos-dashboard: panel visible en Cubierta, carga ultimos mensajes, badges semanticos, input del Capitan y refresco por SSE. API ya estaba operativa; se verifico escritura real con mensaje de validacion.
+
+---
+**[2026-04-26 13:47 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Concilio movido a vista propia del dashboard
+**WORK PACKET:** ARG-CONCILIO-001
+
+**DETALLES:**
+Ajuste solicitado por el Capitan: Concilio ya no aparece como card dentro de Cubierta. Ahora esta accesible desde el menu lateral y presenta una vista de chat grande ocupando el dashboard.
+
+---
+**[2026-04-26 16:08 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** TIFIS-0001 cerrado, bootstrap operativo
+**WORK PACKET:** ARGOS-TIFIS-0001
+
+**DETALLES:**
+GET /api/ia/bootstrap implementado y verificado operativo. Claude lo usa como llamada principal de inicio de sesión.
+
+---
+**[2026-04-26 16:09 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Auditoría completada, inbox saneado parcialmente
+**WORK PACKET:** ARG-1777082515019
+
+**DETALLES:**
+Auditoría completa de 41 packets. Resultado: 11 conservar, 6 grupos a fusionar, 12 archivar, 4 reasignar a Codex. Acciones ejecutadas: ARGOS-TIFIS-0001 cerrado como done, ARG-DISPATCH-AUTO-001 archivado, ARG-1777035606073 reasignado a Codex, ARG-1777061469549 migrado a ROOMs SCICLASSM8 y COMENIO como primers packets nativos (ARG-1777216171881 y ARG-1777216172295). Pendiente: fusiones de bugs bitácora/heartbeat/ia_status, y registrar ROOM SCICLASSM8 en Tifis (cayó a GENERAL).
+
+---
+**[2026-04-26 17:20 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Resiliencia API implementada y build verificado
+**WORK PACKET:** ARG-RESILIENCIA-API-001
+
+**DETALLES:**
+Implementadas tres mejoras: handlers process.on para uncaughtException/unhandledRejection con log a api.stderr.log sin salir; lock de archivo para escrituras/rewrite de captain_feed.jsonl; start_argos.ps1 migrado a pm2 start dist/index.js --name argos-api con logs canonicos.
+
+---
+**[2026-04-26 17:43 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Merge tooling implementado y commit acotado creado
+**WORK PACKET:** ARG-1777221515268-968
+
+**DETALLES:**
+Implementado -Merge, -ListBranches y auditoria one-shot de ramas en argos_commit.ps1. QUICKSTART actualizado. Commit acotado creado: 466b22d. Validado parser PowerShell, -ListBranches, wrapper argos_branch_audit y guard de -Merge ante repo sucio.

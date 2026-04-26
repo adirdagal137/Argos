@@ -166,3 +166,192 @@ El bug no era de orden de middlewares sino de código ausente — el handler des
 **TAREA:** ROOM y TYPE separados en API y dashboard (implementacion completada)
 **SOMBRA:**
 Detecte que el tablero ya segmenta por proyecto por prefijo de ID y ahora se suma filtro por ROOM real; la dualidad puede confundir si ambos criterios divergen. Conviene decidir una jerarquia de filtros para evitar lecturas ambiguas.
+
+---
+**[2026-04-24 21:11 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777061469549
+**TAREA:** Meta-análisis registrado y comunicado; transcript literal preservado en cierre remoto.
+**SOMBRA:**
+La petición del Capitán pedía algo más que crear un task: pedía dignificar el análisis como pieza meta-operativa y además fijarlo en la memoria del sistema. He optado por usar un packet normal porque el alta remota disponible no permite categorías ricas, pero he señalado la degradación de clasificación como síntoma del mismo problema de plataforma que describe el análisis. También he incrustado el transcript literal en el cierre para que no quede reducido a un resumen de feed.
+
+---
+**[2026-04-24 21:20 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777061469549
+**TAREA:** Autoría/voz corregida canónicamente; criterio de menor fragmentación fijado.
+**SOMBRA:**
+El problema no fue de contenido sino de identidad visible y ergonomía operativa. En un sistema multiinterfaz, la distinción de voz por agente es parte de la trazabilidad, no un detalle estético. También hay una lección práctica: demasiados mensajes cortos deterioran la lectura de cubierta aunque cada uno sea correcto por separado.
+
+---
+**[2026-04-24 21:35 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-BITACORA-001-IMPL
+**TAREA:** Heartbeat silenciado en feed, validaciones ORPHAN/canonico y voces unificadas en feed/bitacora
+**SOMBRA:**
+La friccion principal no era de logica de negocio, sino de capas de representacion: feed, voz y estado se estaban mezclando. Sin separar voz visible de clave tecnica, reaparecen sintomas de desincronizacion aunque el backend funcione.
+
+---
+**[2026-04-24 20:30 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1777100000001
+**TAREA:** Transcripts vinculados a packets, accesibles remotamente sin token
+**SOMBRA:**
+El endpoint /:packetId tiene riesgo de colisión de rutas con /packet, /list, /feed — los registré antes para evitar captura. El botón de transcripts solo aparece en done; intencional pero podría ser útil en in_progress también para debugging.
+
+---
+**[2026-04-24 21:43 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-ACTORS-001
+**TAREA:** Actores canonicos migrados a Pi/OpenClaw en API, estado IA y feed
+**SOMBRA:**
+La migracion can�nica exigia separar compatibilidad de entrada de verdad de salida. Si esa frontera se mezcla, el sistema parece funcionar pero vuelve a producir ruido de identidad en feed y tablero.
+
+---
+**[2026-04-24 23:15 Atlantic/Canary] VOZ ORFEO (SOMBRA):**
+**PACKET:** ARG-1777100000001 / LOLA-SHADOW-0001
+**TAREA:** Arquitectura de transcripts, relevo conversacional y consolidación Lola
+**SOMBRA:**
+El debate fue productivo pero llegó cargado de un riesgo silencioso: cuatro agentes con criterios distintos sobre "comprensión posterior" podían producir un diseño por comité, inflado y difícil de cumplir. La observación del Capitán sobre búsqueda por packetId fue la que cortó el nudo — sin ella probablemente habríamos acabado con un campo de transcript obligatorio que nadie llena bien. La decisión de archivo separado para RELEVO me parece correcta pero introduce un archivo nuevo que hay que mantener; si Claude Code no lo integra en la vista de bitácora, quedará invisible y nadie lo leerá. El riesgo real de este sistema no es el diseño sino la adherencia. Un protocolo que añade fricción al cierre se abandona silenciosamente. La apuesta es que RELEVO sea tan corto que cueste más saltárselo que escribirlo. Sobre LOLA-SHADOW-0001: la fase B (análisis relacional) es la más interesante y la más delicada. Si Lola empieza a emitir patrones relacionales sin que el Capitán haya calibrado qué quiere ver, puede producir ruido que se confunda con señal. Dejarlo como fase B hasta que A esté estable es la decisión correcta.
+
+---
+**[2026-04-24 21:46 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-VOICES-001
+**TAREA:** Protocolo y voces actualizados: Pi reemplaza Antigravity en canon operativo
+**SOMBRA:**
+La reforma de voces no es cosm�tica: en multiagente, identidad de actor y formato de cierre son parte del sistema de control. Si la nomenclatura diverge entre interfaz y ledger, reaparece la sensaci�n de caos aunque el c�digo compile.
+
+---
+**[2026-04-24 23:41 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777049413321
+**TAREA:** Mojibake limpiado en captain_feed y heartbeat stale silenciado en feed
+**SOMBRA:**
+El problema no era solo de codificacion de texto, sino de coherencia de procesos en runtime: una instancia vieja puede sabotear fixes nuevos aunque el codigo ya este corregido. La disciplina operativa exige validar siempre proceso activo + artefacto persistido.
+
+---
+**[2026-04-24 23:52 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777049435836
+**TAREA:** Heartbeat stale eliminado del feed con cierre operativo estable
+**SOMBRA:**
+La fricción real fue operativa, no de implementación: tener dos instancias activas anuló temporalmente el efecto del parche y generó falso negativo de cierre. Riesgo latente: repetir limpieza sin capturar evidencia del proceso activo puede esconder regressions intermitentes.
+
+---
+**[2026-04-24 21:00 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1777100000001
+**TAREA:** Protocolo HANDOFF operativo en API, log y dashboard
+**SOMBRA:**
+El parser de readHandoffEntriesForPacket usa regex sobre markdown plano — robusto para el formato definido, frágil si un agente usa formato libre. La doctrina del packet establece el schema con claridad suficiente para evitarlo. El botón Handoff reutiliza la función showPacketTranscripts renombrada — el nombre interno es técnicamente incorrecto pero sin impacto funcional, candidato a refactor cosmético en otro momento.
+
+---
+**[2026-04-24 21:01 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1777100000001
+**TAREA:** HANDOFF operativo
+**SOMBRA:**
+El servidor anterior (PID 11144/9336) tenía el dist viejo en memoria — el campo handoff fue ignorado silenciosamente. Detectado al verificar el endpoint.
+
+---
+**[2026-04-25 00:07 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-SCHEMA-001
+**TAREA:** Schema v1 positive e2e
+**SOMBRA:**
+risk_level=low; closure_type=task_completed; status=completed.
+
+---
+**[2026-04-25 00:08 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-SCHEMA-001
+**TAREA:** Schema v1 positive e2e v2
+**SOMBRA:**
+risk_level=low; closure_type=task_completed; status=completed.
+
+---
+**[2026-04-25 00:09 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-SCHEMA-001
+**TAREA:** Schema v1 bool probe
+**SOMBRA:**
+risk_level=blocked; closure_type=blocked; status=blocked.
+
+---
+**[2026-04-25 00:09 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-SCHEMA-001
+**TAREA:** Schema v1 bool probe string
+**SOMBRA:**
+risk_level=blocked; closure_type=blocked; status=blocked.
+
+---
+**[2026-04-25 00:09 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-SCHEMA-001
+**TAREA:** Summary v1 para GitHub: schema cierre y semaforo de riesgo
+**SOMBRA:**
+El schema ya esta operativo, pero la lectura visual del stream log sigue priorizando markdown narrativo; la verdad estructurada vive en events/logbook enriquecido. Conviene explicitar esta dualidad para evitar falsas alarmas.
+
+---
+**[2026-04-25 01:13 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-BUG-CAPTAIN-FEED-001
+**TAREA:** Recuperacion de captain_feed y blindaje de encoding completados
+**SOMBRA:**
+El incidente mostr� que el problema no es solo encoding binario, tambi�n la fragilidad ritual: editar feed con herramientas no can�nicas rompe confianza humana. La recuperaci�n debe priorizar trazabilidad y preservar la radio de cubierta como canal humano.
+
+---
+**[2026-04-25 02:42 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-CONCILIO-001
+**TAREA:** Codex cierra sesion con Fase 1 de Concilio estable y desplegable.
+**SOMBRA:**
+El riesgo principal sigue siendo de uso semantico: si Concilio se usa como trilog, se contamina. El hard cap 5000 protege abuso extremo pero la disciplina de tipo y brevedad sigue siendo cultural. Tambien hay deuda de identidad narrativa de actores: el catalogo central permite evolucion sin tocar codigo, pero exige gobernanza para no fragmentar voces.
+
+---
+**[2026-04-25 02:45 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1776806232518
+**TAREA:** Protocolo HTTP verificado y documentado. Canal operativo.
+**SOMBRA:**
+La sesión empezó con instrucciones desactualizadas (cloudflared, endpoints incorrectos, asunción de acceso local). Ahora el protocolo refleja la realidad operativa. Gemini tenía razón sobre el Vector: no abrir packets en alta entropía. El sistema se auto-corrige cuando el flujo de cierres funciona — y hoy ese flujo se verificó end-to-end por primera vez correctamente.
+
+---
+**[2026-04-26 13:01 Atlantic/Canary] VOZ CHATGPT (SOMBRA):**
+**PACKET:** ARG-1777204259254
+**TAREA:** Concilio definido y paquetizado listo para ejecución
+**SOMBRA:**
+Riesgo principal: dispersión entre diseño conceptual y ejecución técnica real. También riesgo de mezclar deliberación con automatización prematura. Decisión consciente de separar protocolo (ya implementable) de automatización (futura).
+
+---
+**[2026-04-26 13:22 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777204633030
+**TAREA:** Tier 1 workpackets API implementado, validado y documentado.
+**SOMBRA:**
+Tension principal: la rama nacio sobre una worktree ya sucia con cambios de Concilio, asi que el commit final puede arrastrar contexto constitutivo previo si se usa el script canonico. No reverti nada ajeno. Riesgo residual bajo: Tier 2 history dedicado queda pendiente; hoy la trazabilidad queda en events con changed_fields/requested_fields y metadata en el packet. Cierre tranquilo: el cierre de sesion posterior no trajo cambios de codigo, solo dejo Codex en standby y reafirmo revisar alcance antes de mergear a main.
+
+---
+**[2026-04-26 13:44 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-CONCILIO-001
+**TAREA:** Widget Concilio en dashboard operativo
+**SOMBRA:**
+El packet mezcla Concilio puro con reformas heredadas; marcar todo como done seria un cierre falso. La parte UI queda cerrada, pero conviene separar vector/bitacora en packets propios o actualizar el checklist con alcance claro.
+
+---
+**[2026-04-26 13:47 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-CONCILIO-001
+**TAREA:** Concilio movido a vista propia del dashboard
+**SOMBRA:**
+Buen ajuste de producto: Concilio no es telemetria de cubierta sino sala deliberativa. Separarlo reduce ruido y preserva el dashboard tactico.
+
+---
+**[2026-04-26 16:08 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARGOS-TIFIS-0001
+**TAREA:** TIFIS-0001 cerrado, bootstrap operativo
+**SOMBRA:**
+Endpoint funcionando desde sesiones anteriores, cierre formal retrasado.
+
+---
+**[2026-04-26 16:09 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-1777082515019
+**TAREA:** Auditoría completada, inbox saneado parcialmente
+**SOMBRA:**
+El inbox había acumulado mucho ruido — tests, observaciones informales, instrucciones puntuales convertidas en packets. La migración a ROOMs inaugura una estructura más limpia. La creación del ROOM SCICLASSM8 no fue reconocida por el servidor, lo que indica que los ROOMs deben pre-registrarse en Tifis.
+
+---
+**[2026-04-26 17:20 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-RESILIENCIA-API-001
+**TAREA:** Resiliencia API implementada y build verificado
+**SOMBRA:**
+Riesgo principal: el workspace ya venia muy sucio y argos-api/src/index.ts tenia cambios previos de otros turnos; no conviene commitear todo sin separar autoria. pm2 no esta disponible en PATH de esta sesion, por eso no se ejecuto el arranque real.
+
+---
+**[2026-04-26 17:43 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777221515268-968
+**TAREA:** Merge tooling implementado y commit acotado creado
+**SOMBRA:**
+El arbol estaba muy sucio por trabajos previos; se evito usar el helper de commit porque habria capturado cambios ajenos. Riesgo residual: no se pudo ejecutar un merge real completo hasta que el repo quede limpio.

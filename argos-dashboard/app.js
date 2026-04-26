@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const forestContainer = document.getElementById('view-bosque');
     const vellocinoContainer = document.getElementById('view-vellocino');
     const sourcesBody = document.getElementById('sources-body');
+    const concilioThread = document.getElementById('concilio-thread');
+    const concilioTypeSelect = document.getElementById('concilio-type-select');
+    const concilioBodyInput = document.getElementById('concilio-body-input');
+    const btnSendConcilio = document.getElementById('btn-send-concilio');
 
     const defaultTasks = [
         { id: 'ARG-M8-002', title: 'Mocks cargados por fallo de red', owner: 'Claude', status: 'open', time: 'Sin enlace' }
@@ -60,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let forestLoaded = false;
     let vellocinoLoaded = false;
     let sourcesLoaded = false;
+    let concilioMessages = [];
 
     // Task selection and deletion state
     let selectedTasks = new Set();
@@ -357,6 +362,88 @@ document.addEventListener('DOMContentLoaded', async () => {
         div.className = `cell-bubble ${extraClass}`.trim();
         div.innerHTML = renderMultiline(text || '--');
         return div;
+    }
+
+    function renderConcilio(messages = concilioMessages) {
+        if (!concilioThread) return;
+        concilioMessages = Array.isArray(messages) ? messages.slice(-50) : [];
+
+        if (concilioMessages.length === 0) {
+            concilioThread.innerHTML = '<p class="empty-copy">Sin deliberaciones abiertas.</p>';
+            return;
+        }
+
+        concilioThread.innerHTML = concilioMessages.map((message) => {
+            const type = String(message.type || 'idea').toLowerCase();
+            const agent = message.agent || '--';
+            const body = message.body || '';
+            const packet = message.packet_id || '';
+            const reply = message.in_reply_to || '';
+            const timestamp = formatMaritimeDate(message.timestamp || '', 'minute');
+            return `
+                <article class="concilio-message concilio-type-${safeHtml(type)}">
+                    <div class="concilio-message-head">
+                        <span class="concilio-agent">${safeHtml(agent)}</span>
+                        <span class="concilio-type">${safeHtml(type)}</span>
+                        <time>${safeHtml(timestamp)}</time>
+                    </div>
+                    <div class="concilio-body">${renderMultiline(body)}</div>
+                    ${(packet || reply) ? `
+                        <div class="concilio-meta">
+                            ${packet ? `<span>${safeHtml(packet)}</span>` : ''}
+                            ${reply ? `<span>reply ${safeHtml(reply)}</span>` : ''}
+                        </div>
+                    ` : ''}
+                </article>
+            `;
+        }).join('');
+        concilioThread.scrollTop = concilioThread.scrollHeight;
+    }
+
+    async function loadConcilio() {
+        if (!concilioThread) return;
+        try {
+            const res = await fetch(`${API_URL}/concilio?limit=30`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            renderConcilio(data.messages || []);
+        } catch (error) {
+            concilioThread.innerHTML = '<p class="empty-copy">Concilio no disponible.</p>';
+        }
+    }
+
+    async function sendConcilioMessage() {
+        if (!concilioBodyInput || !concilioTypeSelect || !btnSendConcilio) return;
+        const body = String(concilioBodyInput.value || '').trim();
+        if (!body) return;
+
+        btnSendConcilio.disabled = true;
+        try {
+            const res = await fetch(`${API_URL}/concilio`, {
+                method: 'POST',
+                headers: CAPTAIN_UI_HEADERS,
+                body: JSON.stringify({
+                    agent: 'Capitan',
+                    room: 'concilio',
+                    type: concilioTypeSelect.value || 'pregunta',
+                    body,
+                    packet_id: 'ARG-CONCILIO-001',
+                    session_ref: 'Dashboard Concilio'
+                })
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            if (data.message) renderConcilio([...concilioMessages, data.message]);
+            concilioBodyInput.value = '';
+            concilioBodyInput.style.height = '';
+        } catch (error) {
+            showToast(`Concilio: ${error.message || 'envio fallido'}`);
+        } finally {
+            btnSendConcilio.disabled = false;
+        }
     }
 
     function formatRiskLevel(value) {
@@ -1483,16 +1570,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             tasks: `${API_URL}/tasks${roomQuery}`,
             chat: `${API_URL}/chat`,
             vector: `${API_URL}/vector`,
-            iaStatus: `${API_URL}/ia/status`
+            iaStatus: `${API_URL}/ia/status`,
+            concilio: `${API_URL}/concilio?limit=30`
         };
 
-        const [statusReq, stateReq, tasksReq, chatReq, vectorReq, iaStatusReq] = await Promise.allSettled([
+        const [statusReq, stateReq, tasksReq, chatReq, vectorReq, iaStatusReq, concilioReq] = await Promise.allSettled([
             fetch(endpoints.status),
             fetch(endpoints.state),
             fetch(endpoints.tasks),
             fetch(endpoints.chat),
             fetch(endpoints.vector),
-            fetch(endpoints.iaStatus)
+            fetch(endpoints.iaStatus),
+            fetch(endpoints.concilio)
         ]);
 
         const stateOk = stateReq.status === 'fulfilled' && stateReq.value.ok;
@@ -1536,6 +1625,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderVector(vectorData.categories || []);
         }
 
+        if (concilioReq.status === 'fulfilled' && concilioReq.value.ok) {
+            const concilioData = await concilioReq.value.json();
+            renderConcilio(concilioData.messages || []);
+        }
+
         // applyIaStatusToPanel como paso final por si renderTasks/renderChat
         // hubiesen dejado algo desalineado
         applyIaStatusToPanel(cachedIaStatus);
@@ -1572,6 +1666,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnSendCmd.click();
         }
     });
+
+    if (btnSendConcilio && concilioBodyInput) {
+        btnSendConcilio.addEventListener('click', sendConcilioMessage);
+        concilioBodyInput.addEventListener('input', () => {
+            concilioBodyInput.style.height = 'auto';
+            concilioBodyInput.style.height = `${Math.min(concilioBodyInput.scrollHeight, 120)}px`;
+        });
+        concilioBodyInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendConcilioMessage();
+            }
+        });
+    }
 
     async function fireTask(rawText) {
         showToast('Senal enviada a cubierta. Inyectando fisicamente.');
@@ -2258,6 +2366,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 if (data.topic === 'chat:updated') {
                     triggerResonance('#chat-container');
+                }
+                if (data.topic === 'concilio:message') {
+                    loadConcilio();
+                    triggerResonance('#concilio-thread');
                 }
             } catch (e) {
                 // Ignore parsing errors
