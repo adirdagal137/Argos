@@ -163,6 +163,34 @@ Arranque: `cd C:\Users\Widox\Desktop\ARGOS\argos-api && node dist/index.js`
 **Por que:** varios agentes pueden tocar `argos-api/src/index.ts` en paralelo.
 Sin commits frecuentes, una escritura posterior borra el trabajo anterior silenciosamente.
 
+## API workpackets (Tier 1)
+
+Lectura completa por ID:
+```powershell
+Invoke-RestMethod -Method Get `
+  -Uri "http://localhost:8080/api/workpackets/ARG-XXXX"
+```
+
+Edicion parcial con trazabilidad. Campos permitidos: `subject`, `objective`, `priority`, `room`, `type`,
+`role_requested`, `status`, `assigned_to`. `actor` es obligatorio. En escritura externa usar token de agente.
+El PATCH actualiza en una sola operacion el `.md` canonico y `state/argos.state.json::packet_states`.
+
+```powershell
+Invoke-RestMethod -Method Patch `
+  -Uri "http://localhost:8080/api/workpackets/ARG-XXXX" `
+  -Headers @{ "X-Argos-Agent-Token" = "<token-agente>" } `
+  -ContentType "application/json" `
+  -Body (@{
+    actor = "Codex"
+    status = "in_progress"
+    priority = "high"
+    assigned_to = "Codex"
+    notify_feed = $false
+  } | ConvertTo-Json -Compress)
+```
+
+`notify_feed` solo emite al captain feed si vale `true`; por defecto el cambio queda en eventos/SSE sin ruido humano.
+
 ### Regla general
 Cada agente ejecuta `argos_commit.ps1` al **cerrar sesion** si modifico archivos constitutivos.
 Claude Code lo hace **automaticamente** via hook Stop. Codex y Antigravity deben llamarlo en su ritual de cierre.

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Concilio SSE Probe</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #0b1210; color: #d7e4dc; }
+    pre { white-space: pre-wrap; background: #111a16; border: 1px solid #244; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Concilio SSE Probe</h1>
+  <p>Escucha <code>/api/concilio/sse</code> y muestra solo eventos <code>concilio:message</code>.</p>
+  <pre id="out">Conectando...</pre>
+  <script>
+    const out = document.getElementById('out');
+    const base = location.origin;
+    const es = new EventSource(`${base}/api/concilio/sse`);
+    es.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.topic !== 'concilio:message') return;
+        out.textContent += `\n${JSON.stringify(data, null, 2)}\n`;
+      } catch (_) {}
+    };
+    es.onerror = () => {
+      out.textContent += '\n[SSE] conexion cerrada o con error.';
+    };
+  </script>
+</body>
+</html>

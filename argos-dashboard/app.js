@@ -826,7 +826,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function editTaskPacket(packetId) {
         if (!packetId) return;
         try {
-            const readResponse = await fetch(`${API_URL}/tasks/get?packetId=${encodeURIComponent(packetId)}`);
+            const readResponse = await fetch(`${API_URL}/workpackets/${encodeURIComponent(packetId)}`);
             if (!readResponse.ok) {
                 showToast(`No pude leer ${packetId}.`);
                 return;
@@ -841,7 +841,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const nextOwnerRaw = window.prompt(`Editar responsable de ${packetId}:`, packet.owner || 'Cualquiera');
+            const nextOwnerRaw = window.prompt(`Editar responsable de ${packetId}:`, packet.assigned_to || packet.role_requested || 'Cualquiera');
             if (nextOwnerRaw === null) return;
             const nextOwner = String(nextOwnerRaw || '').trim();
             if (!nextOwner) {
@@ -865,13 +865,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const updateResponse = await fetch(`${API_URL}/tasks/update`, {
-                method: 'POST',
+            const updateResponse = await fetch(`${API_URL}/workpackets/${encodeURIComponent(packetId)}`, {
+                method: 'PATCH',
                 headers: CAPTAIN_UI_HEADERS,
                 body: JSON.stringify({
-                    packetId,
                     subject: nextSubject,
-                    owner: nextOwner,
+                    role_requested: packet.role_requested || nextOwner,
+                    assigned_to: nextOwner,
                     status: nextStatus,
                     objective: nextObjective,
                     actor: 'Ruben Thor'
@@ -2083,10 +2083,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const taskIds = Array.from(selectedTasks);
             const promises = taskIds.map(id => 
-                fetch(`${API_URL}/tasks/update`, {
-                    method: 'POST',
+                fetch(`${API_URL}/workpackets/${encodeURIComponent(id)}`, {
+                    method: 'PATCH',
                     headers: CAPTAIN_UI_HEADERS,
-                    body: JSON.stringify({ packetId: id, status: 'done', actor: 'Ruben Thor' })
+                    body: JSON.stringify({ status: 'done', actor: 'Ruben Thor' })
                 })
             );
 
