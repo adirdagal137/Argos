@@ -1,30 +1,15 @@
 # ============================================================
-# ARGOS — argos_commit.ps1
-# Script de commit compartido para toda la tripulacion.
+# ARGOS - argos_commit.ps1
+# Script de commit, ramas y merge compartido para la tripulacion.
+#
 # Uso:
 #   argos_commit.ps1 -Agent <nombre> [-PacketId <id>] [-Branch] [-BranchName <rama>] [-Message <msg>]
-#
-# Parametros:
-#   -Agent       (obligatorio) Nombre del agente: Claude, Codex, Antigravity, ChatGPT...
-#   -PacketId    (opcional)    ID del work packet activo (ej. ARG-1776816000001)
-#   -Branch      (switch)      Si se activa, crea/cambia a una rama de trabajo antes de commitear
-#   -BranchName  (opcional)    Nombre de rama personalizado. Default: agente/packetid
-#   -Message     (opcional)    Mensaje de commit personalizado. Si no, se genera automaticamente
-#
-# Ejemplos:
-#   # Commit simple al finalizar una tarea
-#   .\argos_commit.ps1 -Agent Codex -PacketId ARG-1776816000001
-#
-#   # Iniciar rama de trabajo para una mejora del sistema
-#   .\argos_commit.ps1 -Agent Claude -PacketId ARG-1776816000042 -Branch
-#
-#   # Commit con mensaje manual
-#   .\argos_commit.ps1 -Agent Antigravity -PacketId ARG-XXX -Message "refactor: nuevo parser de eventos"
+#   argos_commit.ps1 -Agent <nombre> -PacketId <id> -Merge [-DeleteBranch]
+#   argos_commit.ps1 -ListBranches
 # ============================================================
 
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$Agent,
+    [string]$Agent = "",
 
     [string]$PacketId = "",
 
@@ -32,17 +17,20 @@ param(
 
     [string]$BranchName = "",
 
-    [string]$Message = ""
+    [string]$Message = "",
+
+    [switch]$Merge,
+
+    [switch]$DeleteBranch,
+
+    [switch]$ListBranches
 )
 
 $RepoPath = "C:\Users\Widox\Desktop\ARGOS"
-$ErrorActionPreference = "SilentlyContinue"
+$ErrorActionPreference = "Stop"
 
 Set-Location $RepoPath
 
-# ── Archivos que interesan al protocolo ──────────────────────────────────────
-# Solo se commitean ficheros constitutivos del navio.
-# Estado operativo (state/, events/, secrets/, views/) va en .gitignore.
 $TargetPaths = @(
     "argos-api/src/",
     "argos-api/dist/index.js",
@@ -55,10 +43,176 @@ $TargetPaths = @(
     "ARGOS_RUNTIME/work_packets/inbox/"
 )
 
-# ── Comprobar si hay cambios en esos paths ───────────────────────────────────
-$rawStatus = git status --porcelain 2>$null
+function Invoke-Git {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string[]]$Arguments,
+
+        [switch]$AllowFailure
+    )
+
+    $output = & git @Arguments 2>&1
+    if ($LASTEXITCODE -ne 0 -and -not $AllowFailure) {
+        throw "[ARGOS-COMMIT] git $($Arguments -join ' ') fallo: $output"
+    }
+
+    return $output
+}
+
+function Get-PacketIdFromBranch {
+    param([string]$Branch)
+
+    if ($Branch -match "^[^/]+/(arg-.+)$") {
+        return ($Matches[1]).ToUpper()
+    }
+
+    return ""
+}
+
+function Test-PacketFile {
+    param(
+        [string]$Folder,
+        [string]$PacketId
+    )
+
+    if (-not $PacketId) {
+        return $false
+    }
+
+    $path = Join-Path $RepoPath "ARGOS_RUNTIME\work_packets\$Folder"
+    if (-not (Test-Path -LiteralPath $path)) {
+        return $false
+    }
+
+    $match = Get-ChildItem -LiteralPath $path -Filter "$PacketId*" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    return [bool]$match
+}
+
+function Get-PacketBranchStatus {
+    param([string]$PacketId)
+
+    if (-not $PacketId) {
+        return "packet: desconocido  [HUERFANA]"
+    }
+
+    if (Test-PacketFile -Folder "done" -PacketId $PacketId) {
+        return "packet: $PacketId  [DONE - MERGE PENDIENTE]"
+    }
+
+    if (Test-PacketFile -Folder "archived" -PacketId $PacketId) {
+        return "packet: $PacketId  [HUERFANA]"
+    }
+
+    if (Test-PacketFile -Folder "in_progress" -PacketId $PacketId) {
+        return "packet: $PacketId  [IN_PROGRESS]"
+    }
+
+    if (Test-PacketFile -Folder "inbox" -PacketId $PacketId) {
+        return "packet: $PacketId  [OPEN]"
+    }
+
+    $statePath = Join-Path $RepoPath "ARGOS_RUNTIME\state\argos.state.json"
+    if (Test-Path -LiteralPath $statePath) {
+        try {
+            $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
+            $value = $state.packet_states.$PacketId
+            if ($value) {
+                if ($value -match "archived") {
+                    return "packet: $PacketId  [HUERFANA]"
+                }
+                if ($value -match "done") {
+                    return "packet: $PacketId  [DONE - MERGE PENDIENTE]"
+                }
+                if ($value -match "in_progress") {
+                    return "packet: $PacketId  [IN_PROGRESS]"
+                }
+                if ($value -match "inbox|open") {
+                    return "packet: $PacketId  [OPEN]"
+                }
+                return "packet: $PacketId  [$value]"
+            }
+        } catch {
+            return "packet: $PacketId  [ESTADO NO LEGIBLE]"
+        }
+    }
+
+    return "packet: $PacketId  [HUERFANA]"
+}
+
+function Show-ArgosBranches {
+    $branches = Invoke-Git -Arguments @("branch", "--format=%(refname:short)")
+    $openBranches = @($branches | Where-Object { $_ -and $_ -ne "main" })
+
+    Write-Host "[ARGOS-BRANCHES] Ramas abiertas:"
+    if (-not $openBranches -or $openBranches.Count -eq 0) {
+        Write-Host "  (ninguna)"
+        return
+    }
+
+    foreach ($branch in $openBranches) {
+        $packetId = Get-PacketIdFromBranch -Branch $branch
+        $status = Get-PacketBranchStatus -PacketId $packetId
+        Write-Host "  $branch  ->  $status"
+    }
+}
+
+function Invoke-ArgosMerge {
+    if (-not $Agent) {
+        throw "[ARGOS-COMMIT] -Agent es obligatorio con -Merge."
+    }
+
+    if (-not $PacketId) {
+        throw "[ARGOS-COMMIT] -PacketId es obligatorio con -Merge."
+    }
+
+    $currentBranch = (Invoke-Git -Arguments @("rev-parse", "--abbrev-ref", "HEAD")).Trim()
+    if ($currentBranch -eq "main") {
+        Write-Host "[ARGOS-COMMIT] Ya estas en main. Nada que mergear."
+        return
+    }
+
+    $dirty = Invoke-Git -Arguments @("status", "--porcelain")
+    if ($dirty) {
+        Write-Host "[ARGOS-COMMIT] Hay cambios sin commitear; merge cancelado para no mezclar trabajo vivo."
+        $dirty | ForEach-Object { Write-Host "  $_" }
+        exit 1
+    }
+
+    Invoke-Git -Arguments @("checkout", "main") | Out-Null
+    Invoke-Git -Arguments @("merge", $currentBranch, "--no-ff", "-m", "[$Agent] merge ${PacketId}: $currentBranch") | Out-Null
+
+    $origin = Invoke-Git -Arguments @("remote", "get-url", "origin") -AllowFailure
+    if ($LASTEXITCODE -eq 0 -and $origin) {
+        Invoke-Git -Arguments @("push", "origin", "main") | Out-Null
+    } else {
+        Write-Host "[ARGOS-COMMIT] Sin remote origin configurado; push omitido."
+    }
+
+    if ($DeleteBranch) {
+        Invoke-Git -Arguments @("branch", "-d", $currentBranch) | Out-Null
+        Write-Host "[ARGOS-COMMIT] Rama eliminada: $currentBranch"
+    }
+
+    Write-Host "[ARGOS-COMMIT] Merge completado: $currentBranch -> main"
+}
+
+if ($ListBranches) {
+    Show-ArgosBranches
+    exit 0
+}
+
+if ($Merge) {
+    Invoke-ArgosMerge
+    exit 0
+}
+
+if (-not $Agent) {
+    throw "[ARGOS-COMMIT] -Agent es obligatorio para commitear o crear rama."
+}
+
+$rawStatus = Invoke-Git -Arguments @("status", "--porcelain")
 $relevantChanges = $rawStatus | Where-Object {
-    $line = $_ -replace "^.{3}", ""   # quita los 3 primeros caracteres de status (XY + espacio)
+    $line = $_ -replace "^.{3}", ""
     $found = $false
     foreach ($p in $TargetPaths) {
         if ($line.StartsWith($p) -or $line -like "*$p*") {
@@ -77,7 +231,6 @@ if (-not $relevantChanges) {
 Write-Host "[ARGOS-COMMIT] Cambios detectados:"
 $relevantChanges | ForEach-Object { Write-Host "  $_" }
 
-# ── Logica de rama ───────────────────────────────────────────────────────────
 if ($Branch) {
     if (-not $BranchName) {
         $agentSlug = $Agent.ToLower() -replace "[^a-z0-9]", ""
@@ -90,14 +243,14 @@ if ($Branch) {
         }
     }
 
-    $currentBranch = git rev-parse --abbrev-ref HEAD 2>$null
+    $currentBranch = (Invoke-Git -Arguments @("rev-parse", "--abbrev-ref", "HEAD")).Trim()
     if ($currentBranch -ne $BranchName) {
-        $exists = git branch --list $BranchName 2>$null
+        $exists = Invoke-Git -Arguments @("branch", "--list", $BranchName)
         if ($exists) {
-            git checkout $BranchName 2>$null
+            Invoke-Git -Arguments @("checkout", $BranchName) | Out-Null
             Write-Host "[ARGOS-COMMIT] Cambiado a rama existente: $BranchName"
         } else {
-            git checkout -b $BranchName 2>$null
+            Invoke-Git -Arguments @("checkout", "-b", $BranchName) | Out-Null
             Write-Host "[ARGOS-COMMIT] Rama creada: $BranchName"
         }
     } else {
@@ -105,16 +258,14 @@ if ($Branch) {
     }
 }
 
-# ── Staging de archivos constitutivos ────────────────────────────────────────
 foreach ($p in $TargetPaths) {
     $fullPath = Join-Path $RepoPath $p.Replace("/", "\")
-    if (Test-Path $fullPath) {
-        git add $fullPath 2>$null
+    if (Test-Path -LiteralPath $fullPath) {
+        Invoke-Git -Arguments @("add", $fullPath) | Out-Null
     }
 }
 
-# Comprobar que hay algo en staging
-$staged = git diff --cached --name-only 2>$null
+$staged = Invoke-Git -Arguments @("diff", "--cached", "--name-only")
 if (-not $staged) {
     Write-Host "[ARGOS-COMMIT] Nada en staging. Los cambios pueden estar en paths ignorados por .gitignore."
     exit 0
@@ -123,7 +274,6 @@ if (-not $staged) {
 Write-Host "[ARGOS-COMMIT] Staged:"
 $staged | ForEach-Object { Write-Host "  $_" }
 
-# ── Construir mensaje de commit ───────────────────────────────────────────────
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
 if ($Message) {
     $commitMsg = "[$Agent] $Message"
@@ -133,8 +283,7 @@ if ($Message) {
     $commitMsg = "[$Agent] auto-commit $timestamp"
 }
 
-# ── Commit ────────────────────────────────────────────────────────────────────
-$result = git commit -m $commitMsg 2>&1
+$result = Invoke-Git -Arguments @("commit", "-m", $commitMsg) -AllowFailure
 if ($LASTEXITCODE -eq 0) {
     Write-Host "[ARGOS-COMMIT] OK: $commitMsg"
 } else {

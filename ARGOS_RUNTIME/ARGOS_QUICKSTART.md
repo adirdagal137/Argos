@@ -217,7 +217,15 @@ Claude Code lo hace **automaticamente** via hook Stop. Codex y Antigravity deben
 
 # Inicio de tarea de mejora del sistema — crear rama
 .\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Codex -PacketId ARG-XXXX -Branch
+
+# Cierre de rama — merge a main
+.\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Codex -PacketId ARG-XXXX -Merge
+
+# Auditoria de ramas abiertas
+.\ARGOS_RUNTIME\tools\argos_commit.ps1 -ListBranches
 ```
+
+Todo packet que uso `-Branch` **NO puede cerrarse con trilog** sin antes ejecutar `-Merge`. Si el merge falla, documentarlo en `glitch`.
 
 ### Cuando crear rama vs commitear en main
 
@@ -235,8 +243,7 @@ Se puede forzar con `-BranchName <nombre>`.
 ### Merge a main
 Una vez verificado el trabajo en la rama:
 ```powershell
-git checkout main
-git merge <rama> --no-ff -m "[<Agente>] merge <packet-id>: <descripcion>"
+.\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Codex -PacketId ARG-XXXX -Merge
 ```
 
 ### Archivos constitutivos (los que se commitean)
