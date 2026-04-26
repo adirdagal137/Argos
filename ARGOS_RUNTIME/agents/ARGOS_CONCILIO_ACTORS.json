@@ -45,20 +45,11 @@
       "aliases": ["open claw", "qwen", "deepseek"]
     },
     {
-      "id": "Gemini (Pi)",
-      "label": "Gemini (Pi)",
+      "id": "Gemini",
+      "label": "Gemini",
       "token_key": "Gemini",
-      "enabled": false,
-      "notes": "draft",
-      "aliases": ["pi", "gemini pi"]
-    },
-    {
-      "id": "Gemini (AG)",
-      "label": "Gemini (AG)",
-      "token_key": "Gemini",
-      "enabled": false,
-      "notes": "draft",
-      "aliases": ["ag", "antigravity", "gemini ag"]
+      "enabled": true,
+      "aliases": ["pi", "ag", "antigravity", "gemini pi", "gemini ag"]
     }
   ]
 }

@@ -322,8 +322,7 @@ function buildDefaultConcilioActorsCatalog(): ConcilioActorsCatalog {
       { id: 'Codex', label: 'Codex', token_key: 'ChatGPT', enabled: true, aliases: ['openai codex'] },
       { id: 'ChatGPT', label: 'ChatGPT', token_key: 'ChatGPT', enabled: true, aliases: ['chat gpt'] },
       { id: 'OpenClaw', label: 'OpenClaw', token_key: 'ChatGPT', enabled: true, aliases: ['open claw', 'qwen', 'deepseek'] },
-      { id: 'Gemini (Pi)', label: 'Gemini (Pi)', token_key: 'Gemini', enabled: false, notes: 'draft', aliases: ['pi', 'gemini pi'] },
-      { id: 'Gemini (AG)', label: 'Gemini (AG)', token_key: 'Gemini', enabled: false, notes: 'draft', aliases: ['ag', 'antigravity', 'gemini ag'] }
+      { id: 'Gemini', label: 'Gemini', token_key: 'Gemini', enabled: true, aliases: ['pi', 'ag', 'antigravity', 'gemini pi', 'gemini ag'] }
     ]
   };
 }
