@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+﻿import express, { Request, Response } from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
@@ -28,9 +28,6 @@ const CONCILIO_JSONL_PATH = path.join(CONCILIO_EVENTS_DIR, 'argos.concilio.jsonl
 const CONCILIO_LOG_PATH = path.join(CONCILIO_EVENTS_DIR, 'ARGOS_CONCILIO_LOG.md');
 const CONCILIO_ACTORS_PATH = path.join(RUNTIME_DIR, 'agents', 'ARGOS_CONCILIO_ACTORS.json');
 const CAPTAIN_FEED_PATH = path.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
-const CAPTAIN_FEED_LOCK_PATH = `${CAPTAIN_FEED_PATH}.lock`;
-const CAPTAIN_FEED_LOCK_TIMEOUT_MS = 5000;
-const CAPTAIN_FEED_LOCK_STALE_MS = 30000;
 const STATE_ARCHIVE_PATH = path.join(RUNTIME_DIR, 'state', 'argos.state.archive.json');
 const SESSION_ARCHIVE_ROOT = path.join(RUNTIME_DIR, 'archive', 'sessions');
 const LEGACY_ARCHIVE_ROOT = path.join(RUNTIME_DIR, 'archive', 'legacy');
@@ -55,40 +52,6 @@ const ARGOS_VECTOR_PATH = path.join(RUNTIME_DIR, 'ARGOS_VECTOR.md');
 const ARGOS_QUICKSTART_PATH = path.join(RUNTIME_DIR, 'ARGOS_QUICKSTART.md');
 const NGROK_QUICK_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'ngrok.quick.json');
 const CLOUDFLARED_QUICK_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'cloudflared.quick.json');
-const API_STDERR_LOG_PATH = path.join(__dirname, '..', 'api.stderr.log');
-
-function stringifyProcessError(reason: unknown): string {
-  if (reason instanceof Error) return reason.stack || reason.message;
-  try {
-    return JSON.stringify(reason);
-  } catch {
-    return String(reason);
-  }
-}
-
-function appendApiStderrLog(kind: 'uncaughtException' | 'unhandledRejection', reason: unknown): void {
-  const line = [
-    `\n[${new Date().toISOString()}] [${kind}]`,
-    stringifyProcessError(reason)
-  ].join('\n');
-
-  try {
-    ensureDirSync(path.dirname(API_STDERR_LOG_PATH));
-    fs.appendFileSync(API_STDERR_LOG_PATH, `${line}\n`, 'utf-8');
-  } catch (logError) {
-    console.error(`[ARGOS-API] No se pudo escribir ${API_STDERR_LOG_PATH}`, logError);
-  }
-}
-
-process.on('uncaughtException', (error) => {
-  appendApiStderrLog('uncaughtException', error);
-  console.error('[ARGOS-API] uncaughtException capturada; proceso sigue vivo.', error);
-});
-
-process.on('unhandledRejection', (reason) => {
-  appendApiStderrLog('unhandledRejection', reason);
-  console.error('[ARGOS-API] unhandledRejection capturada; proceso sigue vivo.', reason);
-});
 
 const EXTERNAL_WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const LOCAL_ONLY_API_PATHS = new Set(['/admin/rotate-token']);
@@ -296,7 +259,170 @@ type TokenRecord = {
   channel?: string;
 };
 
-const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'SCICLASSM8', 'COMENIO', 'XUANXU', 'GENERAL']);
+type ConcilioMessageType = 'idea' | 'objecion' | 'sintesis' | 'pregunta' | 'propuesta' | 'decision';
+const VALID_CONCILIO_MESSAGE_TYPES = new Set<ConcilioMessageType>(['idea', 'objecion', 'sintesis', 'pregunta', 'propuesta', 'decision']);
+
+type ConcilioMessage = {
+  message_id: string;
+  agent: string;
+  timestamp: string;
+  room: 'concilio';
+  type: ConcilioMessageType;
+  body: string;
+  in_reply_to?: string;
+  packet_id?: string;
+  session_ref?: string;
+};
+
+type ConcilioActor = {
+  id: string;
+  label: string;
+  token_key: 'Claude' | 'ChatGPT' | 'Gemini' | 'Captain';
+  enabled?: boolean;
+  notes?: string;
+  aliases?: string[];
+};
+
+type ConcilioActorsCatalog = {
+  version: string;
+  updated_at: string;
+  actors: ConcilioActor[];
+};
+
+let lastConcilioMsgMs = 0;
+let concilioMsgSeq = 0;
+
+function nextConcilioMessageId(): string {
+  const nowMs = Date.now();
+  if (nowMs === lastConcilioMsgMs) {
+    concilioMsgSeq += 1;
+  } else {
+    lastConcilioMsgMs = nowMs;
+    concilioMsgSeq = 0;
+  }
+  return `${nowMs}-${concilioMsgSeq}`;
+}
+
+function normalizeConcilioLookup(value: string): string {
+  return normaliseText(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function buildDefaultConcilioActorsCatalog(): ConcilioActorsCatalog {
+  return {
+    version: 'v1',
+    updated_at: nowIso(),
+    actors: [
+      { id: 'Capitan', label: 'Capitan', token_key: 'Captain', enabled: true, aliases: ['captain', 'thor'] },
+      { id: 'Claude', label: 'Claude', token_key: 'Claude', enabled: true, aliases: ['claude cowork', 'claude chat'] },
+      { id: 'Claude Code', label: 'Claude Code', token_key: 'Claude', enabled: true, aliases: ['claudecode'] },
+      { id: 'Codex', label: 'Codex', token_key: 'ChatGPT', enabled: true, aliases: ['openai codex'] },
+      { id: 'ChatGPT', label: 'ChatGPT', token_key: 'ChatGPT', enabled: true, aliases: ['chat gpt'] },
+      { id: 'OpenClaw', label: 'OpenClaw', token_key: 'ChatGPT', enabled: true, aliases: ['open claw', 'qwen', 'deepseek'] },
+      { id: 'Gemini', label: 'Gemini', token_key: 'Gemini', enabled: true, aliases: ['pi', 'ag', 'antigravity', 'gemini pi', 'gemini ag'] }
+    ]
+  };
+}
+
+function ensureConcilioActorsCatalog(): ConcilioActorsCatalog {
+  ensureDirSync(path.dirname(CONCILIO_ACTORS_PATH));
+  const fallback = buildDefaultConcilioActorsCatalog();
+  if (!fs.existsSync(CONCILIO_ACTORS_PATH)) {
+    writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
+    return fallback;
+  }
+  const parsed = readJsonFile<ConcilioActorsCatalog>(CONCILIO_ACTORS_PATH, fallback);
+  if (!Array.isArray(parsed.actors) || parsed.actors.length === 0) {
+    writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
+    return fallback;
+  }
+  return parsed;
+}
+
+function findConcilioActor(rawActor: string): ConcilioActor | null {
+  const needle = normalizeConcilioLookup(rawActor);
+  if (needle === '') return null;
+  const catalog = ensureConcilioActorsCatalog();
+  for (const actor of catalog.actors) {
+    const candidates = [actor.id, actor.label, ...(Array.isArray(actor.aliases) ? actor.aliases : [])];
+    if (candidates.some((v) => normalizeConcilioLookup(String(v)) === needle)) {
+      return actor;
+    }
+  }
+  return null;
+}
+
+function ensureConcilioStorage(): void {
+  ensureDirSync(CONCILIO_EVENTS_DIR);
+  if (!fs.existsSync(CONCILIO_LOG_PATH)) {
+    fs.writeFileSync(CONCILIO_LOG_PATH, '# ARGOS CONCILIO LOG\nCanal deliberativo inter-IA.\n\n---\n', 'utf-8');
+  }
+}
+
+function appendConcilioMarkdown(message: ConcilioMessage): void {
+  ensureConcilioStorage();
+  const canaryTs = new Date(message.timestamp).toLocaleString('sv-SE', {
+    timeZone: 'Atlantic/Canary',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).slice(0, 16);
+  const lines: string[] = [
+    `**[${canaryTs} Atlantic/Canary] VOZ ${message.agent} | CONCILIO:${message.type.toUpperCase()}**`,
+    `MESSAGE_ID: ${message.message_id}`,
+    `ROOM: concilio`
+  ];
+  if (normaliseText(message.packet_id) !== '') lines.push(`PACKET_ID: ${message.packet_id}`);
+  if (normaliseText(message.in_reply_to) !== '') lines.push(`IN_REPLY_TO: ${message.in_reply_to}`);
+  if (normaliseText(message.session_ref) !== '') lines.push(`SESSION_REF: ${message.session_ref}`);
+  lines.push('', message.body, '', '---', '');
+  fs.appendFileSync(CONCILIO_LOG_PATH, lines.join('\n'), 'utf-8');
+}
+
+function readConcilioMessages(limitRaw: number, packetIdRaw: string): ConcilioMessage[] {
+  if (!fs.existsSync(CONCILIO_JSONL_PATH)) return [];
+  const safeLimit = Math.max(1, Math.min(Number.isFinite(limitRaw) ? Math.round(limitRaw) : 50, 500));
+  const packetId = normaliseText(packetIdRaw);
+  const lines = fs.readFileSync(CONCILIO_JSONL_PATH, 'utf-8')
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== '');
+  const rows: ConcilioMessage[] = [];
+  lines.forEach((line) => {
+    try {
+      const parsed = JSON.parse(line) as ConcilioMessage;
+      if (packetId !== '' && normaliseText(parsed.packet_id) !== packetId) return;
+      rows.push(parsed);
+    } catch {
+      // Ignora lineas corruptas para no romper lectura.
+    }
+  });
+  rows.sort((a, b) => {
+    const tsDelta = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+    if (tsDelta !== 0) return tsDelta;
+    return normaliseText(a.message_id).localeCompare(normaliseText(b.message_id));
+  });
+  return rows.length <= safeLimit ? rows : rows.slice(rows.length - safeLimit);
+}
+
+function ensureConcilioReadAccess(req: Request, res: Response): boolean {
+  if (isTrustedLocalRequest(req)) return true;
+  const auth = authenticateAgentRequest(req);
+  if (!auth.ok) {
+    res.status(auth.status).json({ error: auth.error });
+    return false;
+  }
+  res.locals.authenticatedAgent = auth.tokenAgent;
+  return true;
+}
+
+const VALID_PACKET_ROOMS = new Set(['ARGOS', 'SCICLASSMATE', 'COMENIO', 'XUANXU', 'GENERAL', 'CONCILIO']);
 const VALID_PACKET_TYPES = new Set(['strategy', 'build', 'integration', 'maintenance', 'bug', 'risk', 'errand', 'task']);
 
 function normalizeTaskRoom(rawValue: string): string {
@@ -624,202 +750,6 @@ type ChatMessage = {
   editedAt: string;
 };
 
-type ConcilioMessageType = 'idea' | 'objecion' | 'sintesis' | 'pregunta' | 'propuesta' | 'decision';
-const VALID_CONCILIO_TYPES = new Set<ConcilioMessageType>(['idea', 'objecion', 'sintesis', 'pregunta', 'propuesta', 'decision']);
-
-type ConcilioMessage = {
-  message_id: string;
-  agent: string;
-  timestamp: string;
-  room: 'concilio';
-  type: ConcilioMessageType;
-  body: string;
-  in_reply_to?: string;
-  packet_id?: string;
-  session_ref?: string;
-};
-
-type ConcilioActorEntry = {
-  id: string;
-  label: string;
-  token_key: 'Claude' | 'ChatGPT' | 'Gemini' | 'Captain';
-  aliases?: string[];
-};
-
-type ConcilioActorCatalog = {
-  version: string;
-  updated_at: string;
-  actors: ConcilioActorEntry[];
-};
-
-let lastConcilioMessageMs = 0;
-let concilioMessageSeq = 0;
-
-function nextConcilioMessageId(): string {
-  const currentMs = Date.now();
-  if (currentMs === lastConcilioMessageMs) {
-    concilioMessageSeq += 1;
-  } else {
-    lastConcilioMessageMs = currentMs;
-    concilioMessageSeq = 0;
-  }
-  return `${currentMs}-${concilioMessageSeq}`;
-}
-
-function normalizeLookupToken(value: string): string {
-  return normaliseText(value)
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-
-function buildDefaultConcilioActorCatalog(): ConcilioActorCatalog {
-  const now = nowIso();
-  return {
-    version: 'v1',
-    updated_at: now,
-    actors: [
-      { id: 'Capitan', label: 'Capitan', token_key: 'Captain', aliases: ['captain', 'capitan', 'thor'] },
-      { id: 'Claude', label: 'Claude', token_key: 'Claude', aliases: ['claude cowork', 'claude chat'] },
-      { id: 'Claude Code', label: 'Claude Code', token_key: 'Claude', aliases: ['claudecode'] },
-      { id: 'Codex', label: 'Codex', token_key: 'ChatGPT', aliases: ['openai codex'] },
-      { id: 'ChatGPT', label: 'ChatGPT', token_key: 'ChatGPT', aliases: ['chat gpt'] },
-      { id: 'Gemini (Pi)', label: 'Gemini (Pi)', token_key: 'Gemini', aliases: ['pi', 'gemini pi'] },
-      { id: 'Gemini (AG)', label: 'Gemini (AG)', token_key: 'Gemini', aliases: ['ag', 'antigravity', 'gemini ag'] },
-      { id: 'OpenClaw', label: 'OpenClaw', token_key: 'ChatGPT', aliases: ['open claw', 'deepseek', 'qwen'] }
-    ]
-  };
-}
-
-function ensureConcilioActorCatalog(): ConcilioActorCatalog {
-  ensureDirSync(path.dirname(CONCILIO_ACTORS_PATH));
-  const fallback = buildDefaultConcilioActorCatalog();
-  const current = readJsonFile<ConcilioActorCatalog>(CONCILIO_ACTORS_PATH, fallback);
-  if (!fs.existsSync(CONCILIO_ACTORS_PATH)) {
-    writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
-    return fallback;
-  }
-  if (!Array.isArray(current.actors) || current.actors.length === 0) {
-    writeJsonFileSafe(CONCILIO_ACTORS_PATH, fallback);
-    return fallback;
-  }
-  return current;
-}
-
-function resolveConcilioActor(rawActor: string): ConcilioActorEntry | null {
-  const catalog = ensureConcilioActorCatalog();
-  const needle = normalizeLookupToken(rawActor);
-  if (needle === '') return null;
-
-  for (const actor of catalog.actors) {
-    const candidates = [actor.id, actor.label, ...(Array.isArray(actor.aliases) ? actor.aliases : [])];
-    if (candidates.some((candidate) => normalizeLookupToken(String(candidate)) === needle)) {
-      return actor;
-    }
-  }
-
-  return null;
-}
-
-function ensureConcilioDecisionWrite(req: Request, res: Response): boolean {
-  if (!isTrustedLocalRequest(req)) {
-    res.status(403).json({ error: 'type=decision solo permitido desde localhost del Capitan' });
-    return false;
-  }
-  const captainUiHeader = normaliseText(req.header('X-Argos-Captain-UI'));
-  if (captainUiHeader !== '1') {
-    res.status(403).json({ error: 'type=decision requiere cabecera X-Argos-Captain-UI: 1' });
-    return false;
-  }
-  return true;
-}
-
-function ensureConcilioActorMatchesAuth(req: Request, res: Response, actor: ConcilioActorEntry): boolean {
-  if (isTrustedLocalRequest(req)) return true;
-  const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
-  if (tokenAgent === '') {
-    res.status(401).json({ error: 'Token de agente requerido para POST /api/concilio' });
-    return false;
-  }
-  if (actor.token_key === 'Captain') {
-    res.status(403).json({ error: 'Capitan no acepta escritura externa en /api/concilio' });
-    return false;
-  }
-  if (tokenAgent !== actor.token_key) {
-    res.status(403).json({ error: `Token de ${tokenAgent} no autorizado para actuar como ${actor.id}` });
-    return false;
-  }
-  return true;
-}
-
-function ensureConcilioStorage(): void {
-  ensureDirSync(CONCILIO_EVENTS_DIR);
-  if (!fs.existsSync(CONCILIO_LOG_PATH)) {
-    fs.writeFileSync(CONCILIO_LOG_PATH, '# ARGOS CONCILIO LOG\nCanal deliberativo inter-IA.\n\n---\n', 'utf-8');
-  }
-}
-
-function appendToConcilioMarkdownLog(message: ConcilioMessage): void {
-  ensureConcilioStorage();
-  const canaryTs = new Date(message.timestamp).toLocaleString('sv-SE', {
-    timeZone: 'Atlantic/Canary',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).slice(0, 16);
-
-  const lines: string[] = [
-    `**[${canaryTs} Atlantic/Canary] VOZ ${message.agent} | CONCILIO:${message.type.toUpperCase()}**`,
-    `MESSAGE_ID: ${message.message_id}`,
-    `ROOM: concilio`
-  ];
-  if (normaliseText(message.packet_id) !== '') lines.push(`PACKET_ID: ${message.packet_id}`);
-  if (normaliseText(message.in_reply_to) !== '') lines.push(`IN_REPLY_TO: ${message.in_reply_to}`);
-  if (normaliseText(message.session_ref) !== '') lines.push(`SESSION_REF: ${message.session_ref}`);
-  lines.push('');
-  lines.push(message.body);
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-
-  fs.appendFileSync(CONCILIO_LOG_PATH, `${lines.join('\n')}`, 'utf-8');
-}
-
-function readConcilioMessages(limit = 50, packetId = ''): ConcilioMessage[] {
-  if (!fs.existsSync(CONCILIO_JSONL_PATH)) return [];
-  const lines = fs.readFileSync(CONCILIO_JSONL_PATH, 'utf-8')
-    .replace(/^\uFEFF/, '')
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line !== '');
-
-  const filtered: ConcilioMessage[] = [];
-  lines.forEach((line) => {
-    try {
-      const parsed = JSON.parse(line) as ConcilioMessage;
-      if (normaliseText(packetId) !== '' && normaliseText(parsed.packet_id) !== normaliseText(packetId)) {
-        return;
-      }
-      filtered.push(parsed);
-    } catch {
-      // Ignora lineas invalidas para robustez.
-    }
-  });
-
-  filtered.sort((a, b) => {
-    const tsDiff = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-    if (tsDiff !== 0) return tsDiff;
-    return normaliseText(a.message_id).localeCompare(normaliseText(b.message_id));
-  });
-
-  const safeLimit = Math.max(1, Math.min(limit, 500));
-  if (filtered.length <= safeLimit) return filtered;
-  return filtered.slice(filtered.length - safeLimit);
-}
-
 type CanonicalProtocolActor = 'Claude' | 'Codex' | 'Pi' | 'ChatGPT' | 'OpenClaw' | 'Qwen';
 const CANONICAL_PROTOCOL_ACTORS: ReadonlyArray<CanonicalProtocolActor> = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'OpenClaw', 'Qwen'];
 
@@ -871,166 +801,6 @@ type CaptainFeedLine = {
   parsed: CaptainFeedRecord | null;
 };
 
-const FEED_NOISE_RE = /\b(probe|smoke|test)\b/i;
-const CAPTAIN_FEED_MOJIBAKE_RE = /Ã|Â|�/g;
-
-function countMojibakeTokens(text: string): number {
-  if (text === '') return 0;
-  return (text.match(CAPTAIN_FEED_MOJIBAKE_RE) || []).length;
-}
-
-function isCaptainFeedPath(filePath: string): boolean {
-  return path.resolve(filePath) === path.resolve(CAPTAIN_FEED_PATH);
-}
-
-function buildCaptainFeedBackupPath(feedPath: string, reason = 'rewrite'): string {
-  const now = new Date();
-  const stamp = now.toISOString().replace(/[:.]/g, '-');
-  const dir = path.dirname(feedPath);
-  const base = path.basename(feedPath, path.extname(feedPath));
-  return path.join(dir, `${base}.backup_${reason}_${stamp}.jsonl`);
-}
-
-function createCaptainFeedBackup(feedPath: string, reason = 'rewrite'): string | null {
-  if (!fs.existsSync(feedPath)) return null;
-  const backupPath = buildCaptainFeedBackupPath(feedPath, reason);
-  fs.copyFileSync(feedPath, backupPath);
-  return backupPath;
-}
-
-function sleepSync(ms: number): void {
-  const end = Date.now() + ms;
-  while (Date.now() < end) {
-    // Busy wait only around rare feed lock contention; keeps this API synchronous.
-  }
-}
-
-function withCaptainFeedWriteLock<T>(reason: string, operation: () => T): T {
-  ensureDirSync(path.dirname(CAPTAIN_FEED_LOCK_PATH));
-  const startedAt = Date.now();
-  let fd: number | null = null;
-  let lastError: unknown = null;
-
-  while (fd === null) {
-    try {
-      fd = fs.openSync(CAPTAIN_FEED_LOCK_PATH, 'wx');
-      fs.writeFileSync(fd, JSON.stringify({
-        pid: process.pid,
-        reason,
-        created_at: new Date().toISOString()
-      }), 'utf-8');
-    } catch (error) {
-      lastError = error;
-      const code = (error as NodeJS.ErrnoException).code;
-      if (code !== 'EEXIST') throw error;
-
-      try {
-        const stats = fs.statSync(CAPTAIN_FEED_LOCK_PATH);
-        if (Date.now() - stats.mtimeMs > CAPTAIN_FEED_LOCK_STALE_MS) {
-          fs.unlinkSync(CAPTAIN_FEED_LOCK_PATH);
-          continue;
-        }
-      } catch (staleError) {
-        lastError = staleError;
-      }
-
-      if (Date.now() - startedAt >= CAPTAIN_FEED_LOCK_TIMEOUT_MS) {
-        throw new Error(`Timeout esperando lock de captain_feed (${reason}): ${stringifyProcessError(lastError)}`);
-      }
-      sleepSync(25);
-    }
-  }
-
-  try {
-    return operation();
-  } finally {
-    try {
-      if (fd !== null) fs.closeSync(fd);
-    } finally {
-      try {
-        if (fs.existsSync(CAPTAIN_FEED_LOCK_PATH)) fs.unlinkSync(CAPTAIN_FEED_LOCK_PATH);
-      } catch (unlockError) {
-        console.error('[ARGOS-FEED] No se pudo liberar lock de captain_feed', unlockError);
-      }
-    }
-  }
-}
-
-function shouldSuppressCaptainFeedNoise(filePath: string, rec: Record<string, unknown>): boolean {
-  if (!isCaptainFeedPath(filePath)) return false;
-
-  const speaker = normaliseText(rec.speaker).toLowerCase();
-  const senderRole = normaliseText(rec.sender_role).toLowerCase();
-  if (speaker === 'captain' || senderRole === 'captain') return false;
-  if (!(speaker === 'crew' || senderRole === 'agent')) return false;
-
-  const source = normaliseText(rec.source).toLowerCase();
-  const summary = normaliseText(rec.summary);
-  const details = normaliseText(rec.details);
-
-  if (source === 'autonomous_vocal_system' && /tomando\s*misi/i.test(summary)) {
-    return true;
-  }
-  if (source === 'deposit_heartbeat' && /heartbeat|stale/i.test(`${summary} ${details}`)) {
-    return true;
-  }
-
-  if (!['api:remote/update', 'api:remote/closure', 'agent_reporting', 'autonomous_vocal_system', 'api:chat'].includes(source)) {
-    return false;
-  }
-
-  return FEED_NOISE_RE.test(summary) || FEED_NOISE_RE.test(details);
-}
-
-function rewriteCaptainFeedSafely(feedPath: string, content: string, reason = 'rewrite'): void {
-  let previousLines = 0;
-  let previousMojibake = 0;
-  let parsedLineCount = 0;
-  let nextMojibake = 0;
-  let backupPath: string | null = null;
-
-  withCaptainFeedWriteLock(reason, () => {
-    ensureDirSync(path.dirname(feedPath));
-    const previous = fs.existsSync(feedPath) ? fs.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '') : '';
-    previousLines = previous.split(/\r?\n/).filter((line) => line.trim() !== '').length;
-    previousMojibake = countMojibakeTokens(previous);
-    backupPath = createCaptainFeedBackup(feedPath, reason);
-
-    const normalized = content === '' ? '' : (content.endsWith('\n') ? content : `${content}\n`);
-    fs.writeFileSync(feedPath, normalized, 'utf-8');
-
-    const roundtrip = fs.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '');
-    const parsedLines = roundtrip.split(/\r?\n/).filter((line) => line.trim() !== '');
-    let invalidLines = 0;
-    parsedLines.forEach((line) => {
-      try {
-        JSON.parse(line);
-      } catch {
-        invalidLines += 1;
-      }
-    });
-    if (invalidLines > 0) {
-      if (backupPath && fs.existsSync(backupPath)) {
-        fs.copyFileSync(backupPath, feedPath);
-      }
-      throw new Error(`Guardrail: captain_feed rewrite invalido (${invalidLines} lineas JSON corruptas). Restaurado desde backup.`);
-    }
-
-    parsedLineCount = parsedLines.length;
-    nextMojibake = countMojibakeTokens(roundtrip);
-  });
-
-  appendJsonlRecord(ARGOS_EVENTS_PATH, {
-    timestamp: nowIso(),
-    actor: 'Codex',
-    module: 'argos_feed_guard',
-    type: 'captain_feed_rewrite',
-    summary: `Captain feed reescrito con guardrail (${reason})`,
-    details: `lineas:${previousLines}->${parsedLineCount}; mojibake:${previousMojibake}->${nextMojibake}; backup:${backupPath || 'none'}`,
-    source: 'feed_guardrail'
-  });
-}
-
 function readCaptainFeedLines(feedPath: string): CaptainFeedLine[] {
   if (!fs.existsSync(feedPath)) return [];
   const data = fs.readFileSync(feedPath, 'utf-8').replace(/^\uFEFF/, '');
@@ -1048,10 +818,10 @@ function readCaptainFeedLines(feedPath: string): CaptainFeedLine[] {
 function writeCaptainFeedLines(feedPath: string, lines: CaptainFeedLine[]): void {
   const serialized = lines.map((line) => (line.parsed ? JSON.stringify(line.parsed) : line.raw)).join('\n');
   if (serialized === '') {
-    rewriteCaptainFeedSafely(feedPath, '', 'chat_edit_empty');
+    fs.writeFileSync(feedPath, '', 'utf-8');
     return;
   }
-  rewriteCaptainFeedSafely(feedPath, serialized.endsWith('\n') ? serialized : `${serialized}\n`, 'chat_edit');
+  fs.writeFileSync(feedPath, serialized.endsWith('\n') ? serialized : `${serialized}\n`, 'utf-8');
 }
 
 function ensureCaptainFeedRecordId(record: CaptainFeedRecord): CaptainFeedRecord {
@@ -1749,7 +1519,7 @@ function getVoiceForRole(role: string): string {
 
 function isAntigravityRole(role: string): boolean {
   const value = normaliseText(role).toLowerCase();
-  return value.includes('antigravity') || value.includes('gemini') || value.includes('pi');
+  return value.includes('antigravity') || value.includes('gemini') || /\bpi\b/.test(value);
 }
 
 function normaliseText(value: unknown): string {
@@ -3101,7 +2871,7 @@ function integrateClosure(deposit: ParsedChatDeposit, options: ClosureIntegratio
     const logEntry =
       `\n---\n` +
       `**[${canaryLabelText}] VOZ ${actor.toUpperCase()}:**\n` +
-      `**MISION:** ${deposit.statePayload.mission || deposit.statePayload.summary || 'Integracion automatica de deposito chat'}\n` +
+      `**MISION:** Integracion automatica de deposito chat\n` +
       `**WORK PACKET:** ${packetRef || 'N/A'}\n\n` +
       `**DETALLES:**\n${logText}\n`;
     appendMarkdownEntry(
@@ -3165,10 +2935,6 @@ function integrateClosure(deposit: ParsedChatDeposit, options: ClosureIntegratio
   const captainText = normaliseText(deposit.sections.CAPTAIN);
   let captainFeedId: string | null = null;
   if (captainText !== '') {
-    const configuredPrefix = options.captainSummaryPrefix === undefined
-      ? '[DEPOSITO]'
-      : normaliseText(options.captainSummaryPrefix);
-    const prefixText = configuredPrefix === '' ? '' : `${configuredPrefix} `;
     captainFeedId = nextFeedMessageId();
     appendJsonlRecord(CAPTAIN_FEED_PATH, {
       id: captainFeedId,
@@ -3179,7 +2945,7 @@ function integrateClosure(deposit: ParsedChatDeposit, options: ClosureIntegratio
       sender_role: 'agent',
       audience: 'captain',
       source: sourceLabel,
-      summary: `${prefixText}${deposit.statePayload.mission || deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
+      summary: `${normaliseText(options.captainSummaryPrefix) || '[DEPOSITO]'} ${deposit.statePayload.mission || deposit.statePayload.summary || firstLine(captainText) || 'Mensaje integrado'}`,
       details: captainText,
       status: deposit.statePayload.status,
       tokens: 0,
@@ -3861,18 +3627,6 @@ const DEDUP_HEARTBEAT_TTL_MS = 4 * 60 * 1000; // 4 min for heartbeats
 
 function appendJsonlRecord(filePath: string, record: object): void {
   const rec = record as Record<string, unknown>;
-  if (shouldSuppressCaptainFeedNoise(filePath, rec)) {
-    appendJsonlRecord(ARGOS_EVENTS_PATH, {
-      timestamp: nowIso(),
-      actor: normaliseText(rec.sender_name) || normaliseText(rec.actor) || 'Codex',
-      module: 'argos_feed_guard',
-      type: 'captain_feed_noise_suppressed',
-      summary: normaliseText(rec.summary) || 'Mensaje suprimido por ruido tecnico',
-      details: `source=${normaliseText(rec.source)}; refId=${normaliseText(rec.refId)}`,
-      source: 'feed_guardrail'
-    });
-    return;
-  }
   const now = Date.now();
   const isHeartbeat = rec.kind === 'system_heartbeat';
   const dedupKind = String(rec.kind ?? rec.type ?? '');
@@ -3895,23 +3649,15 @@ function appendJsonlRecord(filePath: string, record: object): void {
   const serialised = JSON.stringify(record);
   
   try {
-    const write = () => {
-      // Si el archivo existe, nos aseguramos de que termine en newline para no romper el JSONL
-      if (fs.existsSync(filePath) && fs.statSync(filePath).size > 0) {
-        const tail = readFileTail(filePath, 4);
-        const endsWithNewline = tail.includes('\n');
-        const separator = endsWithNewline ? '' : '\n';
-        fs.appendFileSync(filePath, `${separator}${serialised}\n`, 'utf-8');
-      } else {
-        // Crear archivo nuevo (asegurando UTF-8 sin BOM)
-        fs.writeFileSync(filePath, `${serialised}\n`, 'utf-8');
-      }
-    };
-
-    if (isCaptainFeedPath(filePath)) {
-      withCaptainFeedWriteLock('append', write);
+    // Si el archivo existe, nos aseguramos de que termine en newline para no romper el JSONL
+    if (fs.existsSync(filePath) && fs.statSync(filePath).size > 0) {
+      const tail = readFileTail(filePath, 4);
+      const endsWithNewline = tail.includes('\n');
+      const separator = endsWithNewline ? '' : '\n';
+      fs.appendFileSync(filePath, `${separator}${serialised}\n`, 'utf-8');
     } else {
-      write();
+      // Crear archivo nuevo (asegurando UTF-8 sin BOM)
+      fs.writeFileSync(filePath, `${serialised}\n`, 'utf-8');
     }
   } catch (e) {
     console.error(`[FS] Error escribiendo en ${filePath}`, e);
@@ -4933,7 +4679,7 @@ function inferTaskOwner(rawText: string): string {
   const explicitPatterns: Array<{ owner: string; regex: RegExp }> = [
     { owner: 'Codex', regex: /^(codex|para codex|orden para codex|ordenes para codex)\b[\s,:-]*/i },
     { owner: 'Claude', regex: /^(claude|para claude|orden para claude|ordenes para claude|orfeo)\b[\s,:-]*/i },
-    { owner: 'Pi', regex: /^(pi|antigravity|gemini|para pi|para antigravity|para gemini|orden para pi|orden para antigravity|orden para gemini|ordenes para pi|ordenes para antigravity|ordenes para gemini)\b[\s,:-]*/i }
+    { owner: 'Antigravity / Gemini', regex: /^(antigravity|gemini|para antigravity|para gemini|orden para antigravity|orden para gemini|ordenes para antigravity|ordenes para gemini)\b[\s,:-]*/i }
   ];
 
   for (const candidate of explicitPatterns) {
@@ -4943,7 +4689,7 @@ function inferTaskOwner(rawText: string): string {
   const mentions: string[] = [];
   if (/\bcodex\b/i.test(trimmed)) mentions.push('Codex');
   if (/\b(claude|orfeo)\b/i.test(trimmed)) mentions.push('Claude');
-  if (/\b(pi|antigravity|gemini)\b/i.test(trimmed)) mentions.push('Pi');
+  if (/\b(antigravity|gemini)\b/i.test(trimmed)) mentions.push('Antigravity / Gemini');
 
   if (mentions.length === 1) return mentions[0];
   return 'Cualquiera';
@@ -5003,8 +4749,7 @@ function getPacketField(content: string, fieldName: string): string {
   return match ? match[1].trim() : '';
 }
 
-type WorkPacketStatus = 'open' | 'in_progress' | 'done' | 'archived';
-type WorkPacketZone = 'inbox' | 'in_progress' | 'done' | 'archived';
+type WorkPacketZone = 'inbox' | 'in_progress' | 'done';
 
 type ResolvedWorkPacket = {
   packetId: string;
@@ -5014,54 +4759,22 @@ type ResolvedWorkPacket = {
   content: string;
 };
 
-type WorkPacketApiRecord = {
-  id: string;
-  role_requested: string;
-  assigned_to: string;
-  subject: string;
-  status: WorkPacketStatus;
-  state_key: string;
-  objective: string;
-  zone: WorkPacketZone;
-  room: string;
-  type: string;
-  priority: string;
-  tokens_spent: number;
-  fileName: string;
-  updated_at: string;
-  updated_by: string;
-  content: string;
-};
-
 function escapeRegex(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function normalizeTaskStatus(status: unknown, fallback: WorkPacketStatus = 'open'): WorkPacketStatus {
+function normalizeTaskStatus(status: unknown, fallback: 'open' | 'in_progress' | 'done' = 'open'): 'open' | 'in_progress' | 'done' {
   const raw = normaliseText(status).toLowerCase();
-  if (['archived', 'archive', 'parked'].includes(raw)) return 'archived';
   if (['done', 'closed', 'resolved', 'complete', 'completed'].includes(raw)) return 'done';
   if (['in_progress', 'in-progress', 'progress', 'active', 'doing', 'review'].includes(raw)) return 'in_progress';
   if (['open', 'inbox', 'pending', 'todo', 'queued'].includes(raw)) return 'open';
   return fallback;
 }
 
-function statusToZone(status: WorkPacketStatus): WorkPacketZone {
-  if (status === 'archived') return 'archived';
+function statusToZone(status: 'open' | 'in_progress' | 'done'): WorkPacketZone {
   if (status === 'done') return 'done';
   if (status === 'in_progress') return 'in_progress';
   return 'inbox';
-}
-
-function statusToStateKey(status: WorkPacketStatus, zone: WorkPacketZone = statusToZone(status)): string {
-  return `${status}:${zone}`;
-}
-
-function normalizePacketPriority(rawValue: unknown, fallback = 'low'): string {
-  const priority = normaliseText(rawValue).toLowerCase();
-  if (priority === 'medium') return 'mid';
-  if (['high', 'mid', 'low'].includes(priority)) return priority;
-  return fallback;
 }
 
 function extractPacketObjective(content: string): string {
@@ -5100,106 +4813,7 @@ function replacePacketObjective(content: string, objective: string): string {
   return `${content}\n${nextBlock}\n[/WORK_PACKET]`;
 }
 
-function buildWorkPacketApiRecord(resolved: ResolvedWorkPacket, content = resolved.content): WorkPacketApiRecord {
-  const fallbackStatus = resolved.zone === 'archived' ? 'archived' : resolved.zone === 'done' ? 'done' : resolved.zone === 'in_progress' ? 'in_progress' : 'open';
-  const currentStatus = normalizeTaskStatus(getPacketField(content, 'STATUS'), fallbackStatus);
-  const roleRequested = getPacketField(content, 'ROLE_REQUESTED') || getPacketField(content, 'OWNER') || 'Cualquiera';
-  const assignedTo = getPacketField(content, 'ASSIGNED_TO') || roleRequested;
-  const state = readArgosState();
-  const stateKey = normaliseText(state.packet_states?.[resolved.packetId]) || statusToStateKey(currentStatus, resolved.zone);
-
-  return {
-    id: resolved.packetId,
-    role_requested: roleRequested,
-    assigned_to: assignedTo,
-    subject: getPacketField(content, 'SUBJECT') || resolved.packetId,
-    status: currentStatus,
-    state_key: stateKey,
-    objective: extractPacketObjective(content),
-    zone: resolved.zone,
-    room: normalizeTaskRoom(getPacketField(content, 'ROOM')),
-    type: normalizeTaskType(getPacketField(content, 'TYPE')),
-    priority: normalizePacketPriority(getPacketField(content, 'PRIORITY'), 'low'),
-    tokens_spent: Number(getPacketField(content, 'TOKENS_SPENT')) || 0,
-    fileName: resolved.fileName,
-    updated_at: getPacketField(content, 'UPDATED_AT'),
-    updated_by: getPacketField(content, 'UPDATED_BY'),
-    content
-  };
-}
-
-function updatePacketStateInMemory(state: ArgosState, packetId: string, status: WorkPacketStatus, zone: WorkPacketZone): ArgosState {
-  const nextState = { ...state };
-  const normalizedPacketId = normaliseText(packetId);
-  nextState.packet_states = { ...(state.packet_states || {}) };
-  nextState.packet_states[normalizedPacketId] = statusToStateKey(status, zone);
-
-  const withoutPacket = (items: unknown): string[] =>
-    Array.isArray(items)
-      ? items.map((id) => normaliseText(id)).filter((id) => id !== '' && id !== normalizedPacketId)
-      : [];
-
-  const openPackets = withoutPacket(state.open_packets);
-  const inProgressPackets = withoutPacket((state as Record<string, unknown>).in_progress_packets);
-  if (zone === 'inbox' && !openPackets.includes(normalizedPacketId)) openPackets.push(normalizedPacketId);
-  if (zone === 'in_progress' && !inProgressPackets.includes(normalizedPacketId)) inProgressPackets.push(normalizedPacketId);
-
-  nextState.open_packets = openPackets;
-  (nextState as Record<string, unknown>).in_progress_packets = inProgressPackets;
-  nextState.updated_at = nowIso();
-  return nextState;
-}
-
-function writeJsonFileAtomic(filePath: string, payload: unknown): void {
-  ensureDirSync(path.dirname(filePath));
-  const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(payload, null, 2), 'utf-8');
-  fs.renameSync(tempPath, filePath);
-}
-
-function writeWorkPacketAndStateAtomic(
-  resolved: ResolvedWorkPacket,
-  nextContent: string,
-  nextZone: WorkPacketZone,
-  nextState: ArgosState
-): { targetFilePath: string } {
-  const targetDir = path.join(RUNTIME_DIR, 'work_packets', nextZone);
-  ensureDirSync(targetDir);
-  const targetFilePath = path.join(targetDir, resolved.fileName);
-  const samePath = path.resolve(targetFilePath) === path.resolve(resolved.filePath);
-  const oldStateRaw = fs.existsSync(ARGOS_STATE_PATH) ? fs.readFileSync(ARGOS_STATE_PATH, 'utf-8') : '';
-  const oldSourceContent = fs.existsSync(resolved.filePath) ? fs.readFileSync(resolved.filePath, 'utf-8') : resolved.content;
-  const oldTargetContent = !samePath && fs.existsSync(targetFilePath) ? fs.readFileSync(targetFilePath, 'utf-8') : null;
-
-  if (!samePath && oldTargetContent !== null) {
-    throw new Error(`Destino ya existe para ${resolved.packetId}: ${targetFilePath}`);
-  }
-
-  try {
-    fs.writeFileSync(targetFilePath, nextContent, 'utf-8');
-    writeJsonFileAtomic(ARGOS_STATE_PATH, nextState);
-    if (!samePath && fs.existsSync(resolved.filePath)) {
-      fs.unlinkSync(resolved.filePath);
-    }
-    return { targetFilePath };
-  } catch (error) {
-    try {
-      if (samePath) {
-        fs.writeFileSync(resolved.filePath, oldSourceContent, 'utf-8');
-      } else {
-        if (fs.existsSync(targetFilePath)) fs.unlinkSync(targetFilePath);
-        if (!fs.existsSync(resolved.filePath)) fs.writeFileSync(resolved.filePath, oldSourceContent, 'utf-8');
-        if (oldTargetContent !== null) fs.writeFileSync(targetFilePath, oldTargetContent, 'utf-8');
-      }
-      if (oldStateRaw !== '') fs.writeFileSync(ARGOS_STATE_PATH, oldStateRaw, 'utf-8');
-    } catch (rollbackError) {
-      console.error('[WORKPACKETS] Rollback incompleto tras fallo atomico', rollbackError);
-    }
-    throw error;
-  }
-}
-
-function findWorkPacketById(packetId: string, zones: WorkPacketZone[] = ['inbox', 'in_progress', 'done', 'archived']): ResolvedWorkPacket | null {
+function findWorkPacketById(packetId: string, zones: WorkPacketZone[] = ['inbox', 'in_progress', 'done']): ResolvedWorkPacket | null {
   const targetId = normaliseText(packetId);
   if (targetId === '') return null;
 
@@ -5896,9 +5510,7 @@ app.get('/api/subscribe/:module', (req: Request, res: Response) => {
 });
 
 app.get('/api/concilio/sse', (req: Request, res: Response) => {
-  if (!isTrustedLocalRequest(req)) {
-    return res.status(403).json({ error: 'Endpoint disponible solo en localhost' });
-  }
+  if (!ensureConcilioReadAccess(req, res)) return;
   subscribeToModule('concilio', res);
   req.on('close', () => {
     console.log('[PUBSUB] Request cerrado para modulo: concilio');
@@ -5907,13 +5519,10 @@ app.get('/api/concilio/sse', (req: Request, res: Response) => {
 
 app.get('/api/concilio', (req: Request, res: Response) => {
   try {
-    if (!isTrustedLocalRequest(req)) {
-      return res.status(403).json({ error: 'GET /api/concilio disponible solo en localhost' });
-    }
+    if (!ensureConcilioReadAccess(req, res)) return;
     const limitRaw = Number(req.query.limit || 50);
-    const limit = Number.isFinite(limitRaw) ? Math.round(limitRaw) : 50;
     const packetId = normaliseText(String(req.query.packet_id || ''));
-    const messages = readConcilioMessages(limit, packetId);
+    const messages = readConcilioMessages(limitRaw, packetId);
     return res.json({
       status: 'ok',
       count: messages.length,
@@ -5926,61 +5535,75 @@ app.get('/api/concilio', (req: Request, res: Response) => {
 
 app.post('/api/concilio', (req: Request, res: Response) => {
   try {
-    const body = req.body || {};
-    const actorRaw = normaliseText(body.agent);
+    const tokenAgent = normaliseText(String(res.locals.authenticatedAgent || ''));
+    const actorRaw = normaliseText(req.body?.agent || tokenAgent);
     if (actorRaw === '') {
       return res.status(400).json({ error: 'agent es obligatorio' });
     }
-    const actor = resolveConcilioActor(actorRaw);
+    const actor = findConcilioActor(actorRaw);
     if (!actor) {
-      return res.status(400).json({ error: `agent no canonico para concilio: ${actorRaw}` });
+      return res.status(400).json({ error: `actor no canonico para concilio: ${actorRaw}` });
     }
-    if (!ensureConcilioActorMatchesAuth(req, res, actor)) return;
+    if (actor.enabled === false) {
+      return res.status(409).json({ error: `actor en draft: ${actor.id}. Habilitar en ${path.basename(CONCILIO_ACTORS_PATH)}` });
+    }
 
-    const typeRaw = normaliseText(body.type).toLowerCase() as ConcilioMessageType;
-    if (!VALID_CONCILIO_TYPES.has(typeRaw)) {
+    if (!isTrustedLocalRequest(req)) {
+      if (tokenAgent === '') {
+        return res.status(401).json({ error: 'Token requerido para POST /api/concilio' });
+      }
+      if (actor.token_key === 'Captain') {
+        return res.status(403).json({ error: 'Capitan solo puede escribir decision desde localhost' });
+      }
+      if (tokenAgent !== actor.token_key) {
+        return res.status(403).json({ error: `Token de ${tokenAgent} no autorizado para actor ${actor.id}` });
+      }
+    }
+
+    const messageType = normaliseText(req.body?.type).toLowerCase() as ConcilioMessageType;
+    if (!VALID_CONCILIO_MESSAGE_TYPES.has(messageType)) {
       return res.status(400).json({ error: 'type invalido para concilio' });
     }
-    if (typeRaw === 'decision') {
-      if (actor.id !== 'Capitan') {
-        return res.status(400).json({ error: 'type=decision solo puede usarlo actor Capitan' });
-      }
-      if (!ensureConcilioDecisionWrite(req, res)) return;
+
+    const roomValue = normaliseText(req.body?.room || 'concilio').toLowerCase();
+    if (roomValue !== 'concilio') {
+      return res.status(400).json({ error: 'room debe ser concilio' });
     }
 
-    const roomRaw = normaliseText(body.room);
-    if (roomRaw !== '' && roomRaw.toLowerCase() !== 'concilio') {
-      return res.status(400).json({ error: 'room debe ser "concilio"' });
-    }
-
-    const bodyText = normaliseText(body.body);
-    if (bodyText === '') {
+    const body = normaliseText(req.body?.body);
+    if (body === '') {
       return res.status(400).json({ error: 'body no puede estar vacio' });
     }
-    if (bodyText.length > 5000) {
-      return res.status(400).json({ error: 'body excede techo maximo de 5000 caracteres' });
+    if (body.length > 5000) {
+      return res.status(400).json({ error: 'body excede 5000 caracteres' });
     }
 
-    const timestamp = parseDepositTimestampIso(normaliseText(body.timestamp) || nowIso());
-    const packetId = normaliseText(body.packet_id);
-    const inReplyTo = normaliseText(body.in_reply_to);
-    const sessionRef = normaliseText(body.session_ref);
+    if (messageType === 'decision') {
+      if (actor.id !== 'Capitan') {
+        return res.status(400).json({ error: 'type=decision solo aceptado para actor Capitan' });
+      }
+      if (!isTrustedLocalRequest(req) || normaliseText(req.header('X-Argos-Captain-UI')) !== '1') {
+        return res.status(403).json({ error: 'type=decision requiere localhost + X-Argos-Captain-UI: 1' });
+      }
+    }
 
+    const packetId = normaliseText(req.body?.packet_id);
+    const timestamp = parseDepositTimestampIso(normaliseText(req.body?.timestamp) || nowIso());
     const message: ConcilioMessage = {
       message_id: nextConcilioMessageId(),
       agent: actor.id,
       timestamp,
       room: 'concilio',
-      type: typeRaw,
-      body: bodyText,
-      ...(inReplyTo !== '' ? { in_reply_to: inReplyTo } : {}),
+      type: messageType,
+      body,
+      ...(normaliseText(req.body?.in_reply_to) !== '' ? { in_reply_to: normaliseText(req.body?.in_reply_to) } : {}),
       ...(packetId !== '' ? { packet_id: packetId } : {}),
-      ...(sessionRef !== '' ? { session_ref: sessionRef } : {})
+      ...(normaliseText(req.body?.session_ref) !== '' ? { session_ref: normaliseText(req.body?.session_ref) } : {})
     };
 
     ensureConcilioStorage();
     appendJsonlRecord(CONCILIO_JSONL_PATH, message);
-    appendToConcilioMarkdownLog(message);
+    appendConcilioMarkdown(message);
 
     appendJsonlRecord(ARGOS_EVENTS_PATH, {
       timestamp,
@@ -5989,23 +5612,23 @@ app.post('/api/concilio', (req: Request, res: Response) => {
       type: 'concilio_message',
       packet_id: packetId,
       refId: packetId,
-      summary: `${typeRaw}: ${bodyText.slice(0, 140)}`,
-      details: bodyText,
+      summary: `${message.type}: ${message.body.substring(0, 140)}`,
+      details: message.body,
       source: 'api:concilio',
       message_id: message.message_id
     });
 
     publishEvent('concilio:message', {
       message_id: message.message_id,
+      timestamp: message.timestamp,
       agent: message.agent,
       type: message.type,
-      packet_id: message.packet_id || '',
-      timestamp: message.timestamp
+      packet_id: message.packet_id || ''
     });
 
     return res.json({ status: 'ok', message });
   } catch (error) {
-    return res.status(500).json({ error: 'Fallo escribiendo en concilio', detail: String(error) });
+    return res.status(500).json({ error: 'Fallo escribiendo concilio', detail: String(error) });
   }
 });
 
@@ -6148,7 +5771,7 @@ app.post('/api/remote/closure', (req: Request, res: Response) => {
     const integrated = integrateClosure(depositPayload, {
       source: 'api:remote/closure',
       trigger: payload.trigger,
-      captainSummaryPrefix: ''
+      captainSummaryPrefix: '[CIERRE-REMOTO]'
     });
 
     let packetMovedTo: 'done' | 'unchanged' = 'unchanged';
@@ -6611,61 +6234,16 @@ app.post('/api/chat', (req: Request, res: Response) => {
 app.post('/api/chat/edit', (req: Request, res: Response) => {
   try {
     const messageId = normaliseText(req.body.messageId);
-    const action = normaliseText(req.body.action).toLowerCase();
-    const actor = normaliseText(req.body.actor) || normaliseText(req.body.agent) || 'Unknown';
     const summary = normaliseText(req.body.summary);
     const details = normaliseText(req.body.details);
 
     if (messageId === '') return res.status(400).json({ error: 'messageId requerido' });
+    if (summary === '') return res.status(400).json({ error: 'summary requerido' });
 
     const feedPath = path.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
     if (!fs.existsSync(feedPath)) return res.status(404).json({ error: 'No existe captain_feed.jsonl' });
 
     const lines = readCaptainFeedLines(feedPath);
-    if (action === 'delete') {
-      let deletedRecord: CaptainFeedRecord | null = null;
-      const nextLines = lines.filter((line) => {
-        if (!line.parsed) return true;
-        const current = ensureCaptainFeedRecordId(line.parsed);
-        if (resolveFeedRecordId(current) !== messageId) return true;
-        deletedRecord = current;
-        return false;
-      });
-
-      if (!deletedRecord) {
-        return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
-      }
-
-      writeCaptainFeedLines(feedPath, nextLines);
-
-      const deletedAt = new Date().toISOString();
-      const finalRecord = deletedRecord as CaptainFeedRecord;
-      const packetRef = normaliseText(finalRecord.refId);
-      appendJsonlRecord(ARGOS_EVENTS_PATH, {
-        timestamp: deletedAt,
-        actor,
-        module: 'argos',
-        type: 'interaction_delete',
-        status: 'deleted',
-        packet_id: packetRef,
-        refId: packetRef,
-        summary: `Mensaje eliminado del captain_feed: ${messageId}`,
-        details: normaliseText(finalRecord.summary),
-        source: 'api:chat/edit'
-      });
-
-      publishEvent('chat:message_deleted', {
-        id: messageId,
-        actor,
-        refId: packetRef,
-        timestamp: deletedAt
-      });
-
-      return res.json({ ok: true, deleted: messageId });
-    }
-
-    if (summary === '') return res.status(400).json({ error: 'summary requerido' });
-
     const editedAt = new Date().toISOString();
     let updatedRecord: CaptainFeedRecord | null = null;
     let found = false;
@@ -7043,7 +6621,7 @@ app.post('/api/trilog', (req: Request, res: Response) => {
       sender_role: 'agent',
       audience: 'captain',
       source: 'trilog',
-      summary,
+      summary: `[CIERRE] ${summary}`,
       details: feedDetails,
       status,
       tokens: 0,
@@ -7373,273 +6951,6 @@ app.get('/api/tasks/get', (req: Request, res: Response) => {
   }
 });
 
-app.get('/api/workpackets/:id', (req: Request, res: Response) => {
-  try {
-    const packetId = normaliseText(req.params.id);
-    if (packetId === '') return res.status(400).json({ error: 'packetId requerido' });
-
-    const resolved = findWorkPacketById(packetId);
-    if (!resolved) return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
-
-    return res.json({
-      status: 'ok',
-      packet: buildWorkPacketApiRecord(resolved)
-    });
-  } catch (error) {
-    return res.status(500).json({ error: 'Fallo leyendo el work packet', detail: String(error) });
-  }
-});
-
-app.patch('/api/workpackets/:id', (req: Request, res: Response) => {
-  try {
-    const packetId = normaliseText(req.params.id);
-    if (packetId === '') return res.status(400).json({ error: 'packetId requerido' });
-
-    const body = req.body && typeof req.body === 'object' ? req.body as Record<string, unknown> : {};
-    const actor = normaliseText(body.actor) || normaliseText(body.agent);
-    if (actor === '') return res.status(400).json({ error: 'actor es obligatorio para trazabilidad' });
-
-    if (!isTrustedLocalRequest(req)) {
-      const auth = authenticateAgentRequest(req, actor);
-      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
-    }
-
-    const resolved = findWorkPacketById(packetId);
-    if (!resolved) return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
-
-    const allowedFields = [
-      'subject',
-      'objective',
-      'priority',
-      'room',
-      'type',
-      'role_requested',
-      'status',
-      'assigned_to'
-    ];
-    const requestedFields = allowedFields.filter((field) => Object.prototype.hasOwnProperty.call(body, field));
-    if (requestedFields.length === 0) {
-      return res.status(400).json({ error: `Nada que actualizar. Campos permitidos: ${allowedFields.join(', ')}` });
-    }
-
-    const before = buildWorkPacketApiRecord(resolved);
-    let nextContent = resolved.content;
-
-    const nextSubject = Object.prototype.hasOwnProperty.call(body, 'subject')
-      ? normaliseText(body.subject)
-      : before.subject;
-    const nextObjective = Object.prototype.hasOwnProperty.call(body, 'objective')
-      ? String(body.objective ?? '').replace(/\r/g, '').trim()
-      : before.objective;
-    const nextPriority = Object.prototype.hasOwnProperty.call(body, 'priority')
-      ? normalizePacketPriority(body.priority, before.priority)
-      : before.priority;
-    const nextRoom = Object.prototype.hasOwnProperty.call(body, 'room')
-      ? normalizeTaskRoom(normaliseText(body.room))
-      : before.room;
-    const nextType = Object.prototype.hasOwnProperty.call(body, 'type')
-      ? normalizeTaskType(normaliseText(body.type))
-      : before.type;
-    const nextRoleRequested = Object.prototype.hasOwnProperty.call(body, 'role_requested')
-      ? normaliseText(body.role_requested)
-      : before.role_requested;
-    const nextAssignedTo = Object.prototype.hasOwnProperty.call(body, 'assigned_to')
-      ? normaliseText(body.assigned_to)
-      : before.assigned_to;
-    const nextStatus = Object.prototype.hasOwnProperty.call(body, 'status')
-      ? normalizeTaskStatus(body.status, before.status)
-      : before.status;
-
-    if (nextSubject === '') return res.status(400).json({ error: 'subject no puede quedar vacio' });
-    if (nextObjective === '') return res.status(400).json({ error: 'objective no puede quedar vacio' });
-    if (nextRoleRequested === '') return res.status(400).json({ error: 'role_requested no puede quedar vacio' });
-    if (nextAssignedTo === '') return res.status(400).json({ error: 'assigned_to no puede quedar vacio' });
-
-    nextContent = upsertPacketField(nextContent, 'SUBJECT', nextSubject);
-    nextContent = replacePacketObjective(nextContent, nextObjective);
-    nextContent = upsertPacketField(nextContent, 'PRIORITY', nextPriority);
-    nextContent = upsertPacketField(nextContent, 'ROOM', nextRoom);
-    nextContent = upsertPacketField(nextContent, 'TYPE', nextType);
-    nextContent = upsertPacketField(nextContent, 'ROLE_REQUESTED', nextRoleRequested);
-    nextContent = upsertPacketField(nextContent, 'ASSIGNED_TO', nextAssignedTo);
-    nextContent = upsertPacketField(nextContent, 'STATUS', nextStatus);
-    const timestamp = nowIso();
-    nextContent = upsertPacketField(nextContent, 'UPDATED_AT', timestamp);
-    nextContent = upsertPacketField(nextContent, 'UPDATED_BY', actor);
-
-    const nextZone = statusToZone(nextStatus);
-    const currentState = readArgosState();
-    const nextState = updatePacketStateInMemory(currentState, resolved.packetId, nextStatus, nextZone);
-    writeWorkPacketAndStateAtomic(resolved, nextContent, nextZone, nextState);
-
-    const movedResolved = findWorkPacketById(resolved.packetId, [nextZone]) || {
-      ...resolved,
-      zone: nextZone,
-      filePath: path.join(RUNTIME_DIR, 'work_packets', nextZone, resolved.fileName),
-      content: nextContent
-    };
-    const after = buildWorkPacketApiRecord(movedResolved, nextContent);
-    const changedFields = requestedFields.filter((field) =>
-      JSON.stringify((before as Record<string, unknown>)[field]) !== JSON.stringify((after as Record<string, unknown>)[field])
-    );
-    const changedSummary = changedFields.length > 0
-      ? changedFields
-        .map((field) => `${field}: ${JSON.stringify((before as Record<string, unknown>)[field])} -> ${JSON.stringify((after as Record<string, unknown>)[field])}`)
-        .join(' | ')
-      : `metadata: UPDATED_BY=${actor} | UPDATED_AT=${timestamp}`;
-
-    appendJsonlRecord(ARGOS_EVENTS_PATH, {
-      timestamp,
-      actor,
-      module: 'argos',
-      type: 'workpacket_patch',
-      status: after.status,
-      packet_id: resolved.packetId,
-      refId: resolved.packetId,
-      summary: `Workpacket actualizado: ${after.subject}`,
-      details: changedSummary,
-      changed_fields: changedFields,
-      requested_fields: requestedFields,
-      source: 'api:workpackets/patch'
-    });
-
-    if (body.notify_feed === true) {
-      appendJsonlRecord(CAPTAIN_FEED_PATH, {
-        id: nextFeedMessageId(),
-        timestamp,
-        kind: 'crew_update',
-        speaker: 'crew',
-        sender_name: actor,
-        sender_role: 'agent',
-        audience: 'captain',
-        source: 'api:workpackets/patch',
-        summary: `Workpacket actualizado: ${after.subject}`,
-        details: changedSummary,
-        status: after.status,
-        tokens: 0,
-        refId: resolved.packetId
-      });
-    }
-
-    publishEvent('packet:changed', {
-      packetId: resolved.packetId,
-      from: resolved.zone,
-      to: nextZone,
-      status: after.status,
-      actor,
-      changed_fields: changedFields,
-      requested_fields: requestedFields
-    });
-
-    return res.json({
-      status: 'ok',
-      packet: after,
-      changed_fields: changedFields,
-      requested_fields: requestedFields
-    });
-  } catch (error) {
-    return res.status(500).json({ error: 'Fallo actualizando el work packet', detail: String(error) });
-  }
-});
-
-app.post('/api/workpackets/:id/archive', (req: Request, res: Response) => {
-  try {
-    const packetId = normaliseText(req.params.id);
-    if (packetId === '') return res.status(400).json({ error: 'packetId requerido' });
-
-    const body = req.body && typeof req.body === 'object' ? req.body as Record<string, unknown> : {};
-    const actor = normaliseText(body.actor) || normaliseText(body.agent);
-    if (actor === '') return res.status(400).json({ error: 'actor es obligatorio para trazabilidad' });
-
-    if (!isTrustedLocalRequest(req)) {
-      const auth = authenticateAgentRequest(req, actor);
-      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
-    }
-
-    const alreadyArchived = findWorkPacketById(packetId, ['archived']);
-    if (alreadyArchived) {
-      return res.json({
-        status: 'ok',
-        archived: true,
-        already_archived: true,
-        packet: buildWorkPacketApiRecord(alreadyArchived)
-      });
-    }
-
-    const resolved = findWorkPacketById(packetId, ['inbox', 'in_progress', 'done']);
-    if (!resolved) return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
-
-    const timestamp = nowIso();
-    const reason = normaliseText(body.reason);
-    let nextContent = resolved.content;
-    nextContent = upsertPacketField(nextContent, 'STATUS', 'archived');
-    nextContent = upsertPacketField(nextContent, 'UPDATED_AT', timestamp);
-    nextContent = upsertPacketField(nextContent, 'UPDATED_BY', actor);
-    if (reason !== '') {
-      nextContent = upsertPacketField(nextContent, 'ARCHIVE_REASON', reason);
-    }
-
-    const nextState = updatePacketStateInMemory(readArgosState(), resolved.packetId, 'archived', 'archived');
-    writeWorkPacketAndStateAtomic(resolved, nextContent, 'archived', nextState);
-
-    const archivedResolved = findWorkPacketById(resolved.packetId, ['archived']) || {
-      ...resolved,
-      zone: 'archived' as WorkPacketZone,
-      filePath: path.join(RUNTIME_DIR, 'work_packets', 'archived', resolved.fileName),
-      content: nextContent
-    };
-    const packet = buildWorkPacketApiRecord(archivedResolved, nextContent);
-
-    appendJsonlRecord(ARGOS_EVENTS_PATH, {
-      timestamp,
-      actor,
-      module: 'argos',
-      type: 'workpacket_archived',
-      status: 'archived',
-      packet_id: resolved.packetId,
-      refId: resolved.packetId,
-      summary: `Workpacket archivado: ${packet.subject}`,
-      details: `ZONA=${resolved.zone}->archived${reason !== '' ? ` | reason=${reason}` : ''}`,
-      source: 'api:workpackets/archive'
-    });
-
-    if (body.notify_feed === true) {
-      appendJsonlRecord(CAPTAIN_FEED_PATH, {
-        id: nextFeedMessageId(),
-        timestamp,
-        kind: 'crew_update',
-        speaker: 'crew',
-        sender_name: actor,
-        sender_role: 'agent',
-        audience: 'captain',
-        source: 'api:workpackets/archive',
-        summary: `Workpacket archivado: ${packet.subject}`,
-        details: reason,
-        status: 'archived',
-        tokens: 0,
-        refId: resolved.packetId
-      });
-    }
-
-    publishEvent('packet:changed', {
-      packetId: resolved.packetId,
-      from: resolved.zone,
-      to: 'archived',
-      status: 'archived',
-      actor
-    });
-
-    return res.json({
-      status: 'ok',
-      archived: true,
-      already_archived: false,
-      packet
-    });
-  } catch (error) {
-    return res.status(500).json({ error: 'Fallo archivando el work packet', detail: String(error) });
-  }
-});
-
 // ============ ENDPOINT: Get AI My Packets ============
 app.get('/api/my-packets', (req: Request, res: Response) => {
   try {
@@ -7934,7 +7245,7 @@ app.post('/api/ia/start-task', (req: Request, res: Response) => {
           : actor;
     postToCrewFeed(
       voiceName,
-      `Tomando misión: ${subject}`,
+      `Tomando mision: ${subject}`,
       `ID: ${packetId} - en progreso.`,
       'crew_update',
       0,
@@ -9618,7 +8929,7 @@ function runArgosDispatcher() {
 
         const id = idMatch[1].trim();
         const subject = subjectMatch ? subjectMatch[1].trim() : 'Sin asunto';
-        const owner = ownerMatch ? ownerMatch[1].trim() : 'Pi';
+        const owner = ownerMatch ? ownerMatch[1].trim() : 'Antigravity';
         const status = statusMatch ? statusMatch[1].trim() : 'open';
         const newStateKey = `${status}:${zone}`;
 
