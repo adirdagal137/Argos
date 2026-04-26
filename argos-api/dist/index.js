@@ -5388,41 +5388,18 @@ app.post('/api/chat', (req, res) => {
 app.post('/api/chat/edit', (req, res) => {
     try {
         const messageId = normaliseText(req.body.messageId);
+        const action = normaliseText(req.body.action).toLowerCase();
         const summary = normaliseText(req.body.summary);
         const details = normaliseText(req.body.details);
         if (messageId === '')
             return res.status(400).json({ error: 'messageId requerido' });
-        if (summary === '')
+        if (action !== 'delete' && summary === '')
             return res.status(400).json({ error: 'summary requerido' });
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         if (!fs_1.default.existsSync(feedPath))
             return res.status(404).json({ error: 'No existe captain_feed.jsonl' });
         const lines = readCaptainFeedLines(feedPath);
         const editedAt = new Date().toISOString();
-        let updatedRecord = null;
-        let found = false;
-        const nextLines = lines.map((line) => {
-            if (!line.parsed)
-                return line;
-            const current = ensureCaptainFeedRecordId(line.parsed);
-            if (resolveFeedRecordId(current) !== messageId) {
-                return { ...line, parsed: current };
-            }
-            found = true;
-            updatedRecord = {
-                ...current,
-                summary,
-                details,
-                edited_at: editedAt,
-                status: 'edited'
-            };
-            return { ...line, parsed: updatedRecord };
-        });
-        if (!found || !updatedRecord) {
-            return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
-        }
-        const finalRecord = updatedRecord;
-        writeCaptainFeedLines(feedPath, nextLines);
         const canaryTs = new Date(editedAt).toLocaleString('sv-SE', {
             timeZone: 'Atlantic/Canary',
             year: 'numeric',
@@ -5431,6 +5408,69 @@ app.post('/api/chat/edit', (req, res) => {
             hour: '2-digit',
             minute: '2-digit'
         }).slice(0, 16);
+        let updatedRecord = null;
+        let deletedRecord = null;
+        let found = false;
+        const nextLines = lines.flatMap((line) => {
+            if (!line.parsed)
+                return line;
+            const current = ensureCaptainFeedRecordId(line.parsed);
+            if (resolveFeedRecordId(current) !== messageId) {
+                return [{ ...line, parsed: current }];
+            }
+            found = true;
+            if (action === 'delete') {
+                deletedRecord = current;
+                return [];
+            }
+            updatedRecord = {
+                ...current,
+                summary,
+                details,
+                edited_at: editedAt,
+                status: 'edited'
+            };
+            return [{ ...line, parsed: updatedRecord }];
+        });
+        if (action === 'delete') {
+            if (!found || !deletedRecord) {
+                return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+            }
+            const removedRecord = deletedRecord;
+            writeCaptainFeedLines(feedPath, nextLines);
+            const packetRef = normaliseText(removedRecord.refId);
+            const removedSummary = normaliseText(removedRecord.summary);
+            appendJsonlRecord(ARGOS_EVENTS_PATH, {
+                timestamp: editedAt,
+                timestamp_label: canaryTs,
+                actor: inferSenderName(removedRecord),
+                module: 'argos',
+                type: 'interaction_delete',
+                status: 'deleted',
+                packet_id: packetRef,
+                refId: packetRef,
+                summary: removedSummary || `Mensaje eliminado: ${messageId}`,
+                details: `messageId=${messageId}`,
+                source: 'api:chat/edit'
+            });
+            publishEvent('chat:message_deleted', {
+                id: messageId,
+                actor: inferSenderName(removedRecord),
+                refId: packetRef,
+                timestamp: editedAt
+            });
+            return res.json({
+                status: 'ok',
+                action: 'delete',
+                messageId,
+                deleted: true
+            });
+        }
+        if (!found || !updatedRecord) {
+            return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+        }
+        const finalRecord = updatedRecord;
+        writeCaptainFeedLines(feedPath, nextLines);
         const packetRef = normaliseText(finalRecord.refId);
         appendJsonlRecord(ARGOS_EVENTS_PATH, {
             timestamp: editedAt,
