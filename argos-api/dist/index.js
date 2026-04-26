@@ -19,9 +19,10 @@ const TOOLS_DIR = path_1.default.join(RUNTIME_DIR, 'tools');
 const LOGBOOK_SNAPSHOT_PATH = path_1.default.join(RUNTIME_DIR, 'views', 'logbook_export', 'logbook.snapshot.json');
 const ARGOS_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.json');
 const DASHBOARD_DIR = path_1.default.join(__dirname, '..', '..', 'argos-dashboard');
-const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
-const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const LOGS_CURRENT_DIR = path_1.default.join(RUNTIME_DIR, 'logs', 'current');
+const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_LOG.md');
+const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
 const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
@@ -3555,8 +3556,8 @@ function getMtimeMs(targetPath) {
 }
 function shouldRefreshLogbookSnapshot() {
     const sourcePaths = [
-        path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md'),
-        path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md'),
+        ARGOS_GLOBAL_LOG_PATH,
+        ARGOS_GLOBAL_SHADOW_PATH,
         path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl'),
         path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl'),
         path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl'),
@@ -3899,8 +3900,8 @@ function enrichArgosStreams(snapshot) {
         }
         return combined;
     };
-    const liveLogEntries = loadStreamEntries('ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
-    const liveShadowEntries = loadStreamEntries('ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
+    const liveLogEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
+    const liveShadowEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
     const liveGlitchEntries = loadStreamEntries('argos.glitches.jsonl', 'glitch', parseArgosEventsStream);
     const processEntries = (entries, streamId) => {
         const next = entries.map((entry) => {
@@ -5513,8 +5514,8 @@ app.get('/api/logbook', (req, res) => {
 });
 app.get('/api/logs', (req, res) => {
     try {
-        const globalLogPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-        const shadowLogPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+        const globalLogPath = ARGOS_GLOBAL_LOG_PATH;
+        const shadowLogPath = ARGOS_GLOBAL_SHADOW_PATH;
         const interactionsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
         const globalStr = readTextFile(globalLogPath, 'Bitacora global desaparecida.');
         const shadowStr = readTextFile(shadowLogPath, 'Shadow log desaparecido.');
@@ -6615,7 +6616,7 @@ app.get('/api/vector', (req, res) => {
 });
 app.get('/api/risks', (req, res) => {
     try {
-        const shadowPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+        const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
         const risks = [];
         // 1. Risks from Shadow Log
         if (fs_1.default.existsSync(shadowPath)) {
@@ -6705,9 +6706,9 @@ app.get('/api/events', (req, res) => {
     if (!query)
         return res.json({ query, hits: [] });
     try {
-        const shadowPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
-        const globalPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-        const glitchPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+        const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
+        const globalPath = ARGOS_GLOBAL_LOG_PATH;
+        const glitchPath = ARGOS_GLOBAL_GLITCH_PATH;
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         const eventsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
         const glitchesJsonPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
@@ -7993,7 +7994,7 @@ function runArgosDispatcher() {
  * MOTOR AUTONOMO: LOLA (VIGIA DE LA SOMBRA)
  */
 function runLolaShadowScanner() {
-    const shadowPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+    const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
     if (!fs_1.default.existsSync(shadowPath))
         return;
     try {

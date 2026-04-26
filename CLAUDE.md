@@ -20,7 +20,7 @@ Leer en este orden:
 1. `c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_QUICKSTART.md` -- protocolo condensado
 2. `c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/work_packets/inbox/` -- que hay pendiente
 3. `c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/state/argos.state.json` -- foco y riesgos activos
-4. `c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md` (tail) -- que se hizo recientemente
+4. `c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md` (tail) -- que se hizo recientemente
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion propia en voz de Orfeo]."
 
 **Log historico** -- si el contexto requiere mas de 3 dias atras:

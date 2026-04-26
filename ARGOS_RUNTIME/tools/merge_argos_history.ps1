@@ -94,13 +94,14 @@ $googleTailPath = Join-Path $RuntimeDir 'archive\v1_0_x_google_native_snapshot_2
 $logbookPath = Join-Path $RuntimeDir 'views\logbook_export\logbook.snapshot.json'
 $eventsPath = Join-Path $RuntimeDir 'events\argos.events.jsonl'
 $glitchesPath = Join-Path $RuntimeDir 'events\argos.glitches.jsonl'
-$glitchMarkdownPath = Join-Path $RuntimeDir 'ARGOS_GLOBAL_GLITCH_LOG.md'
+$logsCurrentDir = Join-Path $RuntimeDir 'logs\current'
+$glitchMarkdownPath = Join-Path $logsCurrentDir 'ARGOS_GLOBAL_GLITCH_LOG.md'
 $historyDir = Join-Path $RuntimeDir 'views\history_export'
 $historyTimelinePath = Join-Path $historyDir 'argos.timeline.jsonl'
 $historyMarkdownPath = Join-Path $historyDir 'ARGOS_CANONICAL_HISTORY.md'
 $historyManifestPath = Join-Path $historyDir 'current_history_manifest.json'
-$activeGlobalLogPath = Join-Path $RuntimeDir 'ARGOS_GLOBAL_LOG.md'
-$activeShadowLogPath = Join-Path $RuntimeDir 'ARGOS_GLOBAL_SHADOW_LOG.md'
+$activeGlobalLogPath = Join-Path $logsCurrentDir 'ARGOS_GLOBAL_LOG.md'
+$activeShadowLogPath = Join-Path $logsCurrentDir 'ARGOS_GLOBAL_SHADOW_LOG.md'
 $donePacketsDir = Join-Path $RuntimeDir 'work_packets\done'
 
 New-Item -ItemType Directory -Force -Path $historyDir | Out-Null

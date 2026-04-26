@@ -16,7 +16,7 @@ const RUNTIME_DIR = path.resolve(SCRIPT_DIR, '..');
 const GEMINI_DIR = path.join(RUNTIME_DIR, 'Gemini');
 const QUARANTINE_DIR = path.join(GEMINI_DIR, '_quarantine');
 const PROCESSED_DIR = path.join(GEMINI_DIR, '_processed');
-const GLOBAL_LOG_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
+const GLOBAL_LOG_PATH = path.join(RUNTIME_DIR, 'logs', 'current', 'ARGOS_GLOBAL_LOG.md');
 const EVENTS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const DEFAULT_SETTLE_MS = 2000;
 
