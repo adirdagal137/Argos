@@ -451,14 +451,14 @@ type LiveStatus = 'idle' | 'working' | 'blocked' | 'waiting_captain';
 type LiveAgentId = 'claude' | 'codex' | 'gemini' | 'openclaw';
 
 type LiveStateRecord = {
-  agent: 'Claude' | 'Codex' | 'Gemini' | 'Pi' | 'OpenClaw';
+  agent: CanonicalProtocolActor;
   updated_at: string;
   packet_id: string | null;
   status: LiveStatus;
   last_output: string;
   open_question: string | null;
   next_step: string | null;
-  handoff_to: 'Claude' | 'Codex' | 'Gemini' | 'Pi' | 'OpenClaw' | null;
+  handoff_to: CanonicalProtocolActor | null;
 };
 
 type DepositSectionKey = 'LOG' | 'SHADOW' | 'GLITCH' | 'STATE' | 'CAPTAIN';
@@ -751,8 +751,8 @@ type ChatMessage = {
   editedAt: string;
 };
 
-type CanonicalProtocolActor = 'Claude' | 'Codex' | 'Pi' | 'ChatGPT' | 'OpenClaw' | 'Qwen';
-const CANONICAL_PROTOCOL_ACTORS: ReadonlyArray<CanonicalProtocolActor> = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'OpenClaw', 'Qwen'];
+type CanonicalProtocolActor = 'Claude' | 'Codex' | 'Gemini' | 'ChatGPT' | 'OpenClaw' | 'Qwen';
+const CANONICAL_PROTOCOL_ACTORS: ReadonlyArray<CanonicalProtocolActor> = ['Claude', 'Codex', 'Gemini', 'ChatGPT', 'OpenClaw', 'Qwen'];
 
 function generateStableHash(seed: string): string {
   let hash = 2166136261;
@@ -834,16 +834,18 @@ function ensureCaptainFeedRecordId(record: CaptainFeedRecord): CaptainFeedRecord
 }
 
 // ============ AGENT NAME NORMALIZATION ============
-function normalizeAgentName(rawName: string): 'Claude' | 'Pi' | 'Codex' | 'OpenClaw' | null {
+function normalizeAgentName(rawName: string): CanonicalProtocolActor | null {
   if (!rawName) return null;
 
   const v = rawName.trim().toLowerCase()
     .replace(/\*\*/g, '').replace(/__/g, '').replace(/\[/g, '').replace(/\]/g, '');
 
   if (v.includes('claude') || v.includes('orfeo')) return 'Claude';
-  if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v)) return 'Pi';
-  if (v.includes('codex') || v.includes('chatgpt')) return 'Codex';
-  if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw') || v.includes('qwen')) return 'OpenClaw';
+  if (v.includes('codex')) return 'Codex';
+  if (v.includes('chatgpt') || v.includes('chat gpt')) return 'ChatGPT';
+  if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v)) return 'Gemini';
+  if (v.includes('qwen')) return 'Qwen';
+  if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw')) return 'OpenClaw';
 
   return null;
 }
@@ -864,7 +866,7 @@ function resolveCrewDisplayName(rawName: string, fallback = 'OpenClaw'): string 
 
   const lower = cleaned.toLowerCase();
   if (lower.includes('claude') || lower.includes('orfeo')) return 'Claude';
-  if (lower.includes('antigravity') || lower.includes('gemini') || /\bpi\b/.test(lower)) return 'Pi';
+  if (lower.includes('antigravity') || lower.includes('gemini') || /\bpi\b/.test(lower)) return 'Gemini';
   if (lower.includes('chatgpt')) return 'ChatGPT';
   if (lower.includes('codex')) return 'Codex';
   if (lower.includes('qwen')) return 'Qwen';
@@ -1597,7 +1599,7 @@ function cleanMarkdownText(value: string): string {
 /**
  * Normalizador de Identidad: Unifica nombres de agentes para consistencia visual (CSS/Icons)
  */
-function resolveCanonicalCrewVoice(rawName: string, fallback: 'Claude' | 'Pi' | 'Codex' | 'OpenClaw' = 'OpenClaw'): 'Claude' | 'Pi' | 'Codex' | 'OpenClaw' {
+function resolveCanonicalCrewVoice(rawName: string, fallback: CanonicalProtocolActor = 'OpenClaw'): CanonicalProtocolActor {
   const cleaned = cleanMarkdownText(rawName || '').trim();
   const agent = normalizeAgentName(cleaned);
   if (agent) return agent;
@@ -1870,11 +1872,11 @@ type IaAgentStatus = {
   next_step?: string;
   last_output?: string;
 };
-type IaStatusMap = { Claude: IaAgentStatus; Pi: IaAgentStatus; Codex: IaAgentStatus; OpenClaw: IaAgentStatus };
+type IaStatusMap = Record<CanonicalProtocolActor, IaAgentStatus>;
 
 function defaultIaStatus(): IaStatusMap {
   const blank = (): IaAgentStatus => ({ status: 'standby', task: '', task_subject: '', since: '' });
-  return { Claude: blank(), Pi: blank(), Codex: blank(), OpenClaw: blank() };
+  return { Claude: blank(), Codex: blank(), Gemini: blank(), ChatGPT: blank(), OpenClaw: blank(), Qwen: blank() };
 }
 
 function readIaStatus(state: Record<string, unknown>): IaStatusMap {
@@ -1883,9 +1885,11 @@ function readIaStatus(state: Record<string, unknown>): IaStatusMap {
   if (!raw) return d;
   return {
     Claude:    { ...d.Claude,    ...(raw.Claude || {}) },
-    Pi:        { ...d.Pi,        ...(raw.Pi || (raw as Record<string, unknown>).Antigravity || {}) },
     Codex:     { ...d.Codex,     ...(raw.Codex || {}) },
-    OpenClaw:  { ...d.OpenClaw,  ...(raw.OpenClaw || (raw as Record<string, unknown>).DeepSeek || {}) }
+    Gemini:    { ...d.Gemini,    ...(raw.Gemini || (raw as Record<string, unknown>).Pi || (raw as Record<string, unknown>).Antigravity || {}) },
+    ChatGPT:   { ...d.ChatGPT,   ...(raw.ChatGPT || {}) },
+    OpenClaw:  { ...d.OpenClaw,  ...(raw.OpenClaw || (raw as Record<string, unknown>).DeepSeek || {}) },
+    Qwen:      { ...d.Qwen,      ...(raw.Qwen || {}) }
   };
 }
 
@@ -2471,7 +2475,7 @@ function appendRemoteClosureRecord(record: RemoteClosureRecord): void {
 function canonicalLiveAgentName(agentId: LiveAgentId): LiveStateRecord['agent'] {
   if (agentId === 'claude') return 'Claude';
   if (agentId === 'codex') return 'Codex';
-  if (agentId === 'gemini') return 'Pi';
+  if (agentId === 'gemini') return 'Gemini';
   return 'OpenClaw';
 }
 
@@ -2487,7 +2491,7 @@ function normalizeLiveAgentId(raw: unknown): LiveAgentId | null {
 function liveAgentToIaStatusKey(agentId: LiveAgentId): keyof IaStatusMap {
   if (agentId === 'claude') return 'Claude';
   if (agentId === 'codex') return 'Codex';
-  if (agentId === 'gemini') return 'Pi';
+  if (agentId === 'gemini') return 'Gemini';
   return 'OpenClaw';
 }
 
@@ -3029,12 +3033,12 @@ function processSingleInboxDeposit(filePath: string, trigger: string): boolean {
     );
   }
 
-  const actorCanonical = normaliseText(parsed.actorCanonical);
-  const canonicalActor = parseCanonicalProtocolActor(actorCanonical);
+  const actorRaw = normaliseText(parsed.actorRaw);
+  const canonicalActor = parseCanonicalProtocolActor(actorRaw);
   if (!canonicalActor) {
     return moveToOrphanWithGlitch(
-      `Deposito ORPHAN: actor no canonico "${actorCanonical || 'N/A'}" - ${path.basename(filePath)}`,
-      `Actor detectado: "${actorCanonical || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`,
+      `Deposito ORPHAN: actor no canonico "${actorRaw || 'N/A'}" - ${path.basename(filePath)}`,
+      `Actor detectado: "${actorRaw || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`,
       `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`
     );
   }
@@ -4427,7 +4431,7 @@ function parseArgosEventsStream(filePath: string, idPrefix: string): LogbookEntr
       const rawActor = normaliseText(record.actor) || normaliseText(record.sender_name);
       let actor = normalizeActorName(rawActor);
       // Si el actor no es un agente canÃ³nico activo, intentar extraer owner de los detalles
-      const canonicalAgents = new Set(['Claude', 'Pi', 'Codex', 'OpenClaw', 'Antigravity', 'DeepSeek']);
+      const canonicalAgents = new Set([...CANONICAL_PROTOCOL_ACTORS, 'Pi', 'Antigravity', 'DeepSeek']);
       if (!canonicalAgents.has(actor)) {
         const ownerFromDetails =
           detailsText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
@@ -5099,7 +5103,7 @@ function isIaGenericOwner(ownerText: string): boolean {
   return owner.includes('cualquiera') || owner.includes('codex / antigravity') || owner.includes('antigravity / codex');
 }
 
-function isTaskAssignedToAgent(task: TaskRecord, agentName: 'Codex' | 'Pi' | 'Claude' | 'OpenClaw'): boolean {
+function isTaskAssignedToAgent(task: TaskRecord, agentName: CanonicalProtocolActor): boolean {
   return normalizeAgentName(task.owner) === agentName;
 }
 
@@ -5109,7 +5113,7 @@ function inferIaStatusFromTasks(base: IaStatusMap): IaStatusMap {
     .filter((task) => task.status === 'in_progress' || task.status === 'open')
     .sort((a, b) => b.mtimeMs - a.mtimeMs);
 
-  const assignTask = (agentName: 'Codex' | 'Pi' | 'Claude' | 'OpenClaw'): TaskRecord | null => {
+  const assignTask = (agentName: CanonicalProtocolActor): TaskRecord | null => {
     const direct = activeTasks.find((task) => isTaskAssignedToAgent(task, agentName));
     if (direct) return direct;
     return null;
@@ -5123,15 +5127,17 @@ function inferIaStatusFromTasks(base: IaStatusMap): IaStatusMap {
 
   const enriched: IaStatusMap = {
     Claude: { ...base.Claude },
-    Pi: { ...base.Pi },
     Codex: { ...base.Codex },
-    OpenClaw: { ...base.OpenClaw }
+    Gemini: { ...base.Gemini },
+    ChatGPT: { ...base.ChatGPT },
+    OpenClaw: { ...base.OpenClaw },
+    Qwen: { ...base.Qwen }
   };
 
   // Cross-check: si una IA estÃ¡ marcada "active" pero su packet ya no estÃ¡ en in_progress/,
   // el status es stale â€” se limpia automÃ¡ticamente a standby.
   // Los estados 'restricted' se mantienen as-is ya que son bloqueos externos, no tareas en ejecuciÃ³n.
-  (['Codex', 'Pi', 'Claude', 'OpenClaw'] as const).forEach((agentName) => {
+  CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
     const current = enriched[agentName];
     if (current.status === 'active' && current.task && !isActuallyInProgress(current.task)) {
       enriched[agentName] = { status: 'standby', task: '', task_subject: '', since: current.since };
@@ -5139,7 +5145,7 @@ function inferIaStatusFromTasks(base: IaStatusMap): IaStatusMap {
   });
 
   // Enriquecer IAs en standby con tareas activas detectadas en el filesystem
-  (['Codex', 'Pi', 'Claude', 'OpenClaw'] as const).forEach((agentName) => {
+  CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
     const current = enriched[agentName];
     if (current.status !== 'standby') return; // ya tiene status vÃ¡lido (active o restricted)
     const task = assignTask(agentName);
@@ -7289,8 +7295,8 @@ app.post('/api/ia/start-task', (req: Request, res: Response) => {
     const voiceName =
       canonicalVoice === 'Claude'
         ? 'Orfeo (Claude)'
-        : canonicalVoice === 'Pi'
-          ? 'Pi'
+        : canonicalVoice === 'Gemini'
+          ? 'Gemini'
           : actor;
     postToCrewFeed(
       voiceName,
@@ -8614,7 +8620,7 @@ const PROXY_TARGETS: Record<string, string> = {
 
 const PROXY_AGENTS: Record<string, string> = {
   anthropic: 'Claude',
-  gemini:    'Pi',
+  gemini:    'Gemini',
   openai:    'Codex',
 };
 
@@ -9074,7 +9080,7 @@ function runArgosDispatcher() {
       !!packetId && inProgressFiles.some(f => f.includes(packetId));
 
     let stateChanged = false;
-    (['Claude', 'Pi', 'Codex', 'OpenClaw'] as const).forEach(agent => {
+    CANONICAL_PROTOCOL_ACTORS.forEach(agent => {
       const s = iaStatus[agent];
       if (s.status === 'active' && s.task && !isActuallyInProgress(s.task)) {
         console.log(`[DISPATCHER] Status stale detectado â€” ${agent} en ${s.task} (no estÃ¡ en in_progress). Reseteando.`);

@@ -399,7 +399,7 @@ function buildEmptyLogbook() {
         ]
     };
 }
-const CANONICAL_PROTOCOL_ACTORS = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'OpenClaw', 'Qwen'];
+const CANONICAL_PROTOCOL_ACTORS = ['Claude', 'Codex', 'Gemini', 'ChatGPT', 'OpenClaw', 'Qwen'];
 function generateStableHash(seed) {
     let hash = 2166136261;
     for (let i = 0; i < seed.length; i += 1) {
@@ -479,11 +479,15 @@ function normalizeAgentName(rawName) {
         .replace(/\*\*/g, '').replace(/__/g, '').replace(/\[/g, '').replace(/\]/g, '');
     if (v.includes('claude') || v.includes('orfeo'))
         return 'Claude';
-    if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v))
-        return 'Pi';
-    if (v.includes('codex') || v.includes('chatgpt'))
+    if (v.includes('codex'))
         return 'Codex';
-    if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw') || v.includes('qwen'))
+    if (v.includes('chatgpt') || v.includes('chat gpt'))
+        return 'ChatGPT';
+    if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v))
+        return 'Gemini';
+    if (v.includes('qwen'))
+        return 'Qwen';
+    if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw'))
         return 'OpenClaw';
     return null;
 }
@@ -505,7 +509,7 @@ function resolveCrewDisplayName(rawName, fallback = 'OpenClaw') {
     if (lower.includes('claude') || lower.includes('orfeo'))
         return 'Claude';
     if (lower.includes('antigravity') || lower.includes('gemini') || /\bpi\b/.test(lower))
-        return 'Pi';
+        return 'Gemini';
     if (lower.includes('chatgpt'))
         return 'ChatGPT';
     if (lower.includes('codex'))
@@ -1390,7 +1394,7 @@ function backfillWorkTokensFromFeed() {
 }
 function defaultIaStatus() {
     const blank = () => ({ status: 'standby', task: '', task_subject: '', since: '' });
-    return { Claude: blank(), Pi: blank(), Codex: blank(), OpenClaw: blank() };
+    return { Claude: blank(), Codex: blank(), Gemini: blank(), ChatGPT: blank(), OpenClaw: blank(), Qwen: blank() };
 }
 function readIaStatus(state) {
     const raw = state.ia_status;
@@ -1399,9 +1403,11 @@ function readIaStatus(state) {
         return d;
     return {
         Claude: { ...d.Claude, ...(raw.Claude || {}) },
-        Pi: { ...d.Pi, ...(raw.Pi || raw.Antigravity || {}) },
         Codex: { ...d.Codex, ...(raw.Codex || {}) },
-        OpenClaw: { ...d.OpenClaw, ...(raw.OpenClaw || raw.DeepSeek || {}) }
+        Gemini: { ...d.Gemini, ...(raw.Gemini || raw.Pi || raw.Antigravity || {}) },
+        ChatGPT: { ...d.ChatGPT, ...(raw.ChatGPT || {}) },
+        OpenClaw: { ...d.OpenClaw, ...(raw.OpenClaw || raw.DeepSeek || {}) },
+        Qwen: { ...d.Qwen, ...(raw.Qwen || {}) }
     };
 }
 function setIaActive(actor, packetId, subject) {
@@ -1954,7 +1960,7 @@ function canonicalLiveAgentName(agentId) {
     if (agentId === 'codex')
         return 'Codex';
     if (agentId === 'gemini')
-        return 'Pi';
+        return 'Gemini';
     return 'OpenClaw';
 }
 function normalizeLiveAgentId(raw) {
@@ -1975,7 +1981,7 @@ function liveAgentToIaStatusKey(agentId) {
     if (agentId === 'codex')
         return 'Codex';
     if (agentId === 'gemini')
-        return 'Pi';
+        return 'Gemini';
     return 'OpenClaw';
 }
 function normalizeLiveStatus(raw) {
@@ -2455,10 +2461,10 @@ function processSingleInboxDeposit(filePath, trigger) {
     if (!parsed.packetId || parsed.packetId.trim() === '') {
         return moveToOrphanWithGlitch(`Deposito ORPHAN: packet_id vacio - ${path_1.default.basename(filePath)}`, 'El deposit no tiene packet_id. Movido a __orphan. Revisar deposito.', 'Agente que genero el deposito debe hacer closure correcta con packet_id.');
     }
-    const actorCanonical = normaliseText(parsed.actorCanonical);
-    const canonicalActor = parseCanonicalProtocolActor(actorCanonical);
+    const actorRaw = normaliseText(parsed.actorRaw);
+    const canonicalActor = parseCanonicalProtocolActor(actorRaw);
     if (!canonicalActor) {
-        return moveToOrphanWithGlitch(`Deposito ORPHAN: actor no canonico "${actorCanonical || 'N/A'}" - ${path_1.default.basename(filePath)}`, `Actor detectado: "${actorCanonical || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`, `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`);
+        return moveToOrphanWithGlitch(`Deposito ORPHAN: actor no canonico "${actorRaw || 'N/A'}" - ${path_1.default.basename(filePath)}`, `Actor detectado: "${actorRaw || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`, `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`);
     }
     const logText = normaliseText(parsed.sections.LOG || '');
     if (logText === '') {
@@ -3762,7 +3768,7 @@ function parseArgosEventsStream(filePath, idPrefix) {
             const rawActor = normaliseText(record.actor) || normaliseText(record.sender_name);
             let actor = normalizeActorName(rawActor);
             // Si el actor no es un agente canÃ³nico activo, intentar extraer owner de los detalles
-            const canonicalAgents = new Set(['Claude', 'Pi', 'Codex', 'OpenClaw', 'Antigravity', 'DeepSeek']);
+            const canonicalAgents = new Set([...CANONICAL_PROTOCOL_ACTORS, 'Pi', 'Antigravity', 'DeepSeek']);
             if (!canonicalAgents.has(actor)) {
                 const ownerFromDetails = detailsText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
                     summaryText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
@@ -4379,21 +4385,23 @@ function inferIaStatusFromTasks(base) {
     const isActuallyInProgress = (packetId) => !!packetId && inProgressFiles.some(f => f.includes(packetId));
     const enriched = {
         Claude: { ...base.Claude },
-        Pi: { ...base.Pi },
         Codex: { ...base.Codex },
-        OpenClaw: { ...base.OpenClaw }
+        Gemini: { ...base.Gemini },
+        ChatGPT: { ...base.ChatGPT },
+        OpenClaw: { ...base.OpenClaw },
+        Qwen: { ...base.Qwen }
     };
     // Cross-check: si una IA estÃ¡ marcada "active" pero su packet ya no estÃ¡ en in_progress/,
     // el status es stale â€” se limpia automÃ¡ticamente a standby.
     // Los estados 'restricted' se mantienen as-is ya que son bloqueos externos, no tareas en ejecuciÃ³n.
-    ['Codex', 'Pi', 'Claude', 'OpenClaw'].forEach((agentName) => {
+    CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
         const current = enriched[agentName];
         if (current.status === 'active' && current.task && !isActuallyInProgress(current.task)) {
             enriched[agentName] = { status: 'standby', task: '', task_subject: '', since: current.since };
         }
     });
     // Enriquecer IAs en standby con tareas activas detectadas en el filesystem
-    ['Codex', 'Pi', 'Claude', 'OpenClaw'].forEach((agentName) => {
+    CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
         const current = enriched[agentName];
         if (current.status !== 'standby')
             return; // ya tiene status vÃ¡lido (active o restricted)
@@ -6358,8 +6366,8 @@ app.post('/api/ia/start-task', (req, res) => {
         const canonicalVoice = normalizeAgentName(actor);
         const voiceName = canonicalVoice === 'Claude'
             ? 'Orfeo (Claude)'
-            : canonicalVoice === 'Pi'
-                ? 'Pi'
+            : canonicalVoice === 'Gemini'
+                ? 'Gemini'
                 : actor;
         postToCrewFeed(voiceName, `Tomando mision: ${subject}`, `ID: ${packetId} - en progreso.`, 'crew_update', 0, packetId);
         // Pub/Sub: notificar al dashboard en tiempo real
@@ -7548,7 +7556,7 @@ const PROXY_TARGETS = {
 };
 const PROXY_AGENTS = {
     anthropic: 'Claude',
-    gemini: 'Pi',
+    gemini: 'Gemini',
     openai: 'Codex',
 };
 function extractAnthropicTokens(body) {
@@ -7973,7 +7981,7 @@ function runArgosDispatcher() {
         const inProgressFiles = fs_1.default.existsSync(inProgressDir) ? fs_1.default.readdirSync(inProgressDir) : [];
         const isActuallyInProgress = (packetId) => !!packetId && inProgressFiles.some(f => f.includes(packetId));
         let stateChanged = false;
-        ['Claude', 'Pi', 'Codex', 'OpenClaw'].forEach(agent => {
+        CANONICAL_PROTOCOL_ACTORS.forEach(agent => {
             const s = iaStatus[agent];
             if (s.status === 'active' && s.task && !isActuallyInProgress(s.task)) {
                 console.log(`[DISPATCHER] Status stale detectado â€” ${agent} en ${s.task} (no estÃ¡ en in_progress). Reseteando.`);
