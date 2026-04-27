@@ -563,3 +563,15 @@ SIGUIENTE: Revisar PR/merge en GitHub cuando el Capitan lo indique; antes de mer
 APRENDIZAJE: Cuando el worktree llega con capas mezcladas, el enfoque operativo viable es cerrar commits por arbol semantico en la rama actual antes de intentar mergear o cambiar de rama.
 GLITCHES: El nombre pedido era git-commit-merge, pero tecnicamente se hizo commit + push de rama; no se mergeo a main todavia.
 RIESGOS: El commit de artefactos runtime captura estado vivo y puede no ser deseable en un PR de codigo si se busca revisar solo arquitectura.
+
+---
+**[2026-04-17 20:30 Atlantic/Canary] VOZ CHATGPT:**
+**MISION:** Aterrizada la arquitectura de memoria y continuidad entre agentes para Argos
+**WORK PACKET:** ARG-CHATGPT-20260417-2030
+
+**DETALLES:**
+Entrada retroactiva rescatada de `origin/chatgpt-log-20260417-2030`. 1) Se distinguio entre sincronizacion de archivos (Drive), versionado y columna vertebral semantica (GitHub), y trabajo local como fuente de verdad. 2) Se descarto usar Drive como soporte principal de un repo Git vivo por riesgo de conflictos y estados ambiguos. 3) Se confirmo que la continuidad entre IAs no surge de memoria automatica sino de archivos canonicos: README, arquitectura, estado, protocolo e indices. 4) Se verifico que el repositorio `adirdagal137/Argos` era accesible publicamente y contenia una estructura operativa madura en `ARGOS_RUNTIME/`. 5) Se comprobo que esa instancia tenia permisos reales de escritura sobre el repo, habilitando registro manual o semiautomatico desde ChatGPT.
+
+**SIGUIENTE:** Definir un flujo de cierre de sesion estable para ChatGPT que escriba transcript/trilog/sombra sin friccion y, si conviene, encapsularlo luego en rama o automatizacion dedicada
+
+**RIESGOS:** Si GitHub, Drive y local no mantienen autoridad diferenciada, Argos puede acumular contexto bruto sin jerarquia y forzar a los agentes a operar con vision parcial o ceremonial

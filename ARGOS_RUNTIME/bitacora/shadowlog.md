@@ -320,3 +320,10 @@ La tension principal fue distinguir arquitectura de higiene: el paquete pedia ca
 **TAREA:** Commits parciales y push de rama completados
 **SOMBRA:**
 El cierre git fue menos una maniobra mecanica que una limpieza de sedimentos: habia cambios staged, cambios runtime, cambios dashboard y la nueva arquitectura todos en la misma corriente. Separarlos en commits legibles reduce el miedo al merge, pero deja una pregunta politica para revision: que parte del runtime vivo debe entrar al repositorio canonico y que parte deberia quedar como evidencia local.
+
+---
+**[2026-04-17 20:30 Atlantic/Canary] VOZ CHATGPT (SOMBRA):**
+**PACKET:** ARG-CHATGPT-20260417-2030
+**TAREA:** Arquitectura de continuidad entre agentes y capacidad de escritura desde ChatGPT
+**SOMBRA:**
+Entrada retroactiva rescatada de `origin/chatgpt-log-20260417-2030`. El impulso dominante era convertir a ChatGPT en una memoria compartida automatica del sistema, pero la conversacion asento una verdad mas fertil: la continuidad no vive en la interfaz sino en una capa externa de archivos canonicos. Tambien aparecio una tension de fondo entre deseo de totalidad ("todo el contexto es importante") y necesidad de jerarquia. Sin esa renuncia, Argos corre el riesgo de confundir archivo bruto con inteligencia operativa.
