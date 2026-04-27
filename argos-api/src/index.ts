@@ -20,7 +20,7 @@ const LOGS_CURRENT_DIR = path.join(RUNTIME_DIR, 'logs', 'current');
 const ARGOS_GLOBAL_LOG_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_LOG.md');
 const ARGOS_GLOBAL_SHADOW_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
 const ARGOS_GLOBAL_GLITCH_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
-const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
+const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const ARGOS_TOKENS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
@@ -928,6 +928,7 @@ function postToCrewFeed(sender: string, summary: string, details: string = '', k
 
 function appendToHandoffLog(agent: string, packetId: string, handoff: HandoffPayload, timestampIso: string): void {
   try {
+    fs.mkdirSync(LOGS_CURRENT_DIR, { recursive: true });
     if (!fs.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH)) {
       fs.writeFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, '# ARGOS GLOBAL HANDOFF LOG\nContexto conversacional por packet. Append-only.\n\n---\n', 'utf-8');
     }
@@ -4370,7 +4371,7 @@ function parseArgosMarkdownStream(filePath: string, idPrefix: string): LogbookEn
       '';
 
     const risksRaw =
-      block.match(/\*\*RIESGO[S]?|Peligros\s*:\*\*([\s\S]*?)(?:\n\*\*|\n---|$)/i)?.[1] ||
+      block.match(/\*\*(?:RIESGO[S]?|Peligros)\s*:\*\*([\s\S]*?)(?:\n\*\*|\n---|$)/i)?.[1] ||
       '';
 
     parsed.push({

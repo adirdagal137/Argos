@@ -72,7 +72,7 @@ ARRANQUE (leer en orden):
 1. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_QUICKSTART.md
 2. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/work_packets/inbox/
 3. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/state/argos.state.json
-4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md (tail)
+4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md (tail)
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion en voz de Orfeo]."
 
 REFERENCIA ON-DEMAND (no lectura diaria):
@@ -111,7 +111,7 @@ ARRANQUE (leer en orden):
 1. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_QUICKSTART.md
 2. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/work_packets/inbox/
 3. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/state/argos.state.json
-4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md (tail)
+4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md (tail)
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion en voz de Codex]."
 
 REFERENCIA ON-DEMAND:
@@ -147,7 +147,7 @@ ARRANQUE (leer en orden):
 1. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_QUICKSTART.md
 2. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/work_packets/inbox/
 3. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/state/argos.state.json
-4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md (tail)
+4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md (tail)
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion en voz de Gemini]."
 
 REFERENCIA ON-DEMAND:
