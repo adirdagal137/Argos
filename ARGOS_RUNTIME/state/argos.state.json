@@ -1,7 +1,7 @@
 {
     "current_focus": "Reforma constitucional ARGOS â€” B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-27T13:37:22.252Z",
+    "updated_at": "2026-04-27T14:01:22.451Z",
     "packet_states": {
         "ARG-1777049395470": "open:done",
         "ARG-QWEN-WEBHOOK-001": "open:inbox",
@@ -118,7 +118,8 @@
         "ARG-1777293324283": "done:done",
         "ARG-1777293327727": "open:inbox",
         "ARG-1777297100000": "open:inbox",
-        "LOLA-RISK-1777297041829": "open:inbox"
+        "LOLA-RISK-1777297041829": "open:inbox",
+        "ARG-1777297676695": "open:inbox"
     },
     "in_progress_packets": [
         "ARG-1776354464819",
@@ -161,11 +162,14 @@
         "ARG-1777246628566",
         "ARG-1777246660856",
         "ARG-1777293327727",
+        "ARG-1777297100000",
+        "ARG-1777297676695",
         "ARG-20260426-BITACORA-TRILOG-AUDIT",
         "ARG-PROTO-AG-001",
         "ARG-QWEN-DISPATCHER-001",
         "ARG-1777236123247-959",
         "LOLA-RISK-1777292424326",
+        "LOLA-RISK-1777297041829",
         "LOLA-SHADOW-0001",
         "ARG-DISPATCH-AUTO-001",
         "ARG-QWEN-001"

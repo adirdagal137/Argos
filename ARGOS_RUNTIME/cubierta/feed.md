@@ -2,6 +2,10 @@
 
 Alias humano de `views/ui_export/captain_feed.jsonl`. El JSONL sigue vigente durante la fase de compatibilidad.
 
+## 2026-04-27T13:47:56.703Z - Ruben Thor
+- Ref: ARG-1777297676695
+- Resumen: Todos los glitches asociados a workpackets de cada ROOM deberían aparecer en la pestaña "Bugs del sistema" (Renombremos glitches/bugs) de ese ROOM
+
 ## 2026-04-27T13:35:58.119Z - Codex
 - Ref: ARG-1777293324283-GIT-COMMIT-MERGE
 - Resumen: [CIERRE-REMOTO] Commits parciales y push de rama completados
@@ -437,11 +441,5 @@ ok
 ## 2026-04-21T23:28:32.474Z - Codex
 - Ref: ARG-1776808310928
 - Resumen: [smoke] ngrok good
-
-ok
-
-## 2026-04-21T23:25:40.130Z - Codex
-- Ref: ARG-1776808310928
-- Resumen: [smoke] ext auth
 
 ok

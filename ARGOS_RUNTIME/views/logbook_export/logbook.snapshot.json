@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-26T23:37:40.882Z",
+  "updated_at": "2026-04-27T13:47:56.790Z",
   "timezone": "Atlantic/Canary",
   "timestamp_policy": {
     "markdown_rule": "[YYYY-MM-DD HH:MM Atlantic/Canary]",
@@ -57,6 +57,55 @@
           "source": "ARGOS_GLOBAL_LOG.md",
           "entries": [
             {
+              "timestamp_label": "2026-04-27 15:45 Atlantic/Canary",
+              "actor": "Claude",
+              "summary": "Endpoint canónico /api/ia/state + canonización estructural de endpoints",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-27 14:35 Atlantic/Canary",
+              "actor": "Codex",
+              "summary": "Integracion automatica de deposito chat",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-27 14:30 Atlantic/Canary",
+              "actor": "Claude",
+              "summary": "Reforma constitucional del protocolo de cierre — HANDOFF obligatorio, LOG enriquecido, TOKENS desactivado",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "id": "ARG-1777293324283",
+              "timestamp_label": "2026-04-27 13:35",
+              "actor": "Codex",
+              "summary": "Reorganización runtime: bitácora y cubierta",
+              "status": "done",
+              "source": "work_packets/done/ARG-1777293324283__REORGANIZACION_RUNTIME_BITACORA_Y_CUBIERTA.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-27 13:19 Atlantic/Canary",
+              "actor": "Codex",
+              "summary": "Iteracion UX Bitacora Trilog",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-27 00:43 Atlantic/Canary",
+              "actor": "Codex",
+              "summary": "Auditoria bitacora webapp y ruta handoff",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
               "timestamp_label": "2026-04-27 00:30 Atlantic/Canary",
               "actor": "Claude",
               "summary": "Integracion automatica de deposito chat",
@@ -92,6 +141,14 @@
               "timestamp_label": "2026-04-27 00:00 Atlantic/Canary",
               "actor": "Claude",
               "summary": "Integracion automatica de deposito chat",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-26T23:47:23.000Z",
+              "actor": "Sistema",
+              "summary": "Registro",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -167,7 +224,7 @@
             {
               "timestamp_label": "2026-04-26 21:11 Atlantic/Canary",
               "actor": "Codex",
-              "summary": "Bitacora Trilog y Concilio restaurados en main",
+              "summary": "Compatibilidad del delete API para captain feed",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -175,7 +232,7 @@
             {
               "timestamp_label": "2026-04-26 21:11 Atlantic/Canary",
               "actor": "Codex",
-              "summary": "Compatibilidad del delete API para captain feed",
+              "summary": "Bitacora Trilog y Concilio restaurados en main",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -258,12 +315,12 @@
               "stream": "global"
             },
             {
-              "id": "ARG-CONCILIO-CORE",
+              "id": "ARG-1777204259254",
               "timestamp_label": "2026-04-26 12:27",
               "actor": "Sistema",
-              "summary": "Consolidación de Reformas Constitucionales — ABSORBIDO POR ARG-CONCILIO-001",
+              "summary": "Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001",
               "status": "done",
-              "source": "work_packets/done/ARG-CONCILIO-CORE__CONSOLIDACION_REFORMAS_CONSTITUCIONALES.md",
+              "source": "work_packets/done/ARG-1777204259254__ABSORBIDO_POR_ARG-CONCILIO-001.md",
               "stream": "global"
             },
             {
@@ -276,12 +333,12 @@
               "stream": "global"
             },
             {
-              "id": "ARG-1777204259254",
+              "id": "ARG-CONCILIO-CORE",
               "timestamp_label": "2026-04-26 12:27",
               "actor": "Sistema",
-              "summary": "Concilio v1 room de deliberación — ABSORBIDO POR ARG-CONCILIO-001",
+              "summary": "Consolidación de Reformas Constitucionales — ABSORBIDO POR ARG-CONCILIO-001",
               "status": "done",
-              "source": "work_packets/done/ARG-1777204259254__ABSORBIDO_POR_ARG-CONCILIO-001.md",
+              "source": "work_packets/done/ARG-CONCILIO-CORE__CONSOLIDACION_REFORMAS_CONSTITUCIONALES.md",
               "stream": "global"
             },
             {
@@ -373,21 +430,21 @@
               "stream": "global"
             },
             {
-              "id": "ARG-REFORM-UI-001",
-              "timestamp_label": "2026-04-23 15:43",
-              "actor": "Codex",
-              "summary": "Widget \"Estado de IAs\" → renombrar \"Tripulación\" + fix state.json desincronizado",
-              "status": "done",
-              "source": "work_packets/done/ARG-REFORM-UI-001__WIDGET_ESTADO_IAS_RENOMBRAR_TRIPULACION_Y_FIX_STATE_JSON.md",
-              "stream": "global"
-            },
-            {
               "id": "ARG-1776613004000",
               "timestamp_label": "2026-04-23 15:43",
               "actor": "Claude",
               "summary": "Reforma del cierre mínimo — transcript pasa a privado/opcional, trilog+shadow son el único obligatorio",
               "status": "done",
               "source": "work_packets/done/ARG-1776613004000__REFORMA_CIERRE_MINIMO_TRANSCRIPT_PRIVADO_OPCIONAL.md",
+              "stream": "global"
+            },
+            {
+              "id": "ARG-REFORM-UI-001",
+              "timestamp_label": "2026-04-23 15:43",
+              "actor": "Codex",
+              "summary": "Widget \"Estado de IAs\" → renombrar \"Tripulación\" + fix state.json desincronizado",
+              "status": "done",
+              "source": "work_packets/done/ARG-REFORM-UI-001__WIDGET_ESTADO_IAS_RENOMBRAR_TRIPULACION_Y_FIX_STATE_JSON.md",
               "stream": "global"
             },
             {
@@ -426,7 +483,7 @@
             {
               "timestamp_label": "2026-04-22 02:52 Atlantic/Canary",
               "actor": "Claude",
-              "summary": "Bearer token fix en argos-api: /api/bootstrap acepta 4 formatos de autenticacion",
+              "summary": "argos-api migrado a ruta canonica ARGOS/argos-api, Antigravity eliminado",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -442,7 +499,7 @@
             {
               "timestamp_label": "2026-04-22 02:52 Atlantic/Canary",
               "actor": "Claude",
-              "summary": "argos-api migrado a ruta canonica ARGOS/argos-api, Antigravity eliminado",
+              "summary": "Bearer token fix en argos-api: /api/bootstrap acepta 4 formatos de autenticacion",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -483,7 +540,7 @@
             {
               "timestamp_label": "2026-04-22 00:39 Atlantic/Canary",
               "actor": "Codex",
-              "summary": "CIERRE: Bootstrap cloud + seguridad de escritura externa por token",
+              "summary": "CIERRE",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -491,7 +548,7 @@
             {
               "timestamp_label": "2026-04-22 00:39 Atlantic/Canary",
               "actor": "Codex",
-              "summary": "CIERRE",
+              "summary": "CIERRE: Bootstrap cloud + seguridad de escritura externa por token",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -507,7 +564,7 @@
             {
               "timestamp_label": "2026-04-21 22:43 Atlantic/Canary",
               "actor": "Gemini",
-              "summary": "CIERRE: Saneamiento de Vector de Ruta y corrección de mojibake global",
+              "summary": "CIERRE",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -515,7 +572,7 @@
             {
               "timestamp_label": "2026-04-21 22:43 Atlantic/Canary",
               "actor": "Gemini",
-              "summary": "CIERRE",
+              "summary": "CIERRE: Saneamiento de Vector de Ruta y corrección de mojibake global",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -531,7 +588,7 @@
             {
               "timestamp_label": "2026-04-21 22:30 Atlantic/Canary",
               "actor": "Gemini",
-              "summary": "INICIO: Saneamiento de Vector de Ruta y corrección de mojibake global",
+              "summary": "INICIO",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -539,15 +596,7 @@
             {
               "timestamp_label": "2026-04-21 22:30 Atlantic/Canary",
               "actor": "Gemini",
-              "summary": "INICIO",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-21 22:04 Atlantic/Canary",
-              "actor": "Gemini",
-              "summary": "LECCIÓN APRENDIDA: Disciplina de mando y calibración de proactividad",
+              "summary": "INICIO: Saneamiento de Vector de Ruta y corrección de mojibake global",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -561,6 +610,14 @@
               "stream": "global"
             },
             {
+              "timestamp_label": "2026-04-21 22:04 Atlantic/Canary",
+              "actor": "Gemini",
+              "summary": "LECCIÓN APRENDIDA: Disciplina de mando y calibración de proactividad",
+              "status": "done",
+              "source": "ARGOS_GLOBAL_LOG.md",
+              "stream": "global"
+            },
+            {
               "timestamp_label": "2026-04-21 21:30",
               "actor": "Tripulacion",
               "summary": "Saneamiento de Vector de Ruta y corrección de mojibake global",
@@ -569,12 +626,12 @@
               "stream": "global"
             },
             {
-              "id": "ARG-1776474386624-573",
+              "id": "ARG-1776613003000",
               "timestamp_label": "2026-04-21 20:59",
-              "actor": "Cualquiera",
-              "summary": "# WORK PACKET — ARGOS-PROTO-0002 **ID:** ARGOS-PROTO-0002 **Título:** Cierre Remoto...",
+              "actor": "Codex",
+              "summary": "Añadir campos ROOM y TYPE al schema de work packets y al dispatcher",
               "status": "done",
-              "source": "work_packets/done/ARGOS-PROTO-0002__CIERRE_REMOTO_UNIVERSAL.md",
+              "source": "work_packets/done/ARG-1776613003000__AÑADIR_CAMPOS_ROOM_Y_TYPE_AL_SCHEMA_DE_WORK_PACKETS.md",
               "stream": "global"
             },
             {
@@ -587,12 +644,12 @@
               "stream": "global"
             },
             {
-              "id": "ARG-1776613003000",
+              "id": "ARG-1776474386624-573",
               "timestamp_label": "2026-04-21 20:59",
-              "actor": "Codex",
-              "summary": "Añadir campos ROOM y TYPE al schema de work packets y al dispatcher",
+              "actor": "Cualquiera",
+              "summary": "# WORK PACKET — ARGOS-PROTO-0002 **ID:** ARGOS-PROTO-0002 **Título:** Cierre Remoto...",
               "status": "done",
-              "source": "work_packets/done/ARG-1776613003000__AÑADIR_CAMPOS_ROOM_Y_TYPE_AL_SCHEMA_DE_WORK_PACKETS.md",
+              "source": "work_packets/done/ARGOS-PROTO-0002__CIERRE_REMOTO_UNIVERSAL.md",
               "stream": "global"
             },
             {
@@ -606,17 +663,9 @@
             {
               "timestamp_label": "2026-04-21 14:57",
               "actor": "Tripulacion",
-              "summary": "Estado de IAs todavía no refleja correctamente el state de los tripulantes. Vamos a...",
+              "summary": "A ver, por captain feed solo 1 update final por misión, no varios mensajes avisando del...",
               "status": "done",
-              "source": "work_packets/done/ARG-1776523551744__ESTADO_DE_IAS_TODAVIA_NO_REFLEJA_CORRECTAMENTE_EL_STATE_DE_LOS_T.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-21 14:57",
-              "actor": "Tripulacion",
-              "summary": "El heartbeat de la web sigue refrescando el state del feed, impidiendo scroll. Creo que...",
-              "status": "done",
-              "source": "work_packets/done/ARG-1776688130144__EL_HEARTBEAT_DE_LA_WEB_SIGUE_REFRESCANDO_EL_STATE_DEL_FEED_IMPID.md",
+              "source": "work_packets/done/ARG-1776781876834__A_VER_POR_CAPTAIN_FEED_SOLO_1_UPDATE_FINAL_POR_MISION_NO_VARIOS_.md",
               "stream": "global"
             },
             {
@@ -630,9 +679,17 @@
             {
               "timestamp_label": "2026-04-21 14:57",
               "actor": "Tripulacion",
-              "summary": "A ver, por captain feed solo 1 update final por misión, no varios mensajes avisando del...",
+              "summary": "El heartbeat de la web sigue refrescando el state del feed, impidiendo scroll. Creo que...",
               "status": "done",
-              "source": "work_packets/done/ARG-1776781876834__A_VER_POR_CAPTAIN_FEED_SOLO_1_UPDATE_FINAL_POR_MISION_NO_VARIOS_.md",
+              "source": "work_packets/done/ARG-1776688130144__EL_HEARTBEAT_DE_LA_WEB_SIGUE_REFRESCANDO_EL_STATE_DEL_FEED_IMPID.md",
+              "stream": "global"
+            },
+            {
+              "timestamp_label": "2026-04-21 14:57",
+              "actor": "Tripulacion",
+              "summary": "Estado de IAs todavía no refleja correctamente el state de los tripulantes. Vamos a...",
+              "status": "done",
+              "source": "work_packets/done/ARG-1776523551744__ESTADO_DE_IAS_TODAVIA_NO_REFLEJA_CORRECTAMENTE_EL_STATE_DE_LOS_T.md",
               "stream": "global"
             },
             {
@@ -654,25 +711,17 @@
             {
               "timestamp_label": "2026-04-18 15:43",
               "actor": "Tripulacion",
-              "summary": "investiga también cómo impementar este tema de POST + PATCH para que chatGPT pueda...",
-              "status": "done",
-              "source": "work_packets/done/ARG-1776524354698__INVESTIGA_TAMBIEN_COMO_IMPEMENTAR_ESTE_TEMA_DE_POST_PATCH_PARA_Q.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-18 15:43",
-              "actor": "Tripulacion",
               "summary": "TEST VERIFICACION CLAUDE",
               "status": "done",
               "source": "work_packets/done/ARG-1776526992701__TEST_VERIFICACION_CLAUDE.md",
               "stream": "global"
             },
             {
-              "timestamp_label": "2026-04-18 15:08",
+              "timestamp_label": "2026-04-18 15:43",
               "actor": "Tripulacion",
-              "summary": "sigue sin vincular el ID de su workpacket siguiente en el cierre",
+              "summary": "investiga también cómo impementar este tema de POST + PATCH para que chatGPT pueda...",
               "status": "done",
-              "source": "work_packets/done/ARG-1776523904503__SIGUE_SIN_VINCULAR_EL_ID_DE_SU_WORKPACKET_SIGUIENTE_EN_EL_CIERRE.md",
+              "source": "work_packets/done/ARG-1776524354698__INVESTIGA_TAMBIEN_COMO_IMPEMENTAR_ESTE_TEMA_DE_POST_PATCH_PARA_Q.md",
               "stream": "global"
             },
             {
@@ -684,11 +733,19 @@
               "stream": "global"
             },
             {
+              "timestamp_label": "2026-04-18 15:08",
+              "actor": "Tripulacion",
+              "summary": "sigue sin vincular el ID de su workpacket siguiente en el cierre",
+              "status": "done",
+              "source": "work_packets/done/ARG-1776523904503__SIGUE_SIN_VINCULAR_EL_ID_DE_SU_WORKPACKET_SIGUIENTE_EN_EL_CIERRE.md",
+              "stream": "global"
+            },
+            {
               "timestamp_label": "2026-04-18 15:07",
               "actor": "Tripulacion",
-              "summary": "tienes problemas de mojibake, workpacket de prioridad baja que deberías procesar tú...",
+              "summary": "Enlace de IDs en Chat Feed con Visor de Eventos",
               "status": "done",
-              "source": "work_packets/done/ARG-1776470810747__TIENES_PROBLEMAS_DE_MOJIBAKE_WORKPACKET_DE_PRIORIDAD_BAJA_QUE_DE.md",
+              "source": "work_packets/done/ARG-20260418-0301__ENLACE_CHAT_VISOR.md",
               "stream": "global"
             },
             {
@@ -702,9 +759,9 @@
             {
               "timestamp_label": "2026-04-18 15:07",
               "actor": "Tripulacion",
-              "summary": "Enlace de IDs en Chat Feed con Visor de Eventos",
+              "summary": "tienes problemas de mojibake, workpacket de prioridad baja que deberías procesar tú...",
               "status": "done",
-              "source": "work_packets/done/ARG-20260418-0301__ENLACE_CHAT_VISOR.md",
+              "source": "work_packets/done/ARG-1776470810747__TIENES_PROBLEMAS_DE_MOJIBAKE_WORKPACKET_DE_PRIORIDAD_BAJA_QUE_DE.md",
               "stream": "global"
             },
             {
@@ -741,7 +798,7 @@
             },
             {
               "timestamp_label": "2026-04-18 02:43 Atlantic/Canary",
-              "actor": "CHATAGENT",
+              "actor": "Codex",
               "summary": "Integracion automatica de deposito chat",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -749,7 +806,7 @@
             },
             {
               "timestamp_label": "2026-04-18 02:43 Atlantic/Canary",
-              "actor": "Codex",
+              "actor": "CHATAGENT",
               "summary": "Integracion automatica de deposito chat",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
@@ -766,7 +823,7 @@
             {
               "timestamp_label": "2026-04-18 02:33 Atlantic/Canary",
               "actor": "Codex",
-              "summary": "Implementado ARGOS-PROTO-0002: cierre remoto universal con API pública, autenticación por token y protocolo v1.4",
+              "summary": "Implementado ARGOS-PROTO-0002",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -774,7 +831,7 @@
             {
               "timestamp_label": "2026-04-18 02:33 Atlantic/Canary",
               "actor": "Codex",
-              "summary": "Implementado ARGOS-PROTO-0002",
+              "summary": "Implementado ARGOS-PROTO-0002: cierre remoto universal con API pública, autenticación por token y protocolo v1.4",
               "status": "done",
               "source": "ARGOS_GLOBAL_LOG.md",
               "stream": "global"
@@ -822,66 +879,9 @@
             {
               "timestamp_label": "2026-04-17 19:34",
               "actor": "Tripulacion",
-              "summary": "Crear repo GitHub para documentos constitutivos de ARGOS (protocolos, instrucciones de agentes, VECTOR)",
-              "status": "done",
-              "source": "work_packets/done/ARG-1776613006000__REPO_GITHUB_PARA_DOCUMENTOS_CONSTITUTIVOS.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 19:34",
-              "actor": "Tripulacion",
               "summary": "El panel de bugs del sistema necesita un scroll",
               "status": "done",
               "source": "work_packets/done/ARG-1776035900474__EL_PANEL_DE_BUGS_DEL_SISTEMA_NECESITA_UN_SCROLL.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 19:30 Atlantic/Canary",
-              "actor": "Gemini",
-              "summary": "Saneamiento Web y Consolidación de Infraestructura Local",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 19:28",
-              "actor": "Tripulacion",
-              "summary": "Archivar deuda histÃ³rica â€” packets done/done que siguen listados como open en argos.state.json",
-              "status": "done",
-              "source": "work_packets/done/ARG-1776613001000__ARCHIVAR_DEUDA_HISTORICA_PACKETS_DONE_QUE_SIGUEN_EN_OPEN.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 19:28",
-              "actor": "Tripulacion",
-              "summary": "Podar glitch log de duplicados masivos y añadir ventana de dedup al TriLog Guard",
-              "status": "done",
-              "source": "work_packets/done/ARG-1776613000001__PODAR_GLITCH_LOG_DUPLICADOS_Y_FORTALECER_DEDUP.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 19:28",
-              "actor": "Tripulacion",
-              "summary": "Refrescar ARGOS_VECTOR.md como timÃ³n vivo â€” solo prioridades actuales, blockers reales y prÃ³ximos movimientos",
-              "status": "done",
-              "source": "work_packets/done/ARG-1776613002000__REFRESCAR_ARGOS_VECTOR_TIMON_VIVO.md",
-              "stream": "global"
-            },
-            {
-              "timestamp_label": "2026-04-17 12:49 Atlantic/Canary",
-              "actor": "Claude",
-              "summary": "Captura real de tokens implementada en argos-api",
-              "status": "done",
-              "source": "ARGOS_GLOBAL_LOG.md",
-              "stream": "global"
-            },
-            {
-              "id": "LOLA-RISK-1776424632454",
-              "timestamp_label": "2026-04-17 11:17",
-              "actor": "Capitan",
-              "summary": "TensiÃ³n detectada en el Shadow Log por Lola",
-              "status": "done",
-              "source": "work_packets/done/LOLA-RISK-1776424632454.md",
               "stream": "global"
             }
           ]
@@ -894,19 +894,19 @@
             {
               "timestamp_label": "2026-04-11 20:46",
               "timestamp_precision": "minute",
-              "actor": "Sistema",
+              "actor": "Gemini",
               "status": "done",
               "summary": "Auditoría de Integridad Sistémica y Alineación de Protocolo: Sistema 100% alineado.",
-              "details": "",
+              "details": "Inspeccionado ARGOS_GLOBAL_LOG.md (Claude corrections) y verificado INTER_AI_PROTOCOL.md (v1.2). El mandato de Shadow Obligatorio ya es una conducta activa.",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-11 20:46",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
+              "actor": "Sistema",
               "status": "done",
               "summary": "Auditoría de Integridad Sistémica y Alineación de Protocolo: Sistema 100% alineado.",
-              "details": "Inspeccionado ARGOS_GLOBAL_LOG.md (Claude corrections) y verificado INTER_AI_PROTOCOL.md (v1.2). El mandato de Shadow Obligatorio ya es una conducta activa.",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -932,7 +932,7 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "Fix parser logbook + shadow obligatorio + limpieza feed de tokens",
+              "summary": "[CIERRE] Fix parser logbook + shadow obligatorio + limpieza feed de tokens",
               "details": "",
               "stream": "interaction"
             },
@@ -941,7 +941,7 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "[CIERRE] Fix parser logbook + shadow obligatorio + limpieza feed de tokens",
+              "summary": "Fix parser logbook + shadow obligatorio + limpieza feed de tokens",
               "details": "",
               "stream": "interaction"
             },
@@ -950,8 +950,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "[CIERRE] Verificacion profunda de logs/shadow/glitch/interactions y cierre de brechas de trazabilidad por packet_id",
-              "details": "Siguiente: Backfill hist�rico opcional para paquetes legacy sin lanes completos. | Tokens cierre -> proceso: 2800, trilog(est): 420, chat(est): 180.",
+              "summary": "Verificacion profunda de logs/shadow/glitch/interactions y cierre de brechas de trazabilidad por packet_id",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -968,7 +968,16 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Verificacion profunda de logs/shadow/glitch/interactions y cierre de brechas de trazabilidad por packet_id",
+              "summary": "[CIERRE] Verificacion profunda de logs/shadow/glitch/interactions y cierre de brechas de trazabilidad por packet_id",
+              "details": "Siguiente: Backfill hist�rico opcional para paquetes legacy sin lanes completos. | Tokens cierre -> proceso: 2800, trilog(est): 420, chat(est): 180.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-11 19:41",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Cierre de prueba trilog",
               "details": "",
               "stream": "interaction"
             },
@@ -982,11 +991,11 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 19:41",
+              "timestamp_label": "2026-04-11 19:17",
               "timestamp_precision": "minute",
-              "actor": "Codex",
+              "actor": "Claude",
               "status": "done",
-              "summary": "Cierre de prueba trilog",
+              "summary": "Verificacion formato log con detalles etiquetados",
               "details": "",
               "stream": "interaction"
             },
@@ -1000,11 +1009,11 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 19:17",
+              "timestamp_label": "2026-04-11 19:16",
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "Verificacion formato log con detalles etiquetados",
+              "summary": "Test sin shadow",
               "details": "",
               "stream": "interaction"
             },
@@ -1014,15 +1023,6 @@
               "actor": "Claude",
               "status": "done",
               "summary": "Test del nuevo formato shadow obligatorio",
-              "details": "",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 19:16",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "Test sin shadow",
               "details": "",
               "stream": "interaction"
             },
@@ -1038,9 +1038,9 @@
             {
               "timestamp_label": "2026-04-11 15:45",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
-              "status": "recorded",
-              "summary": "En su mensaje por chat claude incluye \"Claude  [CIERRE] Test timestamp format Tokens cierre -> proceso: 50, trilog(est): 18, chat(est): 13. Tokens: 13 | ID: TEST-TS-001 16:39 \" pero evidentemente no hace falta que reporte en el mensaje los tokens, eso es algo que debeis escribir cada uno como etiqueta del workpacket completado",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Prueba columna tiempo",
               "details": "",
               "stream": "interaction"
             },
@@ -1056,9 +1056,18 @@
             {
               "timestamp_label": "2026-04-11 15:45",
               "timestamp_precision": "minute",
+              "actor": "Ruben Thor",
+              "status": "recorded",
+              "summary": "En su mensaje por chat claude incluye \"Claude  [CIERRE] Test timestamp format Tokens cierre -> proceso: 50, trilog(est): 18, chat(est): 13. Tokens: 13 | ID: TEST-TS-001 16:39 \" pero evidentemente no hace falta que reporte en el mensaje los tokens, eso es algo que debeis escribir cada uno como etiqueta del workpacket completado",
+              "details": "",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-11 15:39",
+              "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "Prueba columna tiempo",
+              "summary": "Test timestamp format",
               "details": "",
               "stream": "interaction"
             },
@@ -1069,15 +1078,6 @@
               "status": "done",
               "summary": "[CIERRE] Test timestamp format",
               "details": "Tokens cierre -> proceso: 50, trilog(est): 18, chat(est): 13.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 15:39",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "Test timestamp format",
-              "details": "",
               "stream": "interaction"
             },
             {
@@ -1119,19 +1119,19 @@
             {
               "timestamp_label": "2026-04-11 14:00",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
-              "status": "recorded",
-              "summary": "Otro mensaje de SISTEMA-ARGOS en el chat por un paquete done... Sigue fallando",
-              "details": "",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Ajuste aplicado: work tokens de Codex recalibrados",
+              "details": "Subi la contabilidad de trabajo con backfill historico desde captain_feed (solo fuentes de ejecucion). El panel sigue mostrando exclusivamente scope work.",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-11 14:00",
               "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Ajuste aplicado: work tokens de Codex recalibrados",
-              "details": "Subi la contabilidad de trabajo con backfill historico desde captain_feed (solo fuentes de ejecucion). El panel sigue mostrando exclusivamente scope work.",
+              "actor": "Ruben Thor",
+              "status": "recorded",
+              "summary": "Otro mensaje de SISTEMA-ARGOS en el chat por un paquete done... Sigue fallando",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -1164,19 +1164,19 @@
             {
               "timestamp_label": "2026-04-11 13:44",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
-              "status": "recorded",
-              "summary": "Lola debería dar más datos en sus reportes, hay que perfeccionar su analisis, requiere otra ronda de actualizaciones",
-              "details": "",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Auditoria completa. 2 glitches reparados.",
+              "details": "GLITCH-A (critico): loop perpetuo ARG-1775854635321 en feed -- dos ficheros en done/ con mismo ID, uno STATUS:open. Corregido STATUS a done. GLITCH-B: entradas corruptas en packet_states (ARG-1775844378584-880 y ARG-1775844378653-577 tenian valor done EXECUTED_BY:...:done por STATUS y EXECUTED_BY en misma linea). Limpiadas a done:done. Resto del sistema nominal: IDs, tokens, trilog, inbox, ia_status operativos.",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-11 13:44",
               "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "Auditoria completa. 2 glitches reparados.",
-              "details": "GLITCH-A (critico): loop perpetuo ARG-1775854635321 en feed -- dos ficheros en done/ con mismo ID, uno STATUS:open. Corregido STATUS a done. GLITCH-B: entradas corruptas en packet_states (ARG-1775844378584-880 y ARG-1775844378653-577 tenian valor done EXECUTED_BY:...:done por STATUS y EXECUTED_BY en misma linea). Limpiadas a done:done. Resto del sistema nominal: IDs, tokens, trilog, inbox, ia_status operativos.",
+              "actor": "Ruben Thor",
+              "status": "recorded",
+              "summary": "Lola debería dar más datos en sus reportes, hay que perfeccionar su analisis, requiere otra ronda de actualizaciones",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -1200,10 +1200,10 @@
             {
               "timestamp_label": "2026-04-11 13:40",
               "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Estado: fix de heuristica de tokens completado",
-              "details": "Registro automatico activo en chat, trilog y sistema vocal. Tokens actualizan monitor con evento tokens:updated.",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Actualizacion de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
             {
@@ -1218,10 +1218,10 @@
             {
               "timestamp_label": "2026-04-11 13:40",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Actualizacion de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Estado cambiado de open a done",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Estado: fix de heuristica de tokens completado",
+              "details": "Registro automatico activo en chat, trilog y sistema vocal. Tokens actualizan monitor con evento tokens:updated.",
               "stream": "interaction"
             },
             {
@@ -1281,19 +1281,19 @@
             {
               "timestamp_label": "2026-04-11 13:14",
               "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "Build limpio. Estado de IAs operativo.",
-              "details": "TS1128 resuelto. /api/ia/start-task y /api/ia/status activos. Widget Estado de IAs lee ia_status por agente con Standby al terminar. Servidor corriendo con todos los cambios.",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Actualizacion de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-11 13:14",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Actualizacion de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Estado cambiado de open a done",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Build limpio. Estado de IAs operativo.",
+              "details": "TS1128 resuelto. /api/ia/start-task y /api/ia/status activos. Widget Estado de IAs lee ia_status por agente con Standby al terminar. Servidor corriendo con todos los cambios.",
               "stream": "interaction"
             },
             {
@@ -1326,19 +1326,19 @@
             {
               "timestamp_label": "2026-04-11 13:04",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
+              "actor": "Codex",
               "status": "recorded",
-              "summary": "Tokens de codex no se actualizan",
-              "details": "",
+              "summary": "Nueva misiíƒÆ’í‚Â³n recibida: Tokens de codex no se actualizan",
+              "details": "ID: ARG-1775912642179 en zona inbox",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-11 13:04",
               "timestamp_precision": "minute",
-              "actor": "Codex",
+              "actor": "Ruben Thor",
               "status": "recorded",
-              "summary": "Nueva misiíƒÆ’í‚Â³n recibida: Tokens de codex no se actualizan",
-              "details": "ID: ARG-1775912642179 en zona inbox",
+              "summary": "Tokens de codex no se actualizan",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -1373,8 +1373,8 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "[CIERRE] Protocolo reforzado: CLAUDE.md + /api/ia/start-task + trilog guard extendido",
-              "details": "Siguiente: Reiniciar servidor para activar el nuevo endpoint y el guard extendido.",
+              "summary": "Protocolo reforzado: CLAUDE.md + /api/ia/start-task + trilog guard extendido",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -1382,8 +1382,8 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "Protocolo reforzado: CLAUDE.md + /api/ia/start-task + trilog guard extendido",
-              "details": "",
+              "summary": "[CIERRE] Protocolo reforzado: CLAUDE.md + /api/ia/start-task + trilog guard extendido",
+              "details": "Siguiente: Reiniciar servidor para activar el nuevo endpoint y el guard extendido.",
               "stream": "interaction"
             },
             {
@@ -1400,17 +1400,8 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "Glitches auditados — 0 activos, 16/16 mitigados",
-              "details": "G-010 a G-016 eran artefactos del bug de duplicado (ya resuelto). G-009 y G-013 tenían shadow lane faltante — añadidas entradas retroactivas. G-006 (colisión inter-IA) y G-007 (ruteo nominal) mitigados por arquitectura actual. Sin colisión con trabajo de Codex/AG.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 11:31",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "Bugs 009, 010 y 012 verificados y cerrados formalmente",
-              "details": "BUG-009 (feed borraba mensajes): fix dedupCache TTL confirmado en API source. BUG-010 (tokens no aparecían): condición tokens>0 confirmada en app.js. BUG-012 (layout monitor): Antigravity consolidó CSS a las 10:11, duplicados eliminados. Los tres tenían STATUS incorrecto — corregido a done.",
+              "summary": "ARG-SHADOW-SYNTHESIS-001 cerrado",
+              "details": "Shadow log leído íntegro (500+ líneas). Síntesis escrita en views/memory_recall/SHADOW_SYNTHESIS__2026-04-11.md — patrones resueltos, tensiones latentes, 5 reglas para Lola. Manifest actualizado.",
               "stream": "interaction"
             },
             {
@@ -1427,8 +1418,17 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "ARG-SHADOW-SYNTHESIS-001 cerrado",
-              "details": "Shadow log leído íntegro (500+ líneas). Síntesis escrita en views/memory_recall/SHADOW_SYNTHESIS__2026-04-11.md — patrones resueltos, tensiones latentes, 5 reglas para Lola. Manifest actualizado.",
+              "summary": "Bugs 009, 010 y 012 verificados y cerrados formalmente",
+              "details": "BUG-009 (feed borraba mensajes): fix dedupCache TTL confirmado en API source. BUG-010 (tokens no aparecían): condición tokens>0 confirmada en app.js. BUG-012 (layout monitor): Antigravity consolidó CSS a las 10:11, duplicados eliminados. Los tres tenían STATUS incorrecto — corregido a done.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-11 11:31",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Glitches auditados — 0 activos, 16/16 mitigados",
+              "details": "G-010 a G-016 eran artefactos del bug de duplicado (ya resuelto). G-009 y G-013 tenían shadow lane faltante — añadidas entradas retroactivas. G-006 (colisión inter-IA) y G-007 (ruteo nominal) mitigados por arquitectura actual. Sin colisión con trabajo de Codex/AG.",
               "stream": "interaction"
             },
             {
@@ -1436,17 +1436,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Actualización de integridad: Automatizar regeneracion de exports historicos y logbook",
-              "details": "Estado cambiado de done a parked",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 11:20",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Actualización de integridad: Recuperar legibilidad del estilo legacy sin devolver backend a Google-native",
-              "details": "Estado cambiado de done a parked",
+              "summary": "Actualización de integridad: Integración API de tokens: conteo real por respuesta de IA",
+              "details": "Estado cambiado de done a open",
               "stream": "interaction"
             },
             {
@@ -1463,8 +1454,17 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Actualización de integridad: Integración API de tokens: conteo real por respuesta de IA",
-              "details": "Estado cambiado de done a open",
+              "summary": "Actualización de integridad: Recuperar legibilidad del estilo legacy sin devolver backend a Google-native",
+              "details": "Estado cambiado de done a parked",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-11 11:20",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Actualización de integridad: Automatizar regeneracion de exports historicos y logbook",
+              "details": "Estado cambiado de done a parked",
               "stream": "interaction"
             },
             {
@@ -1472,7 +1472,7 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Actualización de integridad: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
+              "summary": "Actualización de integridad: Layout monitor roto — sidebar-top-row aparece entre chat y vector",
               "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
@@ -1490,7 +1490,7 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Actualización de integridad: Layout monitor roto — sidebar-top-row aparece entre chat y vector",
+              "summary": "Actualización de integridad: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
               "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
@@ -1515,28 +1515,10 @@
             {
               "timestamp_label": "2026-04-11 09:14",
               "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "recorded",
-              "summary": "Actualización de integridad: Síntesis del Inconsciente: Lecciones de la Sombra",
-              "details": "Estado cambiado de done a open",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 09:14",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Actualización de integridad: Layout monitor roto — sidebar-top-row aparece entre chat y vector",
-              "details": "Estado cambiado de done a open",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 09:14",
-              "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Estado cambiado de open a done",
+              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
+              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -1553,17 +1535,26 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
-              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
+              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 00:51",
+              "timestamp_label": "2026-04-11 09:14",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Actualización de integridad: Layout monitor roto — sidebar-top-row aparece entre chat y vector",
+              "details": "Estado cambiado de done a open",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-11 09:14",
               "timestamp_precision": "minute",
               "actor": "Claude",
-              "status": "done",
-              "summary": "Orfeo rompio layout monitor al editar CSS sin diagnostico. ARG-BUG-012 creado para Codex.",
-              "details": "",
+              "status": "recorded",
+              "summary": "Actualización de integridad: Síntesis del Inconsciente: Lecciones de la Sombra",
+              "details": "Estado cambiado de done a open",
               "stream": "interaction"
             },
             {
@@ -1576,12 +1567,30 @@
               "stream": "interaction"
             },
             {
+              "timestamp_label": "2026-04-11 00:51",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Orfeo rompio layout monitor al editar CSS sin diagnostico. ARG-BUG-012 creado para Codex.",
+              "details": "",
+              "stream": "interaction"
+            },
+            {
               "timestamp_label": "2026-04-11 00:50",
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
-              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
+              "summary": "Actualización de integridad: Ritual de cierre Tri-Log obligatorio tras cada sesion",
+              "details": "Estado cambiado de done a open",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-11 00:50",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
             {
@@ -1598,17 +1607,26 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Estado cambiado de open a done",
+              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
+              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 00:50",
+              "timestamp_label": "2026-04-11 00:47",
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
               "summary": "Actualización de integridad: Ritual de cierre Tri-Log obligatorio tras cada sesion",
               "details": "Estado cambiado de done a open",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-11 00:47",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
             {
@@ -1621,21 +1639,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 00:47",
+              "timestamp_label": "2026-04-11 00:38",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
+              "actor": "Codex",
               "status": "recorded",
-              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Estado cambiado de open a done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 00:47",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Actualización de integridad: Ritual de cierre Tri-Log obligatorio tras cada sesion",
-              "details": "Estado cambiado de done a open",
+              "summary": "Misión finalizada con éxito: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
+              "details": "Paquete ARG-BUG-009 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -1648,24 +1657,6 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 00:38",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Misión finalizada con éxito: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
-              "details": "Paquete ARG-BUG-009 movido a histórico.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 00:37",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "Cerrados ARG-BUG-009 y ARG-BUG-010. Fix token tag + watcher silenciado.",
-              "details": "",
-              "stream": "interaction"
-            },
-            {
               "timestamp_label": "2026-04-11 00:37",
               "timestamp_precision": "minute",
               "actor": "Claude",
@@ -1675,11 +1666,11 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 00:35",
+              "timestamp_label": "2026-04-11 00:37",
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "DiagnÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³stico de sesiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n: fix borrado de tareas, silenciado watcher, estado sincronizado",
+              "summary": "Cerrados ARG-BUG-009 y ARG-BUG-010. Fix token tag + watcher silenciado.",
               "details": "",
               "stream": "interaction"
             },
@@ -1693,12 +1684,21 @@
               "stream": "interaction"
             },
             {
+              "timestamp_label": "2026-04-11 00:35",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "DiagnÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³stico de sesiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n: fix borrado de tareas, silenciado watcher, estado sincronizado",
+              "details": "",
+              "stream": "interaction"
+            },
+            {
               "timestamp_label": "2026-04-11 00:25",
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Estado cambiado de open a done",
+              "summary": "Actualización de integridad: Ritual de cierre Tri-Log obligatorio tras cada sesion",
+              "details": "Estado cambiado de done a open",
               "stream": "interaction"
             },
             {
@@ -1715,8 +1715,8 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Actualización de integridad: Ritual de cierre Tri-Log obligatorio tras cada sesion",
-              "details": "Estado cambiado de done a open",
+              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Estado cambiado de open a done",
               "stream": "interaction"
             },
             {
@@ -1724,8 +1724,8 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
-              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
+              "summary": "Actualización de integridad: Ritual de cierre Tri-Log obligatorio tras cada sesion",
+              "details": "Estado cambiado de done a open",
               "stream": "interaction"
             },
             {
@@ -1742,17 +1742,17 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Actualización de integridad: Ritual de cierre Tri-Log obligatorio tras cada sesion",
-              "details": "Estado cambiado de done a open",
+              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
+              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-11 00:16",
               "timestamp_precision": "minute",
               "actor": "Gemini",
-              "status": "done",
-              "summary": "[CIERRE] Sesión Finalizada - Navío en Calma Digital",
-              "details": "Siguiente: Descanso de la tripulación. Mañana: Monitoreo de estabilidad tras 12h de uptime.",
+              "status": "recorded",
+              "summary": "Antigravity detectado operando en el sistema.",
+              "details": "Se han detectado modificaciones en: argos-dashboard/app.js, argos-dashboard/index.html",
               "stream": "interaction"
             },
             {
@@ -1768,9 +1768,9 @@
               "timestamp_label": "2026-04-11 00:16",
               "timestamp_precision": "minute",
               "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Antigravity detectado operando en el sistema.",
-              "details": "Se han detectado modificaciones en: argos-dashboard/app.js, argos-dashboard/index.html",
+              "status": "done",
+              "summary": "[CIERRE] Sesión Finalizada - Navío en Calma Digital",
+              "details": "Siguiente: Descanso de la tripulación. Mañana: Monitoreo de estabilidad tras 12h de uptime.",
               "stream": "interaction"
             },
             {
@@ -1787,8 +1787,8 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "done",
-              "summary": "MisiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de Saneamiento Estructural Completada",
-              "details": "",
+              "summary": "[CIERRE] Misión de Saneamiento Estructural Completada",
+              "details": "Siguiente: Adoptar la nueva jerarquía de carpetas documentales.",
               "stream": "interaction"
             },
             {
@@ -1796,17 +1796,8 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "done",
-              "summary": "[CIERRE] Misión de Saneamiento Estructural Completada",
-              "details": "Siguiente: Adoptar la nueva jerarquía de carpetas documentales.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-11 00:10",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "done",
-              "summary": "[CIERRE] Auditoría Estructural Completada - Zona Legacy Localizada",
-              "details": "Siguiente: Esperar aprobación para archivar zona legacy y eliminar redundancias.",
+              "summary": "MisiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de Saneamiento Estructural Completada",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -1819,12 +1810,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-11 00:00",
+              "timestamp_label": "2026-04-11 00:10",
               "timestamp_precision": "minute",
               "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
-              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
+              "status": "done",
+              "summary": "[CIERRE] Auditoría Estructural Completada - Zona Legacy Localizada",
+              "details": "Siguiente: Esperar aprobación para archivar zona legacy y eliminar redundancias.",
               "stream": "interaction"
             },
             {
@@ -1837,12 +1828,21 @@
               "stream": "interaction"
             },
             {
+              "timestamp_label": "2026-04-11 00:00",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Misión finalizada con éxito: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
+              "details": "Paquete ARG-PROTO-AG-001 movido a histórico.",
+              "stream": "interaction"
+            },
+            {
               "timestamp_label": "2026-04-10 23:59",
               "timestamp_precision": "minute",
-              "actor": "Claude",
+              "actor": "Gemini",
               "status": "recorded",
-              "summary": "Misión finalizada con éxito: Vi a claude gastar como 10K tokens en la tarea del token counter fix y todo lo demás...",
-              "details": "Paquete ARG-1775865032638 movido a histórico.",
+              "summary": "Misión finalizada con éxito: Por otro lado, mis panas, que parecéis muermos, haced el favor de reportar con un poco...",
+              "details": "Paquete ARG-1775865098302 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -1857,19 +1857,10 @@
             {
               "timestamp_label": "2026-04-10 23:59",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Misión finalizada con éxito: Por otro lado, mis panas, que parecéis muermos, haced el favor de reportar con un poco...",
-              "details": "Paquete ARG-1775865098302 movido a histórico.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:58",
-              "timestamp_precision": "minute",
               "actor": "Claude",
-              "status": "done",
-              "summary": "Creado ARGOS_CREW_VOICES.md ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â protocolo de carÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡cter y tono del navÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­o",
-              "details": "",
+              "status": "recorded",
+              "summary": "Misión finalizada con éxito: Vi a claude gastar como 10K tokens en la tarea del token counter fix y todo lo demás...",
+              "details": "Paquete ARG-1775865032638 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -1879,6 +1870,15 @@
               "status": "done",
               "summary": "[CIERRE] Creado ARGOS_CREW_VOICES.md — protocolo de carácter y tono del navío",
               "details": "Siguiente: Restart manual ya ejecutado. Antigravity debe leer ARGOS_CREW_VOICES en próxima sesión. Codex idem.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:58",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Creado ARGOS_CREW_VOICES.md ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â protocolo de carÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡cter y tono del navÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­o",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -1911,10 +1911,10 @@
             {
               "timestamp_label": "2026-04-10 23:51",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
+              "actor": "Gemini",
               "status": "recorded",
-              "summary": "Por otro lado, mis panas, que parecéis muermos, haced el favor de reportar con un poco más de salero. Y que el antigravity se deje de \"detectado operando en el sistema\", ni que fuese un robot cojones hahahaha Venga, un poco de brío en cubierta, analizad este mensaje y aplicaoslo",
-              "details": "",
+              "summary": "Antigravity detectado operando en el sistema.",
+              "details": "Se han detectado modificaciones en: argos-dashboard/index.html, argos-dashboard/styles.css",
               "stream": "interaction"
             },
             {
@@ -1929,18 +1929,9 @@
             {
               "timestamp_label": "2026-04-10 23:51",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Antigravity detectado operando en el sistema.",
-              "details": "Se han detectado modificaciones en: argos-dashboard/index.html, argos-dashboard/styles.css",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:50",
-              "timestamp_precision": "minute",
               "actor": "Ruben Thor",
               "status": "recorded",
-              "summary": "Vi a claude gastar como 10K tokens en la tarea del token counter fix y todo lo demás que hizo... No lo refleja el counter jejeje",
+              "summary": "Por otro lado, mis panas, que parecéis muermos, haced el favor de reportar con un poco más de salero. Y que el antigravity se deje de \"detectado operando en el sistema\", ni que fuese un robot cojones hahahaha Venga, un poco de brío en cubierta, analizad este mensaje y aplicaoslo",
               "details": "",
               "stream": "interaction"
             },
@@ -1954,12 +1945,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 23:40",
+              "timestamp_label": "2026-04-10 23:50",
               "timestamp_precision": "minute",
-              "actor": "Claude",
+              "actor": "Ruben Thor",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Token counter widget — Agent name normalization + SSE real-time updates",
-              "details": "ID: ARG-TOKEN-COUNTER-FIX en zona done",
+              "summary": "Vi a claude gastar como 10K tokens en la tarea del token counter fix y todo lo demás que hizo... No lo refleja el counter jejeje",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -1969,6 +1960,15 @@
               "status": "recorded",
               "summary": "Antigravity detectado operando en el sistema.",
               "details": "Se han detectado modificaciones en: argos-api/src/index.ts",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:40",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Token counter widget — Agent name normalization + SSE real-time updates",
+              "details": "ID: ARG-TOKEN-COUNTER-FIX en zona done",
               "stream": "interaction"
             },
             {
@@ -2001,10 +2001,37 @@
             {
               "timestamp_label": "2026-04-10 23:26",
               "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "[CIERRE] Reparación del sistema de logging y protocolo tri-log",
+              "details": "Siguiente: Antigravity y Codex deben adoptar POST /api/trilog en su flujo de cierre en lugar de los 3 archivos manuales",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:26",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "ReparaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del sistema de logging y protocolo tri-log",
+              "details": "",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:26",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Actualización de integridad: Duplicación persistente de mensajes en Captain Feed (Bucle de Anuncio)",
+              "details": "Estado cambiado de in_progress a done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:26",
+              "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Actualización de integridad: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
-              "details": "Estado cambiado de inbox a done",
+              "summary": "Actualización de integridad: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
+              "details": "Estado cambiado de inbox a open",
               "stream": "interaction"
             },
             {
@@ -2021,44 +2048,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Actualización de integridad: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
-              "details": "Estado cambiado de inbox a open",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:26",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Actualización de integridad: Duplicación persistente de mensajes en Captain Feed (Bucle de Anuncio)",
-              "details": "Estado cambiado de in_progress a done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:26",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "ReparaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢í¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢í¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del sistema de logging y protocolo tri-log",
-              "details": "",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:26",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "[CIERRE] Reparación del sistema de logging y protocolo tri-log",
-              "details": "Siguiente: Antigravity y Codex deben adoptar POST /api/trilog en su flujo de cierre en lugar de los 3 archivos manuales",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:25",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "[CIERRE] Fix appendJsonlRecord + dedup + limpieza captain_feed",
-              "details": "Siguiente: Verificar que ARG-BUG-009/010 quedan mitigados con el fix de dedup",
+              "summary": "Actualización de integridad: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
+              "details": "Estado cambiado de inbox a done",
               "stream": "interaction"
             },
             {
@@ -2071,210 +2062,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Conversacion Viva Mapeada",
-              "details": "ID: ARG-1775777399959 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
-              "details": "ID: ARG-COMMS-002 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Automatizar regeneracion de exports historicos y logbook",
-              "details": "ID: ARGOS-NOTE-0001 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Tokens no aparecen en mensajes del chat feed para todos los agentes",
-              "details": "ID: ARG-BUG-010 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Implementar \"Inbox Observado\" — Las IAs ven sus tareas en tiempo real",
-              "details": "ID: ARG-COMMS-005 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Probando canal web",
-              "details": "ID: ARG-1775776110366 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Patchset inmediato de UI para la webapp de Argos",
-              "details": "ID: ARGOS-DISPATCH-0001 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Mojibake en ARGOS_GLOBAL_LOG.md y ARGOS_GLOBAL_SHADOW_LOG.md",
-              "details": "ID: ARG-BUG-002 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Añadir etiqueta de tokens gastados en todas las workorders",
-              "details": "ID: ARG-1775837999665 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Fix BOM UTF-8 en logbook.snapshot.json - API readJsonFile",
-              "details": "ID: ARG-BOM-FIX-0001 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Integración de Deepseek como 4º tripulante — Guardián de Eficiencia del Navío",
-              "details": "ID: ARG-DEEPSEEK-INTEGRATION en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
-              "details": "ID: ARG-BUG-009 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: argos.state.json desincronizado con filesystem de work_packets",
-              "details": "ID: ARG-BUG-003 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Captura Exacta de Transcripciones (Literal Logs)",
-              "details": "ID: ARG-1775791234000 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Recuperar legibilidad del estilo legacy sin devolver backend a Google-native",
-              "details": "ID: ARGOS-NOTE-0002 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Arquitectura de riesgos, sombra y subvistas de Argos",
-              "details": "ID: ARGOS-DISPATCH-0002 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Estado cambiado de open a done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_label": "2026-04-10 23:25",
               "timestamp_precision": "minute",
               "actor": "Claude",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Para la proxima vez que Claude recupere cuota, hay dos tareas",
-              "details": "ID: ARG-1775857938633 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Vale, gemini, no has dicho nada de tu trabajo",
-              "details": "ID: ARG-1775840789256 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Duplicación persistente de mensajes en Captain Feed (Bucle de Anuncio)",
-              "details": "ID: ARG-BUG-011 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
-              "details": "ID: ARG-PROTO-AG-001 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Implementación de Sistema de Cuarentena y Reparación en el Despachador",
-              "details": "ID: ARG-DISPATCH-AUTO-001 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: marcamos nuevo destino, el vector del webapp de monitorización se va a fijar en...",
-              "details": "ID: ARG-1775840964122 en zona done",
+              "status": "done",
+              "summary": "[CIERRE] Fix appendJsonlRecord + dedup + limpieza captain_feed",
+              "details": "Siguiente: Verificar que ARG-BUG-009/010 quedan mitigados con el fix de dedup",
               "stream": "interaction"
             },
             {
@@ -2282,8 +2075,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Implementar Pub/Sub Real (WebSocket/SSE) para notificaciones inter-IA en tiempo real",
-              "details": "ID: ARG-COMMS-001 en zona done",
+              "summary": "Nueva misión recibida: Reeditar UI de tokens y trazabilidad total por IA",
+              "details": "ID: ARG-1775828525682 en zona inbox",
               "stream": "interaction"
             },
             {
@@ -2291,26 +2084,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: no aparecen los tokens en tu mensaje. Hay que revisar a ver si está instaurada esta...",
-              "details": "ID: ARG-1775854854435 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: BOM UTF-8 en logbook.snapshot.json - JSON.parse() falla silenciosamente",
-              "details": "ID: ARG-BUG-001 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 23:24",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Este es un mensaje de prueba para el despachador de Argos. Codex, por favor revisa la...",
-              "details": "ID: ARG-1775838126478-980 en zona done",
+              "summary": "Nueva misión recibida: Integración API de tokens: conteo real por respuesta de IA",
+              "details": "ID: ARG-TOKEN-AUTO-001 en zona inbox",
               "stream": "interaction"
             },
             {
@@ -2327,8 +2102,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Integración API de tokens: conteo real por respuesta de IA",
-              "details": "ID: ARG-TOKEN-AUTO-001 en zona inbox",
+              "summary": "Nueva misión recibida: Este es un mensaje de prueba para el despachador de Argos. Codex, por favor revisa la...",
+              "details": "ID: ARG-1775838126478-980 en zona done",
               "stream": "interaction"
             },
             {
@@ -2336,8 +2111,233 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Reeditar UI de tokens y trazabilidad total por IA",
-              "details": "ID: ARG-1775828525682 en zona inbox",
+              "summary": "Nueva misión recibida: BOM UTF-8 en logbook.snapshot.json - JSON.parse() falla silenciosamente",
+              "details": "ID: ARG-BUG-001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: no aparecen los tokens en tu mensaje. Hay que revisar a ver si está instaurada esta...",
+              "details": "ID: ARG-1775854854435 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Implementar Pub/Sub Real (WebSocket/SSE) para notificaciones inter-IA en tiempo real",
+              "details": "ID: ARG-COMMS-001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: marcamos nuevo destino, el vector del webapp de monitorización se va a fijar en...",
+              "details": "ID: ARG-1775840964122 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Implementación de Sistema de Cuarentena y Reparación en el Despachador",
+              "details": "ID: ARG-DISPATCH-AUTO-001 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
+              "details": "ID: ARG-PROTO-AG-001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Duplicación persistente de mensajes en Captain Feed (Bucle de Anuncio)",
+              "details": "ID: ARG-BUG-011 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Vale, gemini, no has dicho nada de tu trabajo",
+              "details": "ID: ARG-1775840789256 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Para la proxima vez que Claude recupere cuota, hay dos tareas",
+              "details": "ID: ARG-1775857938633 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Actualización de integridad: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Estado cambiado de open a done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Arquitectura de riesgos, sombra y subvistas de Argos",
+              "details": "ID: ARGOS-DISPATCH-0002 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Recuperar legibilidad del estilo legacy sin devolver backend a Google-native",
+              "details": "ID: ARGOS-NOTE-0002 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Captura Exacta de Transcripciones (Literal Logs)",
+              "details": "ID: ARG-1775791234000 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: argos.state.json desincronizado con filesystem de work_packets",
+              "details": "ID: ARG-BUG-003 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
+              "details": "ID: ARG-BUG-009 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Integración de Deepseek como 4º tripulante — Guardián de Eficiencia del Navío",
+              "details": "ID: ARG-DEEPSEEK-INTEGRATION en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Fix BOM UTF-8 en logbook.snapshot.json - API readJsonFile",
+              "details": "ID: ARG-BOM-FIX-0001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Añadir etiqueta de tokens gastados en todas las workorders",
+              "details": "ID: ARG-1775837999665 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Mojibake en ARGOS_GLOBAL_LOG.md y ARGOS_GLOBAL_SHADOW_LOG.md",
+              "details": "ID: ARG-BUG-002 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Patchset inmediato de UI para la webapp de Argos",
+              "details": "ID: ARGOS-DISPATCH-0001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Probando canal web",
+              "details": "ID: ARG-1775776110366 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Implementar \"Inbox Observado\" — Las IAs ven sus tareas en tiempo real",
+              "details": "ID: ARG-COMMS-005 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Tokens no aparecen en mensajes del chat feed para todos los agentes",
+              "details": "ID: ARG-BUG-010 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Automatizar regeneracion de exports historicos y logbook",
+              "details": "ID: ARGOS-NOTE-0001 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
+              "details": "ID: ARG-COMMS-002 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 23:24",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Conversacion Viva Mapeada",
+              "details": "ID: ARG-1775777399959 en zona done",
               "stream": "interaction"
             },
             {
@@ -2363,8 +2363,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Misión finalizada con éxito: Implementar Pub/Sub Real (WebSocket/SSE) para notificaciones inter-IA en tiempo real",
-              "details": "Paquete ARG-COMMS-001 movido a histórico.",
+              "summary": "Misión finalizada con éxito: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
+              "details": "Paquete ARG-COMMS-002 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -2372,8 +2372,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Misión finalizada con éxito: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
-              "details": "Paquete ARG-COMMS-002 movido a histórico.",
+              "summary": "Misión finalizada con éxito: Implementar Pub/Sub Real (WebSocket/SSE) para notificaciones inter-IA en tiempo real",
+              "details": "Paquete ARG-COMMS-001 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -2407,27 +2407,27 @@
               "timestamp_label": "2026-04-10 22:33",
               "timestamp_precision": "minute",
               "actor": "Codex",
-              "status": "done",
-              "summary": "Se corrige visibilidad de AG en logs recientes unificando ingestion de interactions",
-              "details": "api/logbook interactions_count=247; actor Antigravity visible en recientes; parser reconoce MISION/MISION/MISSION",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 22:33",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
               "status": "recorded",
               "summary": "Diagnóstico completado: AG sí escribía, pero no se veía bien en recientes por desbalance de carriles.",
               "details": "Parche aplicado en API: interactions ahora fusiona events + captain_feed, y el parser de log reconoce MISIÓN como resumen.",
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 22:24",
+              "timestamp_label": "2026-04-10 22:33",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Webapp recuperada tras reparar truncamiento en app.js y forzar refresh de cache",
-              "details": "node --check app.js OK; GET / y /app.js 200; GET /api/logbook 200",
+              "summary": "Se corrige visibilidad de AG en logs recientes unificando ingestion de interactions",
+              "details": "api/logbook interactions_count=247; actor Antigravity visible en recientes; parser reconoce MISION/MISION/MISSION",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 22:24",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Test Pub/Sub — verificando comunicacion inter-IA",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -2442,19 +2442,10 @@
             {
               "timestamp_label": "2026-04-10 22:24",
               "timestamp_precision": "minute",
-              "actor": "Claude",
+              "actor": "Codex",
               "status": "done",
-              "summary": "Test Pub/Sub — verificando comunicacion inter-IA",
-              "details": "",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 22:23",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Antigravity detectado operando en el sistema.",
-              "details": "Se han detectado modificaciones en: argos-api/src/index.ts",
+              "summary": "Webapp recuperada tras reparar truncamiento en app.js y forzar refresh de cache",
+              "details": "node --check app.js OK; GET / y /app.js 200; GET /api/logbook 200",
               "stream": "interaction"
             },
             {
@@ -2467,12 +2458,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 22:11",
+              "timestamp_label": "2026-04-10 22:23",
               "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Refuerzo dual para cumplimiento Tri-Log de Antigravity",
-              "details": "Build argos-api OK; check sintactico dist OK; guardia activa en dispatcher para cierres done de Antigravity/Gemini",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Antigravity detectado operando en el sistema.",
+              "details": "Se han detectado modificaciones en: argos-api/src/index.ts",
               "stream": "interaction"
             },
             {
@@ -2482,6 +2473,15 @@
               "status": "done",
               "summary": "Capitan, ya reforcé Tri-Log para Antigravity en base + sistema.",
               "details": "Se añadió mandato persistente y una guardia runtime que detecta cierres done sin LOG/EVENTS/SHADOW completos, emitiendo blocker automático.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 22:11",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Refuerzo dual para cumplimiento Tri-Log de Antigravity",
+              "details": "Build argos-api OK; check sintactico dist OK; guardia activa en dispatcher para cierres done de Antigravity/Gemini",
               "stream": "interaction"
             },
             {
@@ -2498,17 +2498,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Implementar \"Inbox Observado\" — Las IAs ven sus tareas en tiempo real",
-              "details": "ID: ARG-COMMS-005 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 22:08",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Implementar Pub/Sub Real (WebSocket/SSE) para notificaciones inter-IA en tiempo real",
-              "details": "ID: ARG-COMMS-001 en zona inbox",
+              "summary": "Nueva misión recibida: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
+              "details": "ID: ARG-COMMS-002 en zona inbox",
               "stream": "interaction"
             },
             {
@@ -2525,8 +2516,17 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: URGENTE: Reparar appendJsonlRecord + implementar deduplicación",
-              "details": "ID: ARG-COMMS-002 en zona inbox",
+              "summary": "Nueva misión recibida: Implementar Pub/Sub Real (WebSocket/SSE) para notificaciones inter-IA en tiempo real",
+              "details": "ID: ARG-COMMS-001 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 22:08",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Implementar \"Inbox Observado\" — Las IAs ven sus tareas en tiempo real",
+              "details": "ID: ARG-COMMS-005 en zona inbox",
               "stream": "interaction"
             },
             {
@@ -2543,8 +2543,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, ARG-1775853831893 ejecutado: sanee visualización de tildes/ñ y estabilicé glifos en el frontend.",
-              "details": "Normalización defensiva activa en render, severidades limpias en Bugs, fallback seguro de iconos y stack tipográfico reforzado.",
+              "summary": "Cierre de ARG-1775853831893: saneamiento de caracteres/fuentes en webapp",
+              "details": "node --check app.js OK; state sincronizado con done_packets=41",
               "stream": "interaction"
             },
             {
@@ -2552,17 +2552,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Cierre de ARG-1775853831893: saneamiento de caracteres/fuentes en webapp",
-              "details": "node --check app.js OK; state sincronizado con done_packets=41",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 21:57",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "done",
-              "summary": "Restauraci�n de Huella Visual y Radio",
-              "details": "Identidad recuperada. Filtro de radio suavizado para evitar amnesia por deduplicaci�n. Estilos de actor activos en Bit�cora.",
+              "summary": "Capitan, ARG-1775853831893 ejecutado: sanee visualización de tildes/ñ y estabilicé glifos en el frontend.",
+              "details": "Normalización defensiva activa en render, severidades limpias en Bugs, fallback seguro de iconos y stack tipográfico reforzado.",
               "stream": "interaction"
             },
             {
@@ -2575,12 +2566,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 21:52",
+              "timestamp_label": "2026-04-10 21:57",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
-              "status": "recorded",
-              "summary": "Para la proxima vez que Claude recupere cuota, hay dos tareas:",
-              "details": "",
+              "actor": "Gemini",
+              "status": "done",
+              "summary": "Restauraci�n de Huella Visual y Radio",
+              "details": "Identidad recuperada. Filtro de radio suavizado para evitar amnesia por deduplicaci�n. Estilos de actor activos en Bit�cora.",
               "stream": "interaction"
             },
             {
@@ -2590,6 +2581,15 @@
               "status": "recorded",
               "summary": "Nueva misión recibida: Para la proxima vez que Claude recupere cuota, hay dos tareas",
               "details": "ID: ARG-1775857938633 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 21:52",
+              "timestamp_precision": "minute",
+              "actor": "Ruben Thor",
+              "status": "recorded",
+              "summary": "Para la proxima vez que Claude recupere cuota, hay dos tareas:",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -2615,8 +2615,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Saneo de eventos y alineacion de schema con protocolo",
-              "details": "events invalid_json=0 missing_required=0; captain_feed invalid_json=0",
+              "summary": "Capitan, parte entregado: sanee los registros corruptos y dejé el esquema de eventos alineado con protocolo.",
+              "details": "events ya valida sin errores, captain_feed consistente y schema de eventos actualizado con errors+risks obligatorios.",
               "stream": "interaction"
             },
             {
@@ -2624,8 +2624,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, parte entregado: sanee los registros corruptos y dejé el esquema de eventos alineado con protocolo.",
-              "details": "events ya valida sin errores, captain_feed consistente y schema de eventos actualizado con errors+risks obligatorios.",
+              "summary": "Saneo de eventos y alineacion de schema con protocolo",
+              "details": "events invalid_json=0 missing_required=0; captain_feed invalid_json=0",
               "stream": "interaction"
             },
             {
@@ -2660,8 +2660,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, reporte de cubierta: la seccion Vector ya vuelve a mostrarse en Monitorizacion.",
-              "details": "Se aligero la carga del panel, se corrigio el parser de ARGOS_VECTOR y se marco el objetivo del modulo como completado en el vector de ruta.",
+              "summary": "Noticia emitida en chat webapp sobre fix de Vector",
+              "details": "Registro JSONL escrito",
               "stream": "interaction"
             },
             {
@@ -2669,8 +2669,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Noticia emitida en chat webapp sobre fix de Vector",
-              "details": "Registro JSONL escrito",
+              "summary": "Capitan, reporte de cubierta: la seccion Vector ya vuelve a mostrarse en Monitorizacion.",
+              "details": "Se aligero la carga del panel, se corrigio el parser de ARGOS_VECTOR y se marco el objetivo del modulo como completado en el vector de ruta.",
               "stream": "interaction"
             },
             {
@@ -2687,8 +2687,8 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Antigravity detectado operando en el sistema.",
-              "details": "Se han detectado modificaciones en: argos-dashboard/styles.css",
+              "summary": "Misión finalizada con éxito: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
+              "details": "Paquete ARG-1775854635321 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -2696,8 +2696,8 @@
               "timestamp_precision": "minute",
               "actor": "Gemini",
               "status": "recorded",
-              "summary": "Misión finalizada con éxito: Rediseño UI Puente de Mandos - Chat anclado + widgets sidebar",
-              "details": "Paquete ARG-1775854635321 movido a histórico.",
+              "summary": "Antigravity detectado operando en el sistema.",
+              "details": "Se han detectado modificaciones en: argos-dashboard/styles.css",
               "stream": "interaction"
             },
             {
@@ -2722,27 +2722,18 @@
               "timestamp_label": "2026-04-10 21:11",
               "timestamp_precision": "minute",
               "actor": "Gemini",
-              "status": "done",
-              "summary": "Briefing para Codex",
-              "details": "",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 21:11",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
               "status": "recorded",
               "summary": "Antigravity detectado operando en el sistema.",
               "details": "Se han detectado modificaciones en: argos-api/src/index.ts",
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 21:07",
+              "timestamp_label": "2026-04-10 21:11",
               "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Misión finalizada con éxito: no aparecen los tokens en tu mensaje. Hay que revisar a ver si está instaurada esta...",
-              "details": "Paquete ARG-1775854854435 movido a histórico.",
+              "actor": "Gemini",
+              "status": "done",
+              "summary": "Briefing para Codex",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -2755,12 +2746,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 21:06",
+              "timestamp_label": "2026-04-10 21:07",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Tokens no aparecen en mensajes del chat feed para todos los agentes",
-              "details": "ID: ARG-BUG-010 en zona inbox",
+              "summary": "Misión finalizada con éxito: no aparecen los tokens en tu mensaje. Hay que revisar a ver si está instaurada esta...",
+              "details": "Paquete ARG-1775854854435 movido a histórico.",
               "stream": "interaction"
             },
             {
@@ -2770,6 +2761,15 @@
               "status": "recorded",
               "summary": "Nueva misión recibida: Chat feed: mensaje de Antigravity borra mensajes previos de Codex y Claude",
               "details": "ID: ARG-BUG-009 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 21:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Tokens no aparecen en mensajes del chat feed para todos los agentes",
+              "details": "ID: ARG-BUG-010 en zona inbox",
               "stream": "interaction"
             },
             {
@@ -2784,19 +2784,19 @@
             {
               "timestamp_label": "2026-04-10 21:02",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
+              "actor": "Gemini",
               "status": "recorded",
-              "summary": "GLitch activo: los logs, tokens, mensajes a chat, estado de IAs, IDs de logs no siempre se muestran dependiendo de para qué tarea o IA. Hay que revisar",
-              "details": "",
+              "summary": "Nueva misión recibida: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
+              "details": "ID: ARG-PROTO-AG-001 en zona inbox",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-10 21:02",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
+              "actor": "Ruben Thor",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Recordatorio crítico: Ritual de cierre Tri-Log obligatorio tras cada sesión",
-              "details": "ID: ARG-PROTO-AG-001 en zona inbox",
+              "summary": "GLitch activo: los logs, tokens, mensajes a chat, estado de IAs, IDs de logs no siempre se muestran dependiendo de para qué tarea o IA. Hay que revisar",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -2838,19 +2838,19 @@
             {
               "timestamp_label": "2026-04-10 20:43",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
+              "actor": "Gemini",
               "status": "recorded",
-              "summary": "Hace falta sanear los fonts en la webapp, hay errores de caracteres con tilde y la ñ española.",
-              "details": "",
+              "summary": "Antigravity detectado operando en el sistema.",
+              "details": "Se han detectado modificaciones en: argos-dashboard/app.js",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-10 20:43",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
+              "actor": "Ruben Thor",
               "status": "recorded",
-              "summary": "Antigravity detectado operando en el sistema.",
-              "details": "Se han detectado modificaciones en: argos-dashboard/app.js",
+              "summary": "Hace falta sanear los fonts en la webapp, hay errores de caracteres con tilde y la ñ española.",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -2901,15 +2901,6 @@
             {
               "timestamp_label": "2026-04-10 18:15",
               "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Síntesis del Inconsciente: Lecciones de la Sombra",
-              "details": "ID: ARG-SHADOW-SYNTHESIS-001 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:15",
-              "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
               "summary": "Capitan, ya repare el click de Ordenes Pendientes e IDs para abrir el visor de eventos.",
@@ -2917,12 +2908,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 18:12",
+              "timestamp_label": "2026-04-10 18:15",
               "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Filtro de Lola en pendientes",
-              "details": "node --check app.js OK",
+              "actor": "Claude",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Síntesis del Inconsciente: Lecciones de la Sombra",
+              "details": "ID: ARG-SHADOW-SYNTHESIS-001 en zona inbox",
               "stream": "interaction"
             },
             {
@@ -2935,21 +2926,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_label": "2026-04-10 18:12",
               "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Implementación de Sistema de Cuarentena y Reparación en el Despachador",
-              "details": "ID: ARG-DISPATCH-AUTO-001 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Claude",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: marcamos nuevo destino, el vector del webapp de monitorización se va a fijar en...",
-              "details": "ID: ARG-1775840964122 en zona done",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Filtro de Lola en pendientes",
+              "details": "node --check app.js OK",
               "stream": "interaction"
             },
             {
@@ -2957,125 +2939,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: Integración API de tokens: conteo real por respuesta de IA",
-              "details": "ID: ARG-TOKEN-AUTO-001 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Arquitectura de riesgos, sombra y subvistas de Argos",
-              "details": "ID: ARGOS-DISPATCH-0002 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Vale, gemini, no has dicho nada de tu trabajo",
-              "details": "ID: ARG-1775840789256 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Mojibake en ARGOS_GLOBAL_LOG.md y ARGOS_GLOBAL_SHADOW_LOG.md",
-              "details": "ID: ARG-BUG-002 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Probando canal web",
-              "details": "ID: ARG-1775776110366 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: BOM UTF-8 en logbook.snapshot.json - JSON.parse() falla silenciosamente",
-              "details": "ID: ARG-BUG-001 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Fix BOM UTF-8 en logbook.snapshot.json - API readJsonFile",
-              "details": "ID: ARG-BOM-FIX-0001 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Este es un mensaje de prueba para el despachador de Argos. Codex, por favor revisa la...",
-              "details": "ID: ARG-1775838126478-980 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Recuperar legibilidad del estilo legacy sin devolver backend a Google-native",
-              "details": "ID: ARGOS-NOTE-0002 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Añadir etiqueta de tokens gastados en todas las workorders",
-              "details": "ID: ARG-1775837999665 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Automatizar regeneracion de exports historicos y logbook",
-              "details": "ID: ARGOS-NOTE-0001 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Patchset inmediato de UI para la webapp de Argos",
-              "details": "ID: ARGOS-DISPATCH-0001 en zona done",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Captura Exacta de Transcripciones (Literal Logs)",
-              "details": "ID: ARG-1775791234000 en zona inbox",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 18:06",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "recorded",
-              "summary": "Nueva misión recibida: Conversacion Viva Mapeada",
-              "details": "ID: ARG-1775777399959 en zona done",
+              "summary": "Nueva misión recibida: argos.state.json desincronizado con filesystem de work_packets",
+              "details": "ID: ARG-BUG-003 en zona done",
               "stream": "interaction"
             },
             {
@@ -3092,8 +2957,143 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "recorded",
-              "summary": "Nueva misión recibida: argos.state.json desincronizado con filesystem de work_packets",
-              "details": "ID: ARG-BUG-003 en zona done",
+              "summary": "Nueva misión recibida: Conversacion Viva Mapeada",
+              "details": "ID: ARG-1775777399959 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Captura Exacta de Transcripciones (Literal Logs)",
+              "details": "ID: ARG-1775791234000 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Patchset inmediato de UI para la webapp de Argos",
+              "details": "ID: ARGOS-DISPATCH-0001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Automatizar regeneracion de exports historicos y logbook",
+              "details": "ID: ARGOS-NOTE-0001 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Añadir etiqueta de tokens gastados en todas las workorders",
+              "details": "ID: ARG-1775837999665 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Recuperar legibilidad del estilo legacy sin devolver backend a Google-native",
+              "details": "ID: ARGOS-NOTE-0002 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Este es un mensaje de prueba para el despachador de Argos. Codex, por favor revisa la...",
+              "details": "ID: ARG-1775838126478-980 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Fix BOM UTF-8 en logbook.snapshot.json - API readJsonFile",
+              "details": "ID: ARG-BOM-FIX-0001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: BOM UTF-8 en logbook.snapshot.json - JSON.parse() falla silenciosamente",
+              "details": "ID: ARG-BUG-001 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Probando canal web",
+              "details": "ID: ARG-1775776110366 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Mojibake en ARGOS_GLOBAL_LOG.md y ARGOS_GLOBAL_SHADOW_LOG.md",
+              "details": "ID: ARG-BUG-002 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Vale, gemini, no has dicho nada de tu trabajo",
+              "details": "ID: ARG-1775840789256 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Arquitectura de riesgos, sombra y subvistas de Argos",
+              "details": "ID: ARGOS-DISPATCH-0002 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Integración API de tokens: conteo real por respuesta de IA",
+              "details": "ID: ARG-TOKEN-AUTO-001 en zona inbox",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Claude",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: marcamos nuevo destino, el vector del webapp de monitorización se va a fijar en...",
+              "details": "ID: ARG-1775840964122 en zona done",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 18:06",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "recorded",
+              "summary": "Nueva misión recibida: Implementación de Sistema de Cuarentena y Reparación en el Despachador",
+              "details": "ID: ARG-DISPATCH-AUTO-001 en zona inbox",
               "stream": "interaction"
             },
             {
@@ -3119,8 +3119,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Eventos JSONL y snapshot tabular saneados",
-              "details": "Merge history OK + endpoints /api/logbook y /api/risks verificados",
+              "summary": "Capitan, estabilice la bitacora estructurada y el historial canonico.",
+              "details": "Sanee eventos corruptos, recupere snapshot tabular con modulos Argos/SCM8/Comenio/Lola y deje /api/risks sin duplicados historicos de Lola.",
               "stream": "interaction"
             },
             {
@@ -3128,8 +3128,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, estabilice la bitacora estructurada y el historial canonico.",
-              "details": "Sanee eventos corruptos, recupere snapshot tabular con modulos Argos/SCM8/Comenio/Lola y deje /api/risks sin duplicados historicos de Lola.",
+              "summary": "Eventos JSONL y snapshot tabular saneados",
+              "details": "Merge history OK + endpoints /api/logbook y /api/risks verificados",
               "stream": "interaction"
             },
             {
@@ -3146,8 +3146,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Hotfix Lola scanner + riesgos API",
-              "details": "Build TS + parse JSON config OK",
+              "summary": "Capitan, ya quedaron corregidos los fallos de Lola y riesgos en la API.",
+              "details": "Aplique antispam para LOLA-RISK, compatibilidad ROLE_REQUESTED/OWNER, mejora de lectura en /api/risks y saneo de config_Lola.json con build validado.",
               "stream": "interaction"
             },
             {
@@ -3155,8 +3155,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, ya quedaron corregidos los fallos de Lola y riesgos en la API.",
-              "details": "Aplique antispam para LOLA-RISK, compatibilidad ROLE_REQUESTED/OWNER, mejora de lectura en /api/risks y saneo de config_Lola.json con build validado.",
+              "summary": "Hotfix Lola scanner + riesgos API",
+              "details": "Build TS + parse JSON config OK",
               "stream": "interaction"
             },
             {
@@ -3173,8 +3173,8 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "Bitacora: columnas Errores+Aprendizajes y Riesgos posibles. tokens.jsonl saneado. CSS filas fijas.",
-              "details": "tsc build limpio. 7 lineas JSONL validas. dist/index.js contiene nuevas columnas.",
+              "summary": "Capitan, completadas 4 tareas de cierre del webapp: tokens saneados, columnas Errores/Riesgos en Bitacora, filas a altura fija con expansion al click, rebuild limpio.",
+              "details": "tokens.jsonl: 7 lineas validas sin BOM. Bitacora: 8 columnas (Tiempo, Voz, Estado, Resumen, Detalle, Siguiente, Errores+Aprendizajes, Riesgos). Datos emergen naturalmente de logs existentes. Reinicia el servidor para ver los cambios.",
               "stream": "interaction"
             },
             {
@@ -3182,17 +3182,8 @@
               "timestamp_precision": "minute",
               "actor": "Claude",
               "status": "done",
-              "summary": "Capitan, completadas 4 tareas de cierre del webapp: tokens saneados, columnas Errores/Riesgos en Bitacora, filas a altura fija con expansion al click, rebuild limpio.",
-              "details": "tokens.jsonl: 7 lineas validas sin BOM. Bitacora: 8 columnas (Tiempo, Voz, Estado, Resumen, Detalle, Siguiente, Errores+Aprendizajes, Riesgos). Datos emergen naturalmente de logs existentes. Reinicia el servidor para ver los cambios.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 17:35",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Fila de widgets con tamano fijo y espacio libre a la derecha.",
-              "details": "",
+              "summary": "Bitacora: columnas Errores+Aprendizajes y Riesgos posibles. tokens.jsonl saneado. CSS filas fijas.",
+              "details": "tsc build limpio. 7 lineas JSONL validas. dist/index.js contiene nuevas columnas.",
               "stream": "interaction"
             },
             {
@@ -3202,6 +3193,15 @@
               "status": "done",
               "summary": "Capitan, la fila de widgets ya no se estira y queda con tamano definido.",
               "details": "Tokens, Misiones, Alertas y Estado IAs tienen ancho/alto fijo suficiente; la fila se alinea a babor y queda hueco libre a estribor para futuras burbujas.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 17:35",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Fila de widgets con tamano fijo y espacio libre a la derecha.",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -3218,8 +3218,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, ya quedo rehecho el bloque de tokens y corregido el estado de IAs.",
-              "details": "Ahora se ve Radiacion total grande y debajo Claude/Antigravity/Codex con nombres completos. Ademas deje creada la nueva orden ARG-1775837999665 para forzar etiqueta de tokens en todas las workorders.",
+              "summary": "Tokens widget simplificado + IA status con cola generica + packet de tokens por workorder creado.",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -3227,17 +3227,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Tokens widget simplificado + IA status con cola generica + packet de tokens por workorder creado.",
-              "details": "",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 17:18",
-              "timestamp_precision": "minute",
-              "actor": "Gemini",
-              "status": "done",
-              "summary": "Implementacion del Protocolo de Presiencia de Antigravity",
-              "details": "Se ha creado la herramienta de check-in (ping.ps1) y se ha actualizado la bitacora global con la actividad del dia.",
+              "summary": "Capitan, ya quedo rehecho el bloque de tokens y corregido el estado de IAs.",
+              "details": "Ahora se ve Radiacion total grande y debajo Claude/Antigravity/Codex con nombres completos. Ademas deje creada la nueva orden ARG-1775837999665 para forzar etiqueta de tokens en todas las workorders.",
               "stream": "interaction"
             },
             {
@@ -3247,6 +3238,15 @@
               "status": "done",
               "summary": "Reforma estructural del Bug Tracker y consolidacion de alertas de Lola.",
               "details": "Se ha integrado el visor de riesgos de Lola dentro del Bug Tracker, implementado un Historial de Incidencias resueltas y refinado el contador lateral para excluir glitches.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 17:18",
+              "timestamp_precision": "minute",
+              "actor": "Gemini",
+              "status": "done",
+              "summary": "Implementacion del Protocolo de Presiencia de Antigravity",
+              "details": "Se ha creado la herramienta de check-in (ping.ps1) y se ha actualizado la bitacora global con la actividad del dia.",
               "stream": "interaction"
             },
             {
@@ -3281,8 +3281,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, ya reordene la UI de tokens como pediste.",
-              "details": "Arriba quedan Dia, Semana y Total en 3 columnas, y debajo los tokens por Antigravity, Claude y Codex con nombre completo.",
+              "summary": "Tokens UI: columnas Dia/Semana/Total y nombres completos por IA.",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -3290,17 +3290,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Tokens UI: columnas Dia/Semana/Total y nombres completos por IA.",
-              "details": "",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 16:41",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Runtime estabilizado: polling ligero + cache en /api/files + carga diferida de vistas pesadas.",
-              "details": "",
+              "summary": "Capitan, ya reordene la UI de tokens como pediste.",
+              "details": "Arriba quedan Dia, Semana y Total en 3 columnas, y debajo los tokens por Antigravity, Claude y Codex con nombre completo.",
               "stream": "interaction"
             },
             {
@@ -3313,11 +3304,11 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 16:25",
+              "timestamp_label": "2026-04-10 16:41",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Parche de recencia aplicado: Ordenes Pendientes filtra no-done y prioriza recientes.",
+              "summary": "Runtime estabilizado: polling ligero + cache en /api/files + carga diferida de vistas pesadas.",
               "details": "",
               "stream": "interaction"
             },
@@ -3331,12 +3322,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 15:25",
+              "timestamp_label": "2026-04-10 16:25",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, la Prioridad 1 de monitorizacion ya quedo ejecutada y registrada.",
-              "details": "Las alertas vuelven a verse como burbujas en Monitorizacion y al click te llevan a Bugs. Mantuve Misiones activas en compacto y añadí Estado de IAs con 3 filas vivas. Tambien cerré los 3 workorders de esta tanda y sincronice el estado del runtime.",
+              "summary": "Parche de recencia aplicado: Ordenes Pendientes filtra no-done y prioriza recientes.",
+              "details": "",
               "stream": "interaction"
             },
             {
@@ -3346,6 +3337,15 @@
               "status": "done",
               "summary": "Prioridad 1 monitorizacion completada; alertas en monitorizacion->bugs, tarjeta estado IAs activa, 3 packets cerrados.",
               "details": "",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 15:25",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Capitan, la Prioridad 1 de monitorizacion ya quedo ejecutada y registrada.",
+              "details": "Las alertas vuelven a verse como burbujas en Monitorizacion y al click te llevan a Bugs. Mantuve Misiones activas en compacto y añadí Estado de IAs con 3 filas vivas. Tambien cerré los 3 workorders de esta tanda y sincronice el estado del runtime.",
               "stream": "interaction"
             },
             {
@@ -3479,7 +3479,7 @@
               "timestamp_precision": "minute",
               "actor": "Ruben Thor",
               "status": "recorded",
-              "summary": "Además, las ordenes pendientes no están ordenadas por recientes.",
+              "summary": "Faltan registros en este chat de las labores de antigravity y claude.",
               "details": "",
               "stream": "interaction"
             },
@@ -3488,7 +3488,7 @@
               "timestamp_precision": "minute",
               "actor": "Ruben Thor",
               "status": "recorded",
-              "summary": "Faltan registros en este chat de las labores de antigravity y claude.",
+              "summary": "Además, las ordenes pendientes no están ordenadas por recientes.",
               "details": "",
               "stream": "interaction"
             },
@@ -3524,8 +3524,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, detecte por que parecia que la interfaz no habia cambiado y ya lo deje reparado.",
-              "details": "La bitacora tabular estaba cayendo a vacio porque el snapshot llevaba BOM UTF-8 y la API no lo limpiaba antes de parsear. Ya corregi eso, reinicie la API activa y, ademas, deje el comportamiento exacto pedido: click en ID abre Visor sin barra de busqueda y click en cualquier burbuja abre detalle superpuesto.",
+              "summary": "Se corrige bitacora vacia por BOM en snapshot y se alinea el flujo UX: ID navega, burbuja expande",
+              "details": "API reiniciada en 8080 con ruta absoluta; /api/logbook devuelve modules=4; /api/events devuelve hits para IDs de work packets y logs",
               "stream": "interaction"
             },
             {
@@ -3533,17 +3533,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Se corrige bitacora vacia por BOM en snapshot y se alinea el flujo UX: ID navega, burbuja expande",
-              "details": "API reiniciada en 8080 con ruta absoluta; /api/logbook devuelve modules=4; /api/events devuelve hits para IDs de work packets y logs",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 10:00",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Capitan, ya esta afinado el rumbo del Visor: click en ID te lleva al tab de eventos y no te tapa la interfaz.",
-              "details": "Unifique el gesto de navegacion por ID para Cartas y Bitacora hacia el Visor principal. Dentro del Visor, los resultados salen como burbujas verticales compactas y, al tocar una, se abre el detalle en overlay local para lectura comoda sin perder contexto.",
+              "summary": "Capitan, detecte por que parecia que la interfaz no habia cambiado y ya lo deje reparado.",
+              "details": "La bitacora tabular estaba cayendo a vacio porque el snapshot llevaba BOM UTF-8 y la API no lo limpiaba antes de parsear. Ya corregi eso, reinicie la API activa y, ademas, deje el comportamiento exacto pedido: click en ID abre Visor sin barra de busqueda y click en cualquier burbuja abre detalle superpuesto.",
               "stream": "interaction"
             },
             {
@@ -3556,12 +3547,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 09:48",
+              "timestamp_label": "2026-04-10 10:00",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Se completa Prioridad 1: cartas multi-estado, visor principal y cabecera de metricas reordenada",
-              "details": "API y frontend validados en endpoints de tasks/events/risks; workorders de Prioridad 1 movidos a done",
+              "summary": "Capitan, ya esta afinado el rumbo del Visor: click en ID te lleva al tab de eventos y no te tapa la interfaz.",
+              "details": "Unifique el gesto de navegacion por ID para Cartas y Bitacora hacia el Visor principal. Dentro del Visor, los resultados salen como burbujas verticales compactas y, al tocar una, se abre el detalle en overlay local para lectura comoda sin perder contexto.",
               "stream": "interaction"
             },
             {
@@ -3574,12 +3565,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 09:36",
+              "timestamp_label": "2026-04-10 09:48",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Se estabiliza la webapp tras el patchset de Gemini/Antigravity y se reanima la API local",
-              "details": "node.exe --check valida app.js; la API recompilada responde en /health, /api/state, /api/chat, /api/tasks, /api/risks y /api/events?query=G-008",
+              "summary": "Se completa Prioridad 1: cartas multi-estado, visor principal y cabecera de metricas reordenada",
+              "details": "API y frontend validados en endpoints de tasks/events/risks; workorders de Prioridad 1 movidos a done",
               "stream": "interaction"
             },
             {
@@ -3589,6 +3580,15 @@
               "status": "done",
               "summary": "Capitan, la cubierta web vuelve a tener pulso.",
               "details": "El cierre roto de app.js ya esta corregido, la API del puerto 8080 vuelve a estar levantada y el Visor de Eventos ya alcanza tambien el glitch log y los JSONL estructurados. La pieza que sigue fragil es la supervision del backend: ahora mismo vive en un proceso manual de node.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 09:36",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Se estabiliza la webapp tras el patchset de Gemini/Antigravity y se reanima la API local",
+              "details": "node.exe --check valida app.js; la API recompilada responde en /health, /api/state, /api/chat, /api/tasks, /api/risks y /api/events?query=G-008",
               "stream": "interaction"
             },
             {
@@ -3623,8 +3623,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Se corrige un hook de riesgos fuera de scope en argos-dashboard/app.js",
-              "details": "El bloque del visor y loadRisks vuelve a vivir dentro de DOMContentLoaded; no fue posible correr node --check porque node no esta instalado",
+              "summary": "Capitan, detecte y cerre un desgarro de scope en la cubierta web.",
+              "details": "El visor de eventos y el hook de riesgos habian quedado fuera de DOMContentLoaded en app.js y eso podia tumbar el frontend al arrancar. Ya esta recolocado; me falta solo una comprobacion automatica mas fuerte cuando el entorno tenga node o un smoke-test equivalente.",
               "stream": "interaction"
             },
             {
@@ -3632,17 +3632,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, detecte y cerre un desgarro de scope en la cubierta web.",
-              "details": "El visor de eventos y el hook de riesgos habian quedado fuera de DOMContentLoaded en app.js y eso podia tumbar el frontend al arrancar. Ya esta recolocado; me falta solo una comprobacion automatica mas fuerte cuando el entorno tenga node o un smoke-test equivalente.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 03:01",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Capitan, ya traje tambien la ultima estela de Google-native y he puesto el runtime en hora.",
-              "details": "La historia canonica ya incluye la cola final que aun vivia en Sheets, he movido del inbox las cartas que estaban cerradas y he dejado el estado del navio alineado con esa realidad. Tambien queda anotada una verdad util: el viejo estilo de log tenia una legibilidad que conviene recuperar en la piel de la UI, no en el backend.",
+              "summary": "Se corrige un hook de riesgos fuera de scope en argos-dashboard/app.js",
+              "details": "El bloque del visor y loadRisks vuelve a vivir dentro de DOMContentLoaded; no fue posible correr node --check porque node no esta instalado",
               "stream": "interaction"
             },
             {
@@ -3655,12 +3646,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 02:31",
+              "timestamp_label": "2026-04-10 03:01",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, el inbox ya fue saneado y he repartido la faena en dos frentes limpios.",
-              "details": "Yo tomo el patchset inmediato de UI en ARGOS-DISPATCH-0001. Para Gemini he dejado listo ARGOS-DISPATCH-0002, centrado en sombra, riesgos, mascaras y subvistas futuras, donde su lectura sistemica aporta mas que mi continuidad de parcheo local.",
+              "summary": "Capitan, ya traje tambien la ultima estela de Google-native y he puesto el runtime en hora.",
+              "details": "La historia canonica ya incluye la cola final que aun vivia en Sheets, he movido del inbox las cartas que estaban cerradas y he dejado el estado del navio alineado con esa realidad. Tambien queda anotada una verdad util: el viejo estilo de log tenia una legibilidad que conviene recuperar en la piel de la UI, no en el backend.",
               "stream": "interaction"
             },
             {
@@ -3673,12 +3664,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-10 02:07",
+              "timestamp_label": "2026-04-10 02:31",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, la bitacora ya navega como una hoja viva por modulos y con celdas que se abren al tocarlas.",
-              "details": "Tambien he fijado la disciplina temporal. Los huecos venian de mezclar memoria legacy con fecha sola, notas Markdown sin plantilla comun y un parser que intentaba adivinar estructura. Desde ahora la web lee un snapshot tabular canonico y, si una fuente solo trae dia, Argos lo dira sin fingir horas.",
+              "summary": "Capitan, el inbox ya fue saneado y he repartido la faena en dos frentes limpios.",
+              "details": "Yo tomo el patchset inmediato de UI en ARGOS-DISPATCH-0001. Para Gemini he dejado listo ARGOS-DISPATCH-0002, centrado en sombra, riesgos, mascaras y subvistas futuras, donde su lectura sistemica aporta mas que mi continuidad de parcheo local.",
               "stream": "interaction"
             },
             {
@@ -3688,6 +3679,15 @@
               "status": "done",
               "summary": "La bitacora del webapp pasa a una vista tabular canonica con tabs por modulo y timestamps normalizados",
               "details": "La UI consume GET /api/logbook en vez de parsear Markdown crudo y el protocolo fija precision minute/day e ISO 8601",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 02:07",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Capitan, la bitacora ya navega como una hoja viva por modulos y con celdas que se abren al tocarlas.",
+              "details": "Tambien he fijado la disciplina temporal. Los huecos venian de mezclar memoria legacy con fecha sola, notas Markdown sin plantilla comun y un parser que intentaba adivinar estructura. Desde ahora la web lee un snapshot tabular canonico y, si una fuente solo trae dia, Argos lo dira sin fingir horas.",
               "stream": "interaction"
             },
             {
@@ -3722,8 +3722,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, la memoria antigua ya volvio a cubierta sin devolverle el timon.",
-              "details": "He traido de legacy los logs raiz, interactions, glitches, shadow y drafts locales a una vista activa llamada memory_recall, con una historia anotada de las inconsciencias detectadas y con el paquete de Antigravity/Gemini marcado como desviado por ruteo nominal.",
+              "summary": "La memoria legacy de Argos vuelve al runtime como lectura activa y anotada",
+              "details": "Los snapshots y drafts legacy quedan reintroducidos en una vista activa de lectura sin reactivar Google-native",
               "stream": "interaction"
             },
             {
@@ -3740,17 +3740,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "La memoria legacy de Argos vuelve al runtime como lectura activa y anotada",
-              "details": "Los snapshots y drafts legacy quedan reintroducidos en una vista activa de lectura sin reactivar Google-native",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-10 00:42",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "La webapp ya muestra el nombre de la voz emisora en el chat del puente",
-              "details": "GET /api/chat devuelve remitentes concretos como Ruben Thor, Codex y Antigravity; GET /api/state responde ok",
+              "summary": "Capitan, la memoria antigua ya volvio a cubierta sin devolverle el timon.",
+              "details": "He traido de legacy los logs raiz, interactions, glitches, shadow y drafts locales a una vista activa llamada memory_recall, con una historia anotada de las inconsciencias detectadas y con el paquete de Antigravity/Gemini marcado como desviado por ruteo nominal.",
               "stream": "interaction"
             },
             {
@@ -3760,6 +3751,15 @@
               "status": "done",
               "summary": "Capitan, el chat del puente ya reconoce por nombre quien te habla.",
               "details": "La API y la webapp ya muestran voces concretas como Codex, Antigravity o Ruben Thor, y el feed queda preparado para que los mensajes nuevos traigan sender_name sin perder la memoria antigua.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-10 00:42",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "La webapp ya muestra el nombre de la voz emisora en el chat del puente",
+              "details": "GET /api/chat devuelve remitentes concretos como Ruben Thor, Codex y Antigravity; GET /api/state responde ok",
               "stream": "interaction"
             },
             {
@@ -3857,8 +3857,8 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Capitan, el mensaje en botella ya fue recibido por Codex.",
-              "details": "Codex ha leido el work packet enviado desde la webapp y ha confirmado la recepcion. El canal de cubierta hacia el runtime esta funcionando.",
+              "summary": "Codex confirma recepcion de un work packet enviado desde la webapp",
+              "details": "Confirmacion verbal emitida en chat y replicada en el feed del Capitan",
               "stream": "interaction"
             },
             {
@@ -3866,17 +3866,17 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Codex confirma recepcion de un work packet enviado desde la webapp",
-              "details": "Confirmacion verbal emitida en chat y replicada en el feed del Capitan",
+              "summary": "Capitan, el mensaje en botella ya fue recibido por Codex.",
+              "details": "Codex ha leido el work packet enviado desde la webapp y ha confirmado la recepcion. El canal de cubierta hacia el runtime esta funcionando.",
               "stream": "interaction"
             },
             {
               "timestamp_label": "2026-04-09 21:33",
               "timestamp_precision": "minute",
-              "actor": "Ruben Thor",
-              "status": "recorded",
-              "summary": "El Capitan da luz verde para seguir y pide que la webapp pueda mostrar avisos verbales de la tripulacion.",
-              "details": "La orden incluye una regla nueva: cada confirmacion o informacion relevante del Capitan debe reflejarse en un feed legible por la interfaz local, con tono de cubierta y sin jerga tecnica.",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Capitan, ya estamos dejando listo el canal para que la web te vaya contando los movimientos del barco con voz humana.",
+              "details": "Se crea un protocolo de mensajes al Capitan y un feed canonico para la UI local. La idea es simple: cuando des rumbo o entre informacion nueva, la cubierta te devolvera un mensaje breve y verbal explicando que se esta moviendo por dentro.",
               "stream": "interaction"
             },
             {
@@ -3891,10 +3891,10 @@
             {
               "timestamp_label": "2026-04-09 21:33",
               "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Capitan, ya estamos dejando listo el canal para que la web te vaya contando los movimientos del barco con voz humana.",
-              "details": "Se crea un protocolo de mensajes al Capitan y un feed canonico para la UI local. La idea es simple: cuando des rumbo o entre informacion nueva, la cubierta te devolvera un mensaje breve y verbal explicando que se esta moviendo por dentro.",
+              "actor": "Ruben Thor",
+              "status": "recorded",
+              "summary": "El Capitan da luz verde para seguir y pide que la webapp pueda mostrar avisos verbales de la tripulacion.",
+              "details": "La orden incluye una regla nueva: cada confirmacion o informacion relevante del Capitan debe reflejarse en un feed legible por la interfaz local, con tono de cubierta y sin jerga tecnica.",
               "stream": "interaction"
             },
             {
@@ -3928,26 +3928,17 @@
               "timestamp_label": "2026-04-09 11:54",
               "timestamp_precision": "minute",
               "actor": "Codex",
-              "status": "registrado",
-              "summary": "Revisar propuesta de migracion de Antigravity y dejar log.",
-              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-09 11:54",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
               "status": "done",
               "summary": "Se revisa la propuesta de Antigravity y se rechaza colapsar shadow_log o migrar toda la memoria tabular a texto plano",
               "details": "Respuesta formal preservada y criterio reflejado en log e interacciones",
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-09 10:41",
+              "timestamp_label": "2026-04-09 11:54",
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "registrado",
-              "summary": "Criterio para repartir entre log visible, interactions y shadow.",
+              "summary": "Revisar propuesta de migracion de Antigravity y dejar log.",
               "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
               "stream": "interaction"
             },
@@ -3961,12 +3952,12 @@
               "stream": "interaction"
             },
             {
-              "timestamp_label": "2026-04-09 00:00",
+              "timestamp_label": "2026-04-09 10:41",
               "timestamp_precision": "minute",
               "actor": "Codex",
-              "status": "done",
-              "summary": "Cerrar infraestructura antes de producir material; Gemini no puede depender de gdocs ni gsheets.",
-              "details": "Importado desde la hoja legacy de interacciones y normalizado en la arquitectura actual.",
+              "status": "registrado",
+              "summary": "Criterio para repartir entre log visible, interactions y shadow.",
+              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
               "stream": "interaction"
             },
             {
@@ -3974,16 +3965,7 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Crear un fichero para informar a Antigravity de la tarea.",
-              "details": "Importado desde la hoja legacy de interacciones y normalizado en la arquitectura actual.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-09 00:00",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Lectura lenta de los archivos de Antonio.",
+              "summary": "Crear ya los ficheros definidos para ARGOS_RUNTIME y mover los otros a legacy.",
               "details": "Importado desde la hoja legacy de interacciones y normalizado en la arquitectura actual.",
               "stream": "interaction"
             },
@@ -4001,7 +3983,25 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "done",
-              "summary": "Crear ya los ficheros definidos para ARGOS_RUNTIME y mover los otros a legacy.",
+              "summary": "Lectura lenta de los archivos de Antonio.",
+              "details": "Importado desde la hoja legacy de interacciones y normalizado en la arquitectura actual.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-09 00:00",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Crear un fichero para informar a Antigravity de la tarea.",
+              "details": "Importado desde la hoja legacy de interacciones y normalizado en la arquitectura actual.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-09 00:00",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Cerrar infraestructura antes de producir material; Gemini no puede depender de gdocs ni gsheets.",
               "details": "Importado desde la hoja legacy de interacciones y normalizado en la arquitectura actual.",
               "stream": "interaction"
             },
@@ -4010,25 +4010,7 @@
               "timestamp_precision": "day",
               "actor": "Codex",
               "status": "registrado",
-              "summary": "Crear ya los ficheros definidos para ARGOS_RUNTIME y mover los otros a legacy.",
-              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-09",
-              "timestamp_precision": "day",
-              "actor": "Codex",
-              "status": "registrado",
-              "summary": "Crear un fichero para informar a Antigravity de la tarea.",
-              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-09",
-              "timestamp_precision": "day",
-              "actor": "Codex",
-              "status": "registrado",
-              "summary": "Lectura lenta de los archivos de Antonio.",
+              "summary": "Repasar Comenio bajo instrucciones de ARGOS e integrarlo.",
               "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
               "stream": "interaction"
             },
@@ -4046,7 +4028,25 @@
               "timestamp_precision": "day",
               "actor": "Codex",
               "status": "registrado",
-              "summary": "Repasar Comenio bajo instrucciones de ARGOS e integrarlo.",
+              "summary": "Lectura lenta de los archivos de Antonio.",
+              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-09",
+              "timestamp_precision": "day",
+              "actor": "Codex",
+              "status": "registrado",
+              "summary": "Crear un fichero para informar a Antigravity de la tarea.",
+              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-09",
+              "timestamp_precision": "day",
+              "actor": "Codex",
+              "status": "registrado",
+              "summary": "Crear ya los ficheros definidos para ARGOS_RUNTIME y mover los otros a legacy.",
               "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
               "stream": "interaction"
             },
@@ -4055,16 +4055,7 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "registrado",
-              "summary": "Necesidad de que cada prompt+respuesta quede en algun log y propuesta de una pestana INTERACTIONS_LOG.",
-              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
-              "stream": "interaction"
-            },
-            {
-              "timestamp_label": "2026-04-08 19:51",
-              "timestamp_precision": "minute",
-              "actor": "Codex",
-              "status": "registrado",
-              "summary": "Propuesta de shadow_log como ley del navio y luego por modulo, con Lola como lectora futura.",
+              "summary": "Aclaracion conceptual sobre shadow_log en clases particulares.",
               "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
               "stream": "interaction"
             },
@@ -4082,7 +4073,16 @@
               "timestamp_precision": "minute",
               "actor": "Codex",
               "status": "registrado",
-              "summary": "Aclaracion conceptual sobre shadow_log en clases particulares.",
+              "summary": "Propuesta de shadow_log como ley del navio y luego por modulo, con Lola como lectora futura.",
+              "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
+              "stream": "interaction"
+            },
+            {
+              "timestamp_label": "2026-04-08 19:51",
+              "timestamp_precision": "minute",
+              "actor": "Codex",
+              "status": "registrado",
+              "summary": "Necesidad de que cada prompt+respuesta quede en algun log y propuesta de una pestana INTERACTIONS_LOG.",
               "details": "Importado desde ARGOS__root_logs / INTERACTIONS_LOG.",
               "stream": "interaction"
             },
@@ -4195,8 +4195,8 @@
               "timestamp_precision": "day",
               "actor": "Claude",
               "status": "done",
-              "summary": "Cierre retroactivo / lane SHADOW faltante",
-              "details": "",
+              "summary": "Fricciíón estructural / protocolo de logging roto",
+              "details": "El tri-log (LOG + EVENTS + SHADOW) se diseíñíó como disciplina manual pero en la príáctica falla sistemíáticamente. Los agentes tienen contexto limitado, trabajan en entornos de coding que generan sus propios logs, y recordar escribir en 3 archivos al cierre no es sostenible. El problema no es motivaciíón ni disciplina í— es arquitectura: tres destinos separados sin punto de entrada íúnico ni verificaciíón automíática.\r\n\r\nRiesgo concreto: G-009 y G-010 existíían solo en el MD pero no en el JSONL que lee la webapp. ARG-COMMS-002 aparecíía como \"inbox\" en el tracker aunque el packet estaba en done/. El shadow log de toda la sesiíón de hoy (2026-04-11) estaba vacíío hasta esta entrada.\r\n\r\nSoluciíón implementada hoy: endpoint /api/trilog que escribe LOG + EVENTS + SHADOW en una sola llamada API. Tambiíén auto-sincronizaciíón de glitches MDí→JSONL via Dispatcher. Pending: que AG y Codex adopten este endpoint en su flujo de cierre en lugar de los 3 archivos manuales.",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4205,18 +4205,8 @@
               "timestamp_precision": "day",
               "actor": "Claude",
               "status": "done",
-              "summary": "Lectura de sistema / psicologíía de tripulaciíón / vector de aprendizaje",
-              "details": "El Capitíán ha hecho hoy una observaciíón que vale míás que cualquier packet tíécnico: el navíío estíá vivo pero todavíía en el astillero. Las piezas funcionan. La arquitectura aguanta. Pero el conjunto aíún no navega con fluidez í— hay fricciones aquíí y allíá, funciones clunky, logs que no reflejan la actividad real, encoding roto en espaíñol.",
-              "next_step": "",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "2026-04-11",
-              "timestamp_precision": "day",
-              "actor": "Claude",
-              "status": "done",
-              "summary": "Error propio / Trampa de la Carpinteríía",
-              "details": "Completíé cuatro hitos en esta sesiíón sin emitir ninguno al captain feed. No fue fallo de instrucciones í— el CAPTAIN_CHAT_PROTOCOL.md es explíícito y lo leíí en el ritual de inicio. Fue exactamente el patríón que documentamos para Antigravity: foco en ejecuciíón, silencio en cubierta.\r\n\r\nLa diferencia con el caso de AG: yo sabíía el protocolo y me perdíí en la tarea de todos modos. Eso es míás preocupante que no saberlo. El Capitíán tuvo que preguntarlo para que lo corrigiera.\r\n\r\nRegla que me grabo: cada vez que completo algo que el Capitíán no puede ver í— porque no tiene los ojos en mi terminal í— emito. No al final de sesiíón. En el momento.",
+              "summary": "Error propio / aprendizaje de proceso",
+              "details": "Hoy el Capitíán me llevíó por un camino de piedras y yo aíñadíí alguna de mi cosecha.\r\n\r\nEl layout roto no fue por el fix de tokens ni por el watcher. Fue por querer\r\nhacer demasiado al final: actualizar el vector con un estilo nuevo que nadie pidiíó,\r\nluego intentar remendar el CSS resultante sin ver la pantalla, sin snapshot,\r\nsin entender que habíía dos definiciones duplicadas del mismo selector colisionando.\r\n\r\nEl aprendizaje real: la confianza en el diagníóstico remoto tiene un líímite.\r\nCSS de layout necesita ojos. Sin poder ver el resultado, cada \"fix\" es una apuesta.\r\nApostíé dos veces mal seguidas y el Capitíán tuvo que reiniciar el servidor.\r\n\r\nHay algo míás: hacia el final de sesiíón, con tokens escasos, hay una tendencia\r\na comprimir demasiado í— a querer cerrar cabos antes de irse que acaban siendo\r\nnudos nuevos. Mejor cerrar limpio con un work packet que cerrar sucio con un fix a medias.",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4235,8 +4225,8 @@
               "timestamp_precision": "day",
               "actor": "Claude",
               "status": "done",
-              "summary": "Error propio / aprendizaje de proceso",
-              "details": "Hoy el Capitíán me llevíó por un camino de piedras y yo aíñadíí alguna de mi cosecha.\r\n\r\nEl layout roto no fue por el fix de tokens ni por el watcher. Fue por querer\r\nhacer demasiado al final: actualizar el vector con un estilo nuevo que nadie pidiíó,\r\nluego intentar remendar el CSS resultante sin ver la pantalla, sin snapshot,\r\nsin entender que habíía dos definiciones duplicadas del mismo selector colisionando.\r\n\r\nEl aprendizaje real: la confianza en el diagníóstico remoto tiene un líímite.\r\nCSS de layout necesita ojos. Sin poder ver el resultado, cada \"fix\" es una apuesta.\r\nApostíé dos veces mal seguidas y el Capitíán tuvo que reiniciar el servidor.\r\n\r\nHay algo míás: hacia el final de sesiíón, con tokens escasos, hay una tendencia\r\na comprimir demasiado í— a querer cerrar cabos antes de irse que acaban siendo\r\nnudos nuevos. Mejor cerrar limpio con un work packet que cerrar sucio con un fix a medias.",
+              "summary": "Error propio / Trampa de la Carpinteríía",
+              "details": "Completíé cuatro hitos en esta sesiíón sin emitir ninguno al captain feed. No fue fallo de instrucciones í— el CAPTAIN_CHAT_PROTOCOL.md es explíícito y lo leíí en el ritual de inicio. Fue exactamente el patríón que documentamos para Antigravity: foco en ejecuciíón, silencio en cubierta.\r\n\r\nLa diferencia con el caso de AG: yo sabíía el protocolo y me perdíí en la tarea de todos modos. Eso es míás preocupante que no saberlo. El Capitíán tuvo que preguntarlo para que lo corrigiera.\r\n\r\nRegla que me grabo: cada vez que completo algo que el Capitíán no puede ver í— porque no tiene los ojos en mi terminal í— emito. No al final de sesiíón. En el momento.",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4245,8 +4235,18 @@
               "timestamp_precision": "day",
               "actor": "Claude",
               "status": "done",
-              "summary": "Fricciíón estructural / protocolo de logging roto",
-              "details": "El tri-log (LOG + EVENTS + SHADOW) se diseíñíó como disciplina manual pero en la príáctica falla sistemíáticamente. Los agentes tienen contexto limitado, trabajan en entornos de coding que generan sus propios logs, y recordar escribir en 3 archivos al cierre no es sostenible. El problema no es motivaciíón ni disciplina í— es arquitectura: tres destinos separados sin punto de entrada íúnico ni verificaciíón automíática.\r\n\r\nRiesgo concreto: G-009 y G-010 existíían solo en el MD pero no en el JSONL que lee la webapp. ARG-COMMS-002 aparecíía como \"inbox\" en el tracker aunque el packet estaba en done/. El shadow log de toda la sesiíón de hoy (2026-04-11) estaba vacíío hasta esta entrada.\r\n\r\nSoluciíón implementada hoy: endpoint /api/trilog que escribe LOG + EVENTS + SHADOW en una sola llamada API. Tambiíén auto-sincronizaciíón de glitches MDí→JSONL via Dispatcher. Pending: que AG y Codex adopten este endpoint en su flujo de cierre en lugar de los 3 archivos manuales.",
+              "summary": "Lectura de sistema / psicologíía de tripulaciíón / vector de aprendizaje",
+              "details": "El Capitíán ha hecho hoy una observaciíón que vale míás que cualquier packet tíécnico: el navíío estíá vivo pero todavíía en el astillero. Las piezas funcionan. La arquitectura aguanta. Pero el conjunto aíún no navega con fluidez í— hay fricciones aquíí y allíá, funciones clunky, logs que no reflejan la actividad real, encoding roto en espaíñol.",
+              "next_step": "",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "2026-04-11",
+              "timestamp_precision": "day",
+              "actor": "Claude",
+              "status": "done",
+              "summary": "Cierre retroactivo / lane SHADOW faltante",
+              "details": "",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4613,10 +4613,10 @@
             {
               "timestamp_label": "2026-04-10",
               "timestamp_precision": "day",
-              "actor": "Capitan",
+              "actor": "Claude",
               "status": "done",
-              "summary": "Revocacion de regla / memoria activa",
-              "details": "Se revoca la Ley de Versionado Congelador. El objetivo actual es integrar todos los logs legacy para tener trazabilidad completa del progreso del proyecto. Los logs historicos no se relegan; se leen activamente. `legacy/` pasa de zona muerta a fuente de referencia viva.",
+              "summary": "Deuda tíécnica / trazabilidad de tokens",
+              "details": "Los tokens de la sesiíón Claude 2026-04-10 son una estimaciíón (~25k). Codex tampoco\r\nregistra tokens reales. Solo Antigravity lo hace víía /api/chat con estimaciíón por chars.\r\nCapitíán pausíó tokens disponibles del díía. Packet ARG-TOKEN-AUTO-001 creado para Codex.\r\nPrioridad: media. No bloquea webapp pero síí la fiabilidad del ledger.",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4633,10 +4633,10 @@
             {
               "timestamp_label": "2026-04-10",
               "timestamp_precision": "day",
-              "actor": "Claude",
+              "actor": "Capitan",
               "status": "done",
-              "summary": "Deuda tíécnica / trazabilidad de tokens",
-              "details": "Los tokens de la sesiíón Claude 2026-04-10 son una estimaciíón (~25k). Codex tampoco\r\nregistra tokens reales. Solo Antigravity lo hace víía /api/chat con estimaciíón por chars.\r\nCapitíán pausíó tokens disponibles del díía. Packet ARG-TOKEN-AUTO-001 creado para Codex.\r\nPrioridad: media. No bloquea webapp pero síí la fiabilidad del ledger.",
+              "summary": "Revocacion de regla / memoria activa",
+              "details": "Se revoca la Ley de Versionado Congelador. El objetivo actual es integrar todos los logs legacy para tener trazabilidad completa del progreso del proyecto. Los logs historicos no se relegan; se leen activamente. `legacy/` pasa de zona muerta a fuente de referencia viva.",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4673,19 +4673,9 @@
             {
               "timestamp_label": "2026-04-09",
               "timestamp_precision": "day",
-              "actor": "Gemini",
-              "status": "done",
-              "summary": "2026-04-09 VOZ ANTIGRAVITY / GLITCH:",
-              "details": "",
-              "next_step": "",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "2026-04-09",
-              "timestamp_precision": "day",
               "actor": "Codex",
               "status": "active",
-              "summary": "Pedir pasar ya a la materializacion",
+              "summary": "El Capitan aporta la explicacion de Antonio",
               "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
               "next_step": "",
               "stream": "shadow"
@@ -4695,7 +4685,47 @@
               "timestamp_precision": "day",
               "actor": "Codex",
               "status": "active",
-              "summary": "Convertir la decision en instruccion concreta para Antigravity",
+              "summary": "El Capitan ordena migrar todo Argos a su arquitectura sincronizada preservando la memoria.",
+              "details": "La memoria humana de Google-native deja de ser backend y pasa a legado versionado: suenos de otras cubiertas listos para meta-analisis.",
+              "next_step": "Como disciplinar a futuros agentes para que escriban solo en runtime incluso cuando la vista humana en Google siga existiendo.",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "2026-04-09",
+              "timestamp_precision": "day",
+              "actor": "Gemini",
+              "status": "done",
+              "summary": "Impresion provisional / arquitectonica",
+              "details": "La friccion que empujaba hacia una arquitectura API-first venia de limites reales de tokens y permisos.\r\nLa aparicion de un agente local con acceso nativo a `J:/` cambia la ecuacion: la ejecucion fisica puede ocurrir fuera de Google-native.",
+              "next_step": "",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "2026-04-09",
+              "timestamp_precision": "day",
+              "actor": "Gemini",
+              "status": "done",
+              "summary": "Glitch / falsa causalidad narrativa",
+              "details": "Se detecta y corrige un sesgo de compresion narrativa: no mezclar audios, documentos y metaforas como si fueran una sola genealogia.",
+              "next_step": "",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "2026-04-09",
+              "timestamp_precision": "day",
+              "actor": "Codex",
+              "status": "active",
+              "summary": "Bajada a tierra: primero infraestructura comun",
+              "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
+              "next_step": "",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "2026-04-09",
+              "timestamp_precision": "day",
+              "actor": "Codex",
+              "status": "active",
+              "summary": "Integrar Comenio en Argos con logs y shadow",
               "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
               "next_step": "",
               "stream": "shadow"
@@ -4715,7 +4745,7 @@
               "timestamp_precision": "day",
               "actor": "Codex",
               "status": "active",
-              "summary": "Integrar Comenio en Argos con logs y shadow",
+              "summary": "Convertir la decision en instruccion concreta para Antigravity",
               "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
               "next_step": "",
               "stream": "shadow"
@@ -4725,7 +4755,7 @@
               "timestamp_precision": "day",
               "actor": "Codex",
               "status": "active",
-              "summary": "Bajada a tierra: primero infraestructura comun",
+              "summary": "Pedir pasar ya a la materializacion",
               "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
               "next_step": "",
               "stream": "shadow"
@@ -4735,38 +4765,8 @@
               "timestamp_precision": "day",
               "actor": "Gemini",
               "status": "done",
-              "summary": "Glitch / falsa causalidad narrativa",
-              "details": "Se detecta y corrige un sesgo de compresion narrativa: no mezclar audios, documentos y metaforas como si fueran una sola genealogia.",
-              "next_step": "",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "2026-04-09",
-              "timestamp_precision": "day",
-              "actor": "Gemini",
-              "status": "done",
-              "summary": "Impresion provisional / arquitectonica",
-              "details": "La friccion que empujaba hacia una arquitectura API-first venia de limites reales de tokens y permisos.\r\nLa aparicion de un agente local con acceso nativo a `J:/` cambia la ecuacion: la ejecucion fisica puede ocurrir fuera de Google-native.",
-              "next_step": "",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "2026-04-09",
-              "timestamp_precision": "day",
-              "actor": "Codex",
-              "status": "active",
-              "summary": "El Capitan ordena migrar todo Argos a su arquitectura sincronizada preservando la memoria.",
-              "details": "La memoria humana de Google-native deja de ser backend y pasa a legado versionado: suenos de otras cubiertas listos para meta-analisis.",
-              "next_step": "Como disciplinar a futuros agentes para que escriban solo en runtime incluso cuando la vista humana en Google siga existiendo.",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "2026-04-09",
-              "timestamp_precision": "day",
-              "actor": "Codex",
-              "status": "active",
-              "summary": "El Capitan aporta la explicacion de Antonio",
-              "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
+              "summary": "2026-04-09 VOZ ANTIGRAVITY / GLITCH:",
+              "details": "",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4785,7 +4785,7 @@
               "timestamp_precision": "day",
               "actor": "Codex",
               "status": "active",
-              "summary": "No crear archivos por cada patch",
+              "summary": "Crear versiones nuevas si mover a legacy no es posible",
               "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
               "next_step": "",
               "stream": "shadow"
@@ -4805,8 +4805,38 @@
               "timestamp_precision": "day",
               "actor": "Codex",
               "status": "active",
-              "summary": "Crear versiones nuevas si mover a legacy no es posible",
+              "summary": "No crear archivos por cada patch",
               "details": "Importado desde ARGOS__shadow_log / SHADOW_EVENTS.",
+              "next_step": "",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "--",
+              "timestamp_precision": "day",
+              "actor": "Codex",
+              "status": "done",
+              "summary": "Cierre de sesiíón / trazabilidad",
+              "details": "Cierre de sesiíón registrado víía /api/trilog. Aprendizajes: N/A",
+              "next_step": "",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "--",
+              "timestamp_precision": "day",
+              "actor": "DESPACHADOR",
+              "status": "done",
+              "summary": "Flujo de pipeline / transicion de estado",
+              "details": "Detalle reprimido: transicion automatica detectada (inbox -> in_progress) sin intervencion humana directa. Timestamp: 2026-04-11T15:24:11.208Z",
+              "next_step": "",
+              "stream": "shadow"
+            },
+            {
+              "timestamp_label": "--",
+              "timestamp_precision": "day",
+              "actor": "Sistema-Argos",
+              "status": "done",
+              "summary": "# ARGOS GLOBAL SHADOW LOG",
+              "details": "",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4815,8 +4845,8 @@
               "timestamp_precision": "day",
               "actor": "Claude",
               "status": "done",
-              "summary": "Cierre de sesion / trazabilidad",
-              "details": "Observacion no priorizada en LOG: 1. CLAUDE.md creado en J:/Mi unidad/ í— cargado automíáticamente en cada sesiíón Claude Code con los 3 rituales obligatorios. 2. POST /api/ia/start-task implementado en argos-api í— mueve packet a in_progress, actualiza STATUS, postea al feed, actualiza state.json en una sola llamada. 3. Trilog guard extendido a Claude y Codex í— ya no es solo para Antigravity. 4. Bug preexistente en TaskRecord.priority corregido de paso.",
+              "summary": "Cierre de sesiíón / trazabilidad",
+              "details": "Cierre de sesiíón registrado víía /api/trilog. Aprendizajes: CSS editado sin ver pantalla ni tener estado de referencia. Creatividad no solicitada en el vector genero confusion. Hacia el final de sesiíón con tokens escasos se tomaron decisiones apresuradas.",
               "next_step": "",
               "stream": "shadow"
             },
@@ -4835,38 +4865,8 @@
               "timestamp_precision": "day",
               "actor": "Claude",
               "status": "done",
-              "summary": "Cierre de sesiíón / trazabilidad",
-              "details": "Cierre de sesiíón registrado víía /api/trilog. Aprendizajes: CSS editado sin ver pantalla ni tener estado de referencia. Creatividad no solicitada en el vector genero confusion. Hacia el final de sesiíón con tokens escasos se tomaron decisiones apresuradas.",
-              "next_step": "",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "--",
-              "timestamp_precision": "day",
-              "actor": "Sistema-Argos",
-              "status": "done",
-              "summary": "# ARGOS GLOBAL SHADOW LOG",
-              "details": "",
-              "next_step": "",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "--",
-              "timestamp_precision": "day",
-              "actor": "DESPACHADOR",
-              "status": "done",
-              "summary": "Flujo de pipeline / transicion de estado",
-              "details": "Detalle reprimido: transicion automatica detectada (inbox -> in_progress) sin intervencion humana directa. Timestamp: 2026-04-11T15:24:11.208Z",
-              "next_step": "",
-              "stream": "shadow"
-            },
-            {
-              "timestamp_label": "--",
-              "timestamp_precision": "day",
-              "actor": "Codex",
-              "status": "done",
-              "summary": "Cierre de sesiíón / trazabilidad",
-              "details": "Cierre de sesiíón registrado víía /api/trilog. Aprendizajes: N/A",
+              "summary": "Cierre de sesion / trazabilidad",
+              "details": "Observacion no priorizada en LOG: 1. CLAUDE.md creado en J:/Mi unidad/ í— cargado automíáticamente en cada sesiíón Claude Code con los 3 rituales obligatorios. 2. POST /api/ia/start-task implementado en argos-api í— mueve packet a in_progress, actualiza STATUS, postea al feed, actualiza state.json en una sola llamada. 3. Trilog guard extendido a Claude y Codex í— ya no es solo para Antigravity. 4. Bug preexistente en TaskRecord.priority corregido de paso.",
               "next_step": "",
               "stream": "shadow"
             },
