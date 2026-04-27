@@ -1,3 +1,15 @@
+[WORK_PACKET]
+ID: ARG-1777236123247-959
+TYPE: task
+TAG: autonomous_normalization
+SUBJECT: ARGOS-ANTIGRAV-0001 Título: Mejoras UX bitácora — expansión horizontal de logs y...
+ROLE_REQUESTED: Antigravity / Gemini
+OWNER: Antigravity / Gemini
+STATUS: open
+REPORTED_BY: Argos Dispatcher
+REPORTED_AT: 2026-04-26 20:42
+
+[CONTENIDO ORIGINAL]
 ARGOS-ANTIGRAV-0001
 Título: Mejoras UX bitácora — expansión horizontal de logs y reflexión sobre campos vacíos
 Asignado a: Antigravity
@@ -22,3 +34,5 @@ Notas:
 
 No romper el layout base de la bitácora para registros normales/cortos
 La solución de expansión horizontal debe funcionar en la vista actual de la bitácora (webapp)
+
+[/WORK_PACKET]

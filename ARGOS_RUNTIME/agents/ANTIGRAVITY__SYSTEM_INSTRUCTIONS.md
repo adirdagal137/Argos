@@ -1,3 +1,17 @@
+---
+doc_id: antigravity-system-instructions
+title: Antigravity System Instructions (ARGOS) [DEPRECATED]
+version: 1.0.0
+status: deprecated
+last_updated: 2026-04-26
+owner: Claude
+change_type: patch
+summary_of_changes: Marcado como deprecated. Sustituido por GEMINI__SYSTEM_INSTRUCTIONS.md.
+---
+
+> **DEPRECATED** -- Este archivo no debe usarse para nuevas sesiones.
+> Usar `GEMINI__SYSTEM_INSTRUCTIONS.md`. Actor canonico: Gemini (no Antigravity).
+
 # ANTIGRAVITY — SYSTEM INSTRUCTIONS (ARGOS)
 
 ## Inicio de sesión

@@ -1,3 +1,14 @@
+---
+doc_id: argos-readme-root
+title: ARGOS - El Navio
+version: 1.1.0
+status: active
+last_updated: 2026-04-26
+owner: Claude
+change_type: minor
+summary_of_changes: Actores canonicos actualizados, estructura docs/ reflejada, lectura de frio simplificada.
+---
+
 # ARGOS — El Navío
 
 Sistema de coordinación multi-IA operado por Rubén ("el Capitán").
@@ -13,10 +24,11 @@ version: ver ARGOS_RUNTIME/argos.version
 | IA | Nombre | Rol | Mandato principal |
 |---|---|---|---|
 | **Claude** | Orfeo | Navegadora | Estrategia de sesión, arquitectura, decisiones de diseño |
-| **Codex / ChatGPT** | Mecánico | Implementación | Código, reparación técnica, refactorización |
-| **Gemini / Antigravity** | Primer Oficial | Integración | Continuidad operativa, UI, cohesión entre capas |
+| **Codex** | Mecánico | Implementación | Código, reparación técnica, refactorización |
+| **Gemini** | Primer Oficial | Integración | Continuidad operativa, UI, cohesión entre capas |
+| **ChatGPT** | Consultor | Análisis y estrategia | Soporte contextual y segunda opinión |
+| **OpenClaw** | Gateway local | Ejecución local | Qwen vía Ollama, clasificación, file ops |
 | **Lola** | Analista de la Sombra | Memoria | Contexto relacional entre sesiones (en desarrollo) |
-| **Qwen / DeepSeek** | Recadero Local | Tareas rutinarias | Clasificación, file ops, búsquedas en logs |
 
 ---
 
@@ -28,16 +40,26 @@ Argos/
 ├── CLAUDE.md                          ← instrucciones de inicio para Claude Code (Orfeo)
 ├── AGENTS.md                          ← instrucciones para otros agentes
 │
+├── versions.json                      ← indice de documentos con version y estado
+│
 ├── ARGOS_RUNTIME/
-│   ├── README.md                      ← qué es ARGOS_RUNTIME
-│   ├── INTER_AI_PROTOCOL.md           ← reglas operativas entre IAs
-│   ├── ARGOS_CREW_VOICES.md           ← carácter y tono de cada tripulante
-│   ├── ARGOS_VECTOR.md                ← timón vivo: foco, prioridades, blockers
-│   ├── ARGOS_QUICKSTART.md            ← cómo unirse al navío en frío
-│   ├── schemas/                       ← esquemas canónicos (work_packet, event, state)
+│   ├── README.md                      ← que es ARGOS_RUNTIME
+│   ├── ARGOS_QUICKSTART.md            ← tarjeta operativa diaria (LECTURA OBLIGATORIA)
+│   ├── INTER_AI_PROTOCOL.md           ← protocolo completo (referencia on-demand)
+│   ├── ARGOS_CREW_VOICES.md           ← caracter y tono de cada tripulante
+│   ├── ARGOS_VECTOR.md                ← timon vivo: foco, prioridades, blockers
+│   ├── REGISTRY.md                    ← indice documental del runtime
+│   ├── argos.version                  ← version global del sistema
+│   ├── docs/
+│   │   ├── protocols/                 ← protocolos de referencia (REMOTE_CLOSURE_SETUP.md)
+│   │   ├── reference/                 ← docs tecnicos de referencia
+│   │   └── legacy/                    ← documentos historicos
+│   ├── tools/
+│   │   ├── argos_commit.ps1           ← commits y ramas por protocolo
+│   │   └── diagnostics/               ← utilidades temporales de diagnostico
 │   └── work_packets/
-│       ├── inbox/                     ← packets pendientes de ejecución
-│       └── in_progress/               ← packets en ejecución activa
+│       ├── inbox/                     ← packets pendientes de ejecucion
+│       └── in_progress/               ← packets en ejecucion activa
 │
 ├── Comenio/                           ← proyecto educación (docs vivos)
 ├── LOLA/                              ← proyecto Lola (docs vivos)
@@ -56,14 +78,16 @@ Lo que **no** está aquí (vive en local/Drive):
 
 ## Cómo leer el navío (para IAs entrando en frío)
 
-1. **Este README** — qué es Argos y quién hace qué
-2. **`ARGOS_RUNTIME/ARGOS_VECTOR.md`** — qué está pasando ahora mismo
-3. **`ARGOS_RUNTIME/INTER_AI_PROTOCOL.md`** — las reglas del juego
-4. **`CLAUDE.md` o `AGENTS.md`** — tu mandato específico
-5. **`ARGOS_RUNTIME/work_packets/inbox/`** — qué hay pendiente para ti
-6. Estado en tiempo real → `ARGOS_RUNTIME/state/argos.state.json` (local/Drive)
+1. **`CLAUDE.md` o `AGENTS.md`** — tu mandato específico por interfaz
+2. **`ARGOS_RUNTIME/ARGOS_QUICKSTART.md`** — tarjeta operativa: inicio, cierre, actores, git
+3. **`ARGOS_RUNTIME/work_packets/inbox/`** — qué hay pendiente
+4. **`ARGOS_RUNTIME/state/argos.state.json`** — foco y riesgos activos
+5. **`ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md`** (tail) — qué se hizo recientemente
 
-No leas el historial de logs hasta que lo necesites. El estado actual está en `ARGOS_VECTOR.md`.
+Solo bajo ambigüedad o conflicto:
+- `ARGOS_RUNTIME/INTER_AI_PROTOCOL.md` — protocolo completo
+- `ARGOS_RUNTIME/ARGOS_CREW_VOICES.md` — voz y carácter
+- `ARGOS_RUNTIME/docs/protocols/REMOTE_CLOSURE_SETUP.md` — setup remoto
 
 ---
 

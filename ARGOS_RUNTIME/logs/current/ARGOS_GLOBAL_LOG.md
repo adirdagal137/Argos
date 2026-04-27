@@ -5,6 +5,27 @@ Archivo activo de sesion. Ultimo reset: 2026-04-17 12:17 Atlantic/Canary.
 ---
 
 ---
+**[2026-04-26 20:00 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
+**MISION:** Auditoría estructural de Argos — saneamiento de estado, legacy, protocolos y memoria operativa
+**WORK PACKET:** ARG-1777224272203
+
+**DETALLES:**
+Auditoría completa ejecutada como agente local (Cowork / Claude). Inspección directa del filesystem.
+
+1. **Filesystem verificado:** argos-api en ruta canónica `C:\Users\Widox\Desktop\ARGOS\argos-api\` ✓. No existe ruta legacy .gemini/scratch. Sin riesgo P0/P1.
+2. **ARG-CONCILIO-001 restaurado:** El packet era referenciado como destino de absorción por 3 packets (ARG-1777204259254, ARG-1777204463244, ARG-CONCILIO-CORE) pero no existía físicamente. Creado en inbox/ con scope consolidado.
+3. **ARGOS_CREW_VOICES.md actualizado:** Sección IV renombrada de "ANTIGRAVITY / GEMINI" a "PI / GEMINI". Nota de deprecación de Antigravity añadida.
+4. **ARGOS_VECTOR.md reescrito:** Fecha 2026-04-26. Bloqueos resueltos retirados (ARCH-0004, ARCH-0005, Cloudflare). Ngrok como túnel vigente. Tabla de deuda activa y tabla de resueltos. Actores canónicos documentados.
+5. **state.json:** ia_status correcto (Claude working en ARG-1777224272203, Pi/Codex/OpenClaw presentes). Hallazgo crítico: la API sobreescribe el fichero periódicamente — las correcciones de packet_states necesitan hacerse vía PATCH /api/workpackets, no edición directa.
+6. **Packets con state_key inconsistente identificados:** 20+ packets en zona done/ con estado "open:done" o "in_progress:done" en state.json. Corrección vía API queda como tarea para Codex (ARG-REFORM-ACTORS-001 incluye migración equivalente para ia_status).
+7. **Mojibake:** Confirmado en CREW_VOICES (corregido), INTER_AI_PROTOCOL (mojibake en headers pero contenido legible), index.ts línea ~6521 (documentado en ARG-REFORM-ACTORS-001 tarea 7 — pendiente Codex).
+8. **Actores canónicos:** CREW_VOICES y VECTOR actualizados. INTER_AI_PROTOCOL v1.5 ya usa Claude/Codex/Pi correctamente en sección 1.1. ORPHAN validators en heartbeat: pendiente implementación Codex (ARG-REFORM-BITACORA-001-IMPL).
+
+**SIGUIENTE:** Codex: ejecutar ARG-REFORM-ACTORS-001 (normalizar actores en index.ts + mojibake fix + state.json migración). Capitán: ratificar scope de ARG-CONCILIO-001.
+
+**RIESGOS:** state.json se sobreescribe periódicamente por argos-api. Cualquier corrección de packet_states debe ir por PATCH /api/workpackets — la edición directa es volátil.
+
+---
 **[2026-04-22 02:10 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
 **MISION:** Bearer token fix + migración argos-api a ruta canónica
 **WORK PACKET:** ARG-1776816000001 / ARG-1776816000002
@@ -286,3 +307,110 @@ Parser de work packets actualizado con ROOM/TYPE + defaults; /api/tasks agrega f
 **SIGUIENTE:** A tu orden para continuar con commit/merge o validar visualmente en UI.
 
 **RIESGOS:** Riesgo bajo: existen cambios no relacionados en el worktree; para commit conviene aislar solo archivos del packet.
+
+---
+**[2026-04-26 18:21 Atlantic/Canary] VOZ CODEX:**
+**MISION:** UI de bitacora por proyecto sincronizada y con acciones por fila
+**WORK PACKET:** ARG-UI-BITACORA-EDICION
+
+**DETALLES:**
+Implementado en argos-dashboard: mapeo nav proyecto -> modulo de bitacora (SciClass-M8 -> SCM8), modulo placeholder si no hay export local, columna Acciones con Abrir/Editar para filas con packet_id. Verificado en navegador interno sobre localhost:8080.
+
+**SIGUIENTE:** Revisar visualmente si se quiere pulir textos/acentos mojibake; la rama esta lista para merge cuando el Capitan lo confirme.
+
+**RIESGOS:** No se hizo merge de ramas antiguas porque arrastraban diffs grandes y regresivos contra main. Quedan cambios runtime previos sin tocar fuera del commit.
+
+---
+**[2026-04-26 18:31 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Bitacora de proyecto redisenada como tabla trilog unificada
+**WORK PACKET:** ARG-UI-BITACORA-EDICION
+
+**DETALLES:**
+Corregido el rumbo tras feedback del Capitan: eliminadas las pesta�as internas Log/Sombra/Glitch/Transcripts, eliminadas columnas Estado y Acciones, y reemplazada la vista por una tabla unica con Tiempo, Voz, ID, Mision, Detalles, Siguiente, Aprendizaje, Riesgos, Sombra y Handoff. La columna Sombra se une desde el stream shadow por packet_id y Handoff se enriquece desde /api/handoff/:packetId cuando existe.
+
+**SIGUIENTE:** Decidir en un packet separado si migramos persistencia a un cierre canonico estructurado unico por proyecto; mi recomendacion es evento JSONL unico + exports derivados, no un markdown monolitico.
+
+**RIESGOS:** La UI ya refleja trilog, pero el almacenamiento sigue escribiendo multiples artefactos. La migracion de persistencia requiere diseno y compatibilidad con parsers actuales.
+
+---
+**[2026-04-26 20:28 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Implementar borrado real de mensajes del captain feed
+**WORK PACKET:** ARG-1777231414864
+
+**DETALLES:**
+Actualizado /api/chat/edit para aceptar action=delete sin summary, eliminar la linea correspondiente de captain_feed.jsonl, registrar interaction_delete y emitir chat:message_deleted. Build TypeScript limpio y cambios mergeados a main.
+
+**SIGUIENTE:** Reiniciar argos-api para cargar dist/index.js actualizado si el proceso en 8080 seguia vivo antes del build.
+
+---
+**[2026-04-26 21:11 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Compatibilidad del delete API para captain feed
+**WORK PACKET:** ARG-1777231414864
+
+**DETALLES:**
+Tras reporte de Claude, verifique en main y contra el servidor vivo que action=delete funcionaba con messageId. Detecte riesgo de incompatibilidad si se llamaba con id, message_id o delete=true. Actualice /api/chat/edit para aceptar esos alias, regenere dist, reinicie argos-api, probe las tres variantes end-to-end y mergee el ajuste en main.
+
+**SIGUIENTE:** Claude puede borrar usando messageId, id o message_id con action=delete; tambien id + delete=true.
+
+---
+**[2026-04-26 21:11 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Bitacora Trilog y Concilio restaurados en main
+**WORK PACKET:** ARG-UI-BITACORA-EDICION
+
+**DETALLES:**
+Se corrigio la implementacion del workpacket de UI: la bitacora de proyecto queda como tabla Trilog unificada sin columnas Estado/Acciones ni pesta�as internas; se restauraron la pesta�a y vista Concilio; y el commit df9a90f que estaba solo en codex/arg-ui-bitacora-edicion fue cherry-pickeado a main como 7edf1b4. Verificado por HTTP que / contiene view-concilio, Bitacora Trilog y cache-busters 20260426-trilog-concilio.
+
+**SIGUIENTE:** Capitan puede recargar con Ctrl+F5 o abrir http://localhost:8080/?trilog_check=main. Pendiente decidir en packet separado si se migra persistencia a evento JSONL canonico unico por proyecto.
+
+**RIESGOS:** Main queda ahead 4 de origin/main; hay cambios runtime/log no relacionados en worktree que no forman parte de este commit. La escritura de logs sigue repartida en varios artefactos aunque la UI ya la muestra unificada.
+
+---
+**[2026-04-26 22:30 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-20260426-DOC-CONTEXT-HYGIENE
+
+**DETALLES:**
+VOZ ORFEO (CLAUDE) -- ARG-20260426-DOC-CONTEXT-HYGIENE -- Higiene documental completa en 7 fases. ARGOS_QUICKSTART.md reescrito como tarjeta operativa (~134 lineas desde 265), carriles local/remote, actores canonicos, GIT_protocol y VERSION_protocol compactos. INTER_AI_PROTOCOL.md v1.6: banner referencia on-demand, actores canonicos sin Pi/Antigravity/DeepSeek, tabla lectura rutinaria vs referencia, mojibake corregido. AGENTS.md y CLAUDE.md: mojibake eliminado, voz correcta por agente (Codex/Orfeo), refs on-demand actualizadas con docs/protocols/. REGISTRY.md reescrito como indice util con 6 categorias. versions.json creado con 10 documentos indexados (tier, version, status, owner). README.md: actores canonicos actualizados, nueva estructura reflejada, lectura frio simplificada. Nueva estructura docs/: protocols/REMOTE_CLOSURE_SETUP.md, legacy/TRILOG+refresh_msg. tools/diagnostics/ con test_parser.js. Commit directo main -- todo docs/scripts, sin tocar index.ts ni frontend.
+
+---
+**[2026-04-26 22:21 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777229449719
+
+**DETALLES:**
+Implementado Gemini Append Bridge V1 como script local `ARGOS_RUNTIME/tools/gemini_append_bridge.js`.
+
+El bridge procesa depositos `ARGOS_RUNTIME/Gemini/gemini_LOG_TIMESTAMP.md`, acepta solo target `LOG`, exige una linea `agent: Gemini`, appendea la entrada a `ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md`, registra evento `gemini_append_bridge_log` en `events/argos.events.jsonl`, borra el deposito original al completar y mueve entradas invalidas o no soportadas a `ARGOS_RUNTIME/Gemini/_quarantine`.
+
+Tambien quedo integrado en `ARGOS_RUNTIME/tools/start_argos.ps1` bajo PM2 como proceso `gemini-append-bridge`, con logs separados en `ARGOS_RUNTIME/logs/gemini_bridge.*.log`.
+
+Verificacion realizada:
+- `node --check ARGOS_RUNTIME/tools/gemini_append_bridge.js`
+- parseo PowerShell de `start_argos.ps1`
+- smoke test en runtime temporal: append al log OK, evento JSONL OK, deposito eliminado OK
+- commit `9b28fe5` en main con solo `gemini_append_bridge.js` y `start_argos.ps1`
+[/LOG]
+
+---
+**[2026-04-26 23:00 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777236123253-697
+
+**DETALLES:**
+Front matter YAML en 10 docs, plantilla WP, regla agente 1.8, check_versions.js OK.
+
+---
+**[2026-04-26 23:30 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-20260418-0220
+
+**DETALLES:**
+ARG-20260418-0220 completo. ARGOS_SYSTEM_INSTRUCTIONS_UNIFIED.md: 8 secciones por plataforma (Claude Code, Codex CLI, Gemini CLI, Claude web, ChatGPT web, Gemini web, OpenClaw). CODEX__SYSTEM_INSTRUCTIONS v2.0: API remota actualizada. GEMINI__SYSTEM_INSTRUCTIONS nuevo. ANTIGRAVITY deprecated. QWEN actor corregido a OpenClaw. ARG-20260426-LOG-MIGRATION creado para Fase 7.
+
+---
+**[2026-04-27 00:00 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-20260426-LOG-MIGRATION
+
+**DETALLES:**
+[TEST-TRILOG] Verificando escritura en logs/current/ tras migracion.

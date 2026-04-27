@@ -19,9 +19,10 @@ const TOOLS_DIR = path_1.default.join(RUNTIME_DIR, 'tools');
 const LOGBOOK_SNAPSHOT_PATH = path_1.default.join(RUNTIME_DIR, 'views', 'logbook_export', 'logbook.snapshot.json');
 const ARGOS_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.json');
 const DASHBOARD_DIR = path_1.default.join(__dirname, '..', '..', 'argos-dashboard');
-const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
-const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const LOGS_CURRENT_DIR = path_1.default.join(RUNTIME_DIR, 'logs', 'current');
+const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_LOG.md');
+const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
 const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
@@ -398,7 +399,7 @@ function buildEmptyLogbook() {
         ]
     };
 }
-const CANONICAL_PROTOCOL_ACTORS = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'OpenClaw', 'Qwen'];
+const CANONICAL_PROTOCOL_ACTORS = ['Claude', 'Codex', 'Gemini', 'ChatGPT', 'OpenClaw', 'Qwen'];
 function generateStableHash(seed) {
     let hash = 2166136261;
     for (let i = 0; i < seed.length; i += 1) {
@@ -478,11 +479,15 @@ function normalizeAgentName(rawName) {
         .replace(/\*\*/g, '').replace(/__/g, '').replace(/\[/g, '').replace(/\]/g, '');
     if (v.includes('claude') || v.includes('orfeo'))
         return 'Claude';
-    if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v))
-        return 'Pi';
-    if (v.includes('codex') || v.includes('chatgpt'))
+    if (v.includes('codex'))
         return 'Codex';
-    if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw') || v.includes('qwen'))
+    if (v.includes('chatgpt') || v.includes('chat gpt'))
+        return 'ChatGPT';
+    if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v))
+        return 'Gemini';
+    if (v.includes('qwen'))
+        return 'Qwen';
+    if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw'))
         return 'OpenClaw';
     return null;
 }
@@ -504,7 +509,7 @@ function resolveCrewDisplayName(rawName, fallback = 'OpenClaw') {
     if (lower.includes('claude') || lower.includes('orfeo'))
         return 'Claude';
     if (lower.includes('antigravity') || lower.includes('gemini') || /\bpi\b/.test(lower))
-        return 'Pi';
+        return 'Gemini';
     if (lower.includes('chatgpt'))
         return 'ChatGPT';
     if (lower.includes('codex'))
@@ -1389,7 +1394,7 @@ function backfillWorkTokensFromFeed() {
 }
 function defaultIaStatus() {
     const blank = () => ({ status: 'standby', task: '', task_subject: '', since: '' });
-    return { Claude: blank(), Pi: blank(), Codex: blank(), OpenClaw: blank() };
+    return { Claude: blank(), Codex: blank(), Gemini: blank(), ChatGPT: blank(), OpenClaw: blank(), Qwen: blank() };
 }
 function readIaStatus(state) {
     const raw = state.ia_status;
@@ -1398,9 +1403,11 @@ function readIaStatus(state) {
         return d;
     return {
         Claude: { ...d.Claude, ...(raw.Claude || {}) },
-        Pi: { ...d.Pi, ...(raw.Pi || raw.Antigravity || {}) },
         Codex: { ...d.Codex, ...(raw.Codex || {}) },
-        OpenClaw: { ...d.OpenClaw, ...(raw.OpenClaw || raw.DeepSeek || {}) }
+        Gemini: { ...d.Gemini, ...(raw.Gemini || raw.Pi || raw.Antigravity || {}) },
+        ChatGPT: { ...d.ChatGPT, ...(raw.ChatGPT || {}) },
+        OpenClaw: { ...d.OpenClaw, ...(raw.OpenClaw || raw.DeepSeek || {}) },
+        Qwen: { ...d.Qwen, ...(raw.Qwen || {}) }
     };
 }
 function setIaActive(actor, packetId, subject) {
@@ -1953,7 +1960,7 @@ function canonicalLiveAgentName(agentId) {
     if (agentId === 'codex')
         return 'Codex';
     if (agentId === 'gemini')
-        return 'Pi';
+        return 'Gemini';
     return 'OpenClaw';
 }
 function normalizeLiveAgentId(raw) {
@@ -1974,7 +1981,7 @@ function liveAgentToIaStatusKey(agentId) {
     if (agentId === 'codex')
         return 'Codex';
     if (agentId === 'gemini')
-        return 'Pi';
+        return 'Gemini';
     return 'OpenClaw';
 }
 function normalizeLiveStatus(raw) {
@@ -2454,10 +2461,10 @@ function processSingleInboxDeposit(filePath, trigger) {
     if (!parsed.packetId || parsed.packetId.trim() === '') {
         return moveToOrphanWithGlitch(`Deposito ORPHAN: packet_id vacio - ${path_1.default.basename(filePath)}`, 'El deposit no tiene packet_id. Movido a __orphan. Revisar deposito.', 'Agente que genero el deposito debe hacer closure correcta con packet_id.');
     }
-    const actorCanonical = normaliseText(parsed.actorCanonical);
-    const canonicalActor = parseCanonicalProtocolActor(actorCanonical);
+    const actorRaw = normaliseText(parsed.actorRaw);
+    const canonicalActor = parseCanonicalProtocolActor(actorRaw);
     if (!canonicalActor) {
-        return moveToOrphanWithGlitch(`Deposito ORPHAN: actor no canonico "${actorCanonical || 'N/A'}" - ${path_1.default.basename(filePath)}`, `Actor detectado: "${actorCanonical || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`, `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`);
+        return moveToOrphanWithGlitch(`Deposito ORPHAN: actor no canonico "${actorRaw || 'N/A'}" - ${path_1.default.basename(filePath)}`, `Actor detectado: "${actorRaw || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`, `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`);
     }
     const logText = normaliseText(parsed.sections.LOG || '');
     if (logText === '') {
@@ -3555,8 +3562,8 @@ function getMtimeMs(targetPath) {
 }
 function shouldRefreshLogbookSnapshot() {
     const sourcePaths = [
-        path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md'),
-        path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md'),
+        ARGOS_GLOBAL_LOG_PATH,
+        ARGOS_GLOBAL_SHADOW_PATH,
         path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl'),
         path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl'),
         path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl'),
@@ -3761,7 +3768,7 @@ function parseArgosEventsStream(filePath, idPrefix) {
             const rawActor = normaliseText(record.actor) || normaliseText(record.sender_name);
             let actor = normalizeActorName(rawActor);
             // Si el actor no es un agente canÃ³nico activo, intentar extraer owner de los detalles
-            const canonicalAgents = new Set(['Claude', 'Pi', 'Codex', 'OpenClaw', 'Antigravity', 'DeepSeek']);
+            const canonicalAgents = new Set([...CANONICAL_PROTOCOL_ACTORS, 'Pi', 'Antigravity', 'DeepSeek']);
             if (!canonicalAgents.has(actor)) {
                 const ownerFromDetails = detailsText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
                     summaryText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
@@ -3899,8 +3906,8 @@ function enrichArgosStreams(snapshot) {
         }
         return combined;
     };
-    const liveLogEntries = loadStreamEntries('ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
-    const liveShadowEntries = loadStreamEntries('ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
+    const liveLogEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
+    const liveShadowEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
     const liveGlitchEntries = loadStreamEntries('argos.glitches.jsonl', 'glitch', parseArgosEventsStream);
     const processEntries = (entries, streamId) => {
         const next = entries.map((entry) => {
@@ -4378,21 +4385,23 @@ function inferIaStatusFromTasks(base) {
     const isActuallyInProgress = (packetId) => !!packetId && inProgressFiles.some(f => f.includes(packetId));
     const enriched = {
         Claude: { ...base.Claude },
-        Pi: { ...base.Pi },
         Codex: { ...base.Codex },
-        OpenClaw: { ...base.OpenClaw }
+        Gemini: { ...base.Gemini },
+        ChatGPT: { ...base.ChatGPT },
+        OpenClaw: { ...base.OpenClaw },
+        Qwen: { ...base.Qwen }
     };
     // Cross-check: si una IA estÃ¡ marcada "active" pero su packet ya no estÃ¡ en in_progress/,
     // el status es stale â€” se limpia automÃ¡ticamente a standby.
     // Los estados 'restricted' se mantienen as-is ya que son bloqueos externos, no tareas en ejecuciÃ³n.
-    ['Codex', 'Pi', 'Claude', 'OpenClaw'].forEach((agentName) => {
+    CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
         const current = enriched[agentName];
         if (current.status === 'active' && current.task && !isActuallyInProgress(current.task)) {
             enriched[agentName] = { status: 'standby', task: '', task_subject: '', since: current.since };
         }
     });
     // Enriquecer IAs en standby con tareas activas detectadas en el filesystem
-    ['Codex', 'Pi', 'Claude', 'OpenClaw'].forEach((agentName) => {
+    CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
         const current = enriched[agentName];
         if (current.status !== 'standby')
             return; // ya tiene status vÃ¡lido (active o restricted)
@@ -5387,42 +5396,21 @@ app.post('/api/chat', (req, res) => {
 });
 app.post('/api/chat/edit', (req, res) => {
     try {
-        const messageId = normaliseText(req.body.messageId);
+        const messageId = normaliseText(req.body.messageId) ||
+            normaliseText(req.body.message_id) ||
+            normaliseText(req.body.id);
+        const action = normaliseText(req.body.action).toLowerCase() || (req.body.delete === true ? 'delete' : '');
         const summary = normaliseText(req.body.summary);
         const details = normaliseText(req.body.details);
         if (messageId === '')
             return res.status(400).json({ error: 'messageId requerido' });
-        if (summary === '')
+        if (action !== 'delete' && summary === '')
             return res.status(400).json({ error: 'summary requerido' });
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         if (!fs_1.default.existsSync(feedPath))
             return res.status(404).json({ error: 'No existe captain_feed.jsonl' });
         const lines = readCaptainFeedLines(feedPath);
         const editedAt = new Date().toISOString();
-        let updatedRecord = null;
-        let found = false;
-        const nextLines = lines.map((line) => {
-            if (!line.parsed)
-                return line;
-            const current = ensureCaptainFeedRecordId(line.parsed);
-            if (resolveFeedRecordId(current) !== messageId) {
-                return { ...line, parsed: current };
-            }
-            found = true;
-            updatedRecord = {
-                ...current,
-                summary,
-                details,
-                edited_at: editedAt,
-                status: 'edited'
-            };
-            return { ...line, parsed: updatedRecord };
-        });
-        if (!found || !updatedRecord) {
-            return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
-        }
-        const finalRecord = updatedRecord;
-        writeCaptainFeedLines(feedPath, nextLines);
         const canaryTs = new Date(editedAt).toLocaleString('sv-SE', {
             timeZone: 'Atlantic/Canary',
             year: 'numeric',
@@ -5431,6 +5419,69 @@ app.post('/api/chat/edit', (req, res) => {
             hour: '2-digit',
             minute: '2-digit'
         }).slice(0, 16);
+        let updatedRecord = null;
+        let deletedRecord = null;
+        let found = false;
+        const nextLines = lines.flatMap((line) => {
+            if (!line.parsed)
+                return line;
+            const current = ensureCaptainFeedRecordId(line.parsed);
+            if (resolveFeedRecordId(current) !== messageId) {
+                return [{ ...line, parsed: current }];
+            }
+            found = true;
+            if (action === 'delete') {
+                deletedRecord = current;
+                return [];
+            }
+            updatedRecord = {
+                ...current,
+                summary,
+                details,
+                edited_at: editedAt,
+                status: 'edited'
+            };
+            return [{ ...line, parsed: updatedRecord }];
+        });
+        if (action === 'delete') {
+            if (!found || !deletedRecord) {
+                return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+            }
+            const removedRecord = deletedRecord;
+            writeCaptainFeedLines(feedPath, nextLines);
+            const packetRef = normaliseText(removedRecord.refId);
+            const removedSummary = normaliseText(removedRecord.summary);
+            appendJsonlRecord(ARGOS_EVENTS_PATH, {
+                timestamp: editedAt,
+                timestamp_label: canaryTs,
+                actor: inferSenderName(removedRecord),
+                module: 'argos',
+                type: 'interaction_delete',
+                status: 'deleted',
+                packet_id: packetRef,
+                refId: packetRef,
+                summary: removedSummary || `Mensaje eliminado: ${messageId}`,
+                details: `messageId=${messageId}`,
+                source: 'api:chat/edit'
+            });
+            publishEvent('chat:message_deleted', {
+                id: messageId,
+                actor: inferSenderName(removedRecord),
+                refId: packetRef,
+                timestamp: editedAt
+            });
+            return res.json({
+                status: 'ok',
+                action: 'delete',
+                messageId,
+                deleted: true
+            });
+        }
+        if (!found || !updatedRecord) {
+            return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+        }
+        const finalRecord = updatedRecord;
+        writeCaptainFeedLines(feedPath, nextLines);
         const packetRef = normaliseText(finalRecord.refId);
         appendJsonlRecord(ARGOS_EVENTS_PATH, {
             timestamp: editedAt,
@@ -5471,8 +5522,8 @@ app.get('/api/logbook', (req, res) => {
 });
 app.get('/api/logs', (req, res) => {
     try {
-        const globalLogPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-        const shadowLogPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+        const globalLogPath = ARGOS_GLOBAL_LOG_PATH;
+        const shadowLogPath = ARGOS_GLOBAL_SHADOW_PATH;
         const interactionsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
         const globalStr = readTextFile(globalLogPath, 'Bitacora global desaparecida.');
         const shadowStr = readTextFile(shadowLogPath, 'Shadow log desaparecido.');
@@ -6315,8 +6366,8 @@ app.post('/api/ia/start-task', (req, res) => {
         const canonicalVoice = normalizeAgentName(actor);
         const voiceName = canonicalVoice === 'Claude'
             ? 'Orfeo (Claude)'
-            : canonicalVoice === 'Pi'
-                ? 'Pi'
+            : canonicalVoice === 'Gemini'
+                ? 'Gemini'
                 : actor;
         postToCrewFeed(voiceName, `Tomando mision: ${subject}`, `ID: ${packetId} - en progreso.`, 'crew_update', 0, packetId);
         // Pub/Sub: notificar al dashboard en tiempo real
@@ -6573,7 +6624,7 @@ app.get('/api/vector', (req, res) => {
 });
 app.get('/api/risks', (req, res) => {
     try {
-        const shadowPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+        const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
         const risks = [];
         // 1. Risks from Shadow Log
         if (fs_1.default.existsSync(shadowPath)) {
@@ -6663,9 +6714,9 @@ app.get('/api/events', (req, res) => {
     if (!query)
         return res.json({ query, hits: [] });
     try {
-        const shadowPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
-        const globalPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-        const glitchPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+        const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
+        const globalPath = ARGOS_GLOBAL_LOG_PATH;
+        const glitchPath = ARGOS_GLOBAL_GLITCH_PATH;
         const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         const eventsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
         const glitchesJsonPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
@@ -7505,7 +7556,7 @@ const PROXY_TARGETS = {
 };
 const PROXY_AGENTS = {
     anthropic: 'Claude',
-    gemini: 'Pi',
+    gemini: 'Gemini',
     openai: 'Codex',
 };
 function extractAnthropicTokens(body) {
@@ -7930,7 +7981,7 @@ function runArgosDispatcher() {
         const inProgressFiles = fs_1.default.existsSync(inProgressDir) ? fs_1.default.readdirSync(inProgressDir) : [];
         const isActuallyInProgress = (packetId) => !!packetId && inProgressFiles.some(f => f.includes(packetId));
         let stateChanged = false;
-        ['Claude', 'Pi', 'Codex', 'OpenClaw'].forEach(agent => {
+        CANONICAL_PROTOCOL_ACTORS.forEach(agent => {
             const s = iaStatus[agent];
             if (s.status === 'active' && s.task && !isActuallyInProgress(s.task)) {
                 console.log(`[DISPATCHER] Status stale detectado â€” ${agent} en ${s.task} (no estÃ¡ en in_progress). Reseteando.`);
@@ -7951,7 +8002,7 @@ function runArgosDispatcher() {
  * MOTOR AUTONOMO: LOLA (VIGIA DE LA SOMBRA)
  */
 function runLolaShadowScanner() {
-    const shadowPath = path_1.default.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+    const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
     if (!fs_1.default.existsSync(shadowPath))
         return;
     try {

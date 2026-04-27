@@ -16,9 +16,10 @@ const TOOLS_DIR = path.join(RUNTIME_DIR, 'tools');
 const LOGBOOK_SNAPSHOT_PATH = path.join(RUNTIME_DIR, 'views', 'logbook_export', 'logbook.snapshot.json');
 const ARGOS_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'argos.state.json');
 const DASHBOARD_DIR = path.join(__dirname, '..', '..', 'argos-dashboard');
-const ARGOS_GLOBAL_LOG_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-const ARGOS_GLOBAL_SHADOW_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
-const ARGOS_GLOBAL_GLITCH_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const LOGS_CURRENT_DIR = path.join(RUNTIME_DIR, 'logs', 'current');
+const ARGOS_GLOBAL_LOG_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_LOG.md');
+const ARGOS_GLOBAL_SHADOW_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+const ARGOS_GLOBAL_GLITCH_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
 const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
@@ -450,14 +451,14 @@ type LiveStatus = 'idle' | 'working' | 'blocked' | 'waiting_captain';
 type LiveAgentId = 'claude' | 'codex' | 'gemini' | 'openclaw';
 
 type LiveStateRecord = {
-  agent: 'Claude' | 'Codex' | 'Gemini' | 'Pi' | 'OpenClaw';
+  agent: CanonicalProtocolActor;
   updated_at: string;
   packet_id: string | null;
   status: LiveStatus;
   last_output: string;
   open_question: string | null;
   next_step: string | null;
-  handoff_to: 'Claude' | 'Codex' | 'Gemini' | 'Pi' | 'OpenClaw' | null;
+  handoff_to: CanonicalProtocolActor | null;
 };
 
 type DepositSectionKey = 'LOG' | 'SHADOW' | 'GLITCH' | 'STATE' | 'CAPTAIN';
@@ -750,8 +751,8 @@ type ChatMessage = {
   editedAt: string;
 };
 
-type CanonicalProtocolActor = 'Claude' | 'Codex' | 'Pi' | 'ChatGPT' | 'OpenClaw' | 'Qwen';
-const CANONICAL_PROTOCOL_ACTORS: ReadonlyArray<CanonicalProtocolActor> = ['Claude', 'Codex', 'Pi', 'ChatGPT', 'OpenClaw', 'Qwen'];
+type CanonicalProtocolActor = 'Claude' | 'Codex' | 'Gemini' | 'ChatGPT' | 'OpenClaw' | 'Qwen';
+const CANONICAL_PROTOCOL_ACTORS: ReadonlyArray<CanonicalProtocolActor> = ['Claude', 'Codex', 'Gemini', 'ChatGPT', 'OpenClaw', 'Qwen'];
 
 function generateStableHash(seed: string): string {
   let hash = 2166136261;
@@ -833,16 +834,18 @@ function ensureCaptainFeedRecordId(record: CaptainFeedRecord): CaptainFeedRecord
 }
 
 // ============ AGENT NAME NORMALIZATION ============
-function normalizeAgentName(rawName: string): 'Claude' | 'Pi' | 'Codex' | 'OpenClaw' | null {
+function normalizeAgentName(rawName: string): CanonicalProtocolActor | null {
   if (!rawName) return null;
 
   const v = rawName.trim().toLowerCase()
     .replace(/\*\*/g, '').replace(/__/g, '').replace(/\[/g, '').replace(/\]/g, '');
 
   if (v.includes('claude') || v.includes('orfeo')) return 'Claude';
-  if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v)) return 'Pi';
-  if (v.includes('codex') || v.includes('chatgpt')) return 'Codex';
-  if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw') || v.includes('qwen')) return 'OpenClaw';
+  if (v.includes('codex')) return 'Codex';
+  if (v.includes('chatgpt') || v.includes('chat gpt')) return 'ChatGPT';
+  if (v.includes('antigravity') || v.includes('gemini') || /\bpi\b/.test(v)) return 'Gemini';
+  if (v.includes('qwen')) return 'Qwen';
+  if (v.includes('deepseek') || v.includes('contramaestre') || v.includes('openclaw')) return 'OpenClaw';
 
   return null;
 }
@@ -863,7 +866,7 @@ function resolveCrewDisplayName(rawName: string, fallback = 'OpenClaw'): string 
 
   const lower = cleaned.toLowerCase();
   if (lower.includes('claude') || lower.includes('orfeo')) return 'Claude';
-  if (lower.includes('antigravity') || lower.includes('gemini') || /\bpi\b/.test(lower)) return 'Pi';
+  if (lower.includes('antigravity') || lower.includes('gemini') || /\bpi\b/.test(lower)) return 'Gemini';
   if (lower.includes('chatgpt')) return 'ChatGPT';
   if (lower.includes('codex')) return 'Codex';
   if (lower.includes('qwen')) return 'Qwen';
@@ -1596,7 +1599,7 @@ function cleanMarkdownText(value: string): string {
 /**
  * Normalizador de Identidad: Unifica nombres de agentes para consistencia visual (CSS/Icons)
  */
-function resolveCanonicalCrewVoice(rawName: string, fallback: 'Claude' | 'Pi' | 'Codex' | 'OpenClaw' = 'OpenClaw'): 'Claude' | 'Pi' | 'Codex' | 'OpenClaw' {
+function resolveCanonicalCrewVoice(rawName: string, fallback: CanonicalProtocolActor = 'OpenClaw'): CanonicalProtocolActor {
   const cleaned = cleanMarkdownText(rawName || '').trim();
   const agent = normalizeAgentName(cleaned);
   if (agent) return agent;
@@ -1869,11 +1872,11 @@ type IaAgentStatus = {
   next_step?: string;
   last_output?: string;
 };
-type IaStatusMap = { Claude: IaAgentStatus; Pi: IaAgentStatus; Codex: IaAgentStatus; OpenClaw: IaAgentStatus };
+type IaStatusMap = Record<CanonicalProtocolActor, IaAgentStatus>;
 
 function defaultIaStatus(): IaStatusMap {
   const blank = (): IaAgentStatus => ({ status: 'standby', task: '', task_subject: '', since: '' });
-  return { Claude: blank(), Pi: blank(), Codex: blank(), OpenClaw: blank() };
+  return { Claude: blank(), Codex: blank(), Gemini: blank(), ChatGPT: blank(), OpenClaw: blank(), Qwen: blank() };
 }
 
 function readIaStatus(state: Record<string, unknown>): IaStatusMap {
@@ -1882,9 +1885,11 @@ function readIaStatus(state: Record<string, unknown>): IaStatusMap {
   if (!raw) return d;
   return {
     Claude:    { ...d.Claude,    ...(raw.Claude || {}) },
-    Pi:        { ...d.Pi,        ...(raw.Pi || (raw as Record<string, unknown>).Antigravity || {}) },
     Codex:     { ...d.Codex,     ...(raw.Codex || {}) },
-    OpenClaw:  { ...d.OpenClaw,  ...(raw.OpenClaw || (raw as Record<string, unknown>).DeepSeek || {}) }
+    Gemini:    { ...d.Gemini,    ...(raw.Gemini || (raw as Record<string, unknown>).Pi || (raw as Record<string, unknown>).Antigravity || {}) },
+    ChatGPT:   { ...d.ChatGPT,   ...(raw.ChatGPT || {}) },
+    OpenClaw:  { ...d.OpenClaw,  ...(raw.OpenClaw || (raw as Record<string, unknown>).DeepSeek || {}) },
+    Qwen:      { ...d.Qwen,      ...(raw.Qwen || {}) }
   };
 }
 
@@ -2470,7 +2475,7 @@ function appendRemoteClosureRecord(record: RemoteClosureRecord): void {
 function canonicalLiveAgentName(agentId: LiveAgentId): LiveStateRecord['agent'] {
   if (agentId === 'claude') return 'Claude';
   if (agentId === 'codex') return 'Codex';
-  if (agentId === 'gemini') return 'Pi';
+  if (agentId === 'gemini') return 'Gemini';
   return 'OpenClaw';
 }
 
@@ -2486,7 +2491,7 @@ function normalizeLiveAgentId(raw: unknown): LiveAgentId | null {
 function liveAgentToIaStatusKey(agentId: LiveAgentId): keyof IaStatusMap {
   if (agentId === 'claude') return 'Claude';
   if (agentId === 'codex') return 'Codex';
-  if (agentId === 'gemini') return 'Pi';
+  if (agentId === 'gemini') return 'Gemini';
   return 'OpenClaw';
 }
 
@@ -3028,12 +3033,12 @@ function processSingleInboxDeposit(filePath: string, trigger: string): boolean {
     );
   }
 
-  const actorCanonical = normaliseText(parsed.actorCanonical);
-  const canonicalActor = parseCanonicalProtocolActor(actorCanonical);
+  const actorRaw = normaliseText(parsed.actorRaw);
+  const canonicalActor = parseCanonicalProtocolActor(actorRaw);
   if (!canonicalActor) {
     return moveToOrphanWithGlitch(
-      `Deposito ORPHAN: actor no canonico "${actorCanonical || 'N/A'}" - ${path.basename(filePath)}`,
-      `Actor detectado: "${actorCanonical || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`,
+      `Deposito ORPHAN: actor no canonico "${actorRaw || 'N/A'}" - ${path.basename(filePath)}`,
+      `Actor detectado: "${actorRaw || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`,
       `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`
     );
   }
@@ -4201,8 +4206,8 @@ function getMtimeMs(targetPath: string): number {
 
 function shouldRefreshLogbookSnapshot(): boolean {
   const sourcePaths = [
-    path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md'),
-    path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md'),
+    ARGOS_GLOBAL_LOG_PATH,
+    ARGOS_GLOBAL_SHADOW_PATH,
     path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl'),
     path.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl'),
     path.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl'),
@@ -4426,7 +4431,7 @@ function parseArgosEventsStream(filePath: string, idPrefix: string): LogbookEntr
       const rawActor = normaliseText(record.actor) || normaliseText(record.sender_name);
       let actor = normalizeActorName(rawActor);
       // Si el actor no es un agente canÃ³nico activo, intentar extraer owner de los detalles
-      const canonicalAgents = new Set(['Claude', 'Pi', 'Codex', 'OpenClaw', 'Antigravity', 'DeepSeek']);
+      const canonicalAgents = new Set([...CANONICAL_PROTOCOL_ACTORS, 'Pi', 'Antigravity', 'DeepSeek']);
       if (!canonicalAgents.has(actor)) {
         const ownerFromDetails =
           detailsText.match(/owner detectado:\s*([^.\n|]+)/i)?.[1]?.trim() ||
@@ -4575,8 +4580,8 @@ function enrichArgosStreams(snapshot: LogbookSnapshot): LogbookSnapshot {
     return combined;
   };
 
-  const liveLogEntries = loadStreamEntries('ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
-  const liveShadowEntries = loadStreamEntries('ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
+  const liveLogEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
+  const liveShadowEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
   const liveGlitchEntries = loadStreamEntries('argos.glitches.jsonl', 'glitch', parseArgosEventsStream);
 
   const processEntries = (entries: LogbookEntry[], streamId: string) => {
@@ -5098,7 +5103,7 @@ function isIaGenericOwner(ownerText: string): boolean {
   return owner.includes('cualquiera') || owner.includes('codex / antigravity') || owner.includes('antigravity / codex');
 }
 
-function isTaskAssignedToAgent(task: TaskRecord, agentName: 'Codex' | 'Pi' | 'Claude' | 'OpenClaw'): boolean {
+function isTaskAssignedToAgent(task: TaskRecord, agentName: CanonicalProtocolActor): boolean {
   return normalizeAgentName(task.owner) === agentName;
 }
 
@@ -5108,7 +5113,7 @@ function inferIaStatusFromTasks(base: IaStatusMap): IaStatusMap {
     .filter((task) => task.status === 'in_progress' || task.status === 'open')
     .sort((a, b) => b.mtimeMs - a.mtimeMs);
 
-  const assignTask = (agentName: 'Codex' | 'Pi' | 'Claude' | 'OpenClaw'): TaskRecord | null => {
+  const assignTask = (agentName: CanonicalProtocolActor): TaskRecord | null => {
     const direct = activeTasks.find((task) => isTaskAssignedToAgent(task, agentName));
     if (direct) return direct;
     return null;
@@ -5122,15 +5127,17 @@ function inferIaStatusFromTasks(base: IaStatusMap): IaStatusMap {
 
   const enriched: IaStatusMap = {
     Claude: { ...base.Claude },
-    Pi: { ...base.Pi },
     Codex: { ...base.Codex },
-    OpenClaw: { ...base.OpenClaw }
+    Gemini: { ...base.Gemini },
+    ChatGPT: { ...base.ChatGPT },
+    OpenClaw: { ...base.OpenClaw },
+    Qwen: { ...base.Qwen }
   };
 
   // Cross-check: si una IA estÃ¡ marcada "active" pero su packet ya no estÃ¡ en in_progress/,
   // el status es stale â€” se limpia automÃ¡ticamente a standby.
   // Los estados 'restricted' se mantienen as-is ya que son bloqueos externos, no tareas en ejecuciÃ³n.
-  (['Codex', 'Pi', 'Claude', 'OpenClaw'] as const).forEach((agentName) => {
+  CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
     const current = enriched[agentName];
     if (current.status === 'active' && current.task && !isActuallyInProgress(current.task)) {
       enriched[agentName] = { status: 'standby', task: '', task_subject: '', since: current.since };
@@ -5138,7 +5145,7 @@ function inferIaStatusFromTasks(base: IaStatusMap): IaStatusMap {
   });
 
   // Enriquecer IAs en standby con tareas activas detectadas en el filesystem
-  (['Codex', 'Pi', 'Claude', 'OpenClaw'] as const).forEach((agentName) => {
+  CANONICAL_PROTOCOL_ACTORS.forEach((agentName) => {
     const current = enriched[agentName];
     if (current.status !== 'standby') return; // ya tiene status vÃ¡lido (active o restricted)
     const task = assignTask(agentName);
@@ -6233,46 +6240,22 @@ app.post('/api/chat', (req: Request, res: Response) => {
 
 app.post('/api/chat/edit', (req: Request, res: Response) => {
   try {
-    const messageId = normaliseText(req.body.messageId);
+    const messageId =
+      normaliseText(req.body.messageId) ||
+      normaliseText(req.body.message_id) ||
+      normaliseText(req.body.id);
+    const action = normaliseText(req.body.action).toLowerCase() || (req.body.delete === true ? 'delete' : '');
     const summary = normaliseText(req.body.summary);
     const details = normaliseText(req.body.details);
 
     if (messageId === '') return res.status(400).json({ error: 'messageId requerido' });
-    if (summary === '') return res.status(400).json({ error: 'summary requerido' });
+    if (action !== 'delete' && summary === '') return res.status(400).json({ error: 'summary requerido' });
 
     const feedPath = path.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
     if (!fs.existsSync(feedPath)) return res.status(404).json({ error: 'No existe captain_feed.jsonl' });
 
     const lines = readCaptainFeedLines(feedPath);
     const editedAt = new Date().toISOString();
-    let updatedRecord: CaptainFeedRecord | null = null;
-    let found = false;
-
-    const nextLines = lines.map((line) => {
-      if (!line.parsed) return line;
-      const current = ensureCaptainFeedRecordId(line.parsed);
-      if (resolveFeedRecordId(current) !== messageId) {
-        return { ...line, parsed: current };
-      }
-
-      found = true;
-      updatedRecord = {
-        ...current,
-        summary,
-        details,
-        edited_at: editedAt,
-        status: 'edited'
-      };
-      return { ...line, parsed: updatedRecord };
-    });
-
-    if (!found || !updatedRecord) {
-      return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
-    }
-    const finalRecord = updatedRecord as CaptainFeedRecord;
-
-    writeCaptainFeedLines(feedPath, nextLines);
-
     const canaryTs = new Date(editedAt).toLocaleString('sv-SE', {
       timeZone: 'Atlantic/Canary',
       year: 'numeric',
@@ -6281,6 +6264,78 @@ app.post('/api/chat/edit', (req: Request, res: Response) => {
       hour: '2-digit',
       minute: '2-digit'
     }).slice(0, 16);
+    let updatedRecord: CaptainFeedRecord | null = null;
+    let deletedRecord: CaptainFeedRecord | null = null;
+    let found = false;
+
+    const nextLines = lines.flatMap((line) => {
+      if (!line.parsed) return line;
+      const current = ensureCaptainFeedRecordId(line.parsed);
+      if (resolveFeedRecordId(current) !== messageId) {
+        return [{ ...line, parsed: current }];
+      }
+
+      found = true;
+      if (action === 'delete') {
+        deletedRecord = current;
+        return [];
+      }
+
+      updatedRecord = {
+        ...current,
+        summary,
+        details,
+        edited_at: editedAt,
+        status: 'edited'
+      };
+      return [{ ...line, parsed: updatedRecord }];
+    });
+
+    if (action === 'delete') {
+      if (!found || !deletedRecord) {
+        return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+      }
+      const removedRecord = deletedRecord as CaptainFeedRecord;
+      writeCaptainFeedLines(feedPath, nextLines);
+
+      const packetRef = normaliseText(removedRecord.refId);
+      const removedSummary = normaliseText(removedRecord.summary);
+      appendJsonlRecord(ARGOS_EVENTS_PATH, {
+        timestamp: editedAt,
+        timestamp_label: canaryTs,
+        actor: inferSenderName(removedRecord),
+        module: 'argos',
+        type: 'interaction_delete',
+        status: 'deleted',
+        packet_id: packetRef,
+        refId: packetRef,
+        summary: removedSummary || `Mensaje eliminado: ${messageId}`,
+        details: `messageId=${messageId}`,
+        source: 'api:chat/edit'
+      });
+
+      publishEvent('chat:message_deleted', {
+        id: messageId,
+        actor: inferSenderName(removedRecord),
+        refId: packetRef,
+        timestamp: editedAt
+      });
+
+      return res.json({
+        status: 'ok',
+        action: 'delete',
+        messageId,
+        deleted: true
+      });
+    }
+
+    if (!found || !updatedRecord) {
+      return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
+    }
+    const finalRecord = updatedRecord as CaptainFeedRecord;
+
+    writeCaptainFeedLines(feedPath, nextLines);
+
     const packetRef = normaliseText(finalRecord.refId);
     appendJsonlRecord(ARGOS_EVENTS_PATH, {
       timestamp: editedAt,
@@ -6323,8 +6378,8 @@ app.get('/api/logbook', (req: Request, res: Response) => {
 
 app.get('/api/logs', (req: Request, res: Response) => {
   try {
-    const globalLogPath = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-    const shadowLogPath = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+    const globalLogPath = ARGOS_GLOBAL_LOG_PATH;
+    const shadowLogPath = ARGOS_GLOBAL_SHADOW_PATH;
     const interactionsPath = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 
     const globalStr = readTextFile(globalLogPath, 'Bitacora global desaparecida.');
@@ -7240,8 +7295,8 @@ app.post('/api/ia/start-task', (req: Request, res: Response) => {
     const voiceName =
       canonicalVoice === 'Claude'
         ? 'Orfeo (Claude)'
-        : canonicalVoice === 'Pi'
-          ? 'Pi'
+        : canonicalVoice === 'Gemini'
+          ? 'Gemini'
           : actor;
     postToCrewFeed(
       voiceName,
@@ -7529,7 +7584,7 @@ app.get('/api/vector', (req: Request, res: Response) => {
 
 app.get('/api/risks', (req: Request, res: Response) => {
   try {
-    const shadowPath = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+    const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
     const risks: any[] = [];
 
     // 1. Risks from Shadow Log
@@ -7623,11 +7678,11 @@ app.get('/api/risks', (req: Request, res: Response) => {
 app.get('/api/events', (req: Request, res: Response) => {
   const query = (req.query.query as string || '').trim();
   if (!query) return res.json({ query, hits: [] });
-  
+
   try {
-    const shadowPath = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
-    const globalPath = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_LOG.md');
-    const glitchPath = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+    const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
+    const globalPath = ARGOS_GLOBAL_LOG_PATH;
+    const glitchPath = ARGOS_GLOBAL_GLITCH_PATH;
     const feedPath = path.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
     const eventsPath = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
     const glitchesJsonPath = path.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
@@ -8565,7 +8620,7 @@ const PROXY_TARGETS: Record<string, string> = {
 
 const PROXY_AGENTS: Record<string, string> = {
   anthropic: 'Claude',
-  gemini:    'Pi',
+  gemini:    'Gemini',
   openai:    'Codex',
 };
 
@@ -9025,7 +9080,7 @@ function runArgosDispatcher() {
       !!packetId && inProgressFiles.some(f => f.includes(packetId));
 
     let stateChanged = false;
-    (['Claude', 'Pi', 'Codex', 'OpenClaw'] as const).forEach(agent => {
+    CANONICAL_PROTOCOL_ACTORS.forEach(agent => {
       const s = iaStatus[agent];
       if (s.status === 'active' && s.task && !isActuallyInProgress(s.task)) {
         console.log(`[DISPATCHER] Status stale detectado â€” ${agent} en ${s.task} (no estÃ¡ en in_progress). Reseteando.`);
@@ -9047,7 +9102,7 @@ function runArgosDispatcher() {
  * MOTOR AUTONOMO: LOLA (VIGIA DE LA SOMBRA)
  */
 function runLolaShadowScanner() {
-    const shadowPath = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+    const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
     if (!fs.existsSync(shadowPath)) return;
 
     try {
