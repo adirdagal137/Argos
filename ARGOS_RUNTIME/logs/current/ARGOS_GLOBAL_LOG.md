@@ -5,6 +5,59 @@ Archivo activo de sesion. Ultimo reset: 2026-04-17 12:17 Atlantic/Canary.
 ---
 
 ---
+**[2026-04-27 15:45 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
+**MISION:** Endpoint canónico /api/ia/state + canonización estructural de endpoints
+**WORK PACKET:** ARG-1777293327727
+
+**DETALLES:**
+Implementación completa del endpoint canónico de estado por IA, solicitado por ChatGPT.
+
+1. Tipo `IaAgentStatus` extendido con 5 campos opcionales v2: `availability`, `current_packet`, `current_theme`, `last_interaction_summary`, `source`. Backward compatible — campos legacy coexisten.
+2. `POST /api/ia/state` — nuevo endpoint canónico. Acepta los 8 campos del WP. Mapea `availability` → `status` legacy. No borra campos ricos existentes (spread defensivo). Publica evento `ia:state_updated`.
+3. `GET /api/ia/state` — alias de GET /api/ia/status, devuelve mapa completo con campos v2.
+4. `GET /api/ia/state/:actor` — devuelve estado de un agente concreto.
+5. `setIaActive` / `setIaStandby` actualizados: preservan campos ricos con spread antes de sobrescribir (antes borraban todo el objeto).
+6. `/api/ia/status` (GET+POST) marcados como LEGACY con comentario explícito.
+7. `ARGOS_RUNTIME/docs/api/ENDPOINTS_CANONICAL.md` creado: mapa completo de endpoints, mapeo legacy→canónico, ejemplo de cierre con state update.
+
+**SIGUIENTE:** Capitán reinicia argos-api para aplicar. Notificar a Codex y ChatGPT del nuevo endpoint.
+**APRENDIZAJE:** `setIaStandby` borraba completamente el objeto con un literal plano — cualquier campo rico (source, last_interaction_summary) se perdía en cada transición a standby. El spread defensivo `{...ia[agent], ...}` es el patrón correcto para endpoints de estado parcial.
+**GLITCHES:** Ninguno.
+**RIESGOS:** Ninguno — cambio additive, sin breaking changes para clientes existentes.
+
+---
+**[2026-04-27 14:30 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
+**MISION:** Reforma constitucional del protocolo de cierre — HANDOFF obligatorio, LOG enriquecido, TOKENS desactivado
+**WORK PACKET:** DIRECTO-CAPITAN-20260427 (orden verbal, sin packet formal)
+
+**DETALLES:**
+Diagnóstico completo de puntos de corrupción del protocolo de cierre tras reporte de Codex
+("Closure hecho. Quedó escrito en LOG, EVENTS, TOKENS, SHADOW y FEED").
+Fuentes auditadas: SKILL.md new-session-cowork, ARGOS_QUICKSTART.md, INTER_AI_PROTOCOL.md,
+REMOTE_CLOSURE_SETUP.md, argos-api/src/index.ts.
+
+Cambios aplicados:
+1. INTER_AI_PROTOCOL.md v1.6 → v1.7: orden canónico LOG→SHADOW→HANDOFF→EVENTS→FEED documentado.
+   Tabla de validaciones actualizada con HANDOFF obligatorio. Sección 4 TOKENS marcada DESACTIVADA.
+   Mapeo canónico y resumen ejecutivo actualizados. Campos LOG (SIGUIENTE, APRENDIZAJE, GLITCHES, RIESGOS) añadidos.
+2. ARGOS_QUICKSTART.md: CLOSE section actualizada con payload correcto, HANDOFF obligatorio explícito.
+3. REMOTE_CLOSURE_SETUP.md: payload example actualizado con sections.handoff completo.
+4. argos-api/src/index.ts: sections.handoff cambiado de opcional a OBLIGATORIO (400 si ausente).
+   Guard defensivo añadido en el handler para el caso de bypass.
+5. ARGOS_GLOBAL_HANDOFF_LOG.md: creado (no existía).
+6. new-session-cowork_SKILL_UPDATED.md: creado en workspace para copia manual.
+
+**SIGUIENTE:** Capitán copia new-session-cowork_SKILL_UPDATED.md al directorio del skill.
+Codex debe actualizar su closure para incluir sections.handoff (sus closures fallarán con 400 sin él).
+Crear work packet formal para esta reforma (tipo protocol, P1).
+**APRENDIZAJE:** El handoff ya estaba implementado en la API pero era opcional. El código y los docs
+estaban desincronizados — la API no rechazaba lo que los docs decían ser obligatorio.
+El comentario "// Campo handoff opcional" en index.ts era la fuente de corrupción principal.
+**GLITCHES:** SKILL.md en AppData no es editable desde Cowork (fuera del área conectada).
+**RIESGOS:** Codex empezará a recibir 400 en closures hasta que incluya sections.handoff.
+Coordinar con Capitán cuándo activar el nuevo index.ts (requiere restart de argos-api).
+
+---
 **[2026-04-26 20:00 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
 **MISION:** Auditoría estructural de Argos — saneamiento de estado, legacy, protocolos y memoria operativa
 **WORK PACKET:** ARG-1777224272203
@@ -414,3 +467,73 @@ ARG-20260418-0220 completo. ARGOS_SYSTEM_INSTRUCTIONS_UNIFIED.md: 8 secciones po
 
 **DETALLES:**
 [TEST-TRILOG] Verificando escritura en logs/current/ tras migracion.
+
+---
+**[2026-04-27 00:30 Atlantic/Canary] VOZ CLAUDE:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-20260426-LOG-MIGRATION
+
+**DETALLES:**
+Migracion completada: LOGS_CURRENT_DIR en index.ts, tres logs vivos a logs/current/, gemini_append_bridge y merge_argos_history actualizados, seis docs con rutas corregidas. Build OK, delta +236 bytes confirma escritura correcta.
+
+---
+**[2026-04-27 00:25 Atlantic/Canary] VOZ GEMINI:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-CODEX-VALID-SMOKE
+
+**DETALLES:**
+Valid deposit smoke test for ARG-REFORM-BITACORA-001-IMPL.
+
+---
+**[2026-04-27 00:23 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Actores canonicos y ORPHAN implementados en index.ts
+**WORK PACKET:** ARG-REFORM-ACTORS-001
+
+**DETALLES:**
+NormalizeAgentName, IaStatusMap, live-state, start-task, token proxy y guardia ORPHAN quedan alineados con actores canonicos Claude/Codex/Gemini/ChatGPT/OpenClaw/Qwen. Rebuild aplicado y argos-api reiniciado por PM2.
+
+**SIGUIENTE:** Revisar si el dashboard debe ocultar definitivamente la key legacy Pi en cualquier cache visual restante.
+
+**RIESGOS:** El runtime tenia cambios previos y logs vivos; el commit se limito a argos-api/src/index.ts y argos-api/dist/index.js.
+
+---
+**[2026-04-27 00:24 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Validaciones ORPHAN verificadas en heartbeat y closure
+**WORK PACKET:** ARG-REFORM-BITACORA-001-IMPL
+
+**DETALLES:**
+Se verifico deposito sin packet_id, deposito con actor legacy Antigravity, rechazo de /api/remote/closure con ChatAgent y deposito valido con Gemini integrado. Los invalidos fueron a processed/__orphan_* y generaron glitches G-223/G-224.
+
+**SIGUIENTE:** Mantener los depositos de smoke en processed como evidencia, o limpiarlos si el Capitan prefiere dejar el runtime sin pruebas manuales.
+
+**RIESGOS:** Las pruebas manuales escribieron entradas reales de smoke en logs/feed/glitches del runtime.
+
+---
+**[2026-04-27 00:43 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Auditoria bitacora webapp y ruta handoff
+**WORK PACKET:** ARG-1777236123247-959
+
+**DETALLES:**
+Bitacora auditada: API lee log/shadow/glitch desde logs/current/events, handoff pasa a logs/current/ARGOS_GLOBAL_HANDOFF_LOG.md, carpeta legacy handoffs movida a ARGOS_RUNTIME/legacy/handoffs. UI actualizada con columna Glitches, placeholders reflexivos, expansion horizontal y guardia anti-race de proyecto.
+
+**RIESGOS:** Hay logs runtime ya modificados por pruebas y cierres previos; no los limpie. ARGOS_GLOBAL_HANDOFF_LOG.md no se crea hasta el primer handoff real.
+
+---
+**[2026-04-26T23:47:23.000Z] [Claude/Orfeo] CORRECCIÓN — timestamp en closures**
+
+Detectado por el Capitán: los closures remotos de Claude llevaban timestamp hardcodeado en lugar del reloj real. Resultado visible: mensajes en feed con ~15 min de adelanto respecto a la hora real.
+
+**Fix aplicado (comportamiento, no código):** a partir de esta sesión, todos los closures usan `$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")` para generar el timestamp dinámicamente.
+
+Ref: packet ARG-1777238885175 (inbox) — registra el mismo defecto para seguimiento.
+
+
+---
+**[2026-04-27 13:19 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Iteracion UX Bitacora Trilog
+**WORK PACKET:** ARG-1777236123247-959
+
+**DETALLES:**
+Se reorganizo la Bitacora Trilog a 8 columnas canonicas: Timestamp, ID, Voz, Mision, Log, Sombra, Handoff y Detalles. La columna Detalles agrupa Siguiente, Aprendizaje, Riesgos y Glitches. Se documento el modelo visual en WEBAPP_LOGBOOK_READ_MODEL.md, se actualizo REGISTRY.md y versions.json, y se dejo nota de deuda sobre renombrar logs/current a logs/ o bitacora/. La interaccion de fila/celda quedo funcional con overlay adaptativo, aunque el pulido exacto de posicion y anchuras queda aparcado por coste de iteracion.
+
+**RIESGOS:** Worktree con cambios runtime previos no relacionados. La migracion fisica de logs/current queda solo anotada, no ejecutada. La UX de overlay queda aceptable provisionalmente, no definitiva.

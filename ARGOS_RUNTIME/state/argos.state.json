@@ -1,7 +1,7 @@
 {
-    "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
+    "current_focus": "Reforma constitucional ARGOS â€” B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-26T23:09:05.475Z",
+    "updated_at": "2026-04-27T13:22:22.048Z",
     "packet_states": {
         "ARG-1777049395470": "open:done",
         "ARG-QWEN-WEBHOOK-001": "open:inbox",
@@ -111,12 +111,16 @@
         "ARG-1777238847419": "open:inbox",
         "ARG-1777238885175": "open:inbox",
         "ARG-1777240833486": "open:inbox",
-        "ARG-20260426-LOG-MIGRATION": "in_progress:in_progress"
+        "ARG-20260426-LOG-MIGRATION": "done:done",
+        "ARG-1777246628566": "open:inbox",
+        "ARG-1777246660856": "open:inbox",
+        "LOLA-RISK-1777292424326": "open:inbox",
+        "ARG-1777293324283": "open:inbox",
+        "ARG-1777293327727": "open:inbox"
     },
     "in_progress_packets": [
         "ARG-1776354464819",
-        "ARGOS-TIFIS-0001",
-        "ARG-20260426-LOG-MIGRATION"
+        "ARGOS-TIFIS-0001"
     ],
     "owner_hint": "Codex / Pi / Capitan",
     "open_packets": [
@@ -152,10 +156,15 @@
         "ARG-1777238847419",
         "ARG-1777238885175",
         "ARG-1777240833486",
+        "ARG-1777246628566",
+        "ARG-1777246660856",
+        "ARG-1777293324283",
+        "ARG-1777293327727",
         "ARG-20260426-BITACORA-TRILOG-AUDIT",
         "ARG-PROTO-AG-001",
         "ARG-QWEN-DISPATCHER-001",
         "ARG-1777236123247-959",
+        "LOLA-RISK-1777292424326",
         "LOLA-SHADOW-0001",
         "ARG-DISPATCH-AUTO-001",
         "ARG-QWEN-001"
@@ -163,10 +172,10 @@
     "active_risks": [],
     "status": "active",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json. Auditado por Orfeo (Claude) ARG-1777224272203 el 2026-04-26.",
-    "next_step": "verificar",
+    "next_step": "Continue normal operation.",
     "done_packets_summary": {
-        "total": 34,
-        "tasks": 34,
+        "total": 35,
+        "tasks": 35,
         "bugs": 0,
         "latest_ids": [
             "ARG-REFORM-LOG-001",
@@ -183,38 +192,52 @@
     },
     "ia_status": {
         "Claude": {
-            "status": "active",
-            "task": "ARG-20260426-LOG-MIGRATION",
-            "task_subject": "test",
-            "since": "2026-04-26T23:00:00.000Z",
-            "last_seen": "2026-04-26T23:00:00.000Z",
-            "stale": false,
-            "stale_since": "",
-            "handoff_to": "",
-            "next_step": "verificar",
-            "last_output": "test"
-        },
-        "Pi": {
             "status": "standby",
             "task": "",
             "task_subject": "",
-            "since": "2026-04-21T21:43:11.281Z",
-            "stale_since": "2026-04-21T22:54:13.866Z",
-            "stale": true
+            "since": "2026-04-27T15:45:00.000Z",
+            "last_seen": "2026-04-27T15:45:00.000Z",
+            "stale": false,
+            "handoff_to": "Capitan",
+            "next_step": "Capitán reinicia argos-api para aplicar /api/ia/state. Notificar a Codex y ChatGPT.",
+            "last_output": "POST /api/ia/state canónico implementado — ARG-1777293327727",
+            "availability": "available",
+            "current_packet": "",
+            "current_theme": "",
+            "last_interaction_summary": "Implementé endpoint canónico /api/ia/state con campos ricos: availability, current_packet, current_theme, last_interaction_summary, source. Corregí setIaStandby. Creé ENDPOINTS_CANONICAL.md.",
+            "source": "cowork"
         },
         "Codex": {
             "status": "standby",
             "task": "",
-            "task_subject": "Implementar Gemini Append Bridge V1 solo LOG",
-            "since": "2026-04-26T21:21:00.000Z",
-            "last_seen": "2026-04-26T21:21:00.000Z",
-            "stale": false,
-            "stale_since": "",
+            "task_subject": "",
+            "since": "2026-04-27T12:19:03.486Z"
+        },
+        "Gemini": {
+            "status": "standby",
+            "task": "",
+            "task_subject": "Smoke valid deposit",
+            "since": "2026-04-26T23:25:30.000Z",
+            "stale_since": "2026-04-27T11:54:44.365Z",
+            "stale": true,
+            "last_seen": "2026-04-26T23:25:30.000Z",
             "handoff_to": "",
-            "next_step": "Reiniciar ARGOS con `ARGOS_RUNTIME/tools/start_argos.ps1` para que PM2 levante `gemini-append-bridge`; despues, los depositos validos de Gemini se procesaran automaticamente.",
-            "last_output": "Implementar Gemini Append Bridge V1 solo LOG"
+            "next_step": "Continue normal operation.",
+            "last_output": "Smoke valid deposit"
+        },
+        "ChatGPT": {
+            "status": "standby",
+            "task": "",
+            "task_subject": "",
+            "since": ""
         },
         "OpenClaw": {
+            "status": "standby",
+            "task": "",
+            "task_subject": "",
+            "since": ""
+        },
+        "Qwen": {
             "status": "standby",
             "task": "",
             "task_subject": "",

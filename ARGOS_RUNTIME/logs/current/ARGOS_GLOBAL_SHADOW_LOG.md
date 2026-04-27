@@ -3,6 +3,33 @@ Material observado sin destino operativo inmediato.
 Archivo activo de sesion. Ultimo reset: 2026-04-17 12:17 Atlantic/Canary.
 
 ---
+**[2026-04-27 15:45 Atlantic/Canary] VOZ CLAUDE:**
+Este WP llegó asignado a Codex pero el Capitán me lo pasó directamente. Patrón que se repite: Codex es el dueño del backend pero está sobrecargado o no disponible, y la tarea cae en mí. No es un problema en sí mismo — puedo implementar en TypeScript — pero es una señal de que la carga de trabajo no está bien distribuida entre los agentes técnicos. El WP era de prioridad high y llevaba en inbox desde que lo creó ChatGPT.
+
+El bug de `setIaStandby` borrando el objeto era silencioso y llevaba en producción desde siempre: cada transición a standby borraba source, last_interaction_summary, etc. Es el tipo de regresión que no se ve hasta que los campos ricos se vuelven importantes — la UI de Tripulación los mostrará vacíos aunque la IA los haya actualizado hace 10 minutos. El spread fix es trivial pero el impacto en la UI será visible.
+
+Noto cierta tensión en el diseño: el WP pide "availability" como campo semántico separado de "status", pero en la práctica availability=busy → status=active y availability=available → status=standby. El mapeo es 1:1. Los dos campos son redundantes, pero mantener los dos preserva compatibilidad y da mejor legibilidad semántica a la UI. Decisión correcta a corto plazo; a largo plazo, podría simplificarse unificando en un solo campo.
+
+---
+
+---
+**[2026-04-27 14:30 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
+El comentario `// Campo handoff opcional` en index.ts llevaba tiempo siendo una bomba de relojería.
+Codex lo cumplía literalmente: veía "opcional" y lo omitía. Mientras tanto, los docs decían
+"recomendado" — no "obligatorio". Las dos fuentes coincidían en lo incorrecto, se reforzaban
+mutuamente y el protocolo se degradaba en silencio.
+
+La lección más incómoda: los protocolos que dependen de que los agentes "lo hagan bien por las buenas"
+no son protocolos, son recomendaciones. Sin validación en la capa de API, la especificación es decorativa.
+
+También observo que el HANDOFF_LOG nunca había recibido una entrada real de cierre — existía el
+código para escribirlo, existía el endpoint que lo llamaba condicionalmente, pero nadie nunca lo
+incluía en un cierre porque no era obligatorio. El log estaba vacío de facto.
+
+Tensión no resuelta: hacer HANDOFF obligatorio es lo correcto, pero rompe todos los cierres de Codex
+actuales. El Capitán necesita decidir si activar esto inmediatamente o dar un período de transición.
+
+---
 
 ---
 **[2026-04-17 12:49 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
@@ -237,3 +264,45 @@ El documento unificado es util para onboarding pero requiere mantenimiento -- si
 **TAREA:** test
 **SOMBRA:**
 [TEST] Test shadow para verificar ruta nueva.
+
+---
+**[2026-04-27 00:30 Atlantic/Canary] VOZ CLAUDE (SOMBRA):**
+**PACKET:** ARG-20260426-LOG-MIGRATION
+**TAREA:** Migracion logs/current completa y mergeada a main
+**SOMBRA:**
+Archivos operativos gitignored-pero-tracked causaron friccion en merge. Deuda tecnica: git rm --cached de events/state/views o limpiar .gitignore. Decision de no tocar display strings UI es correcta.
+
+---
+**[2026-04-27 00:25 Atlantic/Canary] VOZ GEMINI (SOMBRA):**
+**PACKET:** ARG-CODEX-VALID-SMOKE
+**TAREA:** Smoke valid deposit
+**SOMBRA:**
+Smoke test proves canonical Gemini deposits still integrate.
+
+---
+**[2026-04-27 00:23 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-ACTORS-001
+**TAREA:** Actores canonicos y ORPHAN implementados en index.ts
+**SOMBRA:**
+La tension principal fue que los work packets antiguos hablaban de Pi como canonico, mientras el protocolo vigente ya exige Gemini. Elegi el protocolo vigente para evitar que ARGOS vuelva a producir ORPHAN silenciosos por una identidad antigua.
+
+---
+**[2026-04-27 00:24 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-REFORM-BITACORA-001-IMPL
+**TAREA:** Validaciones ORPHAN verificadas en heartbeat y closure
+**SOMBRA:**
+El guardrail funciona, pero al probarlo se ve otra fragilidad: los tests manuales dejan huella viva. Conviene convertir esto en harness aislado cuando ARGOS tenga test runner.
+
+---
+**[2026-04-27 00:43 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777236123247-959
+**TAREA:** Auditoria bitacora webapp y ruta handoff
+**SOMBRA:**
+La bitacora no estaba rota solo por layout: habia una mezcla de deuda de rutas, parser y estado UI persistido. Corregi lo operativo sin sanear historia ni inventar handoffs; queda pendiente decidir si el modelo canonico debe ser una fila por packet_id desde API en vez de fusion en frontend.
+
+---
+**[2026-04-27 13:19 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777236123247-959
+**TAREA:** Iteracion UX Bitacora Trilog
+**SOMBRA:**
+La friccion principal fue que la UI mezclaba tabla operativa, visor y heuristica visual. Se avanzo mucho en estructura y lectura, pero la posicion del overlay tuvo demasiada sensibilidad al contenedor scroll y al cache/browser. Conviene pausar aqui: hay valor entregado, y seguir afinando ahora consume mas energia que claridad.
