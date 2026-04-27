@@ -1,8 +1,8 @@
 {
   "argos_version": "0.4.0",
-  "last_updated": "2026-04-26",
-  "updated_by": "Claude",
-  "packet_ref": "ARG-20260426-DOC-CONTEXT-HYGIENE",
+  "last_updated": "2026-04-27",
+  "updated_by": "Codex",
+  "packet_ref": "ARG-1777293324283",
   "documents": {
     "argos-quickstart": {
       "path": "ARGOS_RUNTIME/ARGOS_QUICKSTART.md",
@@ -42,12 +42,12 @@
     },
     "registry": {
       "path": "ARGOS_RUNTIME/REGISTRY.md",
-      "version": "2.0.0",
+      "version": "2.2.0",
       "status": "active",
       "tier": 2,
-      "owner": "Claude",
-      "last_updated": "2026-04-26",
-      "summary": "Indice documental del runtime con rutas y descripcion por categoria."
+      "owner": "Codex",
+      "last_updated": "2026-04-27",
+      "summary": "Indice documental del runtime con bitacora/ y cubierta/ como superficies canonicas."
     },
     "remote-closure-setup": {
       "path": "ARGOS_RUNTIME/docs/protocols/REMOTE_CLOSURE_SETUP.md",
@@ -57,6 +57,24 @@
       "owner": "Codex",
       "last_updated": "2026-04-21",
       "summary": "Setup de cierre remoto: tuneles, tokens de agente, instrucciones por interfaz."
+    },
+    "webapp-logbook-read-model": {
+      "path": "ARGOS_RUNTIME/docs/protocols/WEBAPP_LOGBOOK_READ_MODEL.md",
+      "version": "1.0.0",
+      "status": "active",
+      "tier": 2,
+      "owner": "Codex",
+      "last_updated": "2026-04-27",
+      "summary": "Modelo visual canonico de Bitacora Trilog en dashboard: fuentes, columnas, detalles compuestos e interaccion."
+    },
+    "runtime-canonical-surface": {
+      "path": "ARGOS_RUNTIME/docs/protocols/RUNTIME_CANONICAL_SURFACE.md",
+      "version": "1.0.0",
+      "status": "active",
+      "tier": 2,
+      "owner": "Codex",
+      "last_updated": "2026-04-27",
+      "summary": "Contrato de rutas canonicas bitacora/ y cubierta/, compatibilidad legacy y plan de deprecacion."
     },
     "claude-md": {
       "path": "CLAUDE.md",
