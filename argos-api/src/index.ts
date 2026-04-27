@@ -1872,6 +1872,12 @@ type IaAgentStatus = {
   handoff_to?: string;
   next_step?: string;
   last_output?: string;
+  // Campos can?nicos v2 ? memoria operacional enriquecida (POST /api/ia/state)
+  availability?: 'available' | 'busy' | 'offline' | 'restricted';
+  current_packet?: string;
+  current_theme?: string;
+  last_interaction_summary?: string;
+  source?: string;
 };
 type IaStatusMap = Record<CanonicalProtocolActor, IaAgentStatus>;
 
@@ -1899,7 +1905,16 @@ function setIaActive(actor: string, packetId: string, subject: string): void {
   if (!agent) return;
   const state = readArgosState();
   const ia = readIaStatus(state);
-  ia[agent] = { status: 'active', task: packetId, task_subject: subject, since: new Date().toISOString() };
+  ia[agent] = {
+    ...ia[agent],                  // preservar campos ricos (v2)
+    status: 'active',
+    task: packetId,
+    task_subject: subject,
+    since: new Date().toISOString(),
+    availability: 'busy',
+    current_packet: packetId,
+    current_theme: subject
+  };
   (state as Record<string, unknown>).ia_status = ia;
   writeArgosState(state);
 }
@@ -1909,7 +1924,16 @@ function setIaStandby(actor: string): void {
   if (!agent) return;
   const state = readArgosState();
   const ia = readIaStatus(state);
-  ia[agent] = { status: 'standby', task: '', task_subject: '', since: new Date().toISOString() };
+  ia[agent] = {
+    ...ia[agent],                  // preservar campos ricos (v2: source, last_interaction_summary, etc.)
+    status: 'standby',
+    task: '',
+    task_subject: '',
+    since: new Date().toISOString(),
+    availability: 'available',
+    current_packet: '',
+    current_theme: ''
+  };
   (state as Record<string, unknown>).ia_status = ia;
   writeArgosState(state);
 }
@@ -7324,7 +7348,8 @@ app.post('/api/ia/start-task', (req: Request, res: Response) => {
   }
 });
 
-// ============ ENDPOINT: IA Status manual (GET + POST) ============
+// ============ ENDPOINT: IA Status manual (GET + POST) ? LEGACY ============
+// Mantenido por compatibilidad. Preferir /api/ia/state para nuevos clientes.
 app.get('/api/ia/status', (_req: Request, res: Response) => {
   const state = readArgosState();
   const baseStatus = readIaStatus(state);
@@ -7347,6 +7372,87 @@ app.post('/api/ia/status', (req: Request, res: Response) => {
   const agent = normalizeAgentName(actor);
   publishEvent('ia:status_changed', { agent, status, task, subject: task_subject });
   return res.json({ status: 'ok', agent, ia_status: status });
+});
+
+// ============ ENDPOINT CAN?NICO v2: /api/ia/state ============
+// Memoria operacional enriquecida. Permite que cada IA declare su estado completo.
+// Campos: actor, availability, current_packet, current_theme,
+//         last_interaction_summary, next_step, source, last_seen
+app.get('/api/ia/state', (_req: Request, res: Response) => {
+  const state = readArgosState();
+  const baseStatus = readIaStatus(state);
+  const inferredStatus = inferIaStatusFromTasks(baseStatus);
+  res.json({ ia_status: inferredStatus });
+});
+
+app.get('/api/ia/state/:actor', (req: Request, res: Response) => {
+  const actorParam = req.params.actor;
+  const agent = normalizeAgentName(actorParam);
+  if (!agent) return res.status(404).json({ error: `actor '${actorParam}' no reconocido` });
+  const state = readArgosState();
+  const baseStatus = readIaStatus(state);
+  const inferredStatus = inferIaStatusFromTasks(baseStatus);
+  const agentStatus = inferredStatus[agent];
+  if (!agentStatus) return res.status(404).json({ error: 'agent no encontrado en ia_status' });
+  return res.json({ agent, ia_status: agentStatus });
+});
+
+app.post('/api/ia/state', (req: Request, res: Response) => {
+  const {
+    actor,
+    availability,
+    current_packet,
+    current_theme,
+    last_interaction_summary,
+    next_step,
+    source,
+    last_seen
+  } = req.body;
+
+  if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor))) return;
+  if (!actor) return res.status(400).json({ error: 'actor requerido' });
+
+  const agent = normalizeAgentName(actor);
+  if (!agent) return res.status(400).json({ error: `actor '${actor}' no reconocido` });
+
+  // Mapear availability ? status legacy para compatibilidad
+  const availToStatus: Record<string, IaAgentStatus['status']> = {
+    available: 'standby',
+    busy: 'active',
+    offline: 'standby',
+    restricted: 'restricted'
+  };
+  const resolvedStatus: IaAgentStatus['status'] = availToStatus[availability] ?? 'standby';
+  const resolvedAvailability: IaAgentStatus['availability'] = availability ?? (resolvedStatus === 'active' ? 'busy' : 'available');
+
+  const now = new Date().toISOString();
+  const stateDoc = readArgosState();
+  const ia = readIaStatus(stateDoc);
+
+  ia[agent] = {
+    ...ia[agent],                              // preservar campos existentes no sobreescritos
+    status: resolvedStatus,
+    task: current_packet ?? ia[agent].task ?? '',
+    task_subject: current_theme ?? ia[agent].task_subject ?? '',
+    since: ia[agent].since || now,
+    last_seen: last_seen ?? now,
+    ...(next_step !== undefined && { next_step }),
+    ...(last_interaction_summary !== undefined && { last_output: last_interaction_summary }),
+    // campos can?nicos v2
+    availability: resolvedAvailability,
+    current_packet: current_packet ?? ia[agent].current_packet ?? ia[agent].task ?? '',
+    current_theme: current_theme ?? ia[agent].current_theme ?? ia[agent].task_subject ?? '',
+    ...(last_interaction_summary !== undefined && { last_interaction_summary }),
+    ...(source !== undefined && { source }),
+    ...(next_step !== undefined && { next_step })
+  };
+
+  (stateDoc as Record<string, unknown>).ia_status = ia;
+  writeArgosState(stateDoc);
+
+  publishEvent('ia:state_updated', { agent, availability: resolvedAvailability, current_packet, source });
+
+  return res.json({ status: 'ok', agent, ia_status: ia[agent] });
 });
 
 // ============ ENDPOINT: GET /api/ia/bootstrap ============
