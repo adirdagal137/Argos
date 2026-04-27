@@ -1,7 +1,7 @@
 {
     "current_focus": "Reforma constitucional ARGOS â€” B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-27T13:22:22.048Z",
+    "updated_at": "2026-04-27T13:36:22.206Z",
     "packet_states": {
         "ARG-1777049395470": "open:done",
         "ARG-QWEN-WEBHOOK-001": "open:inbox",
@@ -115,7 +115,7 @@
         "ARG-1777246628566": "open:inbox",
         "ARG-1777246660856": "open:inbox",
         "LOLA-RISK-1777292424326": "open:inbox",
-        "ARG-1777293324283": "open:inbox",
+        "ARG-1777293324283": "done:done",
         "ARG-1777293327727": "open:inbox"
     },
     "in_progress_packets": [
@@ -158,7 +158,6 @@
         "ARG-1777240833486",
         "ARG-1777246628566",
         "ARG-1777246660856",
-        "ARG-1777293324283",
         "ARG-1777293327727",
         "ARG-20260426-BITACORA-TRILOG-AUDIT",
         "ARG-PROTO-AG-001",
@@ -172,10 +171,10 @@
     "active_risks": [],
     "status": "active",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json. Auditado por Orfeo (Claude) ARG-1777224272203 el 2026-04-26.",
-    "next_step": "Continue normal operation.",
+    "next_step": "Revisar rama/PR y decidir politica sobre artefactos runtime",
     "done_packets_summary": {
-        "total": 35,
-        "tasks": 35,
+        "total": 36,
+        "tasks": 36,
         "bugs": 0,
         "latest_ids": [
             "ARG-REFORM-LOG-001",
@@ -210,8 +209,14 @@
         "Codex": {
             "status": "standby",
             "task": "",
-            "task_subject": "",
-            "since": "2026-04-27T12:19:03.486Z"
+            "task_subject": "Commits parciales y push de rama completados",
+            "since": "2026-04-27T13:35:58.119Z",
+            "last_seen": "2026-04-27T13:35:58.119Z",
+            "stale": false,
+            "stale_since": "",
+            "handoff_to": "",
+            "next_step": "Revisar rama/PR y decidir politica sobre artefactos runtime",
+            "last_output": "Commits parciales y push de rama completados"
         },
         "Gemini": {
             "status": "standby",

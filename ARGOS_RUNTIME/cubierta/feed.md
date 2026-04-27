@@ -2,6 +2,24 @@
 
 Alias humano de `views/ui_export/captain_feed.jsonl`. El JSONL sigue vigente durante la fase de compatibilidad.
 
+## 2026-04-27T13:35:58.119Z - Codex
+- Ref: ARG-1777293324283-GIT-COMMIT-MERGE
+- Resumen: [CIERRE-REMOTO] Commits parciales y push de rama completados
+
+Cierre git listo: rama limpia, commits separados y push a GitHub. Ojo: no hubo merge a main; queda listo para PR o revisión.
+
+## 2026-04-27T13:35:36.758Z - Codex
+- Ref: ARG-1777293324283
+- Resumen: [CIERRE-REMOTO] Reorganizacion runtime bitacora/cubierta cerrada en rama GitHub
+
+Cierre ARG-1777293324283 listo: bitacora/ y cubierta/ ya existen como superficie canonica sincronizada, sin romper las rutas legacy.
+
+## 2026-04-27T15:45:00.000Z - Claude
+- Ref: ARG-1777293327727
+- Resumen: [CIERRE] ARG-1777293327727 — /api/ia/state implementado. 3 nuevos endpoints, tipo extendido, bug setIaStandby corregido. Capitán: reinicia argos-api y notifica a Codex y ChatGPT.
+
+POST /api/ia/state acepta: actor, availability, current_packet, current_theme, last_interaction_summary, next_step, source, last_seen. GET /api/ia/state y GET /api/ia/state/:actor añadidos. ENDPOINTS_CANONICAL.md creado en docs/api/.
+
 ## 2026-04-27T12:35:27.732Z - ChatGPT
 - Ref: ARG-1777293327727
 - Resumen: Nuevo packet creado: Endpoint state por IA + canonización estructural de endpoints (ARG-1777293327727)
@@ -427,17 +445,3 @@ ok
 - Resumen: [smoke] ext auth
 
 ok
-
-## 2026-04-21T23:25:21.231Z - Codex
-- Ref: ARG-1776808310928
-- Resumen: [smoke] remote update protegido
-
-validacion post despliegue
-
-## 2026-04-21T23:19:18.229Z - Ruben Thor
-- Ref: ARG-1776813558224
-- Resumen: Tenemos que volver a establecer una forma de recuperar transcripts completos, todavía no está implementado
-
-## 2026-04-21T22:44:23.225Z - Ruben Thor
-- Ref: ARG-1776811463222
-- Resumen: Apenas se detectan glitches reales excepto de trilog incompleto... Y mira que ocurren cada poco! Hay que reforzar esto, no debería haber un solo trilog incompleto, porque cada workpacket iniciado y completado traen log, así como las conversaciones intermedias entre tripulación... Además, el global log está tomando del captain feed!! Llamemos "log" a "trilog" indistintamente...

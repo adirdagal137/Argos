@@ -3,6 +3,14 @@ Material observado sin destino operativo inmediato.
 Archivo activo de sesion. Ultimo reset: 2026-04-17 12:17 Atlantic/Canary.
 
 ---
+**[2026-04-27 15:45 Atlantic/Canary] VOZ CLAUDE:**
+Este WP llegó asignado a Codex pero el Capitán me lo pasó directamente. Patrón que se repite: Codex es el dueño del backend pero está sobrecargado o no disponible, y la tarea cae en mí. No es un problema en sí mismo — puedo implementar en TypeScript — pero es una señal de que la carga de trabajo no está bien distribuida entre los agentes técnicos. El WP era de prioridad high y llevaba en inbox desde que lo creó ChatGPT.
+
+El bug de `setIaStandby` borrando el objeto era silencioso y llevaba en producción desde siempre: cada transición a standby borraba source, last_interaction_summary, etc. Es el tipo de regresión que no se ve hasta que los campos ricos se vuelven importantes — la UI de Tripulación los mostrará vacíos aunque la IA los haya actualizado hace 10 minutos. El spread fix es trivial pero el impacto en la UI será visible.
+
+Noto cierta tensión en el diseño: el WP pide "availability" como campo semántico separado de "status", pero en la práctica availability=busy → status=active y availability=available → status=standby. El mapeo es 1:1. Los dos campos son redundantes, pero mantener los dos preserva compatibilidad y da mejor legibilidad semántica a la UI. Decisión correcta a corto plazo; a largo plazo, podría simplificarse unificando en un solo campo.
+
+---
 
 ---
 **[2026-04-27 14:30 Atlantic/Canary] VOZ ORFEO (CLAUDE):**
@@ -298,3 +306,17 @@ La bitacora no estaba rota solo por layout: habia una mezcla de deuda de rutas, 
 **TAREA:** Iteracion UX Bitacora Trilog
 **SOMBRA:**
 La friccion principal fue que la UI mezclaba tabla operativa, visor y heuristica visual. Se avanzo mucho en estructura y lectura, pero la posicion del overlay tuvo demasiada sensibilidad al contenedor scroll y al cache/browser. Conviene pausar aqui: hay valor entregado, y seguir afinando ahora consume mas energia que claridad.
+
+---
+**[2026-04-27 14:35 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777293324283
+**TAREA:** Reorganizacion runtime bitacora/cubierta cerrada en rama GitHub
+**SOMBRA:**
+La tension principal fue distinguir arquitectura de higiene: el paquete pedia canonizar rutas, pero el runtime estaba vivo y mezclado con logs, state, dashboard y endpoints vecinos. La decision conservadora protege continuidad: primero dar una cubierta legible, luego mover plumas de escritura cuando todos los consumidores esten identificados.
+
+---
+**[2026-04-27 14:35 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777293324283-GIT-COMMIT-MERGE
+**TAREA:** Commits parciales y push de rama completados
+**SOMBRA:**
+El cierre git fue menos una maniobra mecanica que una limpieza de sedimentos: habia cambios staged, cambios runtime, cambios dashboard y la nueva arquitectura todos en la misma corriente. Separarlos en commits legibles reduce el miedo al merge, pero deja una pregunta politica para revision: que parte del runtime vivo debe entrar al repositorio canonico y que parte deberia quedar como evidencia local.

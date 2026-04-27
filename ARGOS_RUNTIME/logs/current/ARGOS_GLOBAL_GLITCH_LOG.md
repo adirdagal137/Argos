@@ -2420,3 +2420,8 @@ argos_commit.ps1 -Merge fallo por archivos operativos staged. Resolucion: commit
 **OWNER:** Claude
 **DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
 **SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-27 14:35 Atlantic/Canary] VOZ CODEX (GLITCH):**
+**PACKET:** ARG-1777293324283-GIT-COMMIT-MERGE
+Nombre operativo dice git-commit-merge, pero no se hizo merge a main; solo commits atomicos y push de rama.

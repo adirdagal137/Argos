@@ -537,3 +537,29 @@ Ref: packet ARG-1777238885175 (inbox) — registra el mismo defecto para seguimi
 Se reorganizo la Bitacora Trilog a 8 columnas canonicas: Timestamp, ID, Voz, Mision, Log, Sombra, Handoff y Detalles. La columna Detalles agrupa Siguiente, Aprendizaje, Riesgos y Glitches. Se documento el modelo visual en WEBAPP_LOGBOOK_READ_MODEL.md, se actualizo REGISTRY.md y versions.json, y se dejo nota de deuda sobre renombrar logs/current a logs/ o bitacora/. La interaccion de fila/celda quedo funcional con overlay adaptativo, aunque el pulido exacto de posicion y anchuras queda aparcado por coste de iteracion.
 
 **RIESGOS:** Worktree con cambios runtime previos no relacionados. La migracion fisica de logs/current queda solo anotada, no ejecutada. La UX de overlay queda aceptable provisionalmente, no definitiva.
+
+---
+**[2026-04-27 14:35 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777293324283
+
+**DETALLES:**
+Se canonizo la reorganizacion runtime sin big bang: `ARGOS_RUNTIME/bitacora/` queda como superficie legible para `log.md`, `shadowlog.md`, `handoffs.md` y `glitches.md`; `ARGOS_RUNTIME/cubierta/` queda como superficie visible para `feed.md`, `state.json`, `vector.md`, `inbox.md` y `artefactos.md`. La API conserva escritura primaria en rutas legacy y sincroniza los alias canonicos al arrancar, cada minuto y bajo demanda con `POST /api/runtime/canonical-sync`. Se agrego `ARGOS_RUNTIME/tools/sync_runtime_canon.mjs`, documentacion `RUNTIME_CANONICAL_SURFACE.md`, actualizaciones en quickstart/registry/readmes, y build de `argos-api` verificado.
+
+SIGUIENTE: Implementar una fase posterior donde `bitacora/` y `cubierta/` pasen de superficie sincronizada a rutas primarias de escritura/lectura mediante helpers comunes y compatibilidad inversa.
+APRENDIZAJE: El cambio seguro no era mover archivos vivos, sino introducir una superficie canonica derivada y documentada mientras los agentes aun dependen de `logs/current`, `state`, `views/ui_export` y `ARGOS_VECTOR.md`.
+GLITCHES: El worktree venia con varias capas previas; se separaron commits operativos antes de cerrar este paquete.
+RIESGOS: Mientras la escritura primaria siga en legacy, los aliases canonicos pueden ir con hasta 60 segundos de latencia salvo sync manual.
+
+---
+**[2026-04-27 14:35 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Integracion automatica de deposito chat
+**WORK PACKET:** ARG-1777293324283-GIT-COMMIT-MERGE
+
+**DETALLES:**
+Se limpio operativamente el worktree con commits parciales en la rama `codex/ARG-1777293324283-runtime-bitacora-cubierta` y se subio a GitHub. Se separaron commits para: staged previo de handoff/logbook, read model dashboard de bitacora, endpoint canonico `/api/ia/state`, protocolo de handoff obligatorio, reorganizacion `bitacora/` + `cubierta/`, y artefactos runtime operativos. El resultado final fue `git status` limpio y `git push -u origin codex/ARG-1777293324283-runtime-bitacora-cubierta` correcto.
+
+SIGUIENTE: Revisar PR/merge en GitHub cuando el Capitan lo indique; antes de mergear, verificar si se quieren mantener en la rama los artefactos runtime operativos (`events`, `logs/current`, snapshots, deposits processed, skills locales) o separarlos en otro PR.
+APRENDIZAJE: Cuando el worktree llega con capas mezcladas, el enfoque operativo viable es cerrar commits por arbol semantico en la rama actual antes de intentar mergear o cambiar de rama.
+GLITCHES: El nombre pedido era git-commit-merge, pero tecnicamente se hizo commit + push de rama; no se mergeo a main todavia.
+RIESGOS: El commit de artefactos runtime captura estado vivo y puede no ser deseable en un PR de codigo si se busca revisar solo arquitectura.
