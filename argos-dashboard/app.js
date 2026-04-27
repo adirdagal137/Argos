@@ -60,6 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     let expandedLogbookRow = null;
+    let expandedLogbookCell = null;
+    let logbookCellOverlay = null;
     let expandedEventRow = null;
     let forestLoaded = false;
     let vellocinoLoaded = false;
@@ -76,17 +78,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentRoomFilter = (localStorage.getItem('argos_roomFilter') || 'ALL').toUpperCase();
 
     const unifiedLogbookColumns = [
-        { id: 'timestamp_label', label: 'Tiempo' },
-        { id: 'actor', label: 'Voz' },
+        { id: 'timestamp_label', label: 'Timestamp' },
         { id: 'id', label: 'ID' },
+        { id: 'actor', label: 'Voz' },
         { id: 'summary', label: 'Mision' },
-        { id: 'details', label: 'Detalles' },
-        { id: 'next_step', label: 'Siguiente' },
-        { id: 'learning', label: 'Aprendizaje' },
-        { id: 'risks', label: 'Riesgos' },
+        { id: 'log', label: 'Log' },
         { id: 'shadow', label: 'Sombra' },
-        { id: 'handoff', label: 'Handoff' }
+        { id: 'handoff', label: 'Handoff' },
+        { id: 'details_bundle', label: 'Detalles' }
     ];
+
+    const reflectiveEmptyLabels = {
+        log: 'sin log',
+        shadow: 'sin sombra',
+        handoff: 'sin handoff',
+        details_bundle: 'sin detalles'
+    };
 
     const projectToLogbookModuleId = (projectId) => {
         const normalized = String(projectId || '').trim().toLowerCase();
@@ -433,9 +440,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `${HH}:${MM} ${day}-${month}`;
     }
 
-    function buildBubbleCell(text, extraClass = '') {
+    function buildBubbleCell(text, extraClass = '', options = {}) {
         const div = document.createElement('div');
         div.className = `cell-bubble ${extraClass}`.trim();
+        if (options.isEmpty) {
+            div.classList.add('is-empty-reflection');
+        }
         div.innerHTML = renderMultiline(text || '--');
         return div;
     }
@@ -1184,15 +1194,99 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function getLogbookTableWrap() {
+        return logbookTable ? logbookTable.closest('.logbook-table-wrap') : null;
+    }
+
+    function ensureLogbookCellOverlay() {
+        const wrap = getLogbookTableWrap();
+        if (!wrap) return null;
+        if (logbookCellOverlay && logbookCellOverlay.parentElement === wrap) return logbookCellOverlay;
+
+        logbookCellOverlay = document.createElement('div');
+        logbookCellOverlay.className = 'logbook-cell-overlay hidden';
+        logbookCellOverlay.innerHTML = `
+            <div class="logbook-cell-overlay-panel">
+                <div class="logbook-cell-overlay-title"></div>
+                <div class="logbook-cell-overlay-body"></div>
+            </div>
+        `;
+        const panel = logbookCellOverlay.querySelector('.logbook-cell-overlay-panel');
+        if (panel) {
+            panel.addEventListener('click', (event) => {
+                event.stopPropagation();
+                closeLogbookCellOverlay();
+            });
+        }
+        wrap.appendChild(logbookCellOverlay);
+        return logbookCellOverlay;
+    }
+
+    function closeLogbookCellOverlay() {
+        const wrap = getLogbookTableWrap();
+        if (expandedLogbookCell) {
+            expandedLogbookCell.classList.remove('is-overlay-source');
+            expandedLogbookCell = null;
+        }
+        if (wrap) wrap.classList.remove('has-cell-overlay');
+        if (logbookCellOverlay) {
+            logbookCellOverlay.classList.add('hidden');
+        }
+    }
+
+    function openLogbookCellOverlay(cell) {
+        const overlayNode = ensureLogbookCellOverlay();
+        const wrap = getLogbookTableWrap();
+        if (!overlayNode || !wrap) return;
+        closeLogbookCellOverlay();
+        expandedLogbookCell = cell;
+        expandedLogbookCell.classList.add('is-overlay-source');
+        wrap.classList.add('has-cell-overlay');
+        const wrapRect = wrap.getBoundingClientRect();
+        const text = cell.dataset.fullText || '--';
+        const chars = text.length;
+        const lineBreaks = (text.match(/\n/g) || []).length;
+        const desiredWidth = Math.min(760, Math.max(260, 220 + Math.sqrt(Math.max(chars, 24)) * 34));
+        const estimatedLines = Math.ceil(chars / Math.max(24, desiredWidth / 8)) + lineBreaks;
+        const desiredHeight = Math.min(420, Math.max(118, 86 + estimatedLines * 23));
+        const margin = 16;
+        const visibleLeft = Math.max(wrapRect.left, 0);
+        const visibleTop = Math.max(wrapRect.top, 0);
+        const visibleRight = Math.min(wrapRect.right, window.innerWidth);
+        const visibleBottom = Math.min(wrapRect.bottom, window.innerHeight);
+        const visibleWidth = Math.max(260, visibleRight - visibleLeft);
+        const visibleHeight = Math.max(180, visibleBottom - visibleTop);
+        const width = Math.min(desiredWidth, Math.max(240, visibleWidth - margin * 2));
+        const height = Math.min(desiredHeight, Math.max(112, visibleHeight - margin * 2));
+        const left = visibleLeft + (visibleWidth - width) / 2;
+        const top = visibleTop + margin;
+        overlayNode.style.setProperty('--logbook-overlay-panel-left', `${left}px`);
+        overlayNode.style.setProperty('--logbook-overlay-panel-top', `${top}px`);
+        overlayNode.style.setProperty('--logbook-overlay-panel-width', `${width}px`);
+        overlayNode.style.setProperty('--logbook-overlay-panel-height', `${height}px`);
+
+        const titleNode = overlayNode.querySelector('.logbook-cell-overlay-title');
+        const bodyNode = overlayNode.querySelector('.logbook-cell-overlay-body');
+        if (titleNode) titleNode.textContent = cell.dataset.columnLabel || '';
+        if (bodyNode) bodyNode.innerHTML = renderMultiline(text);
+        overlayNode.classList.remove('hidden');
+    }
+
     function setRowExpanded(row, expanded) {
         row.classList.toggle('is-row-expanded', expanded);
+        Array.from(row.children).forEach((cell) => {
+            cell.classList.remove('is-expanded-cell');
+            cell.classList.remove('is-overlay-source');
+        });
         Array.from(row.querySelectorAll('.cell-bubble')).forEach((bubble) => {
-            bubble.classList.toggle('is-expanded', expanded);
+            bubble.classList.toggle('is-row-expanded-bubble', expanded);
+            bubble.classList.remove('is-expanded');
         });
     }
 
     function collapseExpandedLogbookRow() {
         if (!expandedLogbookRow) return;
+        closeLogbookCellOverlay();
         setRowExpanded(expandedLogbookRow, false);
         expandedLogbookRow = null;
     }
@@ -1391,13 +1485,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         return '';
     }
 
+    function buildDetailsBundle(entry) {
+        const sections = [
+            ['Siguiente', entry.next_step],
+            ['Aprendizaje', entry.learning],
+            ['Riesgos', entry.risks],
+            ['Glitches', entry.glitches]
+        ];
+        return sections
+            .filter(([, value]) => value && String(value).trim() !== '')
+            .map(([label, value]) => `${label}: ${value}`)
+            .join('\n\n');
+    }
+
     function buildUnifiedLogbookEntries(currentModule) {
         const rowsByKey = new Map();
         getStreamEntries(currentModule, 'log').forEach((entry) => {
             rowsByKey.set(entryMergeKey(entry), {
                 ...entry,
+                log: entry.details || '',
                 learning: entry.errors || '',
                 risks: entry.risks || entry.risk_level || '',
+                glitches: '',
                 shadow: '',
                 handoff: compactHandoff(entry)
             });
@@ -1413,10 +1522,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             rowsByKey.set(key, {
                 ...entry,
-                details: '',
+                log: '',
                 next_step: '',
                 learning: '',
                 risks: '',
+                glitches: '',
                 shadow: entry.details || entry.summary || '',
                 handoff: compactHandoff(entry)
             });
@@ -1427,19 +1537,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             const existing = rowsByKey.get(key);
             const glitchText = [entry.summary, entry.details].filter(Boolean).join(' - ');
             if (existing) {
-                existing.risks = [existing.risks, glitchText].filter(Boolean).join('\n');
+                existing.glitches = [existing.glitches, glitchText].filter(Boolean).join('\n');
                 return;
             }
             rowsByKey.set(key, {
                 ...entry,
+                log: entry.details || '',
+                next_step: entry.next_step || '',
                 learning: '',
-                risks: glitchText,
+                risks: entry.risks || '',
+                glitches: glitchText,
                 shadow: '',
                 handoff: compactHandoff(entry)
             });
         });
 
-        return Array.from(rowsByKey.values()).sort((a, b) => {
+        return Array.from(rowsByKey.values()).map((entry) => ({
+            ...entry,
+            details_bundle: buildDetailsBundle(entry)
+        })).sort((a, b) => {
             const msA = Date.parse(a.timestamp || a.timestamp_label || '1970-01-01') || 0;
             const msB = Date.parse(b.timestamp || b.timestamp_label || '1970-01-01') || 0;
             return msB - msA;
@@ -1481,7 +1597,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             row.addEventListener('click', (event) => {
                 event.stopPropagation();
+                const activeCell = event.target.closest('td');
+                if (!activeCell || !row.contains(activeCell)) return;
+                if (event.target.closest('.event-link')) return;
+
+                if (expandedLogbookRow === row) {
+                    if (expandedLogbookCell === activeCell) {
+                        closeLogbookCellOverlay();
+                    } else {
+                        openLogbookCellOverlay(activeCell);
+                    }
+                    return;
+                }
+
                 const shouldExpand = expandedLogbookRow !== row;
+                closeLogbookCellOverlay();
                 collapseExpandedLogbookRow();
                 if (shouldExpand) {
                     setRowExpanded(row, true);
@@ -1492,7 +1622,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             columns.forEach((column) => {
                 const td = document.createElement('td');
                 td.className = `col-${column.id}`;
-                let value = entry[column.id] || '--';
+                td.dataset.columnId = column.id;
+                td.dataset.columnLabel = column.label;
+                let rawValue = entry[column.id];
+                let isReflectiveEmpty = false;
+                if ((rawValue === undefined || rawValue === null || String(rawValue).trim() === '') && reflectiveEmptyLabels[column.id]) {
+                    rawValue = reflectiveEmptyLabels[column.id];
+                    isReflectiveEmpty = true;
+                }
+                let value = rawValue || '--';
                 if (column.id === 'timestamp_label') {
                     value = formatMaritimeDate(value, entry.timestamp_precision);
                 }
@@ -1506,6 +1644,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         td.dataset.extraBubbleClass = risk.className;
                     }
                 }
+                td.dataset.fullText = String(value || '--');
 
                 // transcriptRef — render as 📄 button instead of raw text
                 if (column.id === 'transcriptRef') {
@@ -1543,7 +1682,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     extraClass = td.dataset.extraBubbleClass;
                 }
 
-                const bubble = buildBubbleCell(value, extraClass);
+                const bubble = buildBubbleCell(value, extraClass, { isEmpty: isReflectiveEmpty });
                 if (column.id === 'id' && value !== '--') {
                     bubble.classList.add('event-link');
                     bubble.addEventListener('click', (ev) => {
@@ -1559,8 +1698,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    async function enrichLogbookHandoffs(snapshot) {
-        const moduleId = projectToLogbookModuleId(currentProject);
+    async function enrichLogbookHandoffs(snapshot, projectId = currentProject) {
+        const moduleId = projectToLogbookModuleId(projectId);
         const currentModule = (snapshot.modules || []).find((module) => module.id === moduleId);
         if (!currentModule) return snapshot;
 
@@ -1736,11 +1875,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadLogbookSnapshot() {
         try {
+            const requestedProject = currentProject;
             syncLogbookToCurrentProject();
             const response = await fetch(`${API_URL}/logbook`);
             if (!response.ok) return;
             const logbookData = await response.json();
-            const preparedLogbook = await enrichLogbookHandoffs(ensureLogbookProjectModule(logbookData));
+            const preparedLogbook = await enrichLogbookHandoffs(ensureLogbookProjectModule(logbookData), requestedProject);
+            if (requestedProject !== currentProject) return;
+            viewState.moduleId = projectToLogbookModuleId(requestedProject);
             renderLogbook(preparedLogbook);
         } catch (error) {
             console.warn('Fallo cargando bitacora tabular bajo demanda.', error);
