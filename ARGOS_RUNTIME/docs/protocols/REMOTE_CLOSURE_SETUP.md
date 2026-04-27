@@ -28,6 +28,8 @@ This document configures remote session closure for chat interfaces using:
 
 ## 2. Payload Example
 
+Un cierre válido escribe: **LOG → SHADOW → HANDOFF → EVENTS → FEED** (sin TOKENS).
+
 ```json
 {
   "agent": "Claude",
@@ -36,20 +38,30 @@ This document configures remote session closure for chat interfaces using:
   "packet_id": "ARG-TEST-REMOTE-0001",
   "trigger": "task_completed",
   "sections": {
-    "log": "Implemented remote closure endpoint and integrated logs.",
+    "log": "Implemented remote closure endpoint. SIGUIENTE: Codex validates. APRENDIZAJE: handoff must be mandatory. GLITCHES: ninguno. RIESGOS: ninguno.",
     "shadow": "The system is coherent, but token rotation should stay local-only.",
     "glitch": "",
+    "handoff": {
+      "contexto": "Se implementó el endpoint /api/remote/closure para agentes sin filesystem",
+      "decision": "Separar handoff como sección obligatoria garantiza trazabilidad del 75%",
+      "continuidad": "Codex debe validar el smoke test y confirmar idempotencia",
+      "session_ref": "claude.ai 2026-04-18"
+    },
     "state": {
       "status": "idle",
       "summary": "Remote closure executed",
       "handoff_to": "Codex",
       "next_step": "Captain validates smoke test"
     },
-    "captain": "Remote closure completed. Ready for next packet."
+    "captain": "Remote closure completed. Handoff a Codex para smoke test."
   },
   "mark_packet_done": false
 }
 ```
+
+**Campos obligatorios en sections:** `log`, `shadow`, `handoff` (con los 4 sub-campos), `captain`.
+**LOG debe incluir:** SIGUIENTE, APRENDIZAJE, GLITCHES, RIESGOS (aunque estén vacíos).
+**HANDOFF criterio 75%:** quien lea contexto+decision+continuidad debe poder reconstruir el estado.
 
 ## 3. Agent Tokens
 
