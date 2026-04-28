@@ -7,7 +7,7 @@ $ARGOS_ROOT = "C:\Users\Widox\Desktop\ARGOS"
 $API_DIR = "$ARGOS_ROOT\argos-api"
 $STDOUT_LOG = "$API_DIR\api.stdout.log"
 $STDERR_LOG = "$API_DIR\api.stderr.log"
-$BRIDGE_SCRIPT = "$ARGOS_ROOT\ARGOS_RUNTIME\tools\gemini_append_bridge.js"
+$BRIDGE_SCRIPT = "$ARGOS_ROOT\ARGOS_RUNTIME\tools\gemini_drive_bridge.js"
 $BRIDGE_LOG_DIR = "$ARGOS_ROOT\ARGOS_RUNTIME\logs"
 $BRIDGE_STDOUT_LOG = "$BRIDGE_LOG_DIR\gemini_bridge.stdout.log"
 $BRIDGE_STDERR_LOG = "$BRIDGE_LOG_DIR\gemini_bridge.stderr.log"
@@ -51,19 +51,20 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "[3/4] API lanzada bajo pm2 con auto-restart." -ForegroundColor Green
 Write-Host "Logs disponibles en: $STDOUT_LOG"
 
-# 4. Lanzar Gemini Append Bridge bajo PM2
+# 4. Lanzar Gemini Drive Bridge bajo PM2
 if (Test-Path $BRIDGE_SCRIPT) {
     New-Item -ItemType Directory -Force -Path $BRIDGE_LOG_DIR | Out-Null
     & $pm2.Source delete "gemini-append-bridge" | Out-Null
-    & $pm2.Source start $BRIDGE_SCRIPT --name "gemini-append-bridge" --output $BRIDGE_STDOUT_LOG --error $BRIDGE_STDERR_LOG --time
+    & $pm2.Source delete "gemini-drive-bridge" | Out-Null
+    & $pm2.Source start $BRIDGE_SCRIPT --name "gemini-drive-bridge" --output $BRIDGE_STDOUT_LOG --error $BRIDGE_STDERR_LOG --time
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "[!] AVISO: pm2 no pudo lanzar gemini-append-bridge." -ForegroundColor Yellow
+        Write-Host "[!] AVISO: pm2 no pudo lanzar gemini-drive-bridge." -ForegroundColor Yellow
     } else {
-        Write-Host "[4/4] Gemini Append Bridge activo." -ForegroundColor Green
+        Write-Host "[4/4] Gemini Drive Bridge activo." -ForegroundColor Green
         Write-Host "Logs del bridge: $BRIDGE_STDOUT_LOG"
     }
 } else {
-    Write-Host "[4/4] AVISO: no se encontro gemini_append_bridge.js." -ForegroundColor Yellow
+    Write-Host "[4/4] AVISO: no se encontro gemini_drive_bridge.js." -ForegroundColor Yellow
 }
 
 Start-Sleep -Seconds 3
