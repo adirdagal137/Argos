@@ -1,17 +1,17 @@
 {
   "argos_version": "0.4.0",
-  "last_updated": "2026-04-26",
-  "updated_by": "Claude",
-  "packet_ref": "ARG-20260426-DOC-CONTEXT-HYGIENE",
+  "last_updated": "2026-04-28",
+  "updated_by": "Codex",
+  "packet_ref": "ARG-1777221515268-968",
   "documents": {
     "argos-quickstart": {
       "path": "ARGOS_RUNTIME/ARGOS_QUICKSTART.md",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "status": "active",
       "tier": 1,
       "owner": "Claude",
-      "last_updated": "2026-04-26",
-      "summary": "Tarjeta operativa minima: inicio, actores, carriles, start, close, git, version."
+      "last_updated": "2026-04-28",
+      "summary": "Tarjeta operativa minima: inicio, actores, carriles, start, close, git con guardarrail de ramas, version."
     },
     "inter-ai-protocol": {
       "path": "ARGOS_RUNTIME/INTER_AI_PROTOCOL.md",
@@ -60,21 +60,21 @@
     },
     "claude-md": {
       "path": "CLAUDE.md",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "status": "active",
       "tier": 1,
       "owner": "Claude",
-      "last_updated": "2026-04-26",
-      "summary": "Arranque de Claude Code (Orfeo): lectura obligatoria, referencias on-demand."
+      "last_updated": "2026-04-28",
+      "summary": "Arranque de Claude Code (Orfeo): lectura obligatoria, referencias on-demand y regla Git de ramas."
     },
     "agents-md": {
       "path": "AGENTS.md",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "status": "active",
       "tier": 1,
       "owner": "Codex",
-      "last_updated": "2026-04-26",
-      "summary": "Arranque de Codex CLI: lectura obligatoria, referencias on-demand."
+      "last_updated": "2026-04-28",
+      "summary": "Arranque de Codex CLI: lectura obligatoria, referencias on-demand y regla Git de ramas."
     },
     "readme-root": {
       "path": "README.md",

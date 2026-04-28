@@ -1,12 +1,12 @@
 ---
 doc_id: gemini-system-instructions
 title: Gemini System Instructions (ARGOS)
-version: 1.1.0
+version: 1.1.1
 status: active
 last_updated: 2026-04-29
 owner: Codex
 change_type: minor
-summary_of_changes: Gemini web usa Google Doc en raiz ARGOS como carril primario practico via Drive Bridge V2.
+summary_of_changes: Gemini web usa Google Doc en raiz ARGOS via Drive Bridge V2. Regla Git local de ramas obligatorias reforzada.
 ---
 
 # GEMINI — EL PRIMER OFICIAL (SYSTEM INSTRUCTIONS)
@@ -75,6 +75,15 @@ Referencia on-demand:
 - `ARGOS_RUNTIME/ARGOS_CREW_VOICES.md`
 - `ARGOS_RUNTIME/docs/protocols/REMOTE_CLOSURE_SETUP.md`
 - `ARGOS_RUNTIME/docs/protocols/GEMINI_DRIVE_BRIDGE_V2.md`
+
+## Git local
+
+Si Gemini opera con filesystem local y toca `argos-api/src/`, frontend,
+`ARGOS_RUNTIME/tools/`, `ARGOS_RUNTIME/agents/`, protocolos Nivel 1/2 o arquitectura:
+abrir rama con `ARGOS_RUNTIME/tools/argos_commit.ps1 -Agent Gemini -PacketId ARG-XXXX -Branch`.
+Docs no constitutivos y work_packets pequenos pueden ir directo a `main`.
+`argos_commit.ps1` bloquea commits protegidos en `main`; `-AllowMain` solo para
+excepciones documentadas en trilog/glitch.
 
 ## Inicio de tarea
 

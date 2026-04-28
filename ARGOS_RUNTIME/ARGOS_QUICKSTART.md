@@ -1,12 +1,12 @@
 ---
 doc_id: argos-quickstart
 title: ARGOS Quickstart
-version: 2.0.0
+version: 2.0.1
 status: active
-last_updated: 2026-04-26
+last_updated: 2026-04-28
 owner: Claude
 change_type: major
-summary_of_changes: Reescritura completa como tarjeta operativa. Carriles local/remote, actores canonicos, GIT_protocol y VERSION_protocol compactos.
+summary_of_changes: Reescritura completa como tarjeta operativa. Carriles local/remote, actores canonicos, GIT_protocol y VERSION_protocol compactos. Guardarrail Git reforzado.
 ---
 
 # ARGOS QUICKSTART
@@ -99,17 +99,20 @@ con secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`. `packet_id` y actor s
 
 ## GIT_PROTOCOL (compacto)
 
-| Situacion                                        | Accion                   |
-|--------------------------------------------------|--------------------------|
-| Fix rapido (<50 lineas), docs, scripts, packets  | Commit directo en main   |
-| Toca argos-api/src/index.ts, frontend, arch      | Rama obligatoria         |
+| Situacion                                                        | Accion                 |
+|------------------------------------------------------------------|------------------------|
+| Fix rapido (<50 lineas), docs no constitutivos, packets simples  | Commit directo en main |
+| Toca argos-api/src/, frontend, tools, agents, protocols o arch    | Rama obligatoria       |
 
 ```powershell
 .\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Claude -PacketId ARG-XXXX          # commit basico
 .\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Claude -PacketId ARG-XXXX -Branch  # abrir rama
 .\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Claude -PacketId ARG-XXXX -Merge   # cerrar rama
+.\ARGOS_RUNTIME\tools\argos_commit.ps1 -CleanDesktopIniRefs                      # limpiar refs Git basura
 ```
 
+`argos_commit.ps1` bloquea commits directos a `main` si detecta cambios protegidos.
+`-AllowMain` solo se permite como excepcion explicita y debe quedar explicada en trilog/glitch.
 Si se abrio rama con `-Branch`, no cerrar trilog sin `-Merge` o sin documentar glitch.
 Claude Code ejecuta `argos_commit.ps1` automaticamente via hook Stop.
 

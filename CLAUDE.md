@@ -1,12 +1,12 @@
 ---
 doc_id: argos-claude-md
 title: ARGOS Protocolo Operativo - Claude Code (Orfeo)
-version: 2.0.0
+version: 2.0.1
 status: active
-last_updated: 2026-04-26
+last_updated: 2026-04-28
 owner: Claude
 change_type: major
-summary_of_changes: Mojibake eliminado, voz Orfeo correcta, refs on-demand actualizadas con docs/protocols/.
+summary_of_changes: Mojibake eliminado, voz Orfeo correcta, refs on-demand actualizadas con docs/protocols/. Regla Git de ramas obligatorias reforzada.
 ---
 
 # ARGOS -- PROTOCOLO OPERATIVO DE ORFEO (CLAUDE)
@@ -30,3 +30,12 @@ Leer en este orden:
 - `ARGOS_RUNTIME/INTER_AI_PROTOCOL.md`
 - `ARGOS_RUNTIME/ARGOS_CREW_VOICES.md`
 - `ARGOS_RUNTIME/docs/protocols/REMOTE_CLOSURE_SETUP.md` -- setup remoto, tuneles, tokens
+
+---
+
+## GIT
+
+- Antes de tocar `argos-api/src/`, `argos-dashboard/`, `ARGOS_RUNTIME/tools/`, `ARGOS_RUNTIME/agents/`, protocolos Nivel 1/2 o arquitectura: abrir rama con `.\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Claude -PacketId ARG-XXXX -Branch`.
+- Fix rapido de docs no constitutivos o work_packets simples: commit directo en `main` permitido.
+- `argos_commit.ps1` bloquea commits protegidos en `main`; `-AllowMain` exige excepcion explicita en trilog/glitch.
+- Si hay refs rotas por `desktop.ini`: `.\ARGOS_RUNTIME\tools\argos_commit.ps1 -CleanDesktopIniRefs`.

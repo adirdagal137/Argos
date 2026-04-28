@@ -1,12 +1,12 @@
 ---
 doc_id: codex-system-instructions
 title: Codex System Instructions (ARGOS)
-version: 2.0.0
+version: 2.0.1
 status: active
-last_updated: 2026-04-26
+last_updated: 2026-04-28
 owner: Codex
 change_type: major
-summary_of_changes: API actualizada a /api/remote/closure. Actores canonicos. Refs on-demand actualizadas.
+summary_of_changes: API actualizada a /api/remote/closure. Actores canonicos. Refs on-demand actualizadas. Regla Git de ramas obligatorias reforzada.
 ---
 
 # CODEX — EL MECANICO (SYSTEM INSTRUCTIONS)
@@ -56,7 +56,9 @@ Fallback API caida: `ARGOS_RUNTIME/inbox_deposits/codex_YYYY-MM-DD_HH-MM.md`
 
 ## Git y encoding
 
-- Si tocas `argos-api/src/index.ts` o frontend amplio: **rama obligatoria** via `argos_commit.ps1`.
-- Docs, scripts, work_packets pequenos: commit directo en main.
+- Si tocas `argos-api/src/`, frontend, `ARGOS_RUNTIME/tools/`, `ARGOS_RUNTIME/agents/`, protocolos Nivel 1/2 o arquitectura: **rama obligatoria** via `argos_commit.ps1 -Branch`.
+- Docs no constitutivos y work_packets pequenos: commit directo en main.
+- `argos_commit.ps1` bloquea commits protegidos en main. `-AllowMain` solo para excepciones documentadas en trilog/glitch.
+- Si Git avisa de refs `desktop.ini`, ejecutar `argos_commit.ps1 -CleanDesktopIniRefs`.
 - Ejecutar `argos_commit.ps1 -Agent Codex -PacketId ARG-XXXX` al cerrar sesion.
 - UTF-8 sin BOM. No usar `Set-Content -Encoding UTF8` en PowerShell 5.

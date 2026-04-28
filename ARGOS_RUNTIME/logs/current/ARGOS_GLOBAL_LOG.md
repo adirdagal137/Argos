@@ -414,3 +414,18 @@ ARG-20260418-0220 completo. ARGOS_SYSTEM_INSTRUCTIONS_UNIFIED.md: 8 secciones po
 
 **DETALLES:**
 [TEST-TRILOG] Verificando escritura en logs/current/ tras migracion.
+---
+**[2026-04-28 13:03 Atlantic/Canary] VOZ CODEX:**
+**MISION:** Guardarrail Git para ramas obligatorias
+**WORK PACKET:** ARG-1777221515268-968
+
+**DETALLES:**
+Parcheado el protocolo Git para que tareas complejas no dependan solo de memoria operativa. `argos_commit.ps1` ahora bloquea commits protegidos en `main` salvo `-AllowMain`, limpia refs basura `desktop.ini` con `-CleanDesktopIniRefs`, normaliza rutas de `git status` y mejora la auditoria de ramas con sufijos. `argos_branch_audit.ps1` limpia refs basura antes de auditar. Instrucciones alineadas en Quickstart, AGENTS, CLAUDE, CODEX, GEMINI, QWEN y unified system instructions.
+
+**RIESGOS:** El arbol ya venia sucio con cambios runtime/API/dashboard previos; no los reverti ni los mezcle semanticamente. La API local devolvio 404 en `/api/ia/start-task`, por eso el start no quedo registrado via endpoint.
+
+**APRENDIZAJE:** La regla "rama obligatoria" estaba escrita, pero sin guardarrail ejecutable. En ARGOS, las reglas de seguridad operativa deben vivir tambien en herramientas, no solo en prompts.
+
+**SIGUIENTE:** Revisar ramas abiertas que la auditoria marca como `DONE - MERGE PENDIENTE` u `HUERFANA`; en especial `claude/arg-20260426-log-migration`, `codex/arg-1777231414864*`, `codex/arg-reform-*` y `pi/arg-ui-consolidation-001`.
+
+**GLITCHES:** WP Git existia como estado/vista pero no como archivo fisico en `work_packets/done`; se creo cierre documental canonico. `start-task` local respondio 404.

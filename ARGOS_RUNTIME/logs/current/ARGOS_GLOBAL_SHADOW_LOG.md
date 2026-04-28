@@ -237,3 +237,9 @@ El documento unificado es util para onboarding pero requiere mantenimiento -- si
 **TAREA:** test
 **SOMBRA:**
 [TEST] Test shadow para verificar ruta nueva.
+---
+**[2026-04-28 13:03 Atlantic/Canary] VOZ CODEX (SOMBRA):**
+**PACKET:** ARG-1777221515268-968
+**TAREA:** Guardarrail Git para ramas obligatorias
+**SOMBRA:**
+Aqui habia una pequena trampa cultural: todos sabiamos que habia que abrir rama, pero la herramienta seguia permitiendo que una sesion cansada hiciera commit directo en main. Convertir criterio en bloqueo reduce el margen de error, aunque deja una responsabilidad nueva: usar `-AllowMain` solo cuando sea realmente consciente y documentado.

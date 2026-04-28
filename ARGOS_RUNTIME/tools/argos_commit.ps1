@@ -6,6 +6,7 @@
 #   argos_commit.ps1 -Agent <nombre> [-PacketId <id>] [-Branch] [-BranchName <rama>] [-Message <msg>]
 #   argos_commit.ps1 -Agent <nombre> -PacketId <id> -Merge [-DeleteBranch]
 #   argos_commit.ps1 -ListBranches
+#   argos_commit.ps1 -CleanDesktopIniRefs
 # ============================================================
 
 param(
@@ -23,7 +24,11 @@ param(
 
     [switch]$DeleteBranch,
 
-    [switch]$ListBranches
+    [switch]$ListBranches,
+
+    [switch]$AllowMain,
+
+    [switch]$CleanDesktopIniRefs
 )
 
 $RepoPath = "C:\Users\Widox\Desktop\ARGOS"
@@ -39,8 +44,22 @@ $TargetPaths = @(
     "ARGOS_RUNTIME/INTER_AI_PROTOCOL.md",
     "ARGOS_RUNTIME/ARGOS_VECTOR.md",
     "ARGOS_RUNTIME/agents/",
+    "ARGOS_RUNTIME/docs/protocols/",
     "ARGOS_RUNTIME/tools/",
-    "ARGOS_RUNTIME/work_packets/inbox/"
+    "ARGOS_RUNTIME/work_packets/inbox/",
+    "versions.json"
+)
+
+$BranchRequiredPaths = @(
+    "argos-api/src/",
+    "argos-api/dist/index.js",
+    "argos-dashboard/",
+    "ARGOS_RUNTIME/ARGOS_QUICKSTART.md",
+    "ARGOS_RUNTIME/INTER_AI_PROTOCOL.md",
+    "ARGOS_RUNTIME/agents/",
+    "ARGOS_RUNTIME/tools/",
+    "ARGOS_RUNTIME/docs/protocols/",
+    "versions.json"
 )
 
 function Invoke-Git {
@@ -59,14 +78,75 @@ function Invoke-Git {
     return $output
 }
 
+function Normalize-GitPathFromStatusLine {
+    param([string]$Line)
+
+    $path = $Line -replace "^.{3}", ""
+    if ($path -match " -> ") {
+        $path = ($path -split " -> ")[-1]
+    }
+    return ($path.Trim('"') -replace "\\", "/")
+}
+
+function Test-PathMatchesAnyPrefix {
+    param(
+        [string]$Path,
+        [string[]]$Prefixes
+    )
+
+    foreach ($p in $Prefixes) {
+        if ($Path.StartsWith($p) -or $Path -eq $p.TrimEnd("/")) {
+            return $true
+        }
+    }
+    return $false
+}
+
+function Remove-DesktopIniRefs {
+    $refsPath = Join-Path $RepoPath ".git\refs"
+    if (-not (Test-Path -LiteralPath $refsPath)) {
+        Write-Host "[ARGOS-COMMIT] No existe .git\refs; limpieza omitida."
+        return
+    }
+
+    $refs = Get-ChildItem -LiteralPath $refsPath -Recurse -Force -File -Filter "desktop.ini" -ErrorAction SilentlyContinue
+    if (-not $refs) {
+        Write-Host "[ARGOS-COMMIT] Sin refs desktop.ini que limpiar."
+        return
+    }
+
+    foreach ($ref in $refs) {
+        Remove-Item -LiteralPath $ref.FullName -Force
+        Write-Host "[ARGOS-COMMIT] Ref basura eliminada: $($ref.FullName)"
+    }
+}
+
 function Get-PacketIdFromBranch {
     param([string]$Branch)
 
-    if ($Branch -match "^[^/]+/(arg-.+)$") {
-        return ($Matches[1]).ToUpper()
+    if ($Branch -notmatch "^[^/]+/(arg-.+)$") {
+        return ""
     }
 
-    return ""
+    $slug = $Matches[1]
+
+    if ($slug -match "^(arg-\d{13}-\d{3})(?:-|__|$)") {
+        return $Matches[1].ToUpper()
+    }
+
+    if ($slug -match "^(arg-\d{13})(?:-|__|$)") {
+        return $Matches[1].ToUpper()
+    }
+
+    if ($slug -match "^(arg-reform-.+?-\d{3}(?:-[a-z0-9]+)*)(?:__|$)") {
+        return $Matches[1].ToUpper()
+    }
+
+    if ($slug -match "^(arg-[a-z]+(?:-[a-z0-9]+)*-\d{3}(?:-[a-z0-9]+)*?)(?:-|__|$)") {
+        return $Matches[1].ToUpper()
+    }
+
+    return $slug.ToUpper()
 }
 
 function Test-PacketFile {
@@ -140,7 +220,7 @@ function Get-PacketBranchStatus {
 }
 
 function Show-ArgosBranches {
-    $branches = Invoke-Git -Arguments @("branch", "--format=%(refname:short)")
+    $branches = Invoke-Git -Arguments @("branch", "--format=%(refname:short)") -AllowFailure
     $openBranches = @($branches | Where-Object { $_ -and $_ -ne "main" })
 
     Write-Host "[ARGOS-BRANCHES] Ramas abiertas:"
@@ -154,6 +234,11 @@ function Show-ArgosBranches {
         $status = Get-PacketBranchStatus -PacketId $packetId
         Write-Host "  $branch  ->  $status"
     }
+}
+
+if ($CleanDesktopIniRefs) {
+    Remove-DesktopIniRefs
+    exit 0
 }
 
 function Invoke-ArgosMerge {
@@ -212,15 +297,8 @@ if (-not $Agent) {
 
 $rawStatus = Invoke-Git -Arguments @("status", "--porcelain")
 $relevantChanges = $rawStatus | Where-Object {
-    $line = $_ -replace "^.{3}", ""
-    $found = $false
-    foreach ($p in $TargetPaths) {
-        if ($line.StartsWith($p) -or $line -like "*$p*") {
-            $found = $true
-            break
-        }
-    }
-    $found
+    $line = Normalize-GitPathFromStatusLine -Line $_
+    Test-PathMatchesAnyPrefix -Path $line -Prefixes $TargetPaths
 }
 
 if (-not $relevantChanges) {
@@ -256,6 +334,19 @@ if ($Branch) {
     } else {
         Write-Host "[ARGOS-COMMIT] Ya en rama: $BranchName"
     }
+}
+
+$currentBranch = (Invoke-Git -Arguments @("rev-parse", "--abbrev-ref", "HEAD")).Trim()
+$branchRequiredChanges = @($relevantChanges | Where-Object {
+    $line = Normalize-GitPathFromStatusLine -Line $_
+    Test-PathMatchesAnyPrefix -Path $line -Prefixes $BranchRequiredPaths
+})
+
+if ($currentBranch -eq "main" -and $branchRequiredChanges.Count -gt 0 -and -not $AllowMain) {
+    Write-Host "[ARGOS-COMMIT] Rama obligatoria: se detectaron cambios protegidos estando en main."
+    $branchRequiredChanges | ForEach-Object { Write-Host "  $_" }
+    Write-Host "[ARGOS-COMMIT] Ejecuta con -Branch antes de commitear, o usa -AllowMain solo para una excepcion documentada."
+    exit 1
 }
 
 foreach ($p in $TargetPaths) {

@@ -1911,3 +1911,11 @@ El cierre HTTP por `/api/remote/closure` fallo con 401 porque `agent_tokens.json
 **OWNER:** Claude
 **DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Implementar GET /api/ia/bootstrap en Tifis — ChatGPT no recibe JSON desde ngrok
 **SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+---
+**[2026-04-28 13:03 Atlantic/Canary] G-GIT-001 | CODEX:**
+**WORK PACKET:** ARG-1777221515268-968
+**TIPO:** Protocolo Git sin guardarrail ejecutable
+**ESTADO:** mitigado
+**OWNER:** Codex
+**DETALLE:** La regla de rama obligatoria existia en instrucciones, pero `argos_commit.ps1` permitia commits directos a `main` con cambios protegidos. Tambien habia refs basura `desktop.ini` dentro de `.git/refs`, rompiendo `git log --all`.
+**SIGUIENTE:** Usar `argos_branch_audit.ps1` para revisar ramas pendientes y cerrar/mergear con decision explicita.
