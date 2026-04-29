@@ -1,12 +1,12 @@
 ---
 doc_id: argos-quickstart
 title: ARGOS Quickstart
-version: 2.0.1
+version: 2.1.0
 status: active
-last_updated: 2026-04-28
+last_updated: 2026-04-29
 owner: Claude
-change_type: major
-summary_of_changes: Reescritura completa como tarjeta operativa. Carriles local/remote, actores canonicos, GIT_protocol y VERSION_protocol compactos. Guardarrail Git reforzado.
+change_type: minor
+summary_of_changes: Rutas canonicas de bitacora/cubierta incorporadas al arranque y cierre.
 ---
 
 # ARGOS QUICKSTART
@@ -18,7 +18,7 @@ Protocolo operativo condensado. Lectura obligatoria al inicio de cada sesion.
 
 1. Leer `work_packets/inbox/` -- que hay pendiente.
 2. Leer `state/argos.state.json` -- foco y riesgos activos.
-3. Leer tail de `logs/current/ARGOS_GLOBAL_LOG.md` -- que se hizo recientemente.
+3. Leer tail de `bitacora/log.md` -- que se hizo recientemente.
 4. (Solo si diagnosticas agentes chat o cierres remotos) Leer `inbox_deposits/`.
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion propia en tu voz.]"
 
@@ -91,6 +91,7 @@ Headers: X-Argos-Agent-Token: <token>
 **Sombra:** no puede estar vacia.
 **Handoff** (recomendado): `{ "contexto", "decision", "continuidad", "session_ref" }`.
 `POST /api/trilog` es alternativa equivalente para agentes locales.
+Escritura canonica: `bitacora/log.md`, `bitacora/shadowlog.md`, `bitacora/handoffs.md`, `bitacora/glitches.md` y `cubierta/feed.jsonl`. Historico de lectura: `bitacora/legacy/` y `cubierta/legacy/`.
 
 Fallback si API cae: `ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md`
 con secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`. `packet_id` y actor son OBLIGATORIOS.

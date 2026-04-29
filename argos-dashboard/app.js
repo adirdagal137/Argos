@@ -1489,8 +1489,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sections = [
             ['Siguiente', entry.next_step],
             ['Aprendizaje', entry.learning],
-            ['Riesgos', entry.risks],
-            ['Glitches', entry.glitches]
+            ['Riesgos', entry.risks]
         ];
         return sections
             .filter(([, value]) => value && String(value).trim() !== '')
@@ -1506,7 +1505,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 log: entry.details || '',
                 learning: entry.errors || '',
                 risks: entry.risks || entry.risk_level || '',
-                glitches: '',
                 shadow: '',
                 handoff: compactHandoff(entry)
             });
@@ -1526,28 +1524,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 next_step: '',
                 learning: '',
                 risks: '',
-                glitches: '',
                 shadow: entry.details || entry.summary || '',
-                handoff: compactHandoff(entry)
-            });
-        });
-
-        getStreamEntries(currentModule, 'glitch').forEach((entry) => {
-            const key = entryMergeKey(entry);
-            const existing = rowsByKey.get(key);
-            const glitchText = [entry.summary, entry.details].filter(Boolean).join(' - ');
-            if (existing) {
-                existing.glitches = [existing.glitches, glitchText].filter(Boolean).join('\n');
-                return;
-            }
-            rowsByKey.set(key, {
-                ...entry,
-                log: entry.details || '',
-                next_step: entry.next_step || '',
-                learning: '',
-                risks: entry.risks || '',
-                glitches: glitchText,
-                shadow: '',
                 handoff: compactHandoff(entry)
             });
         });
@@ -1756,7 +1733,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         logbookMeta.innerHTML = `
             <span class="meta-chip event-link" style="cursor:pointer; background: rgba(24, 169, 107, 0.4);" onclick="window.openEventInPanel('${safeHtml(currentModule.id)}')">Proyecto Holografico: ${safeHtml(currentModule.label)}</span>
             <span class="meta-chip meta-chip-quiet">Vista trilog unificada</span>
-            <span class="meta-chip meta-chip-quiet">Fuentes: log + shadow + handoff + glitches</span>
+            <span class="meta-chip meta-chip-quiet">Fuentes: log + shadow + handoff</span>
             <span class="meta-chip meta-chip-quiet">Actualizado: ${safeHtml(updatedAt)}</span>
             <div class="logbook-meta-copy">
                 <strong>${safeHtml(moduleDescription)}</strong><br>
