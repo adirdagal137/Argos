@@ -2425,3 +2425,12 @@ argos_commit.ps1 -Merge fallo por archivos operativos staged. Resolucion: commit
 **[2026-04-27 14:35 Atlantic/Canary] VOZ CODEX (GLITCH):**
 **PACKET:** ARG-1777293324283-GIT-COMMIT-MERGE
 Nombre operativo dice git-commit-merge, pero no se hizo merge a main; solo commits atomicos y push de rama.
+
+---
+**[2026-04-30 11:30 Atlantic/Canary] G-265 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776824400000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, SHADOW. Owner detectado: Claude. Subject: Reparar captain_feed timestamp falso + index.ts truncado (continuación Codex)
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.

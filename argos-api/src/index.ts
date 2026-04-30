@@ -17,10 +17,21 @@ const LOGBOOK_SNAPSHOT_PATH = path.join(RUNTIME_DIR, 'views', 'logbook_export', 
 const ARGOS_STATE_PATH = path.join(RUNTIME_DIR, 'state', 'argos.state.json');
 const DASHBOARD_DIR = path.join(__dirname, '..', '..', 'argos-dashboard');
 const LOGS_CURRENT_DIR = path.join(RUNTIME_DIR, 'logs', 'current');
+const BITACORA_DIR = path.join(RUNTIME_DIR, 'bitacora');
+const CUBIERTA_DIR = path.join(RUNTIME_DIR, 'cubierta');
+const BITACORA_LOG_PATH = path.join(BITACORA_DIR, 'log.md');
+const BITACORA_SHADOW_PATH = path.join(BITACORA_DIR, 'shadowlog.md');
+const BITACORA_HANDOFFS_PATH = path.join(BITACORA_DIR, 'handoffs.md');
+const BITACORA_GLITCHES_PATH = path.join(BITACORA_DIR, 'glitches.md');
+const CUBIERTA_FEED_PATH = path.join(CUBIERTA_DIR, 'feed.md');
+const CUBIERTA_STATE_PATH = path.join(CUBIERTA_DIR, 'state.json');
+const CUBIERTA_VECTOR_PATH = path.join(CUBIERTA_DIR, 'vector.md');
+const CUBIERTA_INBOX_PATH = path.join(CUBIERTA_DIR, 'inbox.md');
+const CUBIERTA_ARTEFACTOS_PATH = path.join(CUBIERTA_DIR, 'artefactos.md');
 const ARGOS_GLOBAL_LOG_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_LOG.md');
 const ARGOS_GLOBAL_SHADOW_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
 const ARGOS_GLOBAL_GLITCH_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
-const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path.join(RUNTIME_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
+const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
 const ARGOS_EVENTS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const ARGOS_TOKENS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
@@ -928,6 +939,7 @@ function postToCrewFeed(sender: string, summary: string, details: string = '', k
 
 function appendToHandoffLog(agent: string, packetId: string, handoff: HandoffPayload, timestampIso: string): void {
   try {
+    fs.mkdirSync(LOGS_CURRENT_DIR, { recursive: true });
     if (!fs.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH)) {
       fs.writeFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, '# ARGOS GLOBAL HANDOFF LOG\nContexto conversacional por packet. Append-only.\n\n---\n', 'utf-8');
     }
@@ -1871,6 +1883,12 @@ type IaAgentStatus = {
   handoff_to?: string;
   next_step?: string;
   last_output?: string;
+  // Campos canónicos v2 — memoria operacional enriquecida (POST /api/ia/state)
+  availability?: 'available' | 'busy' | 'offline' | 'restricted';
+  current_packet?: string;
+  current_theme?: string;
+  last_interaction_summary?: string;
+  source?: string;
 };
 type IaStatusMap = Record<CanonicalProtocolActor, IaAgentStatus>;
 
@@ -1898,7 +1916,16 @@ function setIaActive(actor: string, packetId: string, subject: string): void {
   if (!agent) return;
   const state = readArgosState();
   const ia = readIaStatus(state);
-  ia[agent] = { status: 'active', task: packetId, task_subject: subject, since: new Date().toISOString() };
+  ia[agent] = {
+    ...ia[agent],                  // preservar campos ricos (v2)
+    status: 'active',
+    task: packetId,
+    task_subject: subject,
+    since: new Date().toISOString(),
+    availability: 'busy',
+    current_packet: packetId,
+    current_theme: subject
+  };
   (state as Record<string, unknown>).ia_status = ia;
   writeArgosState(state);
 }
@@ -1908,7 +1935,16 @@ function setIaStandby(actor: string): void {
   if (!agent) return;
   const state = readArgosState();
   const ia = readIaStatus(state);
-  ia[agent] = { status: 'standby', task: '', task_subject: '', since: new Date().toISOString() };
+  ia[agent] = {
+    ...ia[agent],                  // preservar campos ricos (v2: source, last_interaction_summary, etc.)
+    status: 'standby',
+    task: '',
+    task_subject: '',
+    since: new Date().toISOString(),
+    availability: 'available',
+    current_packet: '',
+    current_theme: ''
+  };
   (state as Record<string, unknown>).ia_status = ia;
   writeArgosState(state);
 }
@@ -1998,6 +2034,125 @@ function readJsonFile<T>(filePath: string, fallback: T): T {
 function writeJsonFileSafe(filePath: string, payload: unknown): void {
   ensureDirSync(path.dirname(filePath));
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf-8');
+}
+
+function copyTextIfChanged(sourcePath: string, destinationPath: string): boolean {
+  const source = readTextFileSafe(sourcePath);
+  const current = readTextFileSafe(destinationPath);
+  if (source === current) return false;
+  ensureDirSync(path.dirname(destinationPath));
+  fs.writeFileSync(destinationPath, source, 'utf-8');
+  return true;
+}
+
+function writeTextIfChanged(filePath: string, content: string): boolean {
+  if (readTextFileSafe(filePath) === content) return false;
+  ensureDirSync(path.dirname(filePath));
+  fs.writeFileSync(filePath, content, 'utf-8');
+  return true;
+}
+
+function buildCanonicalFeedMarkdown(limit = 80): string {
+  const records = readCaptainFeedLines(CAPTAIN_FEED_PATH)
+    .map((line) => line.parsed ? ensureCaptainFeedRecordId(line.parsed) : null)
+    .filter((record): record is CaptainFeedRecord => record !== null)
+    .slice(-limit)
+    .reverse();
+
+  const lines = [
+    '# Feed de cubierta',
+    '',
+    'Alias humano de `views/ui_export/captain_feed.jsonl`. El JSONL sigue vigente durante la fase de compatibilidad.',
+    ''
+  ];
+
+  for (const record of records) {
+    const timestamp = normaliseText(record.timestamp) || 'sin timestamp';
+    const sender = inferSenderName(record) || 'ARGOS';
+    const summary = normaliseText(record.summary) || '(sin resumen)';
+    const details = normaliseText(record.details);
+    const ref = normaliseText(record.refId);
+    lines.push(`## ${timestamp} - ${sender}`);
+    if (ref !== '') lines.push(`- Ref: ${ref}`);
+    lines.push(`- Resumen: ${summary}`);
+    if (details !== '') lines.push('', details);
+    lines.push('');
+  }
+
+  if (records.length === 0) lines.push('_Sin mensajes visibles._', '');
+  return lines.join('\n');
+}
+
+function buildCanonicalInboxMarkdown(limit = 80): string {
+  const inboxDir = path.join(RUNTIME_DIR, 'work_packets', 'inbox');
+  const files = fs.existsSync(inboxDir)
+    ? fs.readdirSync(inboxDir).filter((name) => name.toLowerCase().endsWith('.md')).sort()
+    : [];
+  const visible = files.slice(0, limit);
+  const lines = [
+    '# Resumen de inbox',
+    '',
+    `Total visible: ${files.length}`,
+    ''
+  ];
+
+  for (const name of visible) {
+    const id = name.split('__')[0].replace(/\.md$/i, '');
+    const title = name.replace(/\.md$/i, '').replace(`${id}__`, '').replace(/_/g, ' ');
+    lines.push(`- ${id}: ${title}`);
+  }
+
+  if (files.length > visible.length) {
+    lines.push(`- ... ${files.length - visible.length} paquetes adicionales omitidos en cubierta.`);
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+function buildCanonicalArtefactosMarkdown(): string {
+  const artifacts = [
+    ['Dashboard snapshot', path.join(RUNTIME_DIR, 'views', 'logbook_export', 'logbook.snapshot.json')],
+    ['Timeline export', path.join(RUNTIME_DIR, 'views', 'history_export', 'argos.timeline.jsonl')],
+    ['Captain feed JSONL', CAPTAIN_FEED_PATH],
+    ['Events JSONL', ARGOS_EVENTS_PATH],
+    ['Glitches JSONL', ARGOS_GLITCHES_PATH],
+    ['Tokens JSONL', ARGOS_TOKENS_PATH],
+    ['Vector activo', ARGOS_VECTOR_PATH],
+    ['State activo', ARGOS_STATE_PATH]
+  ];
+  const lines = [
+    '# Artefactos visibles de cubierta',
+    '',
+    'Indice liviano para UI, inspeccion humana y agentes remotos.',
+    ''
+  ];
+
+  for (const [label, filePath] of artifacts) {
+    const exists = fs.existsSync(filePath);
+    const stat = exists ? fs.statSync(filePath) : null;
+    const relPath = path.relative(RUNTIME_DIR, filePath).replace(/\\/g, '/');
+    const suffix = stat ? ` - ${stat.size} bytes - ${stat.mtime.toISOString()}` : ' - no existe';
+    lines.push(`- ${label}: \`${relPath}\`${suffix}`);
+  }
+
+  return `${lines.join('\n')}\n`;
+}
+
+function syncRuntimeCanonicalSurface(): void {
+  try {
+    ensureDirSync(BITACORA_DIR);
+    ensureDirSync(CUBIERTA_DIR);
+    copyTextIfChanged(ARGOS_GLOBAL_LOG_PATH, BITACORA_LOG_PATH);
+    copyTextIfChanged(ARGOS_GLOBAL_SHADOW_PATH, BITACORA_SHADOW_PATH);
+    copyTextIfChanged(ARGOS_GLOBAL_HANDOFF_LOG_PATH, BITACORA_HANDOFFS_PATH);
+    copyTextIfChanged(ARGOS_GLOBAL_GLITCH_PATH, BITACORA_GLITCHES_PATH);
+    copyTextIfChanged(ARGOS_STATE_PATH, CUBIERTA_STATE_PATH);
+    copyTextIfChanged(ARGOS_VECTOR_PATH, CUBIERTA_VECTOR_PATH);
+    writeTextIfChanged(CUBIERTA_FEED_PATH, buildCanonicalFeedMarkdown());
+    writeTextIfChanged(CUBIERTA_INBOX_PATH, buildCanonicalInboxMarkdown());
+    writeTextIfChanged(CUBIERTA_ARTEFACTOS_PATH, buildCanonicalArtefactosMarkdown());
+  } catch (error) {
+    console.error('[RUNTIME-CANON] Error sincronizando bitacora/cubierta:', error);
+  }
 }
 
 function nowIso(): string {
@@ -2296,18 +2451,22 @@ function parseRemoteClosurePayload(rawBody: unknown): { payload: RemoteClosurePa
   const handoffToRaw = stateRaw ? stateRaw.handoff_to : body.handoff_to;
   const handoffTo = handoffToRaw === null ? null : (normaliseText(handoffToRaw) || null);
 
-  // Campo handoff opcional
+  // Campo handoff OBLIGATORIO — permite reconstruir el contexto al 75% sin leer el transcript.
+  // Un cierre sin handoff es inválido: no hay trazabilidad de decisiones.
   let handoff: HandoffPayload | undefined;
   const handoffRaw = sectionsRaw && sectionsRaw.handoff && typeof sectionsRaw.handoff === 'object'
     ? (sectionsRaw.handoff as Record<string, unknown>)
     : null;
-  if (handoffRaw) {
+  if (!handoffRaw) {
+    return { payload: null, error: 'sections.handoff es OBLIGATORIO. Incluir: contexto, decision, continuidad, session_ref. Criterio: quien lo lea debe poder reconstruir el estado al 75% sin leer el transcript.' };
+  }
+  {
     const contexto    = normaliseText(handoffRaw.contexto);
     const decision    = normaliseText(handoffRaw.decision);
     const continuidad = normaliseText(handoffRaw.continuidad);
     const session_ref = normaliseText(handoffRaw.session_ref);
     if (!contexto || !decision || !continuidad || !session_ref) {
-      return { payload: null, error: 'sections.handoff requiere contexto, decision, continuidad y session_ref' };
+      return { payload: null, error: 'sections.handoff requiere contexto, decision, continuidad y session_ref (todos no vacíos)' };
     }
     handoff = {
       contexto, decision, continuidad, session_ref,
@@ -4370,7 +4529,7 @@ function parseArgosMarkdownStream(filePath: string, idPrefix: string): LogbookEn
       '';
 
     const risksRaw =
-      block.match(/\*\*RIESGO[S]?|Peligros\s*:\*\*([\s\S]*?)(?:\n\*\*|\n---|$)/i)?.[1] ||
+      block.match(/\*\*(?:RIESGO[S]?|Peligros)\s*:\*\*([\s\S]*?)(?:\n\*\*|\n---|$)/i)?.[1] ||
       '';
 
     parsed.push({
@@ -5801,8 +5960,16 @@ app.post('/api/remote/closure', (req: Request, res: Response) => {
       source: 'api:remote/closure'
     });
 
+    // sections.handoff es OBLIGATORIO — siempre se escribe al HANDOFF_LOG
     if (payload.sections.handoff) {
       appendToHandoffLog(payload.agent, payload.packet_id, payload.sections.handoff, timestampIso);
+    } else {
+      // Defensa: no debería llegar aquí si parseRemoteClosurePayload rechazó correctamente
+      appendJsonlRecord(ARGOS_GLITCHES_PATH, {
+        timestamp: timestampIso, actor: payload.agent, packet_id: payload.packet_id,
+        summary: 'GLITCH: closure sin handoff llegó al handler — parseRemoteClosurePayload no lo rechazó',
+        source: 'api:remote/closure:handoff-missing'
+      });
     }
 
     appendJsonlRecord(ARGOS_EVENTS_PATH, {
@@ -7323,7 +7490,8 @@ app.post('/api/ia/start-task', (req: Request, res: Response) => {
   }
 });
 
-// ============ ENDPOINT: IA Status manual (GET + POST) ============
+// ============ ENDPOINT: IA Status manual (GET + POST) — LEGACY ============
+// Mantenido por compatibilidad. Preferir /api/ia/state para nuevos clientes.
 app.get('/api/ia/status', (_req: Request, res: Response) => {
   const state = readArgosState();
   const baseStatus = readIaStatus(state);
@@ -7346,6 +7514,87 @@ app.post('/api/ia/status', (req: Request, res: Response) => {
   const agent = normalizeAgentName(actor);
   publishEvent('ia:status_changed', { agent, status, task, subject: task_subject });
   return res.json({ status: 'ok', agent, ia_status: status });
+});
+
+// ============ ENDPOINT CANÓNICO v2: /api/ia/state ============
+// Memoria operacional enriquecida. Permite que cada IA declare su estado completo.
+// Campos: actor, availability, current_packet, current_theme,
+//         last_interaction_summary, next_step, source, last_seen
+app.get('/api/ia/state', (_req: Request, res: Response) => {
+  const state = readArgosState();
+  const baseStatus = readIaStatus(state);
+  const inferredStatus = inferIaStatusFromTasks(baseStatus);
+  res.json({ ia_status: inferredStatus });
+});
+
+app.get('/api/ia/state/:actor', (req: Request, res: Response) => {
+  const actorParam = req.params.actor;
+  const agent = normalizeAgentName(actorParam);
+  if (!agent) return res.status(404).json({ error: `actor '${actorParam}' no reconocido` });
+  const state = readArgosState();
+  const baseStatus = readIaStatus(state);
+  const inferredStatus = inferIaStatusFromTasks(baseStatus);
+  const agentStatus = inferredStatus[agent];
+  if (!agentStatus) return res.status(404).json({ error: 'agent no encontrado en ia_status' });
+  return res.json({ agent, ia_status: agentStatus });
+});
+
+app.post('/api/ia/state', (req: Request, res: Response) => {
+  const {
+    actor,
+    availability,
+    current_packet,
+    current_theme,
+    last_interaction_summary,
+    next_step,
+    source,
+    last_seen
+  } = req.body;
+
+  if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor))) return;
+  if (!actor) return res.status(400).json({ error: 'actor requerido' });
+
+  const agent = normalizeAgentName(actor);
+  if (!agent) return res.status(400).json({ error: `actor '${actor}' no reconocido` });
+
+  // Mapear availability → status legacy para compatibilidad
+  const availToStatus: Record<string, IaAgentStatus['status']> = {
+    available: 'standby',
+    busy: 'active',
+    offline: 'standby',
+    restricted: 'restricted'
+  };
+  const resolvedStatus: IaAgentStatus['status'] = availToStatus[availability] ?? 'standby';
+  const resolvedAvailability: IaAgentStatus['availability'] = availability ?? (resolvedStatus === 'active' ? 'busy' : 'available');
+
+  const now = new Date().toISOString();
+  const stateDoc = readArgosState();
+  const ia = readIaStatus(stateDoc);
+
+  ia[agent] = {
+    ...ia[agent],                              // preservar campos existentes no sobreescritos
+    status: resolvedStatus,
+    task: current_packet ?? ia[agent].task ?? '',
+    task_subject: current_theme ?? ia[agent].task_subject ?? '',
+    since: ia[agent].since || now,
+    last_seen: last_seen ?? now,
+    ...(next_step !== undefined && { next_step }),
+    ...(last_interaction_summary !== undefined && { last_output: last_interaction_summary }),
+    // campos canónicos v2
+    availability: resolvedAvailability,
+    current_packet: current_packet ?? ia[agent].current_packet ?? ia[agent].task ?? '',
+    current_theme: current_theme ?? ia[agent].current_theme ?? ia[agent].task_subject ?? '',
+    ...(last_interaction_summary !== undefined && { last_interaction_summary }),
+    ...(source !== undefined && { source }),
+    ...(next_step !== undefined && { next_step })
+  };
+
+  (stateDoc as Record<string, unknown>).ia_status = ia;
+  writeArgosState(stateDoc);
+
+  publishEvent('ia:state_updated', { agent, availability: resolvedAvailability, current_packet, source });
+
+  return res.json({ status: 'ok', agent, ia_status: ia[agent] });
 });
 
 // ============ ENDPOINT: GET /api/ia/bootstrap ============
@@ -8824,6 +9073,23 @@ app.get('/api/ping', (_req: Request, res: Response) => {
   res.json({ ok: true, ts: nowIso(), service: 'argos-api' });
 });
 
+app.post('/api/runtime/canonical-sync', (_req: Request, res: Response) => {
+  syncRuntimeCanonicalSurface();
+  res.json({
+    ok: true,
+    canonical: {
+      bitacora: path.relative(RUNTIME_DIR, BITACORA_DIR).replace(/\\/g, '/'),
+      cubierta: path.relative(RUNTIME_DIR, CUBIERTA_DIR).replace(/\\/g, '/')
+    },
+    compatibility: {
+      logs_current: path.relative(RUNTIME_DIR, LOGS_CURRENT_DIR).replace(/\\/g, '/'),
+      captain_feed: path.relative(RUNTIME_DIR, CAPTAIN_FEED_PATH).replace(/\\/g, '/'),
+      state: path.relative(RUNTIME_DIR, ARGOS_STATE_PATH).replace(/\\/g, '/'),
+      vector: path.relative(RUNTIME_DIR, ARGOS_VECTOR_PATH).replace(/\\/g, '/')
+    }
+  });
+});
+
 // Fallback para SPA: cualquier ruta no manejada por la API devuelve index.html
 app.get('*', (req: Request, res: Response) => {
   const indexPath = path.join(DASHBOARD_DIR, 'index.html');
@@ -8841,6 +9107,7 @@ app.listen(PORT, () => {
   ensureLiveLayerBootstrap();   // bootstrap de capa live por agente
   startInboxDepositsWatcher();  // watcher + barrido inicial de inbox_deposits
   ensureAgentTokensFile();      // bootstrap de tokens por agente para remote closure
+  syncRuntimeCanonicalSurface(); // materializa aliases canonicos bitacora/ y cubierta/
   loadDesktopSourcesConfig(); // bootstrap config si no existe
   loadDesktopIngestState();   // bootstrap estado incremental si no existe
 
@@ -8862,6 +9129,7 @@ app.listen(PORT, () => {
 
   // Iniciar Motores Autonomos
   setInterval(runArgosDispatcher, 60000); // Cada 1 minuto
+  setInterval(syncRuntimeCanonicalSurface, 60000); // Mantiene bitacora/ y cubierta/ como superficie canonica legible
   setInterval(() => {
     // Agrega totales del ledger y notifica al dashboard â€” sin coste extra, solo lectura de JSONL
     try {

@@ -7,9 +7,15 @@
 - `archive/` es historico. No se carga por defecto en el flujo diario.
 
 ## Estructura canonica (vivo)
-- `ARGOS_GLOBAL_LOG.md`: trilog visible activo (sesion actual).
-- `ARGOS_GLOBAL_SHADOW_LOG.md`: observaciones activas de sombra.
-- `ARGOS_GLOBAL_GLITCH_LOG.md`: glitches activos de pipeline.
+- `bitacora/log.md`: trilog visible activo (sesion actual).
+- `bitacora/shadowlog.md`: observaciones activas de sombra.
+- `bitacora/handoffs.md`: handoffs obligatorios por packet.
+- `bitacora/glitches.md`: glitches activos de pipeline.
+- `cubierta/feed.md`: feed humano visible derivado de `views/ui_export/captain_feed.jsonl`.
+- `cubierta/state.json`: state activo del proyecto.
+- `cubierta/vector.md`: vector activo.
+- `cubierta/inbox.md`: resumen liviano del inbox.
+- `cubierta/artefactos.md`: indice de artefactos visibles.
 - `events/`: JSONL activo (`argos.events.jsonl`, `argos.glitches.jsonl`, `argos.tokens.jsonl`).
 - `transcripts/`: transcripts activos (sesion actual).
 - `inbox_deposits/`: deposito canonico para agentes chat (`<agente>_YYYY-MM-DD_HH-MM.md`) y cola `processed/`.
@@ -41,7 +47,7 @@ Script rapido:
 - Historial previo ubicado fuera de `archive/sessions` se considera legado y se migra gradualmente a `archive/legacy`.
 
 ## Depositos chat (ARGOS-PROTO-0001)
-- Agentes locales escriben directo en canonicos (`ARGOS_GLOBAL_*`, `events/*.jsonl`, `state/argos.state.json`, `views/ui_export/captain_feed.jsonl`).
+- Agentes locales escriben directo en las rutas de compatibilidad vigentes (`logs/current/ARGOS_GLOBAL_*`, `events/*.jsonl`, `state/argos.state.json`, `views/ui_export/captain_feed.jsonl`) mientras la API materializa `bitacora/` y `cubierta/`.
 - Agentes chat depositan un unico markdown en `inbox_deposits/`.
 - El heartbeat de `argos-api` procesa el deposito al detectarlo, integra secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]` y mueve el archivo a `inbox_deposits/processed/`.
 - Red de seguridad: cada hora se reprocesan pendientes y se marca `stale` en `ia_status` cuando un agente supera 60 minutos sin actividad.
