@@ -5625,6 +5625,88 @@ app.get('/api/handoff/:packetId', (req, res) => {
         res.status(500).json({ error: 'Fallo leyendo handoff log', detail: String(e) });
     }
 });
+// ============ ENDPOINT: Get Work Packets ============
+app.get('/api/tasks', (req, res) => {
+    try {
+        const roomFilterRaw = normaliseText(String(req.query.room || '')).toUpperCase();
+        const typeFilterRaw = normaliseText(String(req.query.type || '')).toLowerCase();
+        const roomFilter = roomFilterRaw && roomFilterRaw !== 'ALL'
+            ? (VALID_PACKET_ROOMS.has(roomFilterRaw) ? roomFilterRaw : '__INVALID__')
+            : '';
+        const typeFilter = typeFilterRaw && typeFilterRaw !== 'all'
+            ? (VALID_PACKET_TYPES.has(typeFilterRaw) ? typeFilterRaw : '__invalid__')
+            : '';
+        const tasks = [
+            ...loadTasksFromZone('inbox'),
+            ...loadTasksFromZone('in_progress'),
+            ...loadTasksFromZone('done')
+        ];
+        const filteredTasks = tasks.filter((task) => {
+            if (roomFilter !== '' && task.room !== roomFilter)
+                return false;
+            if (typeFilter !== '' && task.type !== typeFilter)
+                return false;
+            return true;
+        });
+        const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
+        const recencyMs = (task) => Math.max(task.created_at_ms || 0, task.mtimeMs || 0);
+        const byPriorityThenRecency = (a, b) => {
+            const pa = PRIORITY_RANK[a.priority] ?? 1;
+            const pb = PRIORITY_RANK[b.priority] ?? 1;
+            if (pb !== pa)
+                return pb - pa;
+            return recencyMs(b) - recencyMs(a);
+        };
+        const pendingTasks = filteredTasks
+            .filter((task) => task.status !== 'done')
+            .sort(byPriorityThenRecency);
+        const doneTasks = filteredTasks
+            .filter((task) => task.status === 'done')
+            .sort((a, b) => recencyMs(b) - recencyMs(a));
+        const orderedTasks = [...pendingTasks, ...doneTasks];
+        res.json({ tasks: orderedTasks });
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Fallo desenterrando los work packets fisicos del inbox' });
+    }
+});
+app.get('/api/tasks/get', (req, res) => {
+    try {
+        const packetId = normaliseText(String(req.query.packetId || ''));
+        if (packetId === '')
+            return res.status(400).json({ error: 'packetId requerido' });
+        const resolved = findWorkPacketById(packetId);
+        if (!resolved)
+            return res.status(404).json({ error: `Packet ${packetId} no encontrado` });
+        const owner = getPacketField(resolved.content, 'ROLE_REQUESTED') || getPacketField(resolved.content, 'OWNER') || 'Cualquiera';
+        const subject = getPacketField(resolved.content, 'SUBJECT') || resolved.packetId;
+        const currentStatus = normalizeTaskStatus(getPacketField(resolved.content, 'STATUS'), resolved.zone === 'done' ? 'done' : resolved.zone === 'in_progress' ? 'in_progress' : 'open');
+        const objective = extractPacketObjective(resolved.content);
+        const packetRoom = normalizeTaskRoom(getPacketField(resolved.content, 'ROOM'));
+        const packetType = normalizeTaskType(getPacketField(resolved.content, 'TYPE'));
+        const priority = getPacketField(resolved.content, 'PRIORITY') || 'low';
+        const tokensSpent = Number(getPacketField(resolved.content, 'TOKENS_SPENT')) || 0;
+        return res.json({
+            status: 'ok',
+            packet: {
+                id: resolved.packetId,
+                owner,
+                subject,
+                status: currentStatus,
+                objective,
+                zone: resolved.zone,
+                room: packetRoom,
+                type: packetType,
+                priority,
+                tokens_spent: tokensSpent,
+                fileName: resolved.fileName
+            }
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Fallo leyendo el work packet', detail: String(error) });
+    }
+});
 // ============ ENDPOINT: Get AI My Packets ============
 app.get('/api/my-packets', (req, res) => {
     try {
