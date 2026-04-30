@@ -493,6 +493,140 @@ body {
     line-height: 1.25;
 }
 
+.concilio-view {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+}
+
+.concilio-card {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.concilio-card-full {
+    flex: 1;
+    min-height: 0;
+}
+
+.concilio-thread {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 6px 8px 6px 0;
+}
+
+.concilio-thread::-webkit-scrollbar {
+    width: 4px;
+}
+
+.concilio-thread::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+
+.concilio-message {
+    border: 1px solid rgba(127, 153, 132, 0.22);
+    border-left-width: 3px;
+    border-radius: 8px;
+    background: rgba(7, 14, 10, 0.55);
+    padding: 12px 14px;
+}
+
+.concilio-message-head,
+.concilio-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.concilio-message-head {
+    margin-bottom: 5px;
+}
+
+.concilio-agent {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-primary);
+}
+
+.concilio-type,
+.concilio-meta span {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    line-height: 1;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.concilio-message-head time {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text-soft);
+}
+
+.concilio-body {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.concilio-meta {
+    margin-top: 6px;
+}
+
+.concilio-type-idea { border-left-color: #66b8ff; }
+.concilio-type-objecion { border-left-color: #ffae52; }
+.concilio-type-sintesis { border-left-color: var(--accent-neon); }
+.concilio-type-pregunta { border-left-color: #a0aab0; }
+.concilio-type-propuesta { border-left-color: #b48cff; }
+.concilio-type-decision { border-left-color: #f2c94c; }
+
+.concilio-input {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) 36px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.concilio-input-full {
+    grid-template-columns: 140px minmax(0, 1fr) 44px;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+.concilio-input select,
+.concilio-input textarea {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid rgba(127, 153, 132, 0.28);
+    border-radius: 8px;
+    background: rgba(7, 14, 10, 0.7);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+}
+
+.concilio-input select {
+    padding: 0 8px;
+}
+
+.concilio-input textarea {
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 10px;
+    line-height: 1.35;
+}
+
 .metric-value-alert {
     color: #ffb9b9;
     text-shadow: 0 0 12px rgba(220, 50, 40, 0.35);

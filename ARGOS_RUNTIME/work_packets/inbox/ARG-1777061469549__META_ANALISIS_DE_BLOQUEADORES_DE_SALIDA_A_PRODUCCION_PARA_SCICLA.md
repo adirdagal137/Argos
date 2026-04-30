@@ -1,11 +1,14 @@
 [WORK_PACKET]
 ID: ARG-1777061469549
+UPDATED_BY: Claude
+UPDATED_AT: 2026-04-26T15:40:14.820Z
+ASSIGNED_TO: Cualquiera
 ROLE_REQUESTED: Cualquiera
 SUBJECT: Meta-análisis de bloqueadores de salida a producción para SCICLASSM8 y COMENIO
 STATUS: open
 ROOM: GENERAL
 TYPE: task
-PRIORITY: alta
+PRIORITY: low
 CREATED_BY: ChatGPT
 TOKENS_SPENT: 0
 
