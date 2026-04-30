@@ -20,7 +20,7 @@ Leer en este orden:
 1. `ARGOS_RUNTIME/ARGOS_QUICKSTART.md` — protocolo condensado (inicio, cierre, voces, tokens)
 2. `work_packets/inbox/` — qué hay pendiente
 3. `state/argos.state.json` — foco y riesgos activos
-4. Tail de `ARGOS_GLOBAL_LOG.md` — qué se hizo recientemente
+4. Tail de `ARGOS_RUNTIME/bitacora/log.md` — qué se hizo recientemente
 5. Confirmar al Capitán: "[N] paquetes en inbox. [frase en voz Antigravity]."
 
 Referencia on-demand (solo bajo ambigüedad de protocolo o conflicto entre IAs):

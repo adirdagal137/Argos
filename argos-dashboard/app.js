@@ -1074,10 +1074,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const canEdit = msg.type === 'sent' && !!msg.id;
             const editedTag = msg.editedAt ? '<span class="chat-edited-tag">editado</span>' : '';
             const editButton = canEdit ? '<button type="button" class="chat-edit-btn">Editar</button>' : '';
-            const transcriptRef = msg.transcriptRef || msg.transcript_ref || '';
-            const transcriptBtn = transcriptRef
-                ? `<button type="button" class="chat-transcript-btn" data-ref="${safeHtml(transcriptRef)}" title="Ver transcript literal">📄</button>`
-                : '';
 
             const contentText = msg.text || [msg.summary, msg.details].filter(Boolean).join('\n\n') || '';
 
@@ -1085,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <span class="sender">${safeHtml(senderLabel)}</span>
                 <p>${renderMultiline(contentText)}</p>
                 <div class="chat-meta-bottom">
-                    <div class="chat-meta-left">${editedTag}${editButton}${transcriptBtn}</div>
+                    <div class="chat-meta-left">${editedTag}${editButton}</div>
                     <span class="time">${safeHtml(msg.time || '--:--')}</span>
                 </div>
             `;
@@ -1099,13 +1095,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 }
             }
-            const tBtn = wrap.querySelector('.chat-transcript-btn');
-            if (tBtn) {
-                tBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    await showTranscriptOverlay(tBtn.dataset.ref);
-                });
-            }
 
             chatContainer.appendChild(wrap);
         });
@@ -1114,43 +1103,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         renderIaStatus(latestVisibleTasks);
-    }
-
-    // Muestra el transcript literal en el overlay de eventos existente
-    async function showTranscriptOverlay(transcriptRef) {
-        if (!transcriptRef) return;
-        // Formato ref: "transcripts/FECHA_AGENTE.md#PACKET-ID"  o  "transcripts/FECHA_AGENTE.md"
-        const [filePart, packetId] = transcriptRef.replace('transcripts/', '').split('#');
-        const [datePart, ...agentParts] = filePart.replace('.md', '').split('_');
-        const agent = agentParts.join('_');
-
-        try {
-            const params = new URLSearchParams({ agent, date: datePart });
-            if (packetId) params.set('packetId', packetId);
-            const resp = await fetch(`${API_URL}/transcript?${params}`);
-            if (!resp.ok) {
-                showTranscriptModal('Transcript no disponible', `No se encontró el bloque para ${transcriptRef}`);
-                return;
-            }
-            const data = await resp.json();
-            showTranscriptModal(
-                `Transcript: ${agent} · ${datePart}${packetId ? ` · ${packetId}` : ''}`,
-                data.content || 'Vacío'
-            );
-        } catch (err) {
-            showTranscriptModal('Error', String(err));
-        }
-    }
-
-    function showTranscriptModal(title, content) {
-        if (!overlay || !modalQueryTitle || !modalEventsList) return;
-        modalQueryTitle.textContent = title;
-        modalEventsList.innerHTML = '';
-        const pre = document.createElement('pre');
-        pre.style.cssText = 'white-space:pre-wrap;word-break:break-word;font-size:0.85rem;line-height:1.5;padding:1rem;';
-        pre.textContent = content;
-        modalEventsList.appendChild(pre);
-        overlay.classList.remove('hidden');
     }
 
     // Carga las entradas de HANDOFF para un packetId y las muestra en el modal.
@@ -1301,7 +1253,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const value = String(source || '').toLowerCase();
         if (value.includes('shadow')) return 'shadow_log';
         if (value.includes('glitch')) return 'glitch_log';
-        if (value.includes('transcript')) return 'transcript';
         if (value.includes('captain_feed') || value.includes('argos.events')) return 'captain_feed';
         if (value.includes('work packet')) return 'work_packet';
         if (value.includes('bug')) return 'bug';
@@ -1400,11 +1351,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Excluir glitch si no tiene entradas (tab oculto)
         const visibleStreams = streams.filter((s) => s.id !== 'glitch' || (s.entries || []).length > 0);
 
-        // 'transcript' es un tab virtual — no existe en el snapshot, pero es válido
-        if (viewState.streamId === 'transcript') {
-            return { currentModule, currentStream: null };
-        }
-
         let currentStream = visibleStreams.find((stream) => stream.id === viewState.streamId);
         if (!currentStream) {
             currentStream = visibleStreams[0] || streams[0];
@@ -1450,16 +1396,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             streamTabs.appendChild(button);
         });
 
-        // Tab especial Transcript — siempre visible, fuera del snapshot
-        const transcriptBtn = document.createElement('button');
-        transcriptBtn.type = 'button';
-        transcriptBtn.className = `sheet-tab ${viewState.streamId === 'transcript' ? 'is-active' : ''}`.trim();
-        transcriptBtn.textContent = '📄 Transcripts';
-        transcriptBtn.addEventListener('click', () => {
-            viewState.streamId = 'transcript';
-            renderLogbook(snapshot);
-        });
-        streamTabs.appendChild(transcriptBtn);
     }
 
     function entryMergeKey(entry) {
@@ -1623,29 +1559,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 td.dataset.fullText = String(value || '--');
 
-                // transcriptRef — render as 📄 button instead of raw text
-                if (column.id === 'transcriptRef') {
-                    if (value && value !== '--') {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'transcript-btn';
-                        btn.title = value;
-                        btn.textContent = '📄';
-                        btn.addEventListener('click', (ev) => {
-                            ev.stopPropagation();
-                            showTranscriptOverlay(value);
-                        });
-                        td.appendChild(btn);
-                    } else {
-                        const empty = document.createElement('span');
-                        empty.className = 'logbook-cell-empty';
-                        empty.textContent = '—';
-                        td.appendChild(empty);
-                    }
-                    row.appendChild(td);
-                    return;
-                }
-
                 let extraClass = '';
                 if (column.id === 'timestamp_label' && entry.timestamp_precision !== 'minute') {
                     extraClass = 'is-imprecise';
@@ -1759,95 +1672,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderStreamTabs(selection.currentModule, snapshot);
         viewState.streamId = null;
 
-        if (viewState.streamId === 'transcript') {
-            logbookMeta.innerHTML = `
-                <span class="meta-chip meta-chip-quiet">📄 Transcripts literales</span>
-                <span class="meta-chip meta-chip-quiet">Fuente: transcripts/FECHA_AGENTE.md</span>
-                <div class="logbook-meta-copy"><strong>Exchanges literales entre IAs y Capitán, indexados por work packet.</strong></div>
-            `;
-            renderTranscriptTab();
-            return;
-        }
-
         renderLogbookMeta(snapshot, selection.currentModule);
         renderLogbookTable(snapshot, selection.currentModule);
-    }
-
-    async function renderTranscriptTab() {
-        logbookHead.innerHTML = '';
-        logbookBody.innerHTML = '';
-        if (logbookTable) logbookTable.classList.add('transcript-table');
-
-        // Header fijo
-        const headRow = document.createElement('tr');
-        headRow.innerHTML = `
-            <th class="col-ts-fit">Tiempo</th>
-            <th class="col-voz-fit">Voz</th>
-            <th class="col-id-fit">ID</th>
-            <th class="col-transcript-text">Transcript</th>
-        `;
-        logbookHead.appendChild(headRow);
-
-        // Cargar datos
-        const today = new Date().toISOString().slice(0, 10);
-        let entries = [];
-        try {
-            const res = await fetch(`${API_URL}/transcript/feed?date=${today}`);
-            if (res.ok) {
-                const data = await res.json();
-                entries = data.entries || [];
-            }
-        } catch (e) {
-            console.warn('Fallo cargando transcript feed:', e);
-        }
-
-        if (entries.length === 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `<td colspan="4" class="logbook-empty">Sin transcripts para hoy.</td>`;
-            logbookBody.appendChild(emptyRow);
-            return;
-        }
-
-        entries.forEach((entry) => {
-            const row = document.createElement('tr');
-            row.className = 'logbook-row transcript-feed-row';
-
-            // Timestamp
-            const tsTd = document.createElement('td');
-            tsTd.className = 'col-ts-fit';
-            tsTd.appendChild(buildBubbleCell(entry.timestamp || '--'));
-
-            // Voz / agent
-            const vozTd = document.createElement('td');
-            vozTd.className = 'col-voz-fit';
-            const agentClass = `bubble-agent-${(entry.agent || '').toLowerCase().replace(/\s+/g, '-')}`;
-            vozTd.appendChild(buildBubbleCell(entry.agent || '--', agentClass));
-
-            // PacketId — clickable → abre visor
-            const idTd = document.createElement('td');
-            idTd.className = 'col-id-fit';
-            const idBubble = buildBubbleCell(entry.packetId || '--');
-            if (entry.packetId) {
-                idBubble.classList.add('event-link');
-                idBubble.addEventListener('click', () => window.openEventInPanel(entry.packetId));
-            }
-            idTd.appendChild(idBubble);
-
-            // Transcript content — no expandable, texto directo
-            const textTd = document.createElement('td');
-            textTd.className = 'col-transcript-text';
-            const pre = document.createElement('pre');
-            pre.className = 'transcript-feed-text';
-            pre.textContent = entry.content || '';
-            textTd.appendChild(pre);
-
-            row.appendChild(tsTd);
-            row.appendChild(vozTd);
-            row.appendChild(idTd);
-            row.appendChild(textTd);
-
-            logbookBody.appendChild(row);
-        });
     }
 
     async function loadLogbookSnapshot() {
@@ -2378,38 +2204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             modalEventsList.innerHTML = '<p class="empty-copy" style="color:#ff5555">Error en la conexion hermeneutica.</p>';
         }
 
-        // Si la query parece un packet ID, también cargar transcripts de todas las IAs
-        if (/^(ARG|ID)-\d+$/i.test(query.trim())) {
-            renderPacketTranscripts(query.trim());
-        }
-    }
-
-    async function renderPacketTranscripts(packetId) {
-        try {
-            const res = await fetch(`${API_URL}/transcript/packet?packetId=${encodeURIComponent(packetId)}`);
-            if (!res.ok) return;
-            const data = await res.json();
-            const blocks = data.transcripts || [];
-            if (blocks.length === 0) return;
-
-            const section = document.createElement('div');
-            section.className = 'hermeneutic-transcript-section';
-            section.innerHTML = `<h4 class="transcript-section-title">📄 Transcripts — ${safeHtml(packetId)}</h4>`;
-
-            blocks.forEach((block) => {
-                const div = document.createElement('div');
-                div.className = 'hermeneutic-hit glass-panel';
-                div.innerHTML = `
-                    <span class="hit-source">${safeHtml(block.agent)} · ${safeHtml(block.date || '')}</span>
-                    <div class="hit-content transcript-block-content">${renderMultiline(block.content || '')}</div>
-                `;
-                section.appendChild(div);
-            });
-
-            modalEventsList.appendChild(section);
-        } catch (err) {
-            console.warn('No se pudo cargar el transcript del packet:', err);
-        }
     }
 
     function renderHermeneuticHits(hits) {
