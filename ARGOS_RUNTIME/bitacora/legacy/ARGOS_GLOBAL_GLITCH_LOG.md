@@ -1919,3 +1919,21 @@ El cierre HTTP por `/api/remote/closure` fallo con 401 porque `agent_tokens.json
 **OWNER:** Codex
 **DETALLE:** La regla de rama obligatoria existia en instrucciones, pero `argos_commit.ps1` permitia commits directos a `main` con cambios protegidos. Tambien habia refs basura `desktop.ini` dentro de `.git/refs`, rompiendo `git log --all`.
 **SIGUIENTE:** Usar `argos_branch_audit.ps1` para revisar ramas pendientes y cerrar/mergear con decision explicita.
+
+---
+**[2026-04-29 12:11 Atlantic/Canary] G-207 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1776824400000
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Claude
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Claude. Subject: Reparar captain_feed timestamp falso + index.ts truncado (continuación Codex)
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
+
+---
+**[2026-04-29 12:11 Atlantic/Canary] G-208 | TRILOG GUARD:**
+**WORK PACKET:** ARG-1777293324283
+**TIPO:** TriLog incompleto
+**ESTADO:** open
+**OWNER:** Codex
+**DETALLE:** Lane(s) ausentes: LOG, EVENTS, SHADOW, TRANSCRIPT. Owner detectado: Codex. Subject: Reorganización runtime: bitácora y cubierta
+**SIGUIENTE:** Registrar cierre via /api/trilog con packetId y verificar LOG + EVENTS + SHADOW.
