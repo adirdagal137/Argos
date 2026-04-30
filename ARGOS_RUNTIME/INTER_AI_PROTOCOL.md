@@ -44,6 +44,9 @@ No va aqui: opiniones, riesgos no ejecutados, texto de conversacion literal.
 | `actor` | string canónico | `Claude`, `Codex`, `Gemini`, `ChatGPT`, `OpenClaw`, `Qwen`. Nunca: “Pi”, “Antigravity”, “DeepSeek”, “IA”, “sistema”, “agente” |
 | `packet_id` | string | Obligatorio. Sin packet_id la entrada es inválida (ORPHAN). |
 | `summary` | string | Qué se hizo, resultado concreto. No el subject del packet. |
+| `siguiente` | string | Próximo paso concreto. `””` solo si no hay continuidad posible. |
+| `aprendizaje` | string | Qué aprendimos. `””` solo si ejecución sin novedad. |
+| `glitches` | string | Fallos de proceso/pipeline detectados. `””` si ninguno. Errores de código van como work packet TYPE: bug, NO aquí. |
 | `errors` | string | Errores + aprendizajes. `””` solo si ejecución limpia. |
 | `risks` | string | Riesgos detectados. `””` si no aplica. |
 
@@ -57,6 +60,8 @@ WORK PACKET: ARG-REFORM-BITACORA-001
 DETALLES: Actualizados INTER_AI_PROTOCOL.md v1.5 y ARGOS_QUICKSTART.md.
 Añadida sección 2b (ciclo de vida), 1.7 (validaciones), ejemplo real de closure.
 SIGUIENTE: Codex implementa validaciones ORPHAN en heartbeat (ARG-REFORM-BITACORA-001-IMPL).
+APRENDIZAJE: El handoff era opcional en API — debe ser obligatorio para garantizar trazabilidad.
+GLITCHES: Ninguno detectado en este cierre.
 RIESGOS: Codex debe leer la propuesta antes de tocar index.ts.
 ```
 
@@ -171,14 +176,16 @@ Arquitectura activa en tres capas:
 - `ARGOS_RUNTIME/inbox_deposits/processed/`
 - `ARGOS_RUNTIME/legacy/live_deprecated_2026-04-18/` (archivo historico de la antigua capa live)
 
-**Secciones obligatorias del deposito:** `[LOG]`, `[SHADOW]`, `[GLITCH]`, `[STATE]`, `[CAPTAIN]`.
+**Secciones obligatorias del deposito:** `[LOG]`, `[SHADOW]`, `[HANDOFF]`, `[STATE]`, `[CAPTAIN]`.
+`[GLITCH]` es opcional — solo si hay fallos de proceso. No es TOKENS.
 
-**Mapeo canonico:**
-- `[LOG]` -> `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl`
-- `[SHADOW]` -> `ARGOS_GLOBAL_SHADOW_LOG.md`
-- `[GLITCH]` -> `ARGOS_GLOBAL_GLITCH_LOG.md` + `events/argos.glitches.jsonl` (si no vacio)
-- `[STATE]` -> `state/argos.state.json` (`ia_status`)
-- `[CAPTAIN]` -> `views/ui_export/captain_feed.jsonl`
+**Mapeo canonico (orden de escritura):**
+- `[LOG]` → `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl` (EVENTS)
+- `[SHADOW]` → `ARGOS_GLOBAL_SHADOW_LOG.md`
+- `[HANDOFF]` → `ARGOS_GLOBAL_HANDOFF_LOG.md` (OBLIGATORIO — criterio 75%)
+- `[GLITCH]` → `ARGOS_GLOBAL_GLITCH_LOG.md` + `events/argos.glitches.jsonl` (solo si no vacío)
+- `[STATE]` → `state/argos.state.json` (`ia_status`) (EVENTS)
+- `[CAPTAIN]` → `views/ui_export/captain_feed.jsonl` (FEED)
 
 **Triggers de escritura:**
 - A (explicito): cuando el Capitan pide cierre de sesion.
@@ -332,6 +339,9 @@ El heartbeat moverá `ia_status` a working en el siguiente ciclo.
 
 ### MOMENTO 3 — CIERRE DE ORDEN (al completar el trabajo)
 
+**Un cierre escribe exactamente en este orden: LOG → SHADOW → HANDOFF → EVENTS → FEED**
+No hay sección TOKENS en el cierre (la captura de tokens es automática vía proxy).
+
 **Camino primario — todos los agentes:**
 
 ```http
@@ -344,27 +354,40 @@ Headers: X-Argos-Agent-Token: <token-agente>
   "packet_id":  "ARG-XXXX",
   "trigger":    "task_completed|session_close|handoff",
   "sections": {
-    "log":    "Qué se hizo, resultado concreto, artefactos generados",
-    "shadow": "Reflexión interna — tensiones, riesgos percibidos, calibración",
+    "log":    "Qué se hizo, resultado concreto, artefactos generados — OBLIGATORIO",
+    "shadow": "Reflexión interna — tensiones, riesgos percibidos, calibración — OBLIGATORIO",
     "glitch": "",
+    "handoff": {
+      "contexto":    "Situación que llevó a las decisiones tomadas — OBLIGATORIO",
+      "decision":    "Decisión clave adoptada y su razón — OBLIGATORIO",
+      "continuidad": "Qué sigue y quién debe continuar — OBLIGATORIO",
+      "session_ref": "Referencia de sesión — OBLIGATORIO"
+    },
     "state": {
       "status":     "idle",
       "summary":    "Estado tras el cierre",
-      "handoff_to": "Codex|Claude|Pi|null",
+      "handoff_to": "Codex|Claude|null",
       "next_step":  "Qué sigue"
     },
-    "captain": "Mensaje directo al Capitán — lo que necesita saber, en voz del agente"
+    "captain": "Mensaje directo al Capitán — lo que necesita saber, en voz del agente — OBLIGATORIO"
   },
   "mark_packet_done": false
 }
 ```
 
+**Regla del LOG:** Los campos SIGUIENTE, APRENDIZAJE, GLITCHES y RIESGOS deben aparecer
+siempre en el texto de `sections.log`, aunque estén vacíos.
+**GLITCHES en log:** errores de proceso/pipeline. Errores de código → work packet TYPE: bug.
+**HANDOFF — criterio del 75%:** quien lea el handoff debe reconstruir el contexto y las razones
+de las decisiones al menos al 75% sin necesidad de leer el transcript completo.
+
 El servidor automáticamente:
-1. Escribe `sections.log` en `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl`
+1. Escribe `sections.log` en `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl` (EVENTS)
 2. Escribe `sections.shadow` en `ARGOS_GLOBAL_SHADOW_LOG.md`
 3. Escribe `sections.glitch` en `ARGOS_GLOBAL_GLITCH_LOG.md` (si no vacío)
-4. Actualiza `ia_status` → `idle` en `state.json`
-5. Emite `sections.captain` al feed del Capitán
+4. Escribe `sections.handoff` en `ARGOS_GLOBAL_HANDOFF_LOG.md` (OBLIGATORIO)
+5. Actualiza `ia_status` → `idle` en `state.json` (EVENTS)
+6. Emite `sections.captain` al feed del Capitán (FEED)
 
 **Fallback si API no disponible:**
 Depositar en `ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md`.
@@ -390,6 +413,7 @@ No se envían hitos intermedios. Los hitos van al log, no al feed.
 | `agent` | `/api/remote/closure` | No vacío | 400 |
 | `sections.log` | `/api/remote/closure` | No vacío | 400 |
 | `sections.shadow` | `/api/remote/closure` | No vacío | 400 |
+| `sections.handoff` | `/api/remote/closure` | OBLIGATORIO: contexto+decision+continuidad+session_ref | 400 |
 | `sections.captain` | `/api/remote/closure` | No vacío | 400 |
 | `sections.state.status` | `/api/remote/closure` | idle/working/blocked/waiting_captain | 400 |
 | `trigger` | `/api/remote/closure` | task_completed/session_close/handoff | 400 |
@@ -398,12 +422,16 @@ No se envían hitos intermedios. Los hitos van al log, no al feed.
 | `packet_id` en deposit | heartbeat | Pendiente impl. → ORPHAN | — |
 | Actor canónico en deposit | heartbeat | Pendiente impl. → ORPHAN | — |
 
+**TOKENS:** El campo `sections.tokens` / `processTokens` está **desactivado** del protocolo de cierre.
+Los tokens se capturan automáticamente vía proxy (ANTHROPIC_BASE_URL etc.). No enviar tokens en closure.
+
 ---
 
 ## 3. Rituales de cierre por capa (v1.5)
 
-La escritura canonica usa un formato unico de 5 secciones:
-`[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`.
+La escritura canonica usa este orden de 5 secciones obligatorias + 1 condicional:
+`[LOG] [SHADOW] [HANDOFF] [STATE/EVENTS] [CAPTAIN/FEED]` + `[GLITCH]` solo si hay fallos de proceso.
+No hay sección `[TOKENS]` en el cierre.
 
 ### 3.1 Agentes locales (Claude Code, Codex, Gemini CLI, OpenClaw)
 
@@ -441,17 +469,16 @@ Si la API publica falla por timeout/5xx/sin red:
 
 ### 3.4 Formato unico y mapeo canonico
 
-El mismo schema de 5 secciones aplica en los 3 caminos:
-- Local directo
-- API publica (`/api/remote/closure`)
-- Deposito Drive fallback
+El mismo schema aplica en los 3 caminos: Local directo / API publica / Deposito fallback.
+Orden canónico de escritura: **LOG → SHADOW → HANDOFF → EVENTS → FEED**
 
 Mapeo canonico:
-- `[LOG]` -> `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl`
-- `[SHADOW]` -> `ARGOS_GLOBAL_SHADOW_LOG.md`
-- `[GLITCH]` -> `ARGOS_GLOBAL_GLITCH_LOG.md` + `events/argos.glitches.jsonl` (si no vacio)
-- `[STATE]` -> `state/argos.state.json` (`ia_status`)
-- `[CAPTAIN]` -> `views/ui_export/captain_feed.jsonl`
+- `[LOG]` → `ARGOS_GLOBAL_LOG.md` + `events/argos.events.jsonl` (EVENTS)
+- `[SHADOW]` → `ARGOS_GLOBAL_SHADOW_LOG.md`
+- `[HANDOFF]` → `ARGOS_GLOBAL_HANDOFF_LOG.md` (OBLIGATORIO)
+- `[GLITCH]` → `ARGOS_GLOBAL_GLITCH_LOG.md` + `events/argos.glitches.jsonl` (solo si no vacío)
+- `[STATE]` → `state/argos.state.json` (`ia_status`) (EVENTS)
+- `[CAPTAIN]` → `views/ui_export/captain_feed.jsonl` (FEED)
 
 ### 3.5 Triggers de cierre (clarificados)
 
@@ -467,9 +494,12 @@ Compatibilidad:
 - `POST /api/transcript` sigue disponible, pero queda deprecado como camino principal de cierre para interfaces chat.
 - Para chat, el cierre canonico es `POST /api/remote/closure` con fallback a `inbox_deposits/`.
 
-## 4. Disciplina de Contabilidad (TOKENS) [parcialmente legacy]
+## 4. Disciplina de Contabilidad (TOKENS) [DESACTIVADO DEL PROTOCOLO DE CIERRE]
 
-> El sistema de tokens existe pero no esta activamente configurado en todos los entornos. Ver ARGOS_QUICKSTART.md seccion VERSION_PROTOCOL para estado actual.
+> **Los tokens NO son parte del cierre de sesión.** No incluir `sections.tokens` ni `processTokens` en closures.
+> La captura de tokens es automática vía proxy (ANTHROPIC_BASE_URL, etc.) cuando está configurado.
+> El panel de tokens sigue disponible en `/api/tokens` para auditoría, pero los agentes no lo reportan manualmente.
+> Para reactivar la disciplina de tokens, se requiere un work packet dedicado de tipo `protocol`.
 
 El panel muestra **solo WORK_TOKENS** (coste real de proceso).
 Los tokens se capturan automaticamente cuando el proxy esta activo.
@@ -623,7 +653,10 @@ MOMENTO 2 — START (1 mensaje al feed)
      Fallback si API caída: deposit [STATE] status=working en inbox_deposits/
 
 MOMENTO 3 — CLOSE (1 mensaje al feed)
-  4. POST /api/remote/closure  → log + shadow + glitch + state + captain en una llamada
+  Un cierre válido escribe: LOG → SHADOW → HANDOFF → EVENTS → FEED
+  No hay TOKENS en el cierre.
+
+  4. POST /api/remote/closure → log + shadow + handoff + glitch + state + captain en una llamada
      El servidor emite sections.captain al feed y mueve ia_status a idle.
      Fallback si API caída: deposit completo en inbox_deposits/ (con packet_id y actor canónico)
 ```
@@ -632,5 +665,7 @@ MOMENTO 3 — CLOSE (1 mensaje al feed)
 
 Sin start-task = Capitán no sabe quién trabaja; ia_status queda stale.
 Sin closure = packet huérfano; trilog guard dispara glitch.
-sections.log/shadow/captain vacíos = endpoint rechaza con 400.
+sections.log/shadow/captain/handoff vacíos o ausentes = endpoint rechaza con 400.
+LOG debe incluir SIGUIENTE, APRENDIZAJE, GLITCHES y RIESGOS aunque estén vacíos.
+HANDOFF criterio 75%: contexto+decision+continuidad+session_ref permiten reconstruir el estado.
 Transcript = opcional, solo si el razonamiento no cabe en sections.log.
