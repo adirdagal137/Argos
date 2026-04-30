@@ -19,22 +19,21 @@ const TOOLS_DIR = path_1.default.join(RUNTIME_DIR, 'tools');
 const LOGBOOK_SNAPSHOT_PATH = path_1.default.join(RUNTIME_DIR, 'views', 'logbook_export', 'logbook.snapshot.json');
 const ARGOS_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.json');
 const DASHBOARD_DIR = path_1.default.join(__dirname, '..', '..', 'argos-dashboard');
-const LOGS_CURRENT_DIR = path_1.default.join(RUNTIME_DIR, 'logs', 'current');
 const BITACORA_DIR = path_1.default.join(RUNTIME_DIR, 'bitacora');
+const BITACORA_LEGACY_DIR = path_1.default.join(BITACORA_DIR, 'legacy');
 const CUBIERTA_DIR = path_1.default.join(RUNTIME_DIR, 'cubierta');
-const BITACORA_LOG_PATH = path_1.default.join(BITACORA_DIR, 'log.md');
-const BITACORA_SHADOW_PATH = path_1.default.join(BITACORA_DIR, 'shadowlog.md');
-const BITACORA_HANDOFFS_PATH = path_1.default.join(BITACORA_DIR, 'handoffs.md');
-const BITACORA_GLITCHES_PATH = path_1.default.join(BITACORA_DIR, 'glitches.md');
-const CUBIERTA_FEED_PATH = path_1.default.join(CUBIERTA_DIR, 'feed.md');
-const CUBIERTA_STATE_PATH = path_1.default.join(CUBIERTA_DIR, 'state.json');
-const CUBIERTA_VECTOR_PATH = path_1.default.join(CUBIERTA_DIR, 'vector.md');
-const CUBIERTA_INBOX_PATH = path_1.default.join(CUBIERTA_DIR, 'inbox.md');
-const CUBIERTA_ARTEFACTOS_PATH = path_1.default.join(CUBIERTA_DIR, 'artefactos.md');
-const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_LOG.md');
-const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
-const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
-const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path_1.default.join(LOGS_CURRENT_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
+const CUBIERTA_LEGACY_DIR = path_1.default.join(CUBIERTA_DIR, 'legacy');
+const ARGOS_GLOBAL_LOG_PATH = path_1.default.join(BITACORA_DIR, 'log.md');
+const ARGOS_GLOBAL_SHADOW_PATH = path_1.default.join(BITACORA_DIR, 'shadowlog.md');
+const ARGOS_GLOBAL_GLITCH_PATH = path_1.default.join(BITACORA_DIR, 'glitches.md');
+const ARGOS_GLOBAL_HANDOFF_LOG_PATH = path_1.default.join(BITACORA_DIR, 'handoffs.md');
+const ARGOS_LEGACY_LOG_PATH = path_1.default.join(BITACORA_LEGACY_DIR, 'ARGOS_GLOBAL_LOG.md');
+const ARGOS_LEGACY_SHADOW_PATH = path_1.default.join(BITACORA_LEGACY_DIR, 'ARGOS_GLOBAL_SHADOW_LOG.md');
+const ARGOS_LEGACY_GLITCH_PATH = path_1.default.join(BITACORA_LEGACY_DIR, 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const ARGOS_LEGACY_HANDOFF_LOG_PATH = path_1.default.join(BITACORA_LEGACY_DIR, 'ARGOS_GLOBAL_HANDOFF_LOG.md');
+// events/ recibe solo TIPO_DISCRETO: glitch, heartbeat, señal, packet_created, packet_remote_done,
+// interaction_delete/edit, packet_edit, external_transcript_mirrored, ia:stale, desktop-import, etc.
+// NO escribir aquí: session_close, remote_closure, chat_deposit_log/integrated, concilio_message.
 const ARGOS_EVENTS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const ARGOS_GLITCHES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const ARGOS_TOKENS_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
@@ -42,23 +41,22 @@ const CONCILIO_EVENTS_DIR = path_1.default.join(RUNTIME_DIR, 'events', 'concilio
 const CONCILIO_JSONL_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'argos.concilio.jsonl');
 const CONCILIO_LOG_PATH = path_1.default.join(CONCILIO_EVENTS_DIR, 'ARGOS_CONCILIO_LOG.md');
 const CONCILIO_ACTORS_PATH = path_1.default.join(RUNTIME_DIR, 'agents', 'ARGOS_CONCILIO_ACTORS.json');
-const CAPTAIN_FEED_PATH = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
+const CAPTAIN_FEED_PATH = path_1.default.join(CUBIERTA_DIR, 'feed.jsonl');
+const CAPTAIN_FEED_LEGACY_PATH = path_1.default.join(CUBIERTA_LEGACY_DIR, 'captain_feed.jsonl');
+const CAPTAIN_FEED_MARKDOWN_PATH = path_1.default.join(CUBIERTA_DIR, 'feed.md');
+const CUBIERTA_INBOX_SUMMARY_PATH = path_1.default.join(CUBIERTA_DIR, 'inbox_summary.md');
 const STATE_ARCHIVE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'argos.state.archive.json');
 const SESSION_ARCHIVE_ROOT = path_1.default.join(RUNTIME_DIR, 'archive', 'sessions');
 const LEGACY_ARCHIVE_ROOT = path_1.default.join(RUNTIME_DIR, 'archive', 'legacy');
 const ANTIGRAVITY_PROTO_PACKET_NAME = 'ARG-PROTO-AG-001__ANTIGRAVITY_RITUAL_DE_CIERRE_OBLIGATORIO.md';
 const ANTIGRAVITY_PROTO_PACKET_PATH = path_1.default.join(RUNTIME_DIR, 'work_packets', 'inbox', ANTIGRAVITY_PROTO_PACKET_NAME);
 const PENDING_ACTIONS_PATH = path_1.default.join(RUNTIME_DIR, 'locks', 'pending_actions.jsonl');
-const TRANSCRIPTS_DIR = path_1.default.join(RUNTIME_DIR, 'transcripts');
 const LIVE_DIR = path_1.default.join(RUNTIME_DIR, 'live');
 const LIVE_SCHEMA_PATH = path_1.default.join(LIVE_DIR, '_schema.json');
 const LEGACY_RUNTIME_DIR = path_1.default.join(RUNTIME_DIR, 'legacy');
 const LIVE_DEPRECATED_DIR = path_1.default.join(LEGACY_RUNTIME_DIR, 'live_deprecated_2026-04-18');
-const INBOX_DEPOSITS_DIR = path_1.default.join(RUNTIME_DIR, 'inbox_deposits');
-const INBOX_DEPOSITS_PROCESSED_DIR = path_1.default.join(INBOX_DEPOSITS_DIR, 'processed');
 const DESKTOP_SOURCES_CONFIG_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'desktop_sources.json');
 const DESKTOP_INGEST_STATE_PATH = path_1.default.join(RUNTIME_DIR, 'state', 'desktop_ingest.state.json');
-const EXTERNAL_TRANSCRIPTS_DIR = path_1.default.join(TRANSCRIPTS_DIR, 'external');
 const SECRETS_DIR = path_1.default.join(RUNTIME_DIR, 'secrets');
 const AGENT_TOKENS_PATH = path_1.default.join(SECRETS_DIR, 'agent_tokens.json');
 const ARGOS_REMOTE_CLOSURES_PATH = path_1.default.join(RUNTIME_DIR, 'events', 'argos.remote_closures.jsonl');
@@ -293,8 +291,6 @@ function normalizeTaskType(rawValue) {
     return VALID_PACKET_TYPES.has(packetType) ? packetType : 'task';
 }
 let liveLayerDeprecationLogged = false;
-let inboxDepositsWatcher = null;
-let inboxDepositsDebounceTimer = null;
 function parseTimestampLabel(rawValue) {
     const trimmed = normaliseText(rawValue);
     if (trimmed === '')
@@ -358,9 +354,9 @@ function buildEmptyLogbook() {
                 status: 'active',
                 description: 'BitÃ¡cora operativa y trazabilidad.',
                 streams: [
-                    { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
-                    { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
-                    { id: 'glitch', label: 'Glitches', source: 'argos.glitches.jsonl', empty_state: 'Sin glitches.' }
+                    { id: 'log', label: 'Log', source: 'bitacora/log.md', empty_state: 'Sin entradas en el log.' },
+                    { id: 'shadow', label: 'Shadow', source: 'bitacora/shadowlog.md', empty_state: 'Sin entradas en shadow.' },
+                    { id: 'glitch', label: 'Glitches', source: 'bitacora/glitches.md', empty_state: 'Sin glitches.' }
                 ]
             },
             {
@@ -369,9 +365,9 @@ function buildEmptyLogbook() {
                 status: 'active',
                 description: 'Misiones de investigaciÃ³n cientÃ­fica.',
                 streams: [
-                    { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
-                    { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
-                    { id: 'glitch', label: 'Glitches', source: 'argos.glitches.jsonl', empty_state: 'Sin glitches.' }
+                    { id: 'log', label: 'Log', source: 'bitacora/log.md', empty_state: 'Sin entradas en el log.' },
+                    { id: 'shadow', label: 'Shadow', source: 'bitacora/shadowlog.md', empty_state: 'Sin entradas en shadow.' },
+                    { id: 'glitch', label: 'Glitches', source: 'bitacora/glitches.md', empty_state: 'Sin glitches.' }
                 ]
             },
             {
@@ -380,9 +376,9 @@ function buildEmptyLogbook() {
                 status: 'active',
                 description: 'Protocolos de aprendizaje y educaciÃ³n.',
                 streams: [
-                    { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
-                    { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
-                    { id: 'glitch', label: 'Glitches', source: 'argos.glitches.jsonl', empty_state: 'Sin glitches.' }
+                    { id: 'log', label: 'Log', source: 'bitacora/log.md', empty_state: 'Sin entradas en el log.' },
+                    { id: 'shadow', label: 'Shadow', source: 'bitacora/shadowlog.md', empty_state: 'Sin entradas en shadow.' },
+                    { id: 'glitch', label: 'Glitches', source: 'bitacora/glitches.md', empty_state: 'Sin glitches.' }
                 ]
             },
             {
@@ -391,9 +387,9 @@ function buildEmptyLogbook() {
                 status: 'active',
                 description: 'EscÃ¡ner de sombra y gestiÃ³n de riesgos.',
                 streams: [
-                    { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
-                    { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
-                    { id: 'glitch', label: 'Glitches', source: 'argos.glitches.jsonl', empty_state: 'Sin glitches.' }
+                    { id: 'log', label: 'Log', source: 'bitacora/log.md', empty_state: 'Sin entradas en el log.' },
+                    { id: 'shadow', label: 'Shadow', source: 'bitacora/shadowlog.md', empty_state: 'Sin entradas en shadow.' },
+                    { id: 'glitch', label: 'Glitches', source: 'bitacora/glitches.md', empty_state: 'Sin glitches.' }
                 ]
             },
             {
@@ -402,9 +398,9 @@ function buildEmptyLogbook() {
                 status: 'active',
                 description: 'Algoritmos avanzados y forja de cÃ³digo.',
                 streams: [
-                    { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', empty_state: 'Sin entradas en el log.' },
-                    { id: 'shadow', label: 'Shadow', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', empty_state: 'Sin entradas en shadow.' },
-                    { id: 'glitch', label: 'Glitches', source: 'argos.glitches.jsonl', empty_state: 'Sin glitches.' }
+                    { id: 'log', label: 'Log', source: 'bitacora/log.md', empty_state: 'Sin entradas en el log.' },
+                    { id: 'shadow', label: 'Shadow', source: 'bitacora/shadowlog.md', empty_state: 'Sin entradas en shadow.' },
+                    { id: 'glitch', label: 'Glitches', source: 'bitacora/glitches.md', empty_state: 'Sin glitches.' }
                 ]
             }
         ]
@@ -468,12 +464,64 @@ function readCaptainFeedLines(feedPath) {
     });
 }
 function writeCaptainFeedLines(feedPath, lines) {
+    ensureDirSync(path_1.default.dirname(feedPath));
     const serialized = lines.map((line) => (line.parsed ? JSON.stringify(line.parsed) : line.raw)).join('\n');
     if (serialized === '') {
         fs_1.default.writeFileSync(feedPath, '', 'utf-8');
         return;
     }
     fs_1.default.writeFileSync(feedPath, serialized.endsWith('\n') ? serialized : `${serialized}\n`, 'utf-8');
+}
+function getCaptainFeedReadPaths() {
+    return [CAPTAIN_FEED_LEGACY_PATH, CAPTAIN_FEED_PATH, ...findArchivedFiles('captain_feed.jsonl')]
+        .filter((feedPath, index, all) => all.indexOf(feedPath) === index);
+}
+function readCaptainFeedRecordsFromPaths(paths) {
+    const records = [];
+    paths.forEach((feedPath) => {
+        if (!fs_1.default.existsSync(feedPath))
+            return;
+        readCaptainFeedLines(feedPath).forEach((line) => {
+            if (line.parsed)
+                records.push(ensureCaptainFeedRecordId(line.parsed));
+        });
+    });
+    return records;
+}
+function rebuildCubiertaFeedMarkdown() {
+    try {
+        ensureDirSync(CUBIERTA_DIR);
+        const records = readCaptainFeedRecordsFromPaths(getCaptainFeedReadPaths());
+        records.sort((a, b) => new Date(normaliseText(a.timestamp)).getTime() - new Date(normaliseText(b.timestamp)).getTime());
+        const blocks = records.map((record) => {
+            const timestamp = normaliseText(record.timestamp) || 'sin timestamp';
+            const sender = inferSenderName(record);
+            const summary = normaliseText(record.summary);
+            const refId = normaliseText(record.refId);
+            const details = normaliseText(record.details);
+            return [
+                `**[${timestamp}] ${sender}:** ${summary || normaliseText(record.kind) || 'Interaccion'}`,
+                refId ? `**REF:** ${refId}` : '',
+                '',
+                details
+            ].filter((line, index) => line !== '' || index === 2).join('\n').trim();
+        }).filter(Boolean);
+        const content = [
+            '# ARGOS CUBIERTA FEED',
+            'Vista legible generada desde cubierta/feed.jsonl y cubierta/legacy/captain_feed.jsonl.',
+            '',
+            '---',
+            blocks.join('\n\n---\n')
+        ].join('\n').trimEnd() + '\n';
+        fs_1.default.writeFileSync(CAPTAIN_FEED_MARKDOWN_PATH, content, 'utf-8');
+    }
+    catch (error) {
+        console.warn('[CUBIERTA] No se pudo reconstruir feed.md:', error);
+    }
+}
+function appendCaptainFeedRecord(record) {
+    appendJsonlRecord(CAPTAIN_FEED_PATH, record);
+    rebuildCubiertaFeedMarkdown();
 }
 function ensureCaptainFeedRecordId(record) {
     const withId = { ...record };
@@ -533,7 +581,6 @@ function resolveCrewDisplayName(rawName, fallback = 'OpenClaw') {
 }
 // --- SOPORTE PARA SISTEMA VOCAL (V2) ---
 function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tokens = 0, refId = '') {
-    const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
     const numericTokens = Number(tokens) || 0;
     const canonicalSender = resolveCrewDisplayName(sender, normalizeAgentName(sender) || sender || 'OpenClaw');
     const record = {
@@ -552,7 +599,7 @@ function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tok
         refId
     };
     try {
-        appendJsonlRecord(feedPath, record);
+        appendCaptainFeedRecord(record);
         if (numericTokens > 0) {
             const tokensPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
             appendJsonlRecord(tokensPath, {
@@ -582,7 +629,7 @@ function postToCrewFeed(sender, summary, details = '', kind = 'crew_update', tok
 // ============ HANDOFF LOG ============
 function appendToHandoffLog(agent, packetId, handoff, timestampIso) {
     try {
-        fs_1.default.mkdirSync(LOGS_CURRENT_DIR, { recursive: true });
+        ensureDirSync(path_1.default.dirname(ARGOS_GLOBAL_HANDOFF_LOG_PATH));
         if (!fs_1.default.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH)) {
             fs_1.default.writeFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, '# ARGOS GLOBAL HANDOFF LOG\nContexto conversacional por packet. Append-only.\n\n---\n', 'utf-8');
         }
@@ -612,9 +659,12 @@ function appendToHandoffLog(agent, packetId, handoff, timestampIso) {
     }
 }
 function readHandoffEntriesForPacket(packetId) {
-    if (!fs_1.default.existsSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH))
+    const content = [ARGOS_GLOBAL_HANDOFF_LOG_PATH, ARGOS_LEGACY_HANDOFF_LOG_PATH]
+        .filter((handoffPath, index, all) => all.indexOf(handoffPath) === index && fs_1.default.existsSync(handoffPath))
+        .map((handoffPath) => fs_1.default.readFileSync(handoffPath, 'utf-8'))
+        .join('\n---\n');
+    if (content === '')
         return [];
-    const content = fs_1.default.readFileSync(ARGOS_GLOBAL_HANDOFF_LOG_PATH, 'utf-8');
     const anchor = `<!-- ${packetId} -->`;
     const results = [];
     let searchFrom = 0;
@@ -640,78 +690,6 @@ function readHandoffEntriesForPacket(packetId) {
     }
     return results;
 }
-// ============ TRANSCRIPT SYSTEM ============
-function transcriptDateStr() {
-    return new Date().toLocaleDateString('sv-SE', { timeZone: 'Atlantic/Canary' }); // YYYY-MM-DD
-}
-function transcriptFilePath(agent) {
-    if (!fs_1.default.existsSync(TRANSCRIPTS_DIR))
-        fs_1.default.mkdirSync(TRANSCRIPTS_DIR, { recursive: true });
-    const date = transcriptDateStr();
-    const safeName = (agent || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_');
-    return path_1.default.join(TRANSCRIPTS_DIR, `${date}_${safeName}.md`);
-}
-/**
- * Escribe un bloque de exchange en el transcript del agente.
- * role: 'captain' | 'agent'
- * El bloque queda anclado con el packetId para recuperaciÃ³n directa.
- */
-function appendToTranscript(agent, role, content, packetId = '') {
-    try {
-        const filePath = transcriptFilePath(agent);
-        const ts = new Date().toISOString();
-        const canaryTs = new Date().toLocaleString('sv-SE', {
-            timeZone: 'Atlantic/Canary', year: 'numeric', month: '2-digit',
-            day: '2-digit', hour: '2-digit', minute: '2-digit'
-        }).slice(0, 16);
-        const roleLabel = role === 'captain' ? `PROMPT (CapitÃ¡n â†’ ${agent})` : `RESPONSE (${agent} â†’ CapitÃ¡n)`;
-        const anchor = packetId ? `<!-- ${packetId} -->` : '';
-        const packetLine = packetId ? `**Packet:** ${packetId}` : '';
-        const block = [
-            anchor,
-            `## [${canaryTs}]${packetId ? ` Packet: ${packetId}` : ''}`,
-            packetLine,
-            '',
-            `**${roleLabel}:**`,
-            content.trim(),
-            '',
-            '---',
-            ''
-        ].filter(l => l !== undefined).join('\n');
-        fs_1.default.appendFileSync(filePath, block, 'utf-8');
-        const date = transcriptDateStr();
-        const safeName = (agent || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_');
-        return `transcripts/${date}_${safeName}.md${packetId ? `#${packetId}` : ''}`;
-    }
-    catch (e) {
-        console.error('[TRANSCRIPT] Error escribiendo transcript', e);
-        return '';
-    }
-}
-/**
- * Lee el bloque de transcript para un packetId especÃ­fico dentro de un archivo.
- * Devuelve el bloque completo entre el anchor y el siguiente '---'.
- */
-function readTranscriptBlock(agent, date, packetId) {
-    try {
-        const safeName = agent.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const filePath = path_1.default.join(TRANSCRIPTS_DIR, `${date}_${safeName}.md`);
-        if (!fs_1.default.existsSync(filePath))
-            return null;
-        const content = fs_1.default.readFileSync(filePath, 'utf-8');
-        const anchor = `<!-- ${packetId} -->`;
-        const start = content.indexOf(anchor);
-        if (start === -1)
-            return null;
-        // Encontrar el siguiente bloque o fin de archivo
-        const afterAnchor = content.indexOf('\n---\n', start);
-        const end = afterAnchor !== -1 ? afterAnchor + 5 : content.length;
-        return content.slice(start, end).trim();
-    }
-    catch (e) {
-        return null;
-    }
-}
 function readArgosState() {
     try {
         if (!fs_1.default.existsSync(ARGOS_STATE_PATH))
@@ -725,15 +703,69 @@ function readArgosState() {
 function writeArgosState(state) {
     try {
         state.updated_at = new Date().toISOString();
-        fs_1.default.writeFileSync(ARGOS_STATE_PATH, JSON.stringify(state, null, 4));
+        const serialized = JSON.stringify(state, null, 4);
+        ensureDirSync(path_1.default.dirname(ARGOS_STATE_PATH));
+        fs_1.default.writeFileSync(ARGOS_STATE_PATH, serialized, 'utf-8');
     }
     catch (e) {
         console.error('[STATE] Error guardando estado de Argos', e);
     }
 }
+function writeCubiertaInboxSummary() {
+    try {
+        ensureDirSync(CUBIERTA_DIR);
+        const inboxDir = path_1.default.join(RUNTIME_DIR, 'work_packets', 'inbox');
+        const lines = [
+            '# ARGOS CUBIERTA INBOX SUMMARY',
+            `Actualizado: ${new Date().toISOString()}`,
+            ''
+        ];
+        if (!fs_1.default.existsSync(inboxDir)) {
+            lines.push('Sin inbox disponible.');
+        }
+        else {
+            const files = fs_1.default.readdirSync(inboxDir).filter((file) => file.endsWith('.md')).sort();
+            if (files.length === 0) {
+                lines.push('Sin paquetes en inbox.');
+            }
+            else {
+                files.forEach((file) => {
+                    const content = readTextFileSafe(path_1.default.join(inboxDir, file));
+                    const id = normaliseText(content.match(/^ID:\s*(.+)$/m)?.[1]) || file.replace(/\.md$/i, '');
+                    const subject = normaliseText(content.match(/^SUBJECT:\s*(.+)$/m)?.[1]) || file.replace(/\.md$/i, '');
+                    lines.push(`- ${id} - ${subject}`);
+                });
+            }
+        }
+        fs_1.default.writeFileSync(CUBIERTA_INBOX_SUMMARY_PATH, `${lines.join('\n')}\n`, 'utf-8');
+    }
+    catch (error) {
+        console.warn('[CUBIERTA] No se pudo actualizar inbox_summary.md:', error);
+    }
+}
 function ensureDirSync(dirPath) {
     if (!fs_1.default.existsSync(dirPath))
         fs_1.default.mkdirSync(dirPath, { recursive: true });
+}
+function ensureRuntimeCanonicalStorage() {
+    ensureDirSync(BITACORA_DIR);
+    ensureDirSync(BITACORA_LEGACY_DIR);
+    ensureDirSync(CUBIERTA_DIR);
+    ensureDirSync(CUBIERTA_LEGACY_DIR);
+    const markdownDefaults = [
+        { path: ARGOS_GLOBAL_LOG_PATH, header: '# ARGOS GLOBAL LOG\nRegistro operativo compartido por la tripulacion.\n\n---\n' },
+        { path: ARGOS_GLOBAL_SHADOW_PATH, header: '# ARGOS GLOBAL SHADOW LOG\nRegistro latente.\n\n---\n' },
+        { path: ARGOS_GLOBAL_GLITCH_PATH, header: '# ARGOS GLOBAL GLITCH LOG\nRegistro estructural de fallas sistemicas.\n\n---\n' },
+        { path: ARGOS_GLOBAL_HANDOFF_LOG_PATH, header: '# ARGOS GLOBAL HANDOFF LOG\nContexto conversacional por packet. Append-only.\n\n---\n' }
+    ];
+    markdownDefaults.forEach((item) => {
+        if (!fs_1.default.existsSync(item.path))
+            fs_1.default.writeFileSync(item.path, item.header, 'utf-8');
+    });
+    if (!fs_1.default.existsSync(CAPTAIN_FEED_PATH))
+        fs_1.default.writeFileSync(CAPTAIN_FEED_PATH, '', 'utf-8');
+    rebuildCubiertaFeedMarkdown();
+    writeCubiertaInboxSummary();
 }
 function canaryDateStamp(now = new Date()) {
     return new Intl.DateTimeFormat('sv-SE', {
@@ -919,15 +951,6 @@ function resetLiveSessionFiles(dryRun, report) {
     writeUtf8FileSafe(ARGOS_GLITCHES_PATH, '', dryRun, report);
     writeUtf8FileSafe(ARGOS_TOKENS_PATH, '', dryRun, report);
     writeUtf8FileSafe(CAPTAIN_FEED_PATH, '', dryRun, report);
-    const transcriptsLegacyDir = path_1.default.join(RUNTIME_DIR, 'events', 'transcripts');
-    if (dryRun) {
-        report.notes.push(`[dry-run] asegurar directorio: ${TRANSCRIPTS_DIR}`);
-        report.notes.push(`[dry-run] asegurar directorio: ${transcriptsLegacyDir}`);
-    }
-    else {
-        ensureDirSync(TRANSCRIPTS_DIR);
-        ensureDirSync(transcriptsLegacyDir);
-    }
 }
 function archiveDonePacketsToSession(sessionDir, dryRun, report) {
     const doneDir = path_1.default.join(RUNTIME_DIR, 'work_packets', 'done');
@@ -938,31 +961,6 @@ function archiveDonePacketsToSession(sessionDir, dryRun, report) {
     doneFiles.forEach((fileName) => {
         const sourcePath = path_1.default.join(doneDir, fileName);
         const destinationPath = path_1.default.join(sessionDir, 'work_packets', 'done', fileName);
-        const movedNow = moveIfExists(sourcePath, destinationPath, dryRun, report);
-        if (movedNow)
-            moved += 1;
-    });
-    return moved;
-}
-function archiveTranscriptLanesToSession(sessionDir, dryRun, report) {
-    let moved = 0;
-    const transcriptFiles = fs_1.default.existsSync(TRANSCRIPTS_DIR)
-        ? fs_1.default.readdirSync(TRANSCRIPTS_DIR).filter((name) => name.endsWith('.md') && name.toLowerCase() !== 'readme.md')
-        : [];
-    transcriptFiles.forEach((fileName) => {
-        const sourcePath = path_1.default.join(TRANSCRIPTS_DIR, fileName);
-        const destinationPath = path_1.default.join(sessionDir, 'transcripts', 'live', fileName);
-        const movedNow = moveIfExists(sourcePath, destinationPath, dryRun, report);
-        if (movedNow)
-            moved += 1;
-    });
-    const legacyTranscriptDir = path_1.default.join(RUNTIME_DIR, 'events', 'transcripts');
-    const legacyFiles = fs_1.default.existsSync(legacyTranscriptDir)
-        ? fs_1.default.readdirSync(legacyTranscriptDir).filter((name) => name.endsWith('.md'))
-        : [];
-    legacyFiles.forEach((fileName) => {
-        const sourcePath = path_1.default.join(legacyTranscriptDir, fileName);
-        const destinationPath = path_1.default.join(sessionDir, 'transcripts', 'legacy_events', fileName);
         const movedNow = moveIfExists(sourcePath, destinationPath, dryRun, report);
         if (movedNow)
             moved += 1;
@@ -1010,8 +1008,7 @@ function runSessionArchive(request) {
         createdFiles: [],
         notes: [],
         compactedDoneStates: 0,
-        archivedDonePackets: 0,
-        archivedTranscriptFiles: 0
+        archivedDonePackets: 0
     };
     if (!request.dryRun)
         ensureDirSync(sessionDir);
@@ -1027,7 +1024,6 @@ function runSessionArchive(request) {
     liveFiles.forEach(({ source, destination }) => {
         moveIfExists(source, destination, request.dryRun, report);
     });
-    report.archivedTranscriptFiles = archiveTranscriptLanesToSession(sessionDir, request.dryRun, report);
     if (request.archiveDonePackets) {
         report.archivedDonePackets = archiveDonePacketsToSession(sessionDir, request.dryRun, report);
     }
@@ -1048,7 +1044,6 @@ function runSessionArchive(request) {
         report: {
             compactedDoneStates: report.compactedDoneStates,
             archivedDonePackets: report.archivedDonePackets,
-            archivedTranscriptFiles: report.archivedTranscriptFiles,
             movedCount: report.movedFiles.length
         }
     }, null, 2), request.dryRun, report);
@@ -1332,9 +1327,9 @@ function backfillWorkTokensFromReportLedger() {
 }
 function backfillWorkTokensFromFeed() {
     try {
-        const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         const tokensPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
-        if (!fs_1.default.existsSync(feedPath))
+        const feedPaths = getCaptainFeedReadPaths().filter((feedPath) => fs_1.default.existsSync(feedPath));
+        if (feedPaths.length === 0)
             return;
         const excludedSources = new Set(['agent_reporting', 'autonomous_vocal_system', 'trilog', 'ui_chat', 'ui_deletion']);
         const existingKeys = new Set();
@@ -1355,46 +1350,48 @@ function backfillWorkTokensFromFeed() {
             });
         }
         let inserted = 0;
-        readTextFileSafe(feedPath)
-            .split('\n')
-            .map((line) => line.trim())
-            .filter((line) => line.startsWith('{'))
-            .forEach((line) => {
-            try {
-                const feedRecord = JSON.parse(line);
-                const senderRole = normaliseText(feedRecord.sender_role).toLowerCase();
-                if (senderRole !== 'agent')
-                    return;
-                const source = normaliseText(feedRecord.source).toLowerCase();
-                if (excludedSources.has(source))
-                    return;
-                const canonicalAgent = normalizeAgentName(normaliseText(feedRecord.sender_name));
-                if (!canonicalAgent)
-                    return;
-                const numericTokens = Number(feedRecord.tokens) || 0;
-                if (numericTokens <= 0)
-                    return;
-                const ts = normaliseText(feedRecord.timestamp);
-                const refId = normaliseText(feedRecord.refId);
-                const dedupKey = `${ts}|${canonicalAgent}|${numericTokens}|${refId}|feed_backfill`;
-                if (existingKeys.has(dedupKey))
-                    return;
-                appendJsonlRecord(tokensPath, {
-                    timestamp: ts || new Date().toISOString(),
-                    agent: canonicalAgent,
-                    tokens: numericTokens,
-                    module: 'argos',
-                    refId,
-                    ref: `Backfill Feed (${source}): ${normaliseText(feedRecord.summary).substring(0, 60)}`,
-                    scope: 'work',
-                    channel: 'feed_backfill'
-                });
-                existingKeys.add(dedupKey);
-                inserted += 1;
-            }
-            catch {
-                // ignore malformed lines
-            }
+        feedPaths.forEach((feedPath) => {
+            readTextFileSafe(feedPath)
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => line.startsWith('{'))
+                .forEach((line) => {
+                try {
+                    const feedRecord = JSON.parse(line);
+                    const senderRole = normaliseText(feedRecord.sender_role).toLowerCase();
+                    if (senderRole !== 'agent')
+                        return;
+                    const source = normaliseText(feedRecord.source).toLowerCase();
+                    if (excludedSources.has(source))
+                        return;
+                    const canonicalAgent = normalizeAgentName(normaliseText(feedRecord.sender_name));
+                    if (!canonicalAgent)
+                        return;
+                    const numericTokens = Number(feedRecord.tokens) || 0;
+                    if (numericTokens <= 0)
+                        return;
+                    const ts = normaliseText(feedRecord.timestamp);
+                    const refId = normaliseText(feedRecord.refId);
+                    const dedupKey = `${ts}|${canonicalAgent}|${numericTokens}|${refId}|feed_backfill`;
+                    if (existingKeys.has(dedupKey))
+                        return;
+                    appendJsonlRecord(tokensPath, {
+                        timestamp: ts || new Date().toISOString(),
+                        agent: canonicalAgent,
+                        tokens: numericTokens,
+                        module: 'argos',
+                        refId,
+                        ref: `Backfill Feed (${source}): ${normaliseText(feedRecord.summary).substring(0, 60)}`,
+                        scope: 'work',
+                        channel: 'feed_backfill'
+                    });
+                    existingKeys.add(dedupKey);
+                    inserted += 1;
+                }
+                catch {
+                    // ignore malformed lines
+                }
+            });
         });
         if (inserted > 0) {
             console.log(`[TOKENS] Backfill work desde captain_feed: +${inserted} registros`);
@@ -1428,16 +1425,7 @@ function setIaActive(actor, packetId, subject) {
         return;
     const state = readArgosState();
     const ia = readIaStatus(state);
-    ia[agent] = {
-        ...ia[agent], // preservar campos ricos (v2)
-        status: 'active',
-        task: packetId,
-        task_subject: subject,
-        since: new Date().toISOString(),
-        availability: 'busy',
-        current_packet: packetId,
-        current_theme: subject
-    };
+    ia[agent] = { status: 'active', task: packetId, task_subject: subject, since: new Date().toISOString() };
     state.ia_status = ia;
     writeArgosState(state);
 }
@@ -1447,16 +1435,7 @@ function setIaStandby(actor) {
         return;
     const state = readArgosState();
     const ia = readIaStatus(state);
-    ia[agent] = {
-        ...ia[agent], // preservar campos ricos (v2: source, last_interaction_summary, etc.)
-        status: 'standby',
-        task: '',
-        task_subject: '',
-        since: new Date().toISOString(),
-        availability: 'available',
-        current_packet: '',
-        current_theme: ''
-    };
+    ia[agent] = { status: 'standby', task: '', task_subject: '', since: new Date().toISOString() };
     state.ia_status = ia;
     writeArgosState(state);
 }
@@ -1522,6 +1501,14 @@ function readTextFileSafe(filePath) {
 function readTextFile(filePath, fallback = '') {
     return fs_1.default.existsSync(filePath) ? fs_1.default.readFileSync(filePath, 'utf-8') : fallback;
 }
+function readTextFilesJoined(filePaths, fallback = '') {
+    const content = filePaths
+        .filter((filePath, index, all) => all.indexOf(filePath) === index && fs_1.default.existsSync(filePath))
+        .map((filePath) => readTextFileSafe(filePath).trim())
+        .filter((text) => text !== '')
+        .join('\n\n---\n');
+    return content || fallback;
+}
 function readJsonFile(filePath, fallback) {
     if (!fs_1.default.existsSync(filePath))
         return fallback;
@@ -1538,118 +1525,6 @@ function readJsonFile(filePath, fallback) {
 function writeJsonFileSafe(filePath, payload) {
     ensureDirSync(path_1.default.dirname(filePath));
     fs_1.default.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf-8');
-}
-function copyTextIfChanged(sourcePath, destinationPath) {
-    const source = readTextFileSafe(sourcePath);
-    const current = readTextFileSafe(destinationPath);
-    if (source === current)
-        return false;
-    ensureDirSync(path_1.default.dirname(destinationPath));
-    fs_1.default.writeFileSync(destinationPath, source, 'utf-8');
-    return true;
-}
-function writeTextIfChanged(filePath, content) {
-    if (readTextFileSafe(filePath) === content)
-        return false;
-    ensureDirSync(path_1.default.dirname(filePath));
-    fs_1.default.writeFileSync(filePath, content, 'utf-8');
-    return true;
-}
-function buildCanonicalFeedMarkdown(limit = 80) {
-    const records = readCaptainFeedLines(CAPTAIN_FEED_PATH)
-        .map((line) => line.parsed ? ensureCaptainFeedRecordId(line.parsed) : null)
-        .filter((record) => record !== null)
-        .slice(-limit)
-        .reverse();
-    const lines = [
-        '# Feed de cubierta',
-        '',
-        'Alias humano de `views/ui_export/captain_feed.jsonl`. El JSONL sigue vigente durante la fase de compatibilidad.',
-        ''
-    ];
-    for (const record of records) {
-        const timestamp = normaliseText(record.timestamp) || 'sin timestamp';
-        const sender = inferSenderName(record) || 'ARGOS';
-        const summary = normaliseText(record.summary) || '(sin resumen)';
-        const details = normaliseText(record.details);
-        const ref = normaliseText(record.refId);
-        lines.push(`## ${timestamp} - ${sender}`);
-        if (ref !== '')
-            lines.push(`- Ref: ${ref}`);
-        lines.push(`- Resumen: ${summary}`);
-        if (details !== '')
-            lines.push('', details);
-        lines.push('');
-    }
-    if (records.length === 0)
-        lines.push('_Sin mensajes visibles._', '');
-    return lines.join('\n');
-}
-function buildCanonicalInboxMarkdown(limit = 80) {
-    const inboxDir = path_1.default.join(RUNTIME_DIR, 'work_packets', 'inbox');
-    const files = fs_1.default.existsSync(inboxDir)
-        ? fs_1.default.readdirSync(inboxDir).filter((name) => name.toLowerCase().endsWith('.md')).sort()
-        : [];
-    const visible = files.slice(0, limit);
-    const lines = [
-        '# Resumen de inbox',
-        '',
-        `Total visible: ${files.length}`,
-        ''
-    ];
-    for (const name of visible) {
-        const id = name.split('__')[0].replace(/\.md$/i, '');
-        const title = name.replace(/\.md$/i, '').replace(`${id}__`, '').replace(/_/g, ' ');
-        lines.push(`- ${id}: ${title}`);
-    }
-    if (files.length > visible.length) {
-        lines.push(`- ... ${files.length - visible.length} paquetes adicionales omitidos en cubierta.`);
-    }
-    return `${lines.join('\n')}\n`;
-}
-function buildCanonicalArtefactosMarkdown() {
-    const artifacts = [
-        ['Dashboard snapshot', path_1.default.join(RUNTIME_DIR, 'views', 'logbook_export', 'logbook.snapshot.json')],
-        ['Timeline export', path_1.default.join(RUNTIME_DIR, 'views', 'history_export', 'argos.timeline.jsonl')],
-        ['Captain feed JSONL', CAPTAIN_FEED_PATH],
-        ['Events JSONL', ARGOS_EVENTS_PATH],
-        ['Glitches JSONL', ARGOS_GLITCHES_PATH],
-        ['Tokens JSONL', ARGOS_TOKENS_PATH],
-        ['Vector activo', ARGOS_VECTOR_PATH],
-        ['State activo', ARGOS_STATE_PATH]
-    ];
-    const lines = [
-        '# Artefactos visibles de cubierta',
-        '',
-        'Indice liviano para UI, inspeccion humana y agentes remotos.',
-        ''
-    ];
-    for (const [label, filePath] of artifacts) {
-        const exists = fs_1.default.existsSync(filePath);
-        const stat = exists ? fs_1.default.statSync(filePath) : null;
-        const relPath = path_1.default.relative(RUNTIME_DIR, filePath).replace(/\\/g, '/');
-        const suffix = stat ? ` - ${stat.size} bytes - ${stat.mtime.toISOString()}` : ' - no existe';
-        lines.push(`- ${label}: \`${relPath}\`${suffix}`);
-    }
-    return `${lines.join('\n')}\n`;
-}
-function syncRuntimeCanonicalSurface() {
-    try {
-        ensureDirSync(BITACORA_DIR);
-        ensureDirSync(CUBIERTA_DIR);
-        copyTextIfChanged(ARGOS_GLOBAL_LOG_PATH, BITACORA_LOG_PATH);
-        copyTextIfChanged(ARGOS_GLOBAL_SHADOW_PATH, BITACORA_SHADOW_PATH);
-        copyTextIfChanged(ARGOS_GLOBAL_HANDOFF_LOG_PATH, BITACORA_HANDOFFS_PATH);
-        copyTextIfChanged(ARGOS_GLOBAL_GLITCH_PATH, BITACORA_GLITCHES_PATH);
-        copyTextIfChanged(ARGOS_STATE_PATH, CUBIERTA_STATE_PATH);
-        copyTextIfChanged(ARGOS_VECTOR_PATH, CUBIERTA_VECTOR_PATH);
-        writeTextIfChanged(CUBIERTA_FEED_PATH, buildCanonicalFeedMarkdown());
-        writeTextIfChanged(CUBIERTA_INBOX_PATH, buildCanonicalInboxMarkdown());
-        writeTextIfChanged(CUBIERTA_ARTEFACTOS_PATH, buildCanonicalArtefactosMarkdown());
-    }
-    catch (error) {
-        console.error('[RUNTIME-CANON] Error sincronizando bitacora/cubierta:', error);
-    }
 }
 function nowIso() {
     return new Date().toISOString();
@@ -1929,22 +1804,18 @@ function parseRemoteClosurePayload(rawBody) {
     const nextStep = nextStepRaw || (stateRaw ? normaliseText(stateRaw.next_step) : '') || normaliseText(body.nextStep);
     const handoffToRaw = stateRaw ? stateRaw.handoff_to : body.handoff_to;
     const handoffTo = handoffToRaw === null ? null : (normaliseText(handoffToRaw) || null);
-    // Campo handoff OBLIGATORIO — permite reconstruir el contexto al 75% sin leer el transcript.
-    // Un cierre sin handoff es inválido: no hay trazabilidad de decisiones.
+    // Campo handoff opcional
     let handoff;
     const handoffRaw = sectionsRaw && sectionsRaw.handoff && typeof sectionsRaw.handoff === 'object'
         ? sectionsRaw.handoff
         : null;
-    if (!handoffRaw) {
-        return { payload: null, error: 'sections.handoff es OBLIGATORIO. Incluir: contexto, decision, continuidad, session_ref. Criterio: quien lo lea debe poder reconstruir el estado al 75% sin leer el transcript.' };
-    }
-    {
+    if (handoffRaw) {
         const contexto = normaliseText(handoffRaw.contexto);
         const decision = normaliseText(handoffRaw.decision);
         const continuidad = normaliseText(handoffRaw.continuidad);
         const session_ref = normaliseText(handoffRaw.session_ref);
         if (!contexto || !decision || !continuidad || !session_ref) {
-            return { payload: null, error: 'sections.handoff requiere contexto, decision, continuidad y session_ref (todos no vacíos)' };
+            return { payload: null, error: 'sections.handoff requiere contexto, decision, continuidad y session_ref' };
         }
         handoff = {
             contexto, decision, continuidad, session_ref,
@@ -2293,10 +2164,6 @@ function writeLiveState(agentId, payload) {
     writeArgosState(state);
     return sanitized;
 }
-function ensureInboxDepositDirectories() {
-    ensureDirSync(INBOX_DEPOSITS_DIR);
-    ensureDirSync(INBOX_DEPOSITS_PROCESSED_DIR);
-}
 function parseDepositTimestampIso(raw) {
     const cleaned = normaliseText(raw);
     if (cleaned === '')
@@ -2406,6 +2273,7 @@ function canaryTimestampLabelFromIso(iso) {
     return `${canaryTs} Atlantic/Canary`;
 }
 function appendMarkdownEntry(filePath, fallbackHeader, entry) {
+    ensureDirSync(path_1.default.dirname(filePath));
     const existing = fs_1.default.existsSync(filePath) ? fs_1.default.readFileSync(filePath, 'utf-8') : fallbackHeader;
     const base = existing.endsWith('\n') ? existing : `${existing}\n`;
     fs_1.default.writeFileSync(filePath, `${base}${entry}`, 'utf-8');
@@ -2483,19 +2351,6 @@ function integrateClosure(deposit, options) {
             `**WORK PACKET:** ${packetRef || 'N/A'}\n\n` +
             `**DETALLES:**\n${logText}\n`;
         appendMarkdownEntry(ARGOS_GLOBAL_LOG_PATH, '# ARGOS GLOBAL LOG\nRegistro operativo compartido por la tripulacion.\n', logEntry);
-        appendJsonlRecord(ARGOS_EVENTS_PATH, {
-            timestamp: timestampIso,
-            timestamp_label: canaryLabelText.replace(' Atlantic/Canary', ''),
-            actor,
-            module: 'argos',
-            type: 'chat_deposit_log',
-            packet_id: packetRef,
-            refId: packetRef,
-            status: deposit.statePayload.status,
-            summary: firstLine(logText) || 'Integracion de deposito chat',
-            details: logText,
-            source: `${sourceLabel}:${triggerLabel}`
-        });
     }
     const shadowText = normaliseText(deposit.sections.SHADOW);
     if (shadowText !== '') {
@@ -2526,7 +2381,7 @@ function integrateClosure(deposit, options) {
     let captainFeedId = null;
     if (captainText !== '') {
         captainFeedId = nextFeedMessageId();
-        appendJsonlRecord(CAPTAIN_FEED_PATH, {
+        appendCaptainFeedRecord({
             id: captainFeedId,
             timestamp: timestampIso,
             kind: 'crew_update',
@@ -2544,17 +2399,6 @@ function integrateClosure(deposit, options) {
         });
     }
     updateIaStatusFromDeposit(deposit);
-    appendJsonlRecord(ARGOS_EVENTS_PATH, {
-        timestamp: timestampIso,
-        actor,
-        module: 'argos',
-        type: 'chat_deposit_integrated',
-        summary: `Deposito integrado: ${deposit.fileName}`,
-        details: `Trigger=${triggerLabel}; packet=${packetRef || 'N/A'}; status=${deposit.statePayload.status}`,
-        packet_id: packetRef,
-        refId: packetRef,
-        source: sourceLabel
-    });
     publishEvent('deposit:processed', {
         actor,
         packet_id: packetRef,
@@ -2568,128 +2412,6 @@ function integrateClosure(deposit, options) {
         packetRef,
         actor
     };
-}
-function processSingleInboxDeposit(filePath, trigger) {
-    const parsed = parseChatDepositFile(filePath);
-    if (!parsed) {
-        const invalidDestination = path_1.default.join(INBOX_DEPOSITS_PROCESSED_DIR, `${path_1.default.basename(filePath, '.md')}__invalid.md`);
-        moveFileWithFallback(filePath, invalidDestination);
-        appendJsonlRecord(ARGOS_EVENTS_PATH, {
-            timestamp: nowIso(),
-            actor: 'Codex',
-            module: 'argos',
-            type: 'chat_deposit_invalid',
-            summary: `Deposito invalido movido: ${path_1.default.basename(filePath)}`,
-            details: `Trigger=${trigger}`,
-            source: 'deposit_heartbeat'
-        });
-        return false;
-    }
-    const moveToOrphanWithGlitch = (summary, details, nextStep) => {
-        const orphanDest = path_1.default.join(INBOX_DEPOSITS_PROCESSED_DIR, `__orphan_${path_1.default.basename(filePath)}`);
-        moveFileWithFallback(filePath, orphanDest);
-        const ts = nowIso();
-        appendJsonlRecord(ARGOS_GLITCHES_PATH, {
-            id: getNextGlitchId(),
-            timestamp: ts,
-            timestamp_label: canaryTimestampLabelFromIso(ts),
-            actor: 'Dispatcher',
-            module: 'argos_deposit_guard',
-            type: 'orphan_deposit',
-            status: 'open',
-            summary,
-            details,
-            next_step: nextStep,
-            source: 'deposit_heartbeat'
-        });
-        return false;
-    };
-    if (!parsed.packetId || parsed.packetId.trim() === '') {
-        return moveToOrphanWithGlitch(`Deposito ORPHAN: packet_id vacio - ${path_1.default.basename(filePath)}`, 'El deposit no tiene packet_id. Movido a __orphan. Revisar deposito.', 'Agente que genero el deposito debe hacer closure correcta con packet_id.');
-    }
-    const actorRaw = normaliseText(parsed.actorRaw);
-    const canonicalActor = parseCanonicalProtocolActor(actorRaw);
-    if (!canonicalActor) {
-        return moveToOrphanWithGlitch(`Deposito ORPHAN: actor no canonico "${actorRaw || 'N/A'}" - ${path_1.default.basename(filePath)}`, `Actor detectado: "${actorRaw || 'N/A'}". Canonicos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`, `Corregir nombre de agente en el deposito. Actores validos: ${CANONICAL_PROTOCOL_ACTORS.join(', ')}.`);
-    }
-    const logText = normaliseText(parsed.sections.LOG || '');
-    if (logText === '') {
-        const ts = nowIso();
-        appendJsonlRecord(ARGOS_GLITCHES_PATH, {
-            id: getNextGlitchId(),
-            timestamp: ts,
-            timestamp_label: canaryTimestampLabelFromIso(ts),
-            actor: 'Dispatcher',
-            module: 'argos_deposit_guard',
-            type: 'deposit_warning',
-            status: 'open',
-            summary: `Deposit con [LOG] vacio - ${path_1.default.basename(filePath)} (packet: ${parsed.packetId})`,
-            details: 'Se integrara shadow/glitch/captain pero no habra entrada en GLOBAL_LOG.',
-            next_step: 'El agente debe incluir [LOG] con contenido en futuros depositos.',
-            packet_id: parsed.packetId,
-            refId: parsed.packetId,
-            source: 'deposit_heartbeat'
-        });
-    }
-    integrateClosure(parsed, {
-        source: 'deposit_heartbeat',
-        trigger,
-        captainSummaryPrefix: '[DEPOSITO]'
-    });
-    const destination = path_1.default.join(INBOX_DEPOSITS_PROCESSED_DIR, path_1.default.basename(filePath));
-    moveFileWithFallback(filePath, destination);
-    return true;
-}
-function processPendingInboxDeposits(trigger = 'manual') {
-    ensureInboxDepositDirectories();
-    const files = fs_1.default.readdirSync(INBOX_DEPOSITS_DIR)
-        .filter((name) => name.toLowerCase().endsWith('.md'))
-        .map((name) => path_1.default.join(INBOX_DEPOSITS_DIR, name));
-    let processed = 0;
-    files.forEach((filePath) => {
-        try {
-            if (processSingleInboxDeposit(filePath, trigger))
-                processed += 1;
-        }
-        catch (error) {
-            appendJsonlRecord(ARGOS_EVENTS_PATH, {
-                timestamp: nowIso(),
-                actor: 'Codex',
-                module: 'argos',
-                type: 'chat_deposit_error',
-                summary: `Error procesando deposito ${path_1.default.basename(filePath)}`,
-                details: String(error),
-                source: 'deposit_heartbeat'
-            });
-        }
-    });
-    return { scanned: files.length, processed };
-}
-function scheduleInboxDepositScan(trigger) {
-    if (inboxDepositsDebounceTimer)
-        clearTimeout(inboxDepositsDebounceTimer);
-    inboxDepositsDebounceTimer = setTimeout(() => {
-        const result = processPendingInboxDeposits(trigger);
-        if (result.processed > 0) {
-            console.log(`[DEPOSITS] Procesados ${result.processed}/${result.scanned} depositos (${trigger})`);
-        }
-    }, 1200);
-}
-function startInboxDepositsWatcher() {
-    ensureInboxDepositDirectories();
-    processPendingInboxDeposits('startup_scan');
-    if (inboxDepositsWatcher)
-        return;
-    inboxDepositsWatcher = fs_1.default.watch(INBOX_DEPOSITS_DIR, (eventType, fileName) => {
-        if (!fileName) {
-            scheduleInboxDepositScan(`watch:${eventType}`);
-            return;
-        }
-        if (!fileName.toLowerCase().endsWith('.md'))
-            return;
-        scheduleInboxDepositScan(`watch:${eventType}:${fileName}`);
-    });
-    console.log(`[DEPOSITS] Watcher activo sobre ${INBOX_DEPOSITS_DIR}`);
 }
 function markStaleAgentsFromDeposits(staleMinutes = 60) {
     const state = readArgosState();
@@ -2740,7 +2462,6 @@ function defaultDesktopSourcesConfig() {
                 id: 'codex',
                 enabled: true,
                 rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Codex',
-                transcriptGlobs: ['**/*transcript*.md', '**/*transcript*.json', '**/*.chat.jsonl'],
                 tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*ledger*.jsonl'],
                 parser: 'generic',
                 agentName: 'Codex',
@@ -2751,7 +2472,6 @@ function defaultDesktopSourcesConfig() {
                 id: 'claude',
                 enabled: true,
                 rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Claude',
-                transcriptGlobs: ['**/*transcript*.md', '**/*conversation*.json', '**/*.jsonl'],
                 tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*ledger*.jsonl'],
                 parser: 'generic',
                 agentName: 'Claude',
@@ -2762,7 +2482,6 @@ function defaultDesktopSourcesConfig() {
                 id: 'antigravity',
                 enabled: true,
                 rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/Antigravity',
-                transcriptGlobs: ['**/*transcript*.md', '**/*chat*.jsonl', '**/*conversation*.json'],
                 tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*ledger*.jsonl'],
                 parser: 'generic',
                 agentName: 'Pi',
@@ -2773,7 +2492,6 @@ function defaultDesktopSourcesConfig() {
                 id: 'openclaw',
                 enabled: true,
                 rootPath: 'C:/Users/Widox/Desktop/ARGOS_DESKTOP_SHARED/OpenClaw',
-                transcriptGlobs: ['**/*transcript*.md', '**/*session*.json', '**/*.jsonl'],
                 tokenGlobs: ['**/*token*.jsonl', '**/*usage*.json', '**/*eval*.json', '**/*webhook*.jsonl'],
                 parser: 'generic',
                 agentName: 'OpenClaw',
@@ -3030,8 +2748,6 @@ function runDesktopImport(mode, actor = 'OpenClaw') {
         sources: enabledSources.length,
         tokenFilesScanned: 0,
         tokensImported: 0,
-        transcriptFilesScanned: 0,
-        transcriptsMirrored: 0,
         errors: 0,
         warnings: []
     };
@@ -3085,49 +2801,6 @@ function runDesktopImport(mode, actor = 'OpenClaw') {
                 }
             });
         }
-        if (mode === 'transcripts' || mode === 'all') {
-            const transcriptFiles = filesMatchingGlobs(source.rootPath, source.transcriptGlobs);
-            summary.transcriptFilesScanned += transcriptFiles.length;
-            transcriptFiles.forEach((filePath) => {
-                try {
-                    const stat = fs_1.default.statSync(filePath);
-                    const raw = readTextFileSafe(filePath);
-                    const hash = simpleHash(raw);
-                    const rel = sanitiseRelativePath(path_1.default.relative(source.rootPath, filePath));
-                    const destination = path_1.default.join(EXTERNAL_TRANSCRIPTS_DIR, source.id, rel);
-                    const stateKey = `transcript:${filePath}`;
-                    const prev = state.files[stateKey];
-                    if (prev && prev.mtimeMs === stat.mtimeMs && prev.size === stat.size && prev.hash === hash)
-                        return;
-                    ensureDirSync(path_1.default.dirname(destination));
-                    fs_1.default.writeFileSync(destination, raw, 'utf-8');
-                    const transcriptKey = simpleHash(`${source.id}|${filePath}|${hash}`);
-                    if (markImportedKey(state.importedTranscriptKeys, transcriptKey)) {
-                        appendJsonlRecord(ARGOS_EVENTS_PATH, {
-                            timestamp: nowIso(),
-                            actor: normalizeAgentName(source.agentName) || source.agentName,
-                            module: 'desktop_import',
-                            type: 'external_transcript_mirrored',
-                            status: 'done',
-                            summary: `Transcript externo espejo (${source.id})`,
-                            details: `${filePath} -> ${destination}`,
-                            source: 'desktop-import'
-                        });
-                    }
-                    summary.transcriptsMirrored += 1;
-                    state.files[stateKey] = {
-                        mtimeMs: stat.mtimeMs,
-                        size: stat.size,
-                        hash,
-                        importedAt: nowIso()
-                    };
-                }
-                catch (error) {
-                    summary.errors += 1;
-                    summary.warnings.push(`[${source.id}] Error transcript ${filePath}: ${String(error)}`);
-                }
-            });
-        }
     });
     summary.finishedAt = nowIso();
     state.lastRun.finishedAt = summary.finishedAt;
@@ -3135,8 +2808,6 @@ function runDesktopImport(mode, actor = 'OpenClaw') {
         sources: summary.sources,
         tokenFilesScanned: summary.tokenFilesScanned,
         tokensImported: summary.tokensImported,
-        transcriptFilesScanned: summary.transcriptFilesScanned,
-        transcriptsMirrored: summary.transcriptsMirrored,
         errors: summary.errors,
         warnings: summary.warnings
     };
@@ -3145,7 +2816,6 @@ function runDesktopImport(mode, actor = 'OpenClaw') {
         mode: summary.mode,
         actor: summary.actor,
         tokensImported: summary.tokensImported,
-        transcriptsMirrored: summary.transcriptsMirrored,
         errors: summary.errors,
         timestamp: summary.finishedAt
     });
@@ -3178,6 +2848,7 @@ const dedupCache = new Map();
 const DEDUP_TTL_MS = 8000; // 8 s for general records
 const DEDUP_HEARTBEAT_TTL_MS = 4 * 60 * 1000; // 4 min for heartbeats
 function appendJsonlRecord(filePath, record) {
+    ensureDirSync(path_1.default.dirname(filePath));
     const rec = record;
     const now = Date.now();
     const isHeartbeat = rec.kind === 'system_heartbeat';
@@ -3302,6 +2973,35 @@ function getNextGlitchId() {
 function normalisePacketId(raw) {
     return normaliseText(raw).toUpperCase();
 }
+function buildTriLogViolationKey(packetId, missingLanes) {
+    return `${normalisePacketId(packetId)}|${missingLanes.map((lane) => normaliseText(lane).toUpperCase()).sort().join(',')}`;
+}
+function hasOpenTriLogViolation(packetId, missingLanes) {
+    const expectedKey = buildTriLogViolationKey(packetId, missingLanes);
+    if (expectedKey === '|')
+        return false;
+    return readTextFileSafe(ARGOS_GLITCHES_PATH)
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith('{'))
+        .some((line) => {
+        try {
+            const parsed = JSON.parse(line);
+            if (normaliseText(parsed.type) !== 'trilog_violation')
+                return false;
+            if (normaliseText(parsed.status).toLowerCase() !== 'open')
+                return false;
+            const lanes = Array.isArray(parsed.missing_lanes)
+                ? parsed.missing_lanes.map((lane) => normaliseText(lane))
+                : [];
+            const parsedPacketId = normaliseText(parsed.packet_id) || normaliseText(parsed.refId);
+            return buildTriLogViolationKey(parsedPacketId, lanes) === expectedKey;
+        }
+        catch {
+            return false;
+        }
+    });
+}
 function hasPacketIdInMarkdownLane(filePath, packetId) {
     const needle = normalisePacketId(packetId);
     if (needle === '')
@@ -3322,6 +3022,9 @@ function hasPacketIdInMarkdownLane(filePath, packetId) {
         }
     }
     return false;
+}
+function hasPacketIdInAnyMarkdownLane(filePaths, packetId) {
+    return filePaths.some((filePath) => hasPacketIdInMarkdownLane(filePath, packetId));
 }
 function hasPacketIdInEventsLane(packetId) {
     const needle = normalisePacketId(packetId);
@@ -3357,40 +3060,17 @@ function hasPacketIdInEventsLane(packetId) {
     }
     return false;
 }
-function hasPacketIdInTranscriptLane(packetId) {
-    const needle = normalisePacketId(packetId);
-    if (needle === '')
-        return false;
-    const transcriptDir = path_1.default.join(RUNTIME_DIR, 'transcripts');
-    if (!fs_1.default.existsSync(transcriptDir))
-        return false;
-    const files = fs_1.default.readdirSync(transcriptDir).filter(f => f.endsWith('.md'));
-    for (const file of files) {
-        const content = fs_1.default.readFileSync(path_1.default.join(transcriptDir, file), 'utf-8');
-        // Busca <!-- ID --> o el ID pelado
-        if (content.includes(`<!-- ${needle} -->`) || content.includes(`Packet: ${needle}`)) {
-            return true;
-        }
-    }
-    return false;
-}
 function getTriLogMissingLanes(packetId) {
     const id = normaliseText(packetId);
     if (id === '')
-        return ['LOG', 'EVENTS', 'SHADOW', 'TRANSCRIPT'];
-    const hasLog = hasPacketIdInMarkdownLane(ARGOS_GLOBAL_LOG_PATH, id);
-    const hasEvents = hasPacketIdInEventsLane(id);
-    const hasShadow = hasPacketIdInMarkdownLane(ARGOS_GLOBAL_SHADOW_PATH, id);
-    const hasTranscript = hasPacketIdInTranscriptLane(id);
+        return ['LOG', 'SHADOW'];
+    const hasLog = hasPacketIdInAnyMarkdownLane([ARGOS_GLOBAL_LOG_PATH, ARGOS_LEGACY_LOG_PATH], id);
+    const hasShadow = hasPacketIdInAnyMarkdownLane([ARGOS_GLOBAL_SHADOW_PATH, ARGOS_LEGACY_SHADOW_PATH], id);
     const missing = [];
     if (!hasLog)
         missing.push('LOG');
-    if (!hasEvents)
-        missing.push('EVENTS');
     if (!hasShadow)
         missing.push('SHADOW');
-    if (!hasTranscript)
-        missing.push('TRANSCRIPT');
     return missing;
 }
 function ensureAntigravityProtocolPacketExists() {
@@ -3414,14 +3094,12 @@ CREATED_BY: Argos Dispatcher
 TOKENS_SPENT: 0
 
 OBJECTIVE:
-Reforzar disciplina de cierre para Antigravity. Ningun paquete puede cerrarse sin Tri-Log completo y Registro de Transcripcion Literal.
+Reforzar disciplina de cierre para Antigravity. Ningun paquete puede cerrarse sin Tri-Log completo.
 
 ACCIONES REQUERIDAS:
-1. Registrar transcripcion literal en transcripts/YYYY-MM-DD_AGENTE.md (via /api/transcript).
-2. Registrar cierre en ARGOS_GLOBAL_LOG.md (LOG lane).
-3. Registrar evento estructurado en events/argos.events.jsonl (EVENTS lane).
-4. Registrar sombra en ARGOS_GLOBAL_SHADOW_LOG.md (SHADOW lane).
-5. Sincronizar state despues del cierre.
+1. Registrar cierre en bitacora/log.md (LOG lane).
+2. Registrar sombra en bitacora/shadowlog.md (SHADOW lane).
+3. Sincronizar state despues del cierre.
 [/WORK_PACKET]
 `;
     try {
@@ -3433,6 +3111,10 @@ ACCIONES REQUERIDAS:
 }
 function recordTriLogViolation(packetId, subject, owner, missingLanes) {
     const missing = missingLanes.join(', ');
+    if (hasOpenTriLogViolation(packetId, missingLanes)) {
+        console.info(`[TRILOG-GUARD] Glitch ya abierto para ${packetId} (${missing}); no se duplica.`);
+        return;
+    }
     const now = new Date();
     const isoTs = now.toISOString();
     const canaryTs = now
@@ -3474,10 +3156,7 @@ function recordTriLogViolation(packetId, subject, owner, missingLanes) {
         `**OWNER:** ${canonicalOwner}\n` +
         `**DETALLE:** ${details}\n` +
         `**SIGUIENTE:** ${nextStep}\n`;
-    const existingGlitchLog = fs_1.default.existsSync(ARGOS_GLOBAL_GLITCH_PATH)
-        ? fs_1.default.readFileSync(ARGOS_GLOBAL_GLITCH_PATH, 'utf-8')
-        : '# ARGOS GLOBAL GLITCH LOG\nRegistro estructural de fallas sistemicas.\n';
-    fs_1.default.writeFileSync(ARGOS_GLOBAL_GLITCH_PATH, existingGlitchLog + glitchEntry, 'utf-8');
+    appendMarkdownEntry(ARGOS_GLOBAL_GLITCH_PATH, '# ARGOS GLOBAL GLITCH LOG\nRegistro estructural de fallas sistemicas.\n', glitchEntry);
     console.info(`[TRILOG-GUARD] ${packetId} cerrado sin lanes: ${missing}. Owner: ${canonicalOwner}. Subject: ${subject}. Glitch: ${glitchId}`);
     publishEvent('glitch:recorded', { id: glitchId, packetId, missingLanes, owner: canonicalOwner });
 }
@@ -3555,8 +3234,9 @@ function runSyncState() {
             bugs: doneBugs.length,
             latest_ids: doneAll.slice(-10)
         };
-        // 4. Escribir Atomicamente (o casi)
-        fs_1.default.writeFileSync(statePath, JSON.stringify(state, null, 2), 'utf-8');
+        // 4. Escribir estado canonico y espejo de cubierta
+        writeArgosState(state);
+        writeCubiertaInboxSummary();
         return {
             ok: true,
             code: 0,
@@ -3632,9 +3312,10 @@ function runMergeHistory() {
                 stream.entries?.forEach(e => addEntry(e, mapped));
             });
         });
-        // 3. Procesar ARGOS_GLOBAL_LOG.md vivo
-        if (fs_1.default.existsSync(ARGOS_GLOBAL_LOG_PATH)) {
-            const content = fs_1.default.readFileSync(ARGOS_GLOBAL_LOG_PATH, 'utf-8');
+        // 3. Procesar bitacora activa + legacy
+        const markdownLogContent = readTextFilesJoined([ARGOS_LEGACY_LOG_PATH, ARGOS_GLOBAL_LOG_PATH]);
+        if (markdownLogContent !== '') {
+            const content = markdownLogContent;
             const blocks = content.split(/\n---/).map(b => b.trim()).filter(b => b.length > 0);
             blocks.forEach(block => {
                 const tsMatch = block.match(/\[(\d{4}[-/\.]\d{1,2}[-/\.]\d{1,2}(?:\s+\d{2}:\d{2})?.*?)\]/);
@@ -3644,7 +3325,7 @@ function runMergeHistory() {
                     const actor = normalizeActorName(actorMatch ? actorMatch[1].trim() : '');
                     const summaryMatch = block.match(/(?:ACCION|ACCIÃ“N|MISION|MISIÃ“N|MISSION|SUBJECT)\s*[:\*]+\s*([^\n\*]+)/i);
                     const summary = summaryMatch ? summaryMatch[1].trim() : 'Registro';
-                    addEntry({ timestamp_label: tsLabel, actor, summary, status: 'done', source: 'ARGOS_GLOBAL_LOG.md' }, 'global');
+                    addEntry({ timestamp_label: tsLabel, actor, summary, status: 'done', source: 'bitacora/log.md' }, 'global');
                 }
             });
         }
@@ -3682,10 +3363,10 @@ function runMergeHistory() {
         const argosMod = logbook.modules?.find(m => m.id === 'argos');
         if (argosMod) {
             argosMod.streams = [
-                { id: 'log', label: 'Log', source: 'ARGOS_GLOBAL_LOG.md', entries: timeline.filter(e => e.stream === 'global').reverse().slice(0, 100) },
+                { id: 'log', label: 'Log', source: 'bitacora/log.md', entries: timeline.filter(e => e.stream === 'global').reverse().slice(0, 100) },
                 { id: 'interactions', label: 'Interacciones', source: 'ARGOS_EVENTS', entries: timeline.filter(e => e.stream === 'interaction').reverse() },
-                { id: 'shadow', label: 'Sombra', source: 'ARGOS_GLOBAL_SHADOW_LOG.md', entries: timeline.filter(e => e.stream === 'shadow').reverse() },
-                { id: 'glitch', label: 'Glitch', source: 'ARGOS_GLOBAL_GLITCH_LOG.md', entries: timeline.filter(e => e.stream === 'glitch').reverse() }
+                { id: 'shadow', label: 'Sombra', source: 'bitacora/shadowlog.md', entries: timeline.filter(e => e.stream === 'shadow').reverse() },
+                { id: 'glitch', label: 'Glitch', source: 'bitacora/glitches.md', entries: timeline.filter(e => e.stream === 'glitch').reverse() }
             ];
         }
         logbook.updated_at = new Date().toISOString();
@@ -3710,9 +3391,14 @@ function shouldRefreshLogbookSnapshot() {
     const sourcePaths = [
         ARGOS_GLOBAL_LOG_PATH,
         ARGOS_GLOBAL_SHADOW_PATH,
+        ARGOS_GLOBAL_GLITCH_PATH,
+        ARGOS_LEGACY_LOG_PATH,
+        ARGOS_LEGACY_SHADOW_PATH,
+        ARGOS_LEGACY_GLITCH_PATH,
         path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl'),
         path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl'),
-        path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl'),
+        CAPTAIN_FEED_PATH,
+        CAPTAIN_FEED_LEGACY_PATH,
         path_1.default.join(RUNTIME_DIR, 'work_packets', 'inbox'),
         path_1.default.join(RUNTIME_DIR, 'work_packets', 'in_progress'),
         path_1.default.join(RUNTIME_DIR, 'work_packets', 'done')
@@ -3857,7 +3543,7 @@ function parseArgosMarkdownStream(filePath, idPrefix) {
             '';
         const errorsRaw = block.match(/\*\*(?:ERRORES[^:]*|APRENDIZAJE|ERROR BASE|Lecciones)\s*:\*\*([\s\S]*?)(?:\n\*\*|\n---|$)/i)?.[1] ||
             '';
-        const risksRaw = block.match(/\*\*(?:RIESGO[S]?|Peligros)\s*:\*\*([\s\S]*?)(?:\n\*\*|\n---|$)/i)?.[1] ||
+        const risksRaw = block.match(/\*\*RIESGO[S]?|Peligros\s*:\*\*([\s\S]*?)(?:\n\*\*|\n---|$)/i)?.[1] ||
             '';
         parsed.push({
             id: explicitPacketId || extractPacketId(block),
@@ -4042,19 +3728,22 @@ function enrichArgosStreams(snapshot) {
         return captainInputPacketIds.has(packetId);
     };
     const streamMap = new Map((argos.streams || []).map((stream) => [stream.id, stream]));
-    const loadStreamEntries = (filename, streamType, parser) => {
-        const livePath = streamType === 'glitch'
-            ? path_1.default.join(RUNTIME_DIR, 'events', filename)
-            : path_1.default.join(RUNTIME_DIR, filename);
+    const loadStreamEntries = (paths, streamType, parser) => {
         const combined = [];
-        if (fs_1.default.existsSync(livePath)) {
-            combined.push(...parser(livePath, `argos-${streamType}-live`));
-        }
+        paths.forEach((livePath, index) => {
+            if (fs_1.default.existsSync(livePath)) {
+                const sourceSuffix = index === 0 ? 'live' : 'legacy';
+                combined.push(...parser(livePath, `argos-${streamType}-${sourceSuffix}`));
+            }
+        });
         return combined;
     };
-    const liveLogEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_LOG.md', 'log', parseArgosMarkdownStream);
-    const liveShadowEntries = loadStreamEntries('logs/current/ARGOS_GLOBAL_SHADOW_LOG.md', 'shadow', parseArgosMarkdownStream);
-    const liveGlitchEntries = loadStreamEntries('argos.glitches.jsonl', 'glitch', parseArgosEventsStream);
+    const liveLogEntries = loadStreamEntries([ARGOS_GLOBAL_LOG_PATH, ARGOS_LEGACY_LOG_PATH], 'log', parseArgosMarkdownStream);
+    const liveShadowEntries = loadStreamEntries([ARGOS_GLOBAL_SHADOW_PATH, ARGOS_LEGACY_SHADOW_PATH], 'shadow', parseArgosMarkdownStream);
+    const liveGlitchEntries = [
+        ...loadStreamEntries([ARGOS_GLITCHES_PATH], 'glitch', parseArgosEventsStream),
+        ...loadStreamEntries([ARGOS_GLOBAL_GLITCH_PATH, ARGOS_LEGACY_GLITCH_PATH], 'glitch', parseArgosMarkdownStream)
+    ];
     const processEntries = (entries, streamId) => {
         const next = entries.map((entry) => {
             const id = normaliseText(entry.id || '');
@@ -4093,6 +3782,12 @@ function enrichArgosStreams(snapshot) {
         const stream = streamMap.get(streamId);
         if (!stream)
             return;
+        const canonicalSources = {
+            log: 'bitacora/log.md + bitacora/legacy/ARGOS_GLOBAL_LOG.md',
+            shadow: 'bitacora/shadowlog.md + bitacora/legacy/ARGOS_GLOBAL_SHADOW_LOG.md',
+            glitch: 'bitacora/glitches.md + events/argos.glitches.jsonl'
+        };
+        stream.source = canonicalSources[streamId] || stream.source;
         const existingSanitized = (stream.entries || []).map((entry) => ({
             ...entry,
             actor: normalizeActorName(entry.actor || '')
@@ -4569,10 +4264,19 @@ function loadGlitchesFromJsonl() {
         return [];
     try {
         const lines = fs_1.default.readFileSync(glitchesPath, 'utf-8').split('\n').filter(l => l.trim());
-        return lines.map(line => {
+        const byIssue = new Map();
+        lines.forEach(line => {
             try {
                 const g = JSON.parse(line);
-                return {
+                const lanes = Array.isArray(g.missing_lanes)
+                    ? g.missing_lanes.map((lane) => normaliseText(lane)).sort().join(',')
+                    : '';
+                const issueKey = [
+                    normaliseText(g.type),
+                    normaliseText(g.packet_id) || normaliseText(g.refId) || normaliseText(g.summary),
+                    lanes || normaliseText(g.details)
+                ].join('|');
+                byIssue.set(issueKey, {
                     id: g.id,
                     severity: 'medium',
                     subject: g.summary,
@@ -4581,12 +4285,11 @@ function loadGlitchesFromJsonl() {
                     reportedAt: g.timestamp_label || g.timestamp,
                     zone: 'inbox',
                     type: 'glitch'
-                };
+                });
             }
-            catch (e) {
-                return null;
-            }
-        }).filter(g => g !== null);
+            catch (e) { }
+        });
+        return Array.from(byIssue.values());
     }
     catch (e) {
         return [];
@@ -4749,11 +4452,16 @@ function readMarkdownTail(filePath, maxLines) {
     const lines = raw.split(/\r?\n/);
     return lines.slice(-Math.max(1, maxLines)).join('\n').trim();
 }
+function readMarkdownTailFromPaths(filePaths, maxLines) {
+    const raw = readTextFilesJoined(filePaths);
+    if (raw === '')
+        return '';
+    const lines = raw.split(/\r?\n/);
+    return lines.slice(-Math.max(1, maxLines)).join('\n').trim();
+}
 function readCaptainFeedTail(limit = 5) {
-    const lines = readCaptainFeedLines(CAPTAIN_FEED_PATH);
-    const records = lines
-        .map((line) => line.parsed ? ensureCaptainFeedRecordId(line.parsed) : null)
-        .filter((row) => row !== null);
+    const records = readCaptainFeedRecordsFromPaths(getCaptainFeedReadPaths());
+    records.sort((a, b) => new Date(normaliseText(a.timestamp)).getTime() - new Date(normaliseText(b.timestamp)).getTime());
     return records.slice(-Math.max(1, limit)).map((record) => ({
         timestamp: normaliseText(record.timestamp),
         sender_name: inferSenderName(record),
@@ -4828,7 +4536,7 @@ function startHeartbeatLoop() {
     setInterval(sendHeartbeat, 30000); // cada 30 s es suficiente para proxies/nginx
     console.log('[HEARTBEAT] SSE keepalive activo (cada 30 s, sin ruido en chat/log)');
 }
-// ============ MEJORA 4: Dispatcher Mirror ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â replica cambios a ARGOS_GLOBAL_LOG.md ============
+// ============ MEJORA 4: Dispatcher Mirror replica cambios a bitacora/log.md ============
 let lastPacketStates = {};
 function startDispatcherMirror() {
     const workPacketsDir = path_1.default.join(RUNTIME_DIR, 'work_packets');
@@ -4983,18 +4691,6 @@ app.post('/api/concilio', (req, res) => {
         ensureConcilioStorage();
         appendJsonlRecord(CONCILIO_JSONL_PATH, message);
         appendConcilioMarkdown(message);
-        appendJsonlRecord(ARGOS_EVENTS_PATH, {
-            timestamp,
-            actor: actor.id,
-            module: 'concilio',
-            type: 'concilio_message',
-            packet_id: packetId,
-            refId: packetId,
-            summary: `${message.type}: ${message.body.substring(0, 140)}`,
-            details: message.body,
-            source: 'api:concilio',
-            message_id: message.message_id
-        });
         publishEvent('concilio:message', {
             message_id: message.message_id,
             timestamp: message.timestamp,
@@ -5038,7 +4734,7 @@ app.get('/api/remote/aperture', (req, res) => {
             title: packet.subject,
             status: packet.status
         })),
-        log_tail: readMarkdownTail(ARGOS_GLOBAL_LOG_PATH, 10),
+        log_tail: readMarkdownTailFromPaths([ARGOS_LEGACY_LOG_PATH, ARGOS_GLOBAL_LOG_PATH], 10),
         captain_feed_tail: readCaptainFeedTail(5),
         protocol_version: bootstrap.protocol_version,
         tunnel_url: bootstrap.tunnel_url
@@ -5060,7 +4756,7 @@ app.post('/api/remote/update', (req, res) => {
         const canonicalSender = resolveCrewDisplayName(claimedActor || tokenAgent || 'ExternalAgent', normalizeAgentName(claimedActor) || claimedActor || tokenAgent || 'ExternalAgent');
         const timestamp = nowIso();
         const entryId = nextFeedMessageId();
-        appendJsonlRecord(CAPTAIN_FEED_PATH, {
+        appendCaptainFeedRecord({
             id: entryId,
             timestamp,
             kind: 'crew_update',
@@ -5153,40 +4849,9 @@ app.post('/api/remote/closure', (req, res) => {
             trigger: payload.trigger,
             source: 'api:remote/closure'
         });
-        // sections.handoff es OBLIGATORIO — siempre se escribe al HANDOFF_LOG
         if (payload.sections.handoff) {
             appendToHandoffLog(payload.agent, payload.packet_id, payload.sections.handoff, timestampIso);
         }
-        else {
-            // Defensa: no debería llegar aquí si parseRemoteClosurePayload rechazó correctamente
-            appendJsonlRecord(ARGOS_GLITCHES_PATH, {
-                timestamp: timestampIso, actor: payload.agent, packet_id: payload.packet_id,
-                summary: 'GLITCH: closure sin handoff llegó al handler — parseRemoteClosurePayload no lo rechazó',
-                source: 'api:remote/closure:handoff-missing'
-            });
-        }
-        appendJsonlRecord(ARGOS_EVENTS_PATH, {
-            timestamp: timestampIso,
-            actor: normalizeAgentName(payload.agent) || payload.agent,
-            module: 'argos',
-            type: 'remote_closure',
-            packet_id: payload.packet_id,
-            refId: payload.packet_id,
-            status: depositPayload.statePayload.status,
-            summary: payload.mission || firstLine(payload.sections.log) || 'Remote closure integrado',
-            mission: payload.mission,
-            closure_type: payload.closure_type,
-            result: payload.result,
-            handoff: payload.handoff,
-            handoff_active: payload.handoff_active,
-            schema_version: payload.schema_version,
-            risk_level: payload.risk_level,
-            risks: payload.handoff,
-            lifecycle_event: payload.lifecycle_event,
-            transcriptRef: payload.transcript_ref || `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
-            details: `trigger=${payload.trigger}; interface=${payload.interface}; mark_packet_done=${payload.mark_packet_done}; status=${payload.status}`,
-            source: 'api:remote/closure'
-        });
         if (payload.legacy_summary_used) {
             appendJsonlRecord(ARGOS_GLITCHES_PATH, {
                 id: getNextGlitchId(),
@@ -5210,7 +4875,7 @@ app.post('/api/remote/closure', (req, res) => {
         });
         return res.json({
             closure_id: closureId,
-            transcriptRef: payload.transcript_ref || `captain_feed.jsonl#${integrated.captainFeedId || closureId}`,
+            transcriptRef: payload.transcript_ref || `cubierta/feed.jsonl#${integrated.captainFeedId || closureId}`,
             packet_moved_to: packetMovedTo
         });
     }
@@ -5408,8 +5073,7 @@ app.post('/api/session/archive', (req, res) => {
 });
 app.get('/api/chat', (req, res) => {
     try {
-        const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
-        const allPaths = [feedPath, ...findArchivedFiles('captain_feed.jsonl')];
+        const allPaths = getCaptainFeedReadPaths();
         const rawMessages = [];
         allPaths.forEach(fp => {
             if (!fs_1.default.existsSync(fp))
@@ -5451,7 +5115,6 @@ app.post('/api/chat', (req, res) => {
             return res.status(400).json({ error: 'Missing summary' });
         const resolvedTokens = resolveEstimatedTokens(tokens, summary, details, req.body.refId, sender);
         const canonicalSender = resolveCrewDisplayName(String(sender || 'Pi'), normalizeAgentName(String(sender || 'Pi')) || String(sender || 'Pi'));
-        const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         const recordsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
         const record = {
             id: nextFeedMessageId(),
@@ -5468,15 +5131,7 @@ app.post('/api/chat', (req, res) => {
             tokens: 0,
             refId: req.body.refId || ''
         };
-        // Transcript: registrar la respuesta literal de la IA
-        // Para agentes UI-side (Antigravity, Qwen...) el contenido completo llega en details.
-        // Para Claude (Claude Code) el transcript literal se escribe desde el cliente â€” aquÃ­
-        // registramos summary+details como fallback hasta que haya captura directa.
-        const transcriptContent = req.body.literalResponse
-            || (details ? `${summary}\n\n${details}` : summary);
-        const tRef = appendToTranscript(canonicalSender, 'agent', transcriptContent, record.refId || '');
-        record.transcriptRef = tRef;
-        appendJsonlRecord(feedPath, record);
+        appendCaptainFeedRecord(record);
         const chatCanaryTs = new Date(record.timestamp || new Date().toISOString())
             .toLocaleString('sv-SE', {
             timeZone: 'Atlantic/Canary',
@@ -5487,8 +5142,6 @@ app.post('/api/chat', (req, res) => {
             minute: '2-digit'
         })
             .slice(0, 16);
-        // interactions_log reemplazado por el sistema de transcripts â€” ya no se escribe type:interaction
-        // al JSONL de eventos; el transcript canÃ³nico vive en transcripts/FECHA_AGENTE.md
         // Also record in the token ledger with module and ID linkage
         appendJsonlRecord(recordsPath, {
             timestamp: record.timestamp,
@@ -5561,9 +5214,9 @@ app.post('/api/chat/edit', (req, res) => {
             return res.status(400).json({ error: 'messageId requerido' });
         if (action !== 'delete' && summary === '')
             return res.status(400).json({ error: 'summary requerido' });
-        const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
-        if (!fs_1.default.existsSync(feedPath))
-            return res.status(404).json({ error: 'No existe captain_feed.jsonl' });
+        const feedPath = getCaptainFeedReadPaths().find((candidatePath) => readCaptainFeedLines(candidatePath).some((line) => line.parsed && resolveFeedRecordId(ensureCaptainFeedRecordId(line.parsed)) === messageId));
+        if (!feedPath)
+            return res.status(404).json({ error: `Mensaje ${messageId} no encontrado` });
         const lines = readCaptainFeedLines(feedPath);
         const editedAt = new Date().toISOString();
         const canaryTs = new Date(editedAt).toLocaleString('sv-SE', {
@@ -5604,6 +5257,7 @@ app.post('/api/chat/edit', (req, res) => {
             }
             const removedRecord = deletedRecord;
             writeCaptainFeedLines(feedPath, nextLines);
+            rebuildCubiertaFeedMarkdown();
             const packetRef = normaliseText(removedRecord.refId);
             const removedSummary = normaliseText(removedRecord.summary);
             appendJsonlRecord(ARGOS_EVENTS_PATH, {
@@ -5637,6 +5291,7 @@ app.post('/api/chat/edit', (req, res) => {
         }
         const finalRecord = updatedRecord;
         writeCaptainFeedLines(feedPath, nextLines);
+        rebuildCubiertaFeedMarkdown();
         const packetRef = normaliseText(finalRecord.refId);
         appendJsonlRecord(ARGOS_EVENTS_PATH, {
             timestamp: editedAt,
@@ -5680,8 +5335,8 @@ app.get('/api/logs', (req, res) => {
         const globalLogPath = ARGOS_GLOBAL_LOG_PATH;
         const shadowLogPath = ARGOS_GLOBAL_SHADOW_PATH;
         const interactionsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
-        const globalStr = readTextFile(globalLogPath, 'Bitacora global desaparecida.');
-        const shadowStr = readTextFile(shadowLogPath, 'Shadow log desaparecido.');
+        const globalStr = readTextFilesJoined([ARGOS_LEGACY_LOG_PATH, globalLogPath], 'Bitacora global desaparecida.');
+        const shadowStr = readTextFilesJoined([ARGOS_LEGACY_SHADOW_PATH, shadowLogPath], 'Shadow log desaparecido.');
         const interactionsStr = readTextFile(interactionsPath, '');
         res.json({ global: globalStr, shadow: shadowStr, interactions: interactionsStr });
     }
@@ -5861,34 +5516,8 @@ app.post('/api/trilog', (req, res) => {
             (nextStep ? `\n**SIGUIENTE:** ${nextStep}\n` : '') +
             (errors ? `\n**ERRORES + APRENDIZAJES:** ${errors}\n` : '') +
             (risks ? `\n**RIESGOS:** ${risks}\n` : '');
-        const existingLog = fs_1.default.existsSync(ARGOS_GLOBAL_LOG_PATH)
-            ? fs_1.default.readFileSync(ARGOS_GLOBAL_LOG_PATH, 'utf-8')
-            : '# ARGOS GLOBAL LOG\nRegistro operativo compartido por la tripulacion.\n';
-        fs_1.default.writeFileSync(ARGOS_GLOBAL_LOG_PATH, existingLog + logEntry, 'utf-8');
+        appendMarkdownEntry(ARGOS_GLOBAL_LOG_PATH, '# ARGOS GLOBAL LOG\nRegistro operativo compartido por la tripulacion.\n', logEntry);
         written.push('LOG');
-        // 2. EVENTS (JSONL estructurado)
-        const eventRecord = {
-            timestamp: isoTs,
-            timestamp_label: canaryTs,
-            actor: canonicalActor,
-            module,
-            type: 'session_close',
-            packet_id: packetRef,
-            refId: packetRef,
-            status,
-            mission: summary,
-            summary,
-            details,
-            next_step: nextStep,
-            errors,
-            risks,
-            lifecycle_event: Boolean(lifecycle_event),
-            tokens: processTokenCount,
-            transcriptRef: normaliseText(transcriptRef),
-            source: 'api:trilog'
-        };
-        appendJsonlRecord(ARGOS_EVENTS_PATH, eventRecord);
-        written.push('EVENTS');
         // 2b. TOKENS ledger (work + report)
         const tokensPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
         appendJsonlRecord(tokensPath, {
@@ -5931,14 +5560,10 @@ app.post('/api/trilog', (req, res) => {
             `**PACKET:** ${packetRef}\n` +
             `**TAREA:** ${summary}\n` +
             `**SOMBRA:**\n${shadowContent}\n`;
-        const existingShadow = fs_1.default.existsSync(ARGOS_GLOBAL_SHADOW_PATH)
-            ? fs_1.default.readFileSync(ARGOS_GLOBAL_SHADOW_PATH, 'utf-8')
-            : '# ARGOS GLOBAL SHADOW LOG\nRegistro latente.\n';
-        fs_1.default.writeFileSync(ARGOS_GLOBAL_SHADOW_PATH, existingShadow + shadowEntry, 'utf-8');
+        appendMarkdownEntry(ARGOS_GLOBAL_SHADOW_PATH, '# ARGOS GLOBAL SHADOW LOG\nRegistro latente.\n', shadowEntry);
         written.push('SHADOW');
         // 4. Captain feed (notificaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n al chat)
-        const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
-        appendJsonlRecord(feedPath, {
+        appendCaptainFeedRecord({
             id: nextFeedMessageId(),
             timestamp: isoTs,
             kind: 'session_close',
@@ -6000,170 +5625,7 @@ app.get('/api/handoff/:packetId', (req, res) => {
         res.status(500).json({ error: 'Fallo leyendo handoff log', detail: String(e) });
     }
 });
-// ============ TRANSCRIPT ENDPOINTS ============
-// GET /api/transcript?agent=Claude&date=2026-04-12&packetId=ARG-XXXX
-// Devuelve el bloque de transcript (o el archivo completo si no se especifica packetId)
-app.get('/api/transcript', (req, res) => {
-    try {
-        const agent = normaliseText(req.query.agent) || 'Claude';
-        const date = normaliseText(req.query.date) || transcriptDateStr();
-        const packetId = normaliseText(req.query.packetId);
-        if (packetId) {
-            const block = readTranscriptBlock(agent, date, packetId);
-            if (!block)
-                return res.status(404).json({ error: `No transcript block for ${packetId} in ${date}_${agent}` });
-            return res.json({ agent, date, packetId, content: block });
-        }
-        const safeName = agent.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const filePath = path_1.default.join(TRANSCRIPTS_DIR, `${date}_${safeName}.md`);
-        if (!fs_1.default.existsSync(filePath))
-            return res.status(404).json({ error: `No transcript for ${agent} on ${date}` });
-        const content = fs_1.default.readFileSync(filePath, 'utf-8');
-        return res.json({ agent, date, content });
-    }
-    catch (e) {
-        res.status(500).json({ error: 'Fallo leyendo transcript', detail: String(e) });
-    }
-});
-// GET /api/transcript/list?date=2026-04-12
-// Lista los archivos de transcript disponibles para una fecha (o hoy)
-app.get('/api/transcript/list', (req, res) => {
-    try {
-        const date = normaliseText(req.query.date) || transcriptDateStr();
-        if (!fs_1.default.existsSync(TRANSCRIPTS_DIR))
-            return res.json({ date, files: [] });
-        const files = fs_1.default.readdirSync(TRANSCRIPTS_DIR)
-            .filter(f => f.startsWith(date) && f.endsWith('.md'))
-            .map(f => ({ file: f, agent: f.replace(`${date}_`, '').replace('.md', '') }));
-        res.json({ date, files });
-    }
-    catch (e) {
-        res.status(500).json({ error: 'Fallo listando transcripts', detail: String(e) });
-    }
-});
-// POST /api/transcript
-// Permite a Claude Code (u otras IAs externas) escribir bloques de transcript literales.
-// Body: { agent, role, content, packetId }
-app.post('/api/transcript', (req, res) => {
-    try {
-        const { agent, role, content, packetId } = req.body;
-        if (!ensureExternalActorMatchesToken(req, res, normaliseText(agent)))
-            return;
-        if (!agent || !content)
-            return res.status(400).json({ error: 'agent y content son obligatorios' });
-        const validRole = role === 'captain' ? 'captain' : 'agent';
-        const tRef = appendToTranscript(normalizeAgentName(agent) || agent, validRole, content, packetId || '');
-        res.json({ status: 'ok', transcriptRef: tRef });
-    }
-    catch (e) {
-        res.status(500).json({ error: 'Fallo escribiendo transcript', detail: String(e) });
-    }
-});
-// GET /api/transcript/packet?packetId=ARG-XXXX
-// Devuelve todos los bloques de transcript de TODAS las IAs para un packetId concreto.
-// Escanea todos los archivos en transcripts/ buscando el anchor <!-- ARG-XXXX -->.
-app.get('/api/transcript/packet', (req, res) => {
-    try {
-        const packetId = normaliseText(req.query.packetId);
-        if (!packetId)
-            return res.status(400).json({ error: 'packetId requerido' });
-        const results = [];
-        if (!fs_1.default.existsSync(TRANSCRIPTS_DIR))
-            return res.json({ packetId, transcripts: [] });
-        const files = fs_1.default.readdirSync(TRANSCRIPTS_DIR).filter(f => f.endsWith('.md')).sort().reverse();
-        const anchor = `<!-- ${packetId} -->`;
-        for (const file of files) {
-            const content = fs_1.default.readFileSync(path_1.default.join(TRANSCRIPTS_DIR, file), 'utf-8');
-            if (!content.includes(anchor))
-                continue;
-            // Extraer el bloque completo entre el anchor y el siguiente '---'
-            const start = content.indexOf(anchor);
-            const afterBlock = content.indexOf('\n---\n', start);
-            const end = afterBlock !== -1 ? afterBlock + 5 : content.length;
-            const block = content.slice(start, end).trim();
-            // Parsear FECHA y AGENTE del nombre del archivo: YYYY-MM-DD_AGENTE.md
-            const nameParts = file.replace('.md', '').split('_');
-            const date = nameParts[0];
-            const agent = nameParts.slice(1).join('_');
-            results.push({ agent, date, file, content: block });
-        }
-        res.json({ packetId, transcripts: results });
-    }
-    catch (e) {
-        res.status(500).json({ error: 'Fallo buscando transcripts por packet', detail: String(e) });
-    }
-});
-// GET /api/transcript/:packetId
-// Alias REST limpio de /api/transcript/packet?packetId=X.
-// Sin autenticaciÃ³n â€” solo lectura, accesible por cualquier agente.
-app.get('/api/transcript/:packetId', (req, res) => {
-    try {
-        const packetId = normaliseText(req.params.packetId);
-        if (!packetId)
-            return res.status(400).json({ error: 'packetId requerido' });
-        const results = [];
-        if (!fs_1.default.existsSync(TRANSCRIPTS_DIR))
-            return res.json({ packetId, transcripts: [] });
-        const files = fs_1.default.readdirSync(TRANSCRIPTS_DIR).filter(f => f.endsWith('.md')).sort().reverse();
-        const anchor = `<!-- ${packetId} -->`;
-        for (const file of files) {
-            const content = fs_1.default.readFileSync(path_1.default.join(TRANSCRIPTS_DIR, file), 'utf-8');
-            if (!content.includes(anchor))
-                continue;
-            const start = content.indexOf(anchor);
-            const afterBlock = content.indexOf('\n---\n', start);
-            const end = afterBlock !== -1 ? afterBlock + 5 : content.length;
-            const block = content.slice(start, end).trim();
-            const nameParts = file.replace('.md', '').split('_');
-            const date = nameParts[0];
-            const agent = nameParts.slice(1).join('_');
-            results.push({ agent, date, file, content: block });
-        }
-        // Ordenar por fecha+agente asc para lectura cronolÃ³gica
-        results.sort((a, b) => `${a.date}_${a.agent}`.localeCompare(`${b.date}_${b.agent}`));
-        res.json({ packetId, transcripts: results });
-    }
-    catch (e) {
-        res.status(500).json({ error: 'Fallo buscando transcripts por packet', detail: String(e) });
-    }
-});
-// GET /api/transcript/feed?date=YYYY-MM-DD (opcional, default hoy)
-// Devuelve lista plana de todos los bloques de transcript para una fecha.
-// Formato: [{ timestamp, agent, packetId, content }]
-app.get('/api/transcript/feed', (req, res) => {
-    try {
-        const date = normaliseText(req.query.date) || transcriptDateStr();
-        if (!fs_1.default.existsSync(TRANSCRIPTS_DIR))
-            return res.json({ date, entries: [] });
-        // Todos los archivos del dÃ­a: YYYY-MM-DD_AGENTE.md
-        const files = fs_1.default.readdirSync(TRANSCRIPTS_DIR)
-            .filter((f) => f.startsWith(date) && f.endsWith('.md'))
-            .sort();
-        const entries = [];
-        for (const file of files) {
-            const nameParts = file.replace('.md', '').split('_');
-            const agent = nameParts.slice(1).join('_') || 'Unknown';
-            const rawContent = fs_1.default.readFileSync(path_1.default.join(TRANSCRIPTS_DIR, file), 'utf-8');
-            // Parsear cada bloque: delimitado por <!-- ARG-XXXX --> ... hasta el siguiente ---
-            const blockRegex = /<!-- ([\w\-]+) -->\n([\s\S]*?)(?=\n<!-- [\w\-]+ -->|$)/g;
-            let match;
-            while ((match = blockRegex.exec(rawContent)) !== null) {
-                const packetId = match[1];
-                const blockText = match[2].trim();
-                // Extraer timestamp de la lÃ­nea ## [YYYY-MM-DD HH:MM]
-                const tsMatch = blockText.match(/## \[(\d{4}-\d{2}-\d{2}[^\]]*)\]/);
-                const timestamp = tsMatch ? tsMatch[1] : date;
-                entries.push({ timestamp, agent, packetId, content: blockText });
-            }
-        }
-        // Ordenar por timestamp desc
-        entries.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-        res.json({ date, entries });
-    }
-    catch (e) {
-        res.status(500).json({ error: 'Fallo leyendo transcript feed', detail: String(e) });
-    }
-});
+// ============ ENDPOINT: Get Work Packets ============
 app.get('/api/tasks', (req, res) => {
     try {
         const roomFilterRaw = normaliseText(String(req.query.room || '')).toUpperCase();
@@ -6186,17 +5648,14 @@ app.get('/api/tasks', (req, res) => {
                 return false;
             return true;
         });
-        // Orden canonico:
-        // 1) Pendientes (open/in_progress): prioridad desc (high > mid > low), luego recencia desc
-        // 2) Completadas al final, por recencia desc
         const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
         const recencyMs = (task) => Math.max(task.created_at_ms || 0, task.mtimeMs || 0);
         const byPriorityThenRecency = (a, b) => {
             const pa = PRIORITY_RANK[a.priority] ?? 1;
             const pb = PRIORITY_RANK[b.priority] ?? 1;
             if (pb !== pa)
-                return pb - pa; // mayor prioridad primero
-            return recencyMs(b) - recencyMs(a); // misma prioridad â†’ mas reciente primero
+                return pb - pa;
+            return recencyMs(b) - recencyMs(a);
         };
         const pendingTasks = filteredTasks
             .filter((task) => task.status !== 'done')
@@ -6205,9 +5664,7 @@ app.get('/api/tasks', (req, res) => {
             .filter((task) => task.status === 'done')
             .sort((a, b) => recencyMs(b) - recencyMs(a));
         const orderedTasks = [...pendingTasks, ...doneTasks];
-        res.json({
-            tasks: orderedTasks
-        });
+        res.json({ tasks: orderedTasks });
     }
     catch (error) {
         res.status(500).json({ error: 'Fallo desenterrando los work packets fisicos del inbox' });
@@ -6540,8 +5997,7 @@ app.post('/api/ia/start-task', (req, res) => {
         res.status(500).json({ error: 'Fallo al iniciar tarea', detail: String(error) });
     }
 });
-// ============ ENDPOINT: IA Status manual (GET + POST) — LEGACY ============
-// Mantenido por compatibilidad. Preferir /api/ia/state para nuevos clientes.
+// ============ ENDPOINT: IA Status manual (GET + POST) ============
 app.get('/api/ia/status', (_req, res) => {
     const state = readArgosState();
     const baseStatus = readIaStatus(state);
@@ -6566,72 +6022,6 @@ app.post('/api/ia/status', (req, res) => {
     const agent = normalizeAgentName(actor);
     publishEvent('ia:status_changed', { agent, status, task, subject: task_subject });
     return res.json({ status: 'ok', agent, ia_status: status });
-});
-// ============ ENDPOINT CANÓNICO v2: /api/ia/state ============
-// Memoria operacional enriquecida. Permite que cada IA declare su estado completo.
-// Campos: actor, availability, current_packet, current_theme,
-//         last_interaction_summary, next_step, source, last_seen
-app.get('/api/ia/state', (_req, res) => {
-    const state = readArgosState();
-    const baseStatus = readIaStatus(state);
-    const inferredStatus = inferIaStatusFromTasks(baseStatus);
-    res.json({ ia_status: inferredStatus });
-});
-app.get('/api/ia/state/:actor', (req, res) => {
-    const actorParam = req.params.actor;
-    const agent = normalizeAgentName(actorParam);
-    if (!agent)
-        return res.status(404).json({ error: `actor '${actorParam}' no reconocido` });
-    const state = readArgosState();
-    const baseStatus = readIaStatus(state);
-    const inferredStatus = inferIaStatusFromTasks(baseStatus);
-    const agentStatus = inferredStatus[agent];
-    if (!agentStatus)
-        return res.status(404).json({ error: 'agent no encontrado en ia_status' });
-    return res.json({ agent, ia_status: agentStatus });
-});
-app.post('/api/ia/state', (req, res) => {
-    const { actor, availability, current_packet, current_theme, last_interaction_summary, next_step, source, last_seen } = req.body;
-    if (!ensureExternalActorMatchesToken(req, res, normaliseText(actor)))
-        return;
-    if (!actor)
-        return res.status(400).json({ error: 'actor requerido' });
-    const agent = normalizeAgentName(actor);
-    if (!agent)
-        return res.status(400).json({ error: `actor '${actor}' no reconocido` });
-    // Mapear availability → status legacy para compatibilidad
-    const availToStatus = {
-        available: 'standby',
-        busy: 'active',
-        offline: 'standby',
-        restricted: 'restricted'
-    };
-    const resolvedStatus = availToStatus[availability] ?? 'standby';
-    const resolvedAvailability = availability ?? (resolvedStatus === 'active' ? 'busy' : 'available');
-    const now = new Date().toISOString();
-    const stateDoc = readArgosState();
-    const ia = readIaStatus(stateDoc);
-    ia[agent] = {
-        ...ia[agent], // preservar campos existentes no sobreescritos
-        status: resolvedStatus,
-        task: current_packet ?? ia[agent].task ?? '',
-        task_subject: current_theme ?? ia[agent].task_subject ?? '',
-        since: ia[agent].since || now,
-        last_seen: last_seen ?? now,
-        ...(next_step !== undefined && { next_step }),
-        ...(last_interaction_summary !== undefined && { last_output: last_interaction_summary }),
-        // campos canónicos v2
-        availability: resolvedAvailability,
-        current_packet: current_packet ?? ia[agent].current_packet ?? ia[agent].task ?? '',
-        current_theme: current_theme ?? ia[agent].current_theme ?? ia[agent].task_subject ?? '',
-        ...(last_interaction_summary !== undefined && { last_interaction_summary }),
-        ...(source !== undefined && { source }),
-        ...(next_step !== undefined && { next_step })
-    };
-    stateDoc.ia_status = ia;
-    writeArgosState(stateDoc);
-    publishEvent('ia:state_updated', { agent, availability: resolvedAvailability, current_packet, source });
-    return res.json({ status: 'ok', agent, ia_status: ia[agent] });
 });
 // ============ ENDPOINT: GET /api/ia/bootstrap ============
 app.get('/api/ia/bootstrap', (req, res) => {
@@ -6695,13 +6085,8 @@ OBJECTIVE:
 ${rawText}
 [/WORK_PACKET]`;
         fs_1.default.writeFileSync(wpPath, packetContent, 'utf-8');
-        // Transcript: registrar el prompt literal del CapitÃ¡n
-        // El agente destino es el owner (o 'crew' si es Cualquiera)
-        const transcriptAgent = normalizeAgentName(owner) || owner || 'crew';
-        const tRef = appendToTranscript(transcriptAgent, 'captain', rawText, pktId);
-        const captainFeedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         const estimatedTokens = estimateTokenCount(rawText);
-        appendJsonlRecord(captainFeedPath, {
+        appendCaptainFeedRecord({
             id: nextFeedMessageId(),
             timestamp: new Date().toISOString(),
             kind: 'captain_order',
@@ -6715,7 +6100,7 @@ ${rawText}
             status: 'recorded',
             tokens: 0,
             refId: pktId,
-            transcriptRef: tRef
+            transcriptRef: ''
         });
         // Record token usage for task creation (Input tokens linked to ID)
         const tokensPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.tokens.jsonl');
@@ -6806,9 +6191,8 @@ app.post('/api/tasks/delete', (req, res) => {
             }
         });
         // Record deletion event
-        const captainFeedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         if (movedFiles.length > 0) {
-            appendJsonlRecord(captainFeedPath, {
+            appendCaptainFeedRecord({
                 id: nextFeedMessageId(),
                 timestamp: new Date().toISOString(),
                 kind: 'captain_deletion',
@@ -6936,14 +6320,10 @@ app.get('/api/events', (req, res) => {
     if (!query)
         return res.json({ query, hits: [] });
     try {
-        const shadowPath = ARGOS_GLOBAL_SHADOW_PATH;
-        const globalPath = ARGOS_GLOBAL_LOG_PATH;
-        const glitchPath = ARGOS_GLOBAL_GLITCH_PATH;
-        const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
         const eventsPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
         const glitchesJsonPath = path_1.default.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
         const results = [];
-        [shadowPath, globalPath, glitchPath].forEach(p => {
+        [ARGOS_LEGACY_SHADOW_PATH, ARGOS_GLOBAL_SHADOW_PATH, ARGOS_LEGACY_LOG_PATH, ARGOS_GLOBAL_LOG_PATH, ARGOS_LEGACY_GLITCH_PATH, ARGOS_GLOBAL_GLITCH_PATH].forEach(p => {
             if (fs_1.default.existsSync(p)) {
                 const text = fs_1.default.readFileSync(p, 'utf-8');
                 const blocks = text.split('---');
@@ -6953,18 +6333,20 @@ app.get('/api/events', (req, res) => {
                 });
             }
         });
-        if (fs_1.default.existsSync(feedPath)) {
+        getCaptainFeedReadPaths().forEach((feedPath) => {
+            if (!fs_1.default.existsSync(feedPath))
+                return;
             const lines = fs_1.default.readFileSync(feedPath, 'utf-8').split('\n');
             lines.forEach(l => {
                 if (l.includes(query)) {
                     try {
                         const d = JSON.parse(l);
-                        results.push({ source: 'captain_feed.jsonl', content: `[${d.timestamp}] ${d.sender_name}: ${d.summary}\n${d.details}` });
+                        results.push({ source: 'cubierta/feed.jsonl', content: `[${d.timestamp}] ${d.sender_name}: ${d.summary}\n${d.details}` });
                     }
                     catch (e) { }
                 }
             });
-        }
+        });
         [eventsPath, glitchesJsonPath].forEach((jsonlPath) => {
             if (!fs_1.default.existsSync(jsonlPath))
                 return;
@@ -7127,8 +6509,7 @@ function reportAntigravityActivity() {
     const summary = `Antigravity detectado operando en el sistema.`;
     const details = `Se han detectado modificaciones en: ${filesList}`;
     console.log(`[REPORTER] Enviando reporte de actividad automatica: ${filesList}`);
-    // Post directo al feed
-    const feedPath = path_1.default.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
+    // Post directo al feed canonico de cubierta.
     const record = {
         timestamp: new Date().toISOString(),
         kind: 'crew_update',
@@ -7143,8 +6524,7 @@ function reportAntigravityActivity() {
         tokens: 0
     };
     try {
-        const data = JSON.stringify(record) + '\n';
-        fs_1.default.appendFileSync(feedPath, data, 'utf-8');
+        appendCaptainFeedRecord(record);
         pendingChanges.clear();
     }
     catch (e) {
@@ -7430,7 +6810,6 @@ app.post('/api/desktop-import/config', (req, res) => {
                 id: normaliseText(s.id).toLowerCase(),
                 enabled: Boolean(s.enabled),
                 rootPath: normaliseText(s.rootPath),
-                transcriptGlobs: Array.isArray(s.transcriptGlobs) ? s.transcriptGlobs.map((g) => normaliseText(g)).filter(Boolean) : [],
                 tokenGlobs: Array.isArray(s.tokenGlobs) ? s.tokenGlobs.map((g) => normaliseText(g)).filter(Boolean) : [],
                 parser: normaliseText(s.parser) || 'generic',
                 agentName: normaliseText(s.agentName) || 'OpenClaw',
@@ -7457,7 +6836,6 @@ app.get('/api/desktop-import/status', (_req, res) => {
             status: 'ok',
             configPath: DESKTOP_SOURCES_CONFIG_PATH,
             statePath: DESKTOP_INGEST_STATE_PATH,
-            externalTranscriptsDir: EXTERNAL_TRANSCRIPTS_DIR,
             enabledSources: config.sources.filter((s) => s.enabled).map((s) => ({
                 id: s.id,
                 rootPath: s.rootPath,
@@ -7476,7 +6854,7 @@ app.get('/api/desktop-import/status', (_req, res) => {
 app.post('/api/desktop-import/run', (req, res) => {
     try {
         const modeRaw = normaliseText(req.body?.mode || req.query.mode || 'all').toLowerCase();
-        const mode = modeRaw === 'tokens' || modeRaw === 'transcripts' ? modeRaw : 'all';
+        const mode = modeRaw === 'tokens' ? 'tokens' : 'all';
         const actor = normaliseText(req.body?.actor) || 'OpenClaw';
         const summary = runDesktopImport(mode, actor);
         return res.json({ status: 'ok', summary });
@@ -7488,16 +6866,14 @@ app.post('/api/desktop-import/run', (req, res) => {
 app.get('/api/desktop-import/files', (req, res) => {
     try {
         const sourceId = normaliseText(req.query.source).toLowerCase();
-        const kindRaw = normaliseText(req.query.kind).toLowerCase();
-        const kind = kindRaw === 'tokens' ? 'tokens' : 'transcripts';
         const limit = Math.max(1, Math.min(5000, Number(req.query.limit || 300)));
         const config = loadDesktopSourcesConfig();
         const source = config.sources.find((s) => s.id === sourceId);
         if (!source)
             return res.status(404).json({ error: `Source desconocida: ${sourceId}` });
         if (!fs_1.default.existsSync(source.rootPath))
-            return res.json({ source: source.id, kind, files: [] });
-        const files = filesMatchingGlobs(source.rootPath, kind === 'tokens' ? source.tokenGlobs : source.transcriptGlobs)
+            return res.json({ source: source.id, kind: 'tokens', files: [] });
+        const files = filesMatchingGlobs(source.rootPath, source.tokenGlobs)
             .slice(0, limit)
             .map((abs) => {
             const stat = fs_1.default.statSync(abs);
@@ -7512,7 +6888,7 @@ app.get('/api/desktop-import/files', (req, res) => {
         return res.json({
             source: source.id,
             owner: source.owner,
-            kind,
+            kind: 'tokens',
             rootPath: source.rootPath,
             files
         });
@@ -7975,22 +7351,6 @@ function runGitCommand(dir, args) {
 app.get('/api/ping', (_req, res) => {
     res.json({ ok: true, ts: nowIso(), service: 'argos-api' });
 });
-app.post('/api/runtime/canonical-sync', (_req, res) => {
-    syncRuntimeCanonicalSurface();
-    res.json({
-        ok: true,
-        canonical: {
-            bitacora: path_1.default.relative(RUNTIME_DIR, BITACORA_DIR).replace(/\\/g, '/'),
-            cubierta: path_1.default.relative(RUNTIME_DIR, CUBIERTA_DIR).replace(/\\/g, '/')
-        },
-        compatibility: {
-            logs_current: path_1.default.relative(RUNTIME_DIR, LOGS_CURRENT_DIR).replace(/\\/g, '/'),
-            captain_feed: path_1.default.relative(RUNTIME_DIR, CAPTAIN_FEED_PATH).replace(/\\/g, '/'),
-            state: path_1.default.relative(RUNTIME_DIR, ARGOS_STATE_PATH).replace(/\\/g, '/'),
-            vector: path_1.default.relative(RUNTIME_DIR, ARGOS_VECTOR_PATH).replace(/\\/g, '/')
-        }
-    });
-});
 // Fallback para SPA: cualquier ruta no manejada por la API devuelve index.html
 app.get('*', (req, res) => {
     const indexPath = path_1.default.join(DASHBOARD_DIR, 'index.html');
@@ -8003,18 +7363,17 @@ app.get('*', (req, res) => {
 });
 app.listen(PORT, () => {
     console.log(`[ARGOS-API] Navio anclado y escuchando pacificamente en puerto http://localhost:${PORT}`);
+    ensureRuntimeCanonicalStorage();
     backfillWorkTokensFromFeed(); // Recupera historial de work tokens desde captain_feed
     backfillWorkTokensFromReportLedger(); // Recupera work tokens faltantes desde report tokens (si refId apunta a work packet)
     ensureLiveLayerBootstrap(); // bootstrap de capa live por agente
-    startInboxDepositsWatcher(); // watcher + barrido inicial de inbox_deposits
     ensureAgentTokensFile(); // bootstrap de tokens por agente para remote closure
-    syncRuntimeCanonicalSurface(); // materializa aliases canonicos bitacora/ y cubierta/
     loadDesktopSourcesConfig(); // bootstrap config si no existe
     loadDesktopIngestState(); // bootstrap estado incremental si no existe
     try {
         const bootstrap = runDesktopImport('all', 'OpenClaw');
-        if (bootstrap.tokensImported > 0 || bootstrap.transcriptsMirrored > 0 || bootstrap.errors > 0) {
-            postToCrewFeed('Pi', '[Desktop Import] Arranque ejecutado', `tokens=${bootstrap.tokensImported}, transcripts=${bootstrap.transcriptsMirrored}, errores=${bootstrap.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-BOOTSTRAP');
+        if (bootstrap.tokensImported > 0 || bootstrap.errors > 0) {
+            postToCrewFeed('Pi', '[Desktop Import] Arranque ejecutado', `tokens=${bootstrap.tokensImported}, errores=${bootstrap.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-BOOTSTRAP');
         }
     }
     catch (error) {
@@ -8022,7 +7381,6 @@ app.listen(PORT, () => {
     }
     // Iniciar Motores Autonomos
     setInterval(runArgosDispatcher, 60000); // Cada 1 minuto
-    setInterval(syncRuntimeCanonicalSurface, 60000); // Mantiene bitacora/ y cubierta/ como superficie canonica legible
     setInterval(() => {
         // Agrega totales del ledger y notifica al dashboard â€” sin coste extra, solo lectura de JSONL
         try {
@@ -8050,16 +7408,15 @@ app.listen(PORT, () => {
         catch (e) {
             console.error('[TOKENS] Error en sync horario:', e);
         }
-        // Red de seguridad: procesar pendientes y marcar stale > 60 min
+        // Marcar agentes stale > 60 min
         try {
-            const deposits = processPendingInboxDeposits('hourly_safety');
             const staleUpdates = markStaleAgentsFromDeposits(60);
-            if (deposits.processed > 0 || staleUpdates > 0) {
-                console.log(`[DEPOSITS] Ciclo horario -> procesados=${deposits.processed}, stale_updates=${staleUpdates}`);
+            if (staleUpdates > 0) {
+                console.log(`[STALE] Ciclo horario -> stale_updates=${staleUpdates}`);
             }
         }
-        catch (depositError) {
-            console.error('[DEPOSITS] Error en ciclo horario:', depositError);
+        catch (staleError) {
+            console.error('[STALE] Error en ciclo horario:', staleError);
         }
         // Import horario de tokens externos (responsable: OpenClaw/Pi)
         try {
@@ -8072,18 +7429,6 @@ app.listen(PORT, () => {
             console.error('[DESKTOP-IMPORT] Error en ciclo horario tokens:', importError);
         }
     }, 3600000); // Cada hora
-    // Import diario de transcripts externos (responsable: OpenClaw/Pi)
-    setInterval(() => {
-        try {
-            const imported = runDesktopImport('transcripts', 'OpenClaw');
-            if (imported.transcriptsMirrored > 0 || imported.errors > 0) {
-                postToCrewFeed('Pi', '[Desktop Import] Ciclo diario de transcripts', `fuentes=${imported.sources}, archivos=${imported.transcriptFilesScanned}, espejados=${imported.transcriptsMirrored}, errores=${imported.errors}`, 'crew_update', 0, 'ARG-DESKTOP-IMPORT-DAILY-TRANSCRIPTS');
-            }
-        }
-        catch (importError) {
-            console.error('[DESKTOP-IMPORT] Error en ciclo diario transcripts:', importError);
-        }
-    }, 24 * 60 * 60 * 1000);
     setInterval(runLolaShadowScanner, 120000); // Cada 2 minutos
     // startAntigravityActivityWatcher(); // Silenciado ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â atribuÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a cambios siempre a Antigravity
     startHeartbeatLoop(); // Mejora 3: Latido del sistema

@@ -1,12 +1,12 @@
 ---
 doc_id: webapp-logbook-read-model
 title: ARGOS Webapp Logbook Read Model
-version: 1.0.0
+version: 1.1.0
 status: active
-last_updated: 2026-04-27
+last_updated: 2026-04-29
 owner: Codex
 change_type: minor
-summary_of_changes: Canoniza la vista tabular de Bitacora Trilog en 8 columnas y deja nota de deuda sobre rutas logs/current.
+summary_of_changes: Canoniza bitacora/cubierta como rutas primarias y legacy como fuente historica de lectura.
 ---
 
 # ARGOS WEBAPP LOGBOOK READ MODEL
@@ -23,8 +23,11 @@ La webapp lee la bitacora desde `/api/logbook`, que fusiona entradas de:
 - `bitacora/shadowlog.md` para `Sombra`
 - `bitacora/handoffs.md` para `Handoff`
 - `argos.glitches.jsonl` para `Glitches`
+- `bitacora/legacy/ARGOS_GLOBAL_*.md` como historico de lectura
 
-La superficie canonica legible es `ARGOS_RUNTIME/bitacora/`. Durante la fase de compatibilidad, la API conserva escritura primaria en `ARGOS_RUNTIME/logs/current/` y sincroniza los alias canonicos al arrancar, cada minuto y con `POST /api/runtime/canonical-sync`.
+La superficie canonica de escritura es `ARGOS_RUNTIME/bitacora/`. `ARGOS_RUNTIME/bitacora/legacy/` solo conserva archivos historicos para que el API los siga cargando sin ensuciar los logs nuevos.
+
+El feed visible de cubierta se escribe en `ARGOS_RUNTIME/cubierta/feed.jsonl`; la vista legible `ARGOS_RUNTIME/cubierta/feed.md` se genera desde `cubierta/feed.jsonl` y `cubierta/legacy/captain_feed.jsonl`.
 
 ---
 

@@ -22,7 +22,7 @@ Leer en este orden:
 1. `ARGOS_RUNTIME/ARGOS_QUICKSTART.md` -- protocolo condensado
 2. `ARGOS_RUNTIME/work_packets/inbox/` -- que hay pendiente
 3. `ARGOS_RUNTIME/state/argos.state.json` -- foco y riesgos activos
-4. Tail de `ARGOS_RUNTIME/logs/current/ARGOS_GLOBAL_LOG.md` -- que se hizo recientemente
+4. Tail de `ARGOS_RUNTIME/bitacora/log.md` -- que se hizo recientemente
 5. Confirmar al Capitan: "[N] paquetes en inbox. [frase en voz Gemini]."
 
 ### Carril remote API (AI Studio / Gemini con HTTP)

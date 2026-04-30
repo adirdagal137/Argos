@@ -4,7 +4,7 @@
  * Fallback local writer for Gemini when HTTP/tunnel access is unavailable.
  *
  * V1 accepts only LOG deposits in ARGOS_RUNTIME/Gemini and appends them to
- * ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md. Invalid or unsupported deposits are moved
+ * ARGOS_RUNTIME/bitacora/log.md. Invalid or unsupported deposits are moved
  * to ARGOS_RUNTIME/Gemini/_quarantine without deleting their contents.
  */
 
@@ -16,7 +16,7 @@ const RUNTIME_DIR = path.resolve(SCRIPT_DIR, '..');
 const GEMINI_DIR = path.join(RUNTIME_DIR, 'Gemini');
 const QUARANTINE_DIR = path.join(GEMINI_DIR, '_quarantine');
 const PROCESSED_DIR = path.join(GEMINI_DIR, '_processed');
-const GLOBAL_LOG_PATH = path.join(RUNTIME_DIR, 'logs', 'current', 'ARGOS_GLOBAL_LOG.md');
+const GLOBAL_LOG_PATH = path.join(RUNTIME_DIR, 'bitacora', 'log.md');
 const EVENTS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const DEFAULT_SETTLE_MS = 2000;
 
@@ -168,6 +168,7 @@ function summarize(text) {
 }
 
 function appendMarkdown(filePath, fallbackHeader, entry) {
+  ensureDir(path.dirname(filePath));
   const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : fallbackHeader;
   const base = existing.endsWith('\n') ? existing : `${existing}\n`;
   fs.writeFileSync(filePath, `${base}${entry}`, 'utf8');

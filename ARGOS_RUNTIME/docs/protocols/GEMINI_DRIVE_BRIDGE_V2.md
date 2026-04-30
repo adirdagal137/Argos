@@ -1,12 +1,12 @@
 ---
 doc_id: gemini-drive-bridge-v2
 title: Gemini Drive Bridge V2
-version: 1.0.0
+version: 1.1.0
 status: active
-last_updated: 2026-04-27
+last_updated: 2026-04-29
 owner: Codex
 change_type: minor
-summary_of_changes: Contrato Gemini web via Google Doc root ARGOS y bridge Node local.
+summary_of_changes: Contrato Gemini web actualizado a rutas canonicas bitacora/cubierta.
 ---
 
 # Gemini Drive Bridge V2
@@ -81,8 +81,8 @@ La cuenta autenticada debe poder leer/exportar los Google Docs y actualizar el D
 
 ## Destinos Canonicos
 
-- `target: log` -> `logs/current/ARGOS_GLOBAL_LOG.md` y `events/argos.events.jsonl`
-- `target: closure` -> LOG, SHADOW, GLITCH si procede, `state/argos.state.json`, `views/ui_export/captain_feed.jsonl`, eventos JSONL
+- `target: log` -> `bitacora/log.md` y `events/argos.events.jsonl`
+- `target: closure` -> LOG, SHADOW, GLITCH si procede, `state/argos.state.json`, `cubierta/feed.jsonl`, eventos JSONL
 - `target: concilio` -> `events/concilio/sessions/<session_id>.md` y `events/concilio/argos.concilio.jsonl`
 
 `ARGOS_RUNTIME/Gemini/` queda como legacy/quarantine historico, no como contrato vivo.

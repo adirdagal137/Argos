@@ -1,7 +1,7 @@
 {
-    "current_focus": "Reforma constitucional ARGOS â€” B1 higiene, B2 protocolo, B3 arquitectura",
+    "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-30T10:30:38.403Z",
+    "updated_at": "2026-04-30T10:21:38.415Z",
     "packet_states": {
         "ARG-1777049395470": "open:done",
         "ARG-QWEN-WEBHOOK-001": "open:inbox",
@@ -112,19 +112,14 @@
         "ARG-1777238885175": "open:inbox",
         "ARG-1777240833486": "open:inbox",
         "ARG-20260426-LOG-MIGRATION": "done:done",
-        "ARG-1777246628566": "open:inbox",
-        "ARG-1777246660856": "open:inbox",
-        "LOLA-RISK-1777292424326": "open:inbox",
-        "ARG-1777293324283": "done:done",
-        "ARG-1777293327727": "open:inbox",
-        "ARG-1777297100000": "open:inbox",
-        "LOLA-RISK-1777297041829": "open:inbox",
-        "ARG-1777297676695": "open:inbox",
-        "ARG-1776824400000": "done:done"
+        "LOLA-RISK-1777461102215": "open:inbox",
+        "ARG-1776824400000": "done:done",
+        "ARG-1777293324283": "done:done"
     },
     "in_progress_packets": [
         "ARG-1776354464819",
-        "ARGOS-TIFIS-0001"
+        "ARGOS-TIFIS-0001",
+        "ARG-20260426-LOG-MIGRATION"
     ],
     "owner_hint": "Codex / Pi / Capitan",
     "open_packets": [
@@ -160,17 +155,10 @@
         "ARG-1777238847419",
         "ARG-1777238885175",
         "ARG-1777240833486",
-        "ARG-1777246628566",
-        "ARG-1777246660856",
-        "ARG-1777293327727",
-        "ARG-1777297100000",
-        "ARG-1777297676695",
         "ARG-20260426-BITACORA-TRILOG-AUDIT",
         "ARG-PROTO-AG-001",
         "ARG-QWEN-DISPATCHER-001",
         "ARG-1777236123247-959",
-        "LOLA-RISK-1777292424326",
-        "LOLA-RISK-1777297041829",
         "LOLA-SHADOW-0001",
         "ARG-DISPATCH-AUTO-001",
         "ARG-QWEN-001"
@@ -178,10 +166,10 @@
     "active_risks": [],
     "status": "active",
     "_note": "Solo contiene packets activos (inbox, in_progress, open, parked). Completados en state.archive.json. Auditado por Orfeo (Claude) ARG-1777224272203 el 2026-04-26.",
-    "next_step": "Revisar rama/PR y decidir politica sobre artefactos runtime",
+    "next_step": "verificar",
     "done_packets_summary": {
-        "total": 36,
-        "tasks": 36,
+        "total": 34,
+        "tasks": 34,
         "bugs": 0,
         "latest_ids": [
             "ARG-REFORM-LOG-001",
@@ -198,44 +186,32 @@
     },
     "ia_status": {
         "Claude": {
-            "status": "standby",
-            "task": "",
-            "task_subject": "",
-            "since": "2026-04-27T15:45:00.000Z",
-            "last_seen": "2026-04-27T15:45:00.000Z",
-            "stale": false,
-            "handoff_to": "Capitan",
-            "next_step": "Capitán reinicia argos-api para aplicar /api/ia/state. Notificar a Codex y ChatGPT.",
-            "last_output": "POST /api/ia/state canónico implementado — ARG-1777293327727",
-            "availability": "available",
-            "current_packet": "",
-            "current_theme": "",
-            "last_interaction_summary": "Implementé endpoint canónico /api/ia/state con campos ricos: availability, current_packet, current_theme, last_interaction_summary, source. Corregí setIaStandby. Creé ENDPOINTS_CANONICAL.md.",
-            "source": "cowork"
+            "status": "active",
+            "task": "ARG-20260426-LOG-MIGRATION",
+            "task_subject": "test",
+            "since": "2026-04-26T23:00:00.000Z",
+            "last_seen": "2026-04-26T23:00:00.000Z",
+            "stale": true,
+            "stale_since": "2026-04-29T13:27:31.055Z",
+            "handoff_to": "",
+            "next_step": "verificar",
+            "last_output": "test"
         },
         "Codex": {
             "status": "standby",
             "task": "",
-            "task_subject": "Commits parciales y push de rama completados",
-            "since": "2026-04-27T13:35:58.119Z",
-            "last_seen": "2026-04-27T13:35:58.119Z",
-            "stale": false,
-            "stale_since": "",
-            "handoff_to": "",
-            "next_step": "Revisar rama/PR y decidir politica sobre artefactos runtime",
-            "last_output": "Commits parciales y push de rama completados"
+            "task_subject": "",
+            "since": "2026-04-29T11:41:12.273Z",
+            "stale": true,
+            "stale_since": "2026-04-29T13:27:31.056Z"
         },
         "Gemini": {
             "status": "standby",
             "task": "",
-            "task_subject": "Smoke valid deposit",
-            "since": "2026-04-26T23:25:30.000Z",
-            "stale_since": "2026-04-27T11:54:44.365Z",
-            "stale": true,
-            "last_seen": "2026-04-26T23:25:30.000Z",
-            "handoff_to": "",
-            "next_step": "Continue normal operation.",
-            "last_output": "Smoke valid deposit"
+            "task_subject": "",
+            "since": "2026-04-21T21:43:11.281Z",
+            "stale_since": "2026-04-21T22:54:13.866Z",
+            "stale": true
         },
         "ChatGPT": {
             "status": "standby",
