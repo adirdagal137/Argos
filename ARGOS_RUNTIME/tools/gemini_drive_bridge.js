@@ -15,13 +15,13 @@ const RUNTIME_DIR = path.resolve(SCRIPT_DIR, '..');
 const ARGOS_ROOT = path.resolve(RUNTIME_DIR, '..');
 const API_DIR = path.join(ARGOS_ROOT, 'argos-api');
 
-const LOG_PATH = path.join(RUNTIME_DIR, 'logs', 'current', 'ARGOS_GLOBAL_LOG.md');
-const SHADOW_PATH = path.join(RUNTIME_DIR, 'logs', 'current', 'ARGOS_GLOBAL_SHADOW_LOG.md');
-const GLITCH_PATH = path.join(RUNTIME_DIR, 'logs', 'current', 'ARGOS_GLOBAL_GLITCH_LOG.md');
+const LOG_PATH = path.join(RUNTIME_DIR, 'bitacora', 'log.md');
+const SHADOW_PATH = path.join(RUNTIME_DIR, 'bitacora', 'shadowlog.md');
+const GLITCH_PATH = path.join(RUNTIME_DIR, 'bitacora', 'glitches.md');
 const EVENTS_PATH = path.join(RUNTIME_DIR, 'events', 'argos.events.jsonl');
 const GLITCHES_JSONL_PATH = path.join(RUNTIME_DIR, 'events', 'argos.glitches.jsonl');
 const REMOTE_CLOSURES_PATH = path.join(RUNTIME_DIR, 'events', 'argos.remote_closures.jsonl');
-const FEED_PATH = path.join(RUNTIME_DIR, 'views', 'ui_export', 'captain_feed.jsonl');
+const FEED_PATH = path.join(RUNTIME_DIR, 'cubierta', 'feed.jsonl');
 const STATE_PATH = path.join(RUNTIME_DIR, 'state', 'argos.state.json');
 const CONCILIO_DIR = path.join(RUNTIME_DIR, 'events', 'concilio');
 const CONCILIO_SESSIONS_DIR = path.join(CONCILIO_DIR, 'sessions');

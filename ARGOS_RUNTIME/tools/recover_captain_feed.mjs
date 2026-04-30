@@ -5,14 +5,15 @@ import { fileURLToPath } from 'url';
 
 const thisFile = fileURLToPath(import.meta.url);
 const runtimeDir = path.resolve(path.dirname(thisFile), '..');
-const feedDir = path.join(runtimeDir, 'views', 'ui_export');
+const feedDir = path.join(runtimeDir, 'cubierta');
 const logsDir = path.join(runtimeDir, 'events', 'logs');
-const activeFeed = path.join(feedDir, 'captain_feed.jsonl');
+const activeFeed = path.join(feedDir, 'feed.jsonl');
 
 const CANDIDATE_ORDER = [
-  'captain_feed.preclean_2026-04-25.jsonl',
-  'captain_feed.pre_heartbeat_cleanup_2026-04-24T23-06.jsonl',
-  'captain_feed.jsonl.bak_saneamiento'
+  path.join('legacy', 'captain_feed.jsonl'),
+  path.join('legacy', 'captain_feed.preclean_2026-04-25.jsonl'),
+  path.join('legacy', 'captain_feed.pre_heartbeat_cleanup_2026-04-24T23-06.jsonl'),
+  path.join('legacy', 'captain_feed.jsonl.bak_saneamiento')
 ];
 
 const MOJI_RE = /Ã|Â|�/g;

@@ -1,17 +1,17 @@
 {
   "argos_version": "0.4.0",
-  "last_updated": "2026-04-28",
+  "last_updated": "2026-04-29",
   "updated_by": "Codex",
-  "packet_ref": "ARG-1777221515268-968",
+  "packet_ref": "ARG-20260429-BUG-LOGBOOK-WEBAPP",
   "documents": {
     "argos-quickstart": {
       "path": "ARGOS_RUNTIME/ARGOS_QUICKSTART.md",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "status": "active",
       "tier": 1,
       "owner": "Claude",
-      "last_updated": "2026-04-28",
-      "summary": "Tarjeta operativa minima: inicio, actores, carriles, start, close, git con guardarrail de ramas, version."
+      "last_updated": "2026-04-29",
+      "summary": "Tarjeta operativa minima: inicio, actores, carriles, start, close, git y rutas canonicas bitacora/cubierta."
     },
     "inter-ai-protocol": {
       "path": "ARGOS_RUNTIME/INTER_AI_PROTOCOL.md",
@@ -33,7 +33,7 @@
     },
     "argos-vector": {
       "path": "ARGOS_RUNTIME/ARGOS_VECTOR.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "tier": 2,
       "owner": "Claude",
@@ -55,35 +55,35 @@
       "status": "active",
       "tier": 2,
       "owner": "Codex",
-      "last_updated": "2026-04-21",
-      "summary": "Setup de cierre remoto: tuneles, tokens de agente, instrucciones por interfaz."
+      "last_updated": "2026-04-29",
+      "summary": "Setup de cierre remoto: tuneles, tokens de agente, instrucciones por interfaz y feed canonico de cubierta."
     },
     "claude-md": {
       "path": "CLAUDE.md",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "status": "active",
       "tier": 1,
       "owner": "Claude",
-      "last_updated": "2026-04-28",
-      "summary": "Arranque de Claude Code (Orfeo): lectura obligatoria, referencias on-demand y regla Git de ramas."
+      "last_updated": "2026-04-29",
+      "summary": "Arranque de Claude Code (Orfeo): lectura obligatoria, rutas bitacora/cubierta, referencias on-demand y regla Git de ramas."
     },
     "agents-md": {
       "path": "AGENTS.md",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "status": "active",
       "tier": 1,
       "owner": "Codex",
-      "last_updated": "2026-04-28",
-      "summary": "Arranque de Codex CLI: lectura obligatoria, referencias on-demand y regla Git de ramas."
+      "last_updated": "2026-04-29",
+      "summary": "Arranque de Codex CLI: lectura obligatoria, rutas bitacora/cubierta, referencias on-demand y regla Git de ramas."
     },
     "readme-root": {
       "path": "README.md",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "active",
       "tier": 3,
       "owner": "Claude",
-      "last_updated": "2026-04-26",
-      "summary": "Descripcion del repositorio ARGOS para lectura externa."
+      "last_updated": "2026-04-29",
+      "summary": "Descripcion del repositorio ARGOS para lectura externa con bitacora/cubierta como filesystem final."
     },
     "readme-runtime": {
       "path": "ARGOS_RUNTIME/README.md",

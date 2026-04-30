@@ -119,7 +119,7 @@ Note: quick tunnel URLs are not stable enough for long-lived agent prompts.
 1. Call `/api/health` from external network through tunnel.
 2. Send one closure for `ARG-TEST-REMOTE-0001`.
 3. Verify:
-   - `captain_feed.jsonl` has new record ID
+   - `cubierta/feed.jsonl` has new record ID
    - `state/argos.state.json` reflects agent summary
 4. Re-send same `(agent, packet_id, timestamp)` and verify `409`.
 5. Test `mark_packet_done: true` with a packet in `inbox/`.
