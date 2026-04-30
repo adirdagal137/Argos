@@ -1,13 +1,13 @@
 {
     "current_focus": "Reforma constitucional ARGOS — B1 higiene, B2 protocolo, B3 arquitectura",
     "module": "argos_core",
-    "updated_at": "2026-04-26T23:09:05.475Z",
+    "updated_at": "2026-04-30T10:20:38.353Z",
     "packet_states": {
         "ARG-1777049395470": "open:done",
         "ARG-QWEN-WEBHOOK-001": "open:inbox",
         "ARG-1777082515019": "done:done",
         "ARG-1776035900474": "done:done",
-        "ARG-1775948530124": "open:inbox",
+        "ARG-1775948530124": "done:done",
         "ARG-1776512030519": "done:done",
         "ARG-1777035412018": "open:inbox",
         "ARG-UI-0002": "done:done",
@@ -54,7 +54,7 @@
         "ARG-1776811463222": "open:inbox",
         "ARG-1776813558224": "open:done",
         "ARG-1776613008000": "open:inbox",
-        "ARG-1776826244874": "open:inbox",
+        "ARG-1776826244874": "done:done",
         "ARG-REFORM-UI-001": "open:done",
         "ARG-1776467399391-231": "in_progress:in_progress",
         "ARG-1776040957963": "in_progress:in_progress",
@@ -91,7 +91,7 @@
         "ARG-REFORM-SCHEMA-001": "in_progress:done",
         "ARG-1776816000003": "open:inbox",
         "ARG-REFORM-BITACORA-001-IMPL": "open:done",
-        "ARG-1775943270801": "open:inbox",
+        "ARG-1775943270801": "done:done",
         "ARG-1776816000002": "open:inbox",
         "ARG-1776809600029": "open:inbox",
         "LOLA-RISK-1776424632454": "open:done",
@@ -102,16 +102,19 @@
         "ARG-1777061469549": "open:inbox",
         "ARG-1777204463244": "done:done",
         "ARG-1776526992701": "done:done",
-        "ARG-1777236123247-959": "open:inbox",
+        "ARG-1777236123247-959": "done:done",
         "ARG-1777236123253-697": "done:done",
         "ARG-20260426-DOC-CONTEXT-HYGIENE": "done:done",
-        "ARG-1777237107073": "open:inbox",
+        "ARG-1777237107073": "done:done",
         "ARG-1777237240219": "open:inbox",
         "ARG-20260426-BITACORA-TRILOG-AUDIT": "open:inbox",
-        "ARG-1777238847419": "open:inbox",
+        "ARG-1777238847419": "done:done",
         "ARG-1777238885175": "open:inbox",
         "ARG-1777240833486": "open:inbox",
-        "ARG-20260426-LOG-MIGRATION": "in_progress:in_progress"
+        "ARG-20260426-LOG-MIGRATION": "done:done",
+        "LOLA-RISK-1777461102215": "open:inbox",
+        "ARG-1776824400000": "done:done",
+        "ARG-1777293324283": "done:done"
     },
     "in_progress_packets": [
         "ARG-1776354464819",
@@ -188,13 +191,21 @@
             "task_subject": "test",
             "since": "2026-04-26T23:00:00.000Z",
             "last_seen": "2026-04-26T23:00:00.000Z",
-            "stale": false,
-            "stale_since": "",
+            "stale": true,
+            "stale_since": "2026-04-29T13:27:31.055Z",
             "handoff_to": "",
             "next_step": "verificar",
             "last_output": "test"
         },
-        "Pi": {
+        "Codex": {
+            "status": "standby",
+            "task": "",
+            "task_subject": "",
+            "since": "2026-04-29T11:41:12.273Z",
+            "stale": true,
+            "stale_since": "2026-04-29T13:27:31.056Z"
+        },
+        "Gemini": {
             "status": "standby",
             "task": "",
             "task_subject": "",
@@ -202,19 +213,19 @@
             "stale_since": "2026-04-21T22:54:13.866Z",
             "stale": true
         },
-        "Codex": {
+        "ChatGPT": {
             "status": "standby",
             "task": "",
-            "task_subject": "Implementar Gemini Append Bridge V1 solo LOG",
-            "since": "2026-04-26T21:21:00.000Z",
-            "last_seen": "2026-04-26T21:21:00.000Z",
-            "stale": false,
-            "stale_since": "",
-            "handoff_to": "",
-            "next_step": "Reiniciar ARGOS con `ARGOS_RUNTIME/tools/start_argos.ps1` para que PM2 levante `gemini-append-bridge`; despues, los depositos validos de Gemini se procesaran automaticamente.",
-            "last_output": "Implementar Gemini Append Bridge V1 solo LOG"
+            "task_subject": "",
+            "since": ""
         },
         "OpenClaw": {
+            "status": "standby",
+            "task": "",
+            "task_subject": "",
+            "since": ""
+        },
+        "Qwen": {
             "status": "standby",
             "task": "",
             "task_subject": "",
