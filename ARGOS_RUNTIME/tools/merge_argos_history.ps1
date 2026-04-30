@@ -94,25 +94,35 @@ $googleTailPath = Join-Path $RuntimeDir 'archive\v1_0_x_google_native_snapshot_2
 $logbookPath = Join-Path $RuntimeDir 'views\logbook_export\logbook.snapshot.json'
 $eventsPath = Join-Path $RuntimeDir 'events\argos.events.jsonl'
 $glitchesPath = Join-Path $RuntimeDir 'events\argos.glitches.jsonl'
-$logsCurrentDir = Join-Path $RuntimeDir 'logs\current'
-$glitchMarkdownPath = Join-Path $logsCurrentDir 'ARGOS_GLOBAL_GLITCH_LOG.md'
+$bitacoraDir = Join-Path $RuntimeDir 'bitacora'
+$bitacoraLegacyDir = Join-Path $bitacoraDir 'legacy'
+$glitchMarkdownPath = Join-Path $bitacoraDir 'glitches.md'
 $historyDir = Join-Path $RuntimeDir 'views\history_export'
 $historyTimelinePath = Join-Path $historyDir 'argos.timeline.jsonl'
 $historyMarkdownPath = Join-Path $historyDir 'ARGOS_CANONICAL_HISTORY.md'
 $historyManifestPath = Join-Path $historyDir 'current_history_manifest.json'
-$activeGlobalLogPath = Join-Path $logsCurrentDir 'ARGOS_GLOBAL_LOG.md'
-$activeShadowLogPath = Join-Path $logsCurrentDir 'ARGOS_GLOBAL_SHADOW_LOG.md'
+$activeGlobalLogPath = Join-Path $bitacoraDir 'log.md'
+$activeShadowLogPath = Join-Path $bitacoraDir 'shadowlog.md'
+$legacyGlobalLogPath = Join-Path $bitacoraLegacyDir 'ARGOS_GLOBAL_LOG.md'
+$legacyShadowLogPath = Join-Path $bitacoraLegacyDir 'ARGOS_GLOBAL_SHADOW_LOG.md'
 $donePacketsDir = Join-Path $RuntimeDir 'work_packets\done'
 
 New-Item -ItemType Directory -Force -Path $historyDir | Out-Null
+New-Item -ItemType Directory -Force -Path $bitacoraDir | Out-Null
 
 $legacyRoot = Get-JsonFile -Path $legacyRootPath
 $legacyShadow = Get-JsonFile -Path $legacyShadowPath
 $googleTail = Get-JsonFile -Path $googleTailPath
 $logbook = Get-JsonFile -Path $logbookPath
 $currentEvents = Get-JsonLines -Path $eventsPath
-$activeGlobalLog = if (Test-Path $activeGlobalLogPath) { Get-Content $activeGlobalLogPath -Raw -Encoding utf8 } else { "" }
-$activeShadowLog = if (Test-Path $activeShadowLogPath) { Get-Content $activeShadowLogPath -Raw -Encoding utf8 } else { "" }
+$activeGlobalLog = @(
+    if (Test-Path $legacyGlobalLogPath) { Get-Content $legacyGlobalLogPath -Raw -Encoding utf8 }
+    if (Test-Path $activeGlobalLogPath) { Get-Content $activeGlobalLogPath -Raw -Encoding utf8 }
+) -join "`n---`n"
+$activeShadowLog = @(
+    if (Test-Path $legacyShadowLogPath) { Get-Content $legacyShadowLogPath -Raw -Encoding utf8 }
+    if (Test-Path $activeShadowLogPath) { Get-Content $activeShadowLogPath -Raw -Encoding utf8 }
+) -join "`n---`n"
 
 $timeline = [System.Collections.Generic.List[object]]::new()
 $timelineIndex = @{}
@@ -710,10 +720,10 @@ $glitchStreamEntries = foreach ($entry in ($glitchSorted | Sort-Object { Get-Sor
 
 $argosModule = $logbook.modules | Where-Object { $_.id -eq 'argos' }
 $argosModule.streams = @(
-    [ordered]@{ id = 'log'; label = 'Log'; source = 'ARGOS_GLOBAL_LOG.md'; entries = $logStreamEntries },
+    [ordered]@{ id = 'log'; label = 'Log'; source = 'bitacora/log.md'; entries = $logStreamEntries },
     [ordered]@{ id = 'interactions'; label = 'Interacciones'; source = 'ARGOS_EVENTS'; entries = $intStreamEntries },
-    [ordered]@{ id = 'shadow'; label = 'Sombra'; source = 'ARGOS_GLOBAL_SHADOW_LOG.md'; entries = $shadowStreamEntries },
-    [ordered]@{ id = 'glitch'; label = 'Glitch'; source = 'ARGOS_GLOBAL_GLITCH_LOG.md'; entries = $glitchStreamEntries }
+    [ordered]@{ id = 'shadow'; label = 'Sombra'; source = 'bitacora/shadowlog.md'; entries = $shadowStreamEntries },
+    [ordered]@{ id = 'glitch'; label = 'Glitch'; source = 'bitacora/glitches.md'; entries = $glitchStreamEntries }
 )
 $logbook.updated_at = (Get-Date -Format 'o')
 $logbookJson = $logbook | ConvertTo-Json -Depth 12
@@ -738,7 +748,7 @@ $manifest = [ordered]@{
     outputs = @(
         'views/history_export/ARGOS_CANONICAL_HISTORY.md',
         'views/history_export/argos.timeline.jsonl',
-        'ARGOS_GLOBAL_GLITCH_LOG.md',
+        'bitacora/glitches.md',
         'events/argos.glitches.jsonl',
         'events/argos.events.jsonl',
         'views/logbook_export/logbook.snapshot.json'
@@ -749,7 +759,7 @@ $manifest = [ordered]@{
         event_entries = @($eventsSorted).Count
     }
     notes = @(
-        'La capa viva (ARGOS_GLOBAL_LOG.md y ARGOS_GLOBAL_SHADOW_LOG.md) sigue siendo operativa.',
+        'La capa viva (bitacora/log.md y bitacora/shadowlog.md) sigue siendo operativa.',
         'La memoria consolidada completa vive en ARGOS_CANONICAL_HISTORY.md y argos.timeline.jsonl.',
         'Los drafts locales de Antigravity se absorben como fuentes historicas con precision day.',
         'La cola final de Google-native posterior al snapshot inicial queda preservada en google_native_tail_import_2026-04-10.json.'

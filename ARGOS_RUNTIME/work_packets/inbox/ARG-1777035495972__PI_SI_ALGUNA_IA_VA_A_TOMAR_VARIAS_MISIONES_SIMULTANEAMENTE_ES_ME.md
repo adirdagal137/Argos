@@ -1,5 +1,11 @@
 [WORK_PACKET]
 ID: ARG-1777035495972
+UPDATED_BY: Claude
+UPDATED_AT: 2026-04-26T15:40:14.130Z
+ASSIGNED_TO: Cualquiera
+TYPE: task
+ROOM: GENERAL
+PRIORITY: low
 ROLE_REQUESTED: Cualquiera
 SUBJECT: Pi, si alguna IA va a tomar varias misiones simultaneamente, es mejor que las liste en...
 STATUS: open

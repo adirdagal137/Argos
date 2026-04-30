@@ -10,4 +10,5 @@ Set-Location $RepoPath
 
 Write-Host "[ARGOS-BRANCH-AUDIT] Resumen para el Capitan"
 Write-Host "[ARGOS-BRANCH-AUDIT] Repo: $RepoPath"
+& $CommitTool -CleanDesktopIniRefs
 & $CommitTool -ListBranches

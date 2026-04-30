@@ -1,12 +1,12 @@
 ---
 doc_id: remote-closure-setup
 title: Remote Closure Setup
-version: 1.0.0
+version: 1.1.0
 status: active
-last_updated: 2026-04-21
+last_updated: 2026-04-27
 owner: Codex
 change_type: minor
-summary_of_changes: Movido de mail/ a docs/protocols/. Contenido original de ARGOS-PROTO-0002.
+summary_of_changes: Gemini web documentado como carril Drive Bridge V2 en vez de HTTP/fallback filesystem.
 ---
 
 # Remote Closure Setup (ARGOS-PROTO-0002)
@@ -14,6 +14,8 @@ summary_of_changes: Movido de mail/ a docs/protocols/. Contenido original de ARG
 This document configures remote session closure for chat interfaces using:
 - Primary path: `POST /api/remote/closure`
 - Fallback path: `ARGOS_RUNTIME/inbox_deposits/`
+
+Exception: Gemini web uses Gemini Drive Bridge V2 as its primary practical path when HTTP is unreliable. It creates a Google Doc in the visible `ARGOS/` root and the local Node bridge exports/processes it.
 
 ## 1. Endpoint Summary
 
@@ -28,6 +30,8 @@ This document configures remote session closure for chat interfaces using:
 
 ## 2. Payload Example
 
+Un cierre válido escribe: **LOG → SHADOW → HANDOFF → EVENTS → FEED** (sin TOKENS).
+
 ```json
 {
   "agent": "Claude",
@@ -36,20 +40,30 @@ This document configures remote session closure for chat interfaces using:
   "packet_id": "ARG-TEST-REMOTE-0001",
   "trigger": "task_completed",
   "sections": {
-    "log": "Implemented remote closure endpoint and integrated logs.",
+    "log": "Implemented remote closure endpoint. SIGUIENTE: Codex validates. APRENDIZAJE: handoff must be mandatory. GLITCHES: ninguno. RIESGOS: ninguno.",
     "shadow": "The system is coherent, but token rotation should stay local-only.",
     "glitch": "",
+    "handoff": {
+      "contexto": "Se implementó el endpoint /api/remote/closure para agentes sin filesystem",
+      "decision": "Separar handoff como sección obligatoria garantiza trazabilidad del 75%",
+      "continuidad": "Codex debe validar el smoke test y confirmar idempotencia",
+      "session_ref": "claude.ai 2026-04-18"
+    },
     "state": {
       "status": "idle",
       "summary": "Remote closure executed",
       "handoff_to": "Codex",
       "next_step": "Captain validates smoke test"
     },
-    "captain": "Remote closure completed. Ready for next packet."
+    "captain": "Remote closure completed. Handoff a Codex para smoke test."
   },
   "mark_packet_done": false
 }
 ```
+
+**Campos obligatorios en sections:** `log`, `shadow`, `handoff` (con los 4 sub-campos), `captain`.
+**LOG debe incluir:** SIGUIENTE, APRENDIZAJE, GLITCHES, RIESGOS (aunque estén vacíos).
+**HANDOFF criterio 75%:** quien lea contexto+decision+continuidad debe poder reconstruir el estado.
 
 ## 3. Agent Tokens
 
@@ -106,15 +120,18 @@ Note: quick tunnel URLs are not stable enough for long-lived agent prompts.
 
 ### Gemini chat
 
-- Same as ChatGPT.
-- Keep Drive fallback enabled if MCP Drive is configured.
+- Gemini web does not assume HTTP or filesystem access.
+- Create a Google Doc in root `ARGOS/` named `gemini_ARGOS_<YYYYMMDDTHHMMSSZ>`.
+- Use Markdown sections `[LOG][SHADOW][GLITCH][STATE][FEED]`.
+- Local bridge: `ARGOS_RUNTIME/tools/gemini_drive_bridge.js`.
+- See `ARGOS_RUNTIME/docs/protocols/GEMINI_DRIVE_BRIDGE_V2.md`.
 
 ## 6. Smoke Test Checklist
 
 1. Call `/api/health` from external network through tunnel.
 2. Send one closure for `ARG-TEST-REMOTE-0001`.
 3. Verify:
-   - `captain_feed.jsonl` has new record ID
+   - `cubierta/feed.jsonl` has new record ID
    - `state/argos.state.json` reflects agent summary
 4. Re-send same `(agent, packet_id, timestamp)` and verify `409`.
 5. Test `mark_packet_done: true` with a packet in `inbox/`.

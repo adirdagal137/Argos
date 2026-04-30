@@ -1,12 +1,12 @@
 ---
 doc_id: argos-system-instructions-unified
 title: ARGOS System Instructions Unificadas por Plataforma
-version: 1.1.0
+version: 1.1.1
 status: active
-last_updated: 2026-04-27
+last_updated: 2026-04-28
 owner: Claude
 change_type: minor
-summary_of_changes: Seccion 6 (ChatGPT GPT) reescrita con operationId correctos para evitar mismatch de acciones. Corregida nota de tunel (ngrok, no Cloudflare).
+summary_of_changes: Seccion 6 (ChatGPT GPT) reescrita con operationId correctos. Regla Git de ramas obligatorias reforzada.
 ---
 
 # ARGOS — SYSTEM INSTRUCTIONS UNIFICADAS
@@ -72,7 +72,7 @@ ARRANQUE (leer en orden):
 1. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_QUICKSTART.md
 2. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/work_packets/inbox/
 3. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/state/argos.state.json
-4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md (tail)
+4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/bitacora/log.md (tail)
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion en voz de Orfeo]."
 
 REFERENCIA ON-DEMAND (no lectura diaria):
@@ -90,8 +90,10 @@ Alternativa: POST http://localhost:8080/api/trilog (equivalente para agentes loc
 FALLBACK (API caida): deposito en ARGOS_RUNTIME/inbox_deposits/claude_YYYY-MM-DD_HH-MM.md
 con secciones [LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]. packet_id y actor OBLIGATORIOS.
 
-GIT: Si tocas argos-api/src/ o frontend amplio -> rama obligatoria via argos_commit.ps1.
-     Docs/scripts/work_packets -> commit directo en main.
+GIT: Si tocas argos-api/src/, frontend, tools, agents, protocolos Nivel 1/2 o arquitectura -> rama obligatoria via argos_commit.ps1 -Branch.
+     Docs no constitutivos/work_packets simples -> commit directo en main.
+     argos_commit.ps1 bloquea commits protegidos en main; -AllowMain exige trilog/glitch.
+     Si Git avisa refs desktop.ini -> argos_commit.ps1 -CleanDesktopIniRefs.
      Hook Stop ejecuta argos_commit.ps1 automaticamente al cerrar Claude Code.
 
 ENCODING: UTF-8 sin BOM. No usar Set-Content -Encoding UTF8 en PowerShell 5.
@@ -111,7 +113,7 @@ ARRANQUE (leer en orden):
 1. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_QUICKSTART.md
 2. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/work_packets/inbox/
 3. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/state/argos.state.json
-4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md (tail)
+4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/bitacora/log.md (tail)
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion en voz de Codex]."
 
 REFERENCIA ON-DEMAND:
@@ -126,8 +128,10 @@ Alternativa: POST http://localhost:8080/api/trilog
 
 FALLBACK: ARGOS_RUNTIME/inbox_deposits/codex_YYYY-MM-DD_HH-MM.md
 
-GIT: Si tocas argos-api/src/index.ts o frontend -> rama obligatoria.
-     Docs/scripts -> commit directo en main.
+GIT: Si tocas argos-api/src/, frontend, tools, agents, protocolos Nivel 1/2 o arquitectura -> rama obligatoria.
+     Docs no constitutivos/work_packets simples -> commit directo en main.
+     argos_commit.ps1 bloquea commits protegidos en main; -AllowMain exige trilog/glitch.
+     Si Git avisa refs desktop.ini -> argos_commit.ps1 -CleanDesktopIniRefs.
      Ejecutar argos_commit.ps1 al cerrar sesion si modificaste archivos constitutivos.
 
 ENCODING: UTF-8 sin BOM. No usar Set-Content -Encoding UTF8 en PowerShell 5.
@@ -147,7 +151,7 @@ ARRANQUE (leer en orden):
 1. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_QUICKSTART.md
 2. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/work_packets/inbox/
 3. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/state/argos.state.json
-4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/ARGOS_GLOBAL_LOG.md (tail)
+4. c:/Users/Widox/Desktop/ARGOS/ARGOS_RUNTIME/bitacora/log.md (tail)
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion en voz de Gemini]."
 
 REFERENCIA ON-DEMAND:
@@ -160,6 +164,10 @@ START: POST http://localhost:8080/api/ia/start-task
 CLOSE: POST http://localhost:8080/api/remote/closure (con token Gemini)
 
 FALLBACK: ARGOS_RUNTIME/inbox_deposits/gemini_YYYY-MM-DD_HH-MM.md
+
+GIT local: Si tocas argos-api/src/, frontend, tools, agents, protocolos Nivel 1/2 o arquitectura -> rama obligatoria via argos_commit.ps1 -Branch.
+           Docs no constitutivos/work_packets simples -> commit directo en main.
+           argos_commit.ps1 bloquea commits protegidos en main; -AllowMain exige trilog/glitch.
 
 ENCODING: UTF-8 sin BOM.
 ```

@@ -493,6 +493,140 @@ body {
     line-height: 1.25;
 }
 
+.concilio-view {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+}
+
+.concilio-card {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.concilio-card-full {
+    flex: 1;
+    min-height: 0;
+}
+
+.concilio-thread {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 6px 8px 6px 0;
+}
+
+.concilio-thread::-webkit-scrollbar {
+    width: 4px;
+}
+
+.concilio-thread::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+
+.concilio-message {
+    border: 1px solid rgba(127, 153, 132, 0.22);
+    border-left-width: 3px;
+    border-radius: 8px;
+    background: rgba(7, 14, 10, 0.55);
+    padding: 12px 14px;
+}
+
+.concilio-message-head,
+.concilio-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.concilio-message-head {
+    margin-bottom: 5px;
+}
+
+.concilio-agent {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-primary);
+}
+
+.concilio-type,
+.concilio-meta span {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    line-height: 1;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.concilio-message-head time {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text-soft);
+}
+
+.concilio-body {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.concilio-meta {
+    margin-top: 6px;
+}
+
+.concilio-type-idea { border-left-color: #66b8ff; }
+.concilio-type-objecion { border-left-color: #ffae52; }
+.concilio-type-sintesis { border-left-color: var(--accent-neon); }
+.concilio-type-pregunta { border-left-color: #a0aab0; }
+.concilio-type-propuesta { border-left-color: #b48cff; }
+.concilio-type-decision { border-left-color: #f2c94c; }
+
+.concilio-input {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) 36px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.concilio-input-full {
+    grid-template-columns: 140px minmax(0, 1fr) 44px;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+.concilio-input select,
+.concilio-input textarea {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid rgba(127, 153, 132, 0.28);
+    border-radius: 8px;
+    background: rgba(7, 14, 10, 0.7);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+}
+
+.concilio-input select {
+    padding: 0 8px;
+}
+
+.concilio-input textarea {
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 10px;
+    line-height: 1.35;
+}
+
 .metric-value-alert {
     color: #ffb9b9;
     text-shadow: 0 0 12px rgba(220, 50, 40, 0.35);
@@ -1192,10 +1326,12 @@ body {
     overflow: auto;
     flex: 1;
     min-height: 0;
+    position: relative;
 }
 
 .logbook-table {
     width: 100%;
+    min-width: 0;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
@@ -1230,13 +1366,14 @@ body {
 }
 
 /* Columnas fijas (poco contenido) */
-.col-timestamp_label { width: 108px; }
-.col-actor           { width: 84px; }
-.col-id              { width: 156px; }
-.col-learning        { width: 150px; }
-.col-risks           { width: 160px; }
-.col-shadow          { width: 220px; }
-.col-handoff         { width: 190px; }
+.col-timestamp_label { width: 8.6%; }
+.col-id              { width: 4.6%; }
+.col-actor           { width: 7.6%; }
+.col-summary         { width: 15.45%; }
+.col-log             { width: 18%; }
+.col-shadow          { width: 16.5%; }
+.col-handoff         { width: 15%; }
+.col-details_bundle  { width: 14.25%; }
 /* Columnas de contenido: igual ancho, se reparten el espacio restante */
 /* Con table-layout:fixed, sin width explícito se distribuyen igual */
 
@@ -1288,13 +1425,87 @@ body {
     background: rgba(20, 31, 23, 0.9);
 }
 
-.cell-bubble.is-expanded {
-    height: auto;
+.cell-bubble.is-row-expanded-bubble {
+    height: 90px;
     line-height: 1.45;
     padding: 6px 9px;
     white-space: normal;
-    overflow: visible;
-    text-overflow: initial;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+}
+
+.logbook-row.is-row-expanded td {
+    background: rgba(24, 169, 107, 0.035);
+}
+
+.logbook-row.is-row-expanded td.is-overlay-source .cell-bubble {
+    border-color: rgba(219, 157, 30, 0.62);
+    box-shadow: inset 0 0 0 1px rgba(219, 157, 30, 0.2);
+}
+
+.logbook-table-wrap.has-cell-overlay .logbook-table {
+    opacity: 0.24;
+    transition: opacity 0.16s ease;
+}
+
+.logbook-table-wrap.has-cell-overlay .logbook-row.is-row-expanded {
+    opacity: 0.72;
+}
+
+.logbook-cell-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 7;
+    pointer-events: none;
+}
+
+.logbook-cell-overlay.hidden {
+    display: none;
+}
+
+.logbook-cell-overlay-panel {
+    position: fixed;
+    left: var(--logbook-overlay-panel-left, 50vw);
+    top: var(--logbook-overlay-panel-top, 50vh);
+    width: var(--logbook-overlay-panel-width, 420px);
+    height: var(--logbook-overlay-panel-height, 220px);
+    pointer-events: auto;
+    border: 1px solid rgba(219, 157, 30, 0.46);
+    border-radius: 8px;
+    background: rgba(8, 14, 10, 0.98);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.logbook-cell-overlay-title {
+    color: var(--text-secondary);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.logbook-cell-overlay-body {
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.55;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.cell-bubble.is-empty-reflection {
+    border-style: dashed;
+    color: rgba(216, 207, 170, 0.74);
+    background: rgba(219, 157, 30, 0.055);
+    font-style: italic;
 }
 
 .cell-bubble.is-imprecise {
@@ -1917,7 +2128,8 @@ body {
 
 /* ─── BUGS TABLE COLUMN WIDTHS ───────────────────────────────────── */
 .col-sev    { width: 112px; }
-.col-id     { width: 155px; }
+#bugs-table .col-id,
+#bugs-history-table .col-id { width: 155px; }
 .col-voice  { width: 110px; }
 .col-subject { }
 .col-date   { width: 130px; }

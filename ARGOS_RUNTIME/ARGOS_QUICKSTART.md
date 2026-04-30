@@ -1,12 +1,12 @@
 ---
 doc_id: argos-quickstart
 title: ARGOS Quickstart
-version: 2.0.0
+version: 2.1.0
 status: active
-last_updated: 2026-04-26
+last_updated: 2026-04-29
 owner: Claude
-change_type: major
-summary_of_changes: Reescritura completa como tarjeta operativa. Carriles local/remote, actores canonicos, GIT_protocol y VERSION_protocol compactos.
+change_type: minor
+summary_of_changes: Rutas canonicas de bitacora/cubierta incorporadas al arranque y cierre.
 ---
 
 # ARGOS QUICKSTART
@@ -18,7 +18,7 @@ Protocolo operativo condensado. Lectura obligatoria al inicio de cada sesion.
 
 1. Leer `work_packets/inbox/` -- que hay pendiente.
 2. Leer `state/argos.state.json` -- foco y riesgos activos.
-3. Leer tail de `logs/current/ARGOS_GLOBAL_LOG.md` -- que se hizo recientemente.
+3. Leer tail de `bitacora/log.md` -- que se hizo recientemente.
 4. (Solo si diagnosticas agentes chat o cierres remotos) Leer `inbox_deposits/`.
 5. Confirmar al Capitan: "[N] paquetes en inbox. [observacion propia en tu voz.]"
 
@@ -91,6 +91,7 @@ Headers: X-Argos-Agent-Token: <token>
 **Sombra:** no puede estar vacia.
 **Handoff** (recomendado): `{ "contexto", "decision", "continuidad", "session_ref" }`.
 `POST /api/trilog` es alternativa equivalente para agentes locales.
+Escritura canonica: `bitacora/log.md`, `bitacora/shadowlog.md`, `bitacora/handoffs.md`, `bitacora/glitches.md` y `cubierta/feed.jsonl`. Historico de lectura: `bitacora/legacy/` y `cubierta/legacy/`.
 
 Fallback si API cae: `ARGOS_RUNTIME/inbox_deposits/<agente>_<YYYY-MM-DD_HH-MM>.md`
 con secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`. `packet_id` y actor son OBLIGATORIOS.
@@ -99,17 +100,20 @@ con secciones `[LOG] [SHADOW] [GLITCH] [STATE] [CAPTAIN]`. `packet_id` y actor s
 
 ## GIT_PROTOCOL (compacto)
 
-| Situacion                                        | Accion                   |
-|--------------------------------------------------|--------------------------|
-| Fix rapido (<50 lineas), docs, scripts, packets  | Commit directo en main   |
-| Toca argos-api/src/index.ts, frontend, arch      | Rama obligatoria         |
+| Situacion                                                        | Accion                 |
+|------------------------------------------------------------------|------------------------|
+| Fix rapido (<50 lineas), docs no constitutivos, packets simples  | Commit directo en main |
+| Toca argos-api/src/, frontend, tools, agents, protocols o arch    | Rama obligatoria       |
 
 ```powershell
 .\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Claude -PacketId ARG-XXXX          # commit basico
 .\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Claude -PacketId ARG-XXXX -Branch  # abrir rama
 .\ARGOS_RUNTIME\tools\argos_commit.ps1 -Agent Claude -PacketId ARG-XXXX -Merge   # cerrar rama
+.\ARGOS_RUNTIME\tools\argos_commit.ps1 -CleanDesktopIniRefs                      # limpiar refs Git basura
 ```
 
+`argos_commit.ps1` bloquea commits directos a `main` si detecta cambios protegidos.
+`-AllowMain` solo se permite como excepcion explicita y debe quedar explicada en trilog/glitch.
 Si se abrio rama con `-Branch`, no cerrar trilog sin `-Merge` o sin documentar glitch.
 Claude Code ejecuta `argos_commit.ps1` automaticamente via hook Stop.
 

@@ -1,7 +1,7 @@
 {
-    "_note": "Archivo de estados completados. Actualizado el 2026-04-17. No modificar manualmente.",
+    "_note": "Archivo de estados completados. Actualizado el 2026-04-24. No modificar manualmente.",
     "_policy": "Los estados done:done y mitigated:done se mueven aquí diariamente. El state.json activo solo contiene packets vivos.",
-    "archived_at": "2026-04-17T11:17:29.332Z",
+    "archived_at": "2026-04-24T12:42:21.373Z",
     "packet_states": {
         "ARG-1775937206478": "done:done",
         "ARG-BUG-009": "done:done",
@@ -104,23 +104,49 @@
         "ARG-1775940476351": "done:done",
         "ARG-1775844378584-880__dup1": "done EXECUTED_BY: Codex...:done",
         "ARG-1775844378653-577__dup1": "done EXECUTED_BY: Codex...:done",
-        "ARG-1776354404838": "done:done"
+        "ARG-1776354404838": "done:done",
+        "ARG-1776613000001": "done:done",
+        "ARG-1776613001000": "done:done",
+        "ARG-1776613002000": "done:done",
+        "ARG-1776613003000": "done:done",
+        "ARG-1776613006000": "done:done",
+        "ARG-1776035900474": "done:done",
+        "ARG-1776470810747": "done:done",
+        "ARG-1776471872288-689": "done:done",
+        "ARG-1776474386624-573": "done:done",
+        "ARG-1776474882515": "done:done",
+        "ARGOS-ARCH-0004": "done:done",
+        "ARGOS-ARCH-0005": "done:done",
+        "ARG-CLOUDFLARE-TUNNEL-001": "done:done",
+        "ARG-20260418-0301": "done:done",
+        "ARG-1776512030519": "done:done",
+        "ARG-1776523551744": "done:done",
+        "ARG-1776523904503": "done:done",
+        "ARG-1776524354698": "done:done",
+        "ARG-1776526992701": "done:done",
+        "ARG-1776688130144": "done:done",
+        "ARG-1776773110909": "done:done",
+        "ARG-1776781876834": "done:done",
+        "ARG-1776783644198": "done:done",
+        "ARG-GPT-APERTURE-IMPL": "done:done",
+        "ARG-UI-0002": "in_progress:done",
+        "ARG-1776808310928": "done:done"
     },
     "done_packets_summary": {
-        "total": 102,
+        "total": 128,
         "tasks": 0,
         "bugs": 0,
         "latest_ids": [
-            "ARG-1776035900474",
+            "ARG-1776613004000",
+            "ARG-1776613005000",
+            "ARG-1776613007000",
+            "ARG-1776613008000",
             "ARG-1775915097259",
             "ARG-1775948530124",
             "ARG-1775915331853",
             "ARG-1776040957963",
             "ARG-DISPATCH-AUTO-001",
-            "ARG-1776039352566",
-            "ARG-1775943565720",
-            "ARG-1775948347775",
-            "ARG-1776039364453"
+            "ARG-1776039352566"
         ]
     }
 }
